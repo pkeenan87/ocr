@@ -122,7 +122,7 @@ ocr (Rust binary)
   - checks installed RAM against the needs of each engine and quant (§8.1).
 - **Start.** `ocr server start --model X` runs the server bound to localhost only:
   ```
-  mlx_vlm.server --host 127.0.0.1 --port <p> --model <repo> --max-num-seqs <jobs>
+  mlx_vlm.server --host 127.0.0.1 --port <p> --model <repo> --max-num-seqs 1
   ```
   - `--trust-remote-code` is not needed. mlx-vlm 0.7.6 has native model code for all three engines. The `mlx-vlm` version is pinned.
   - The process is detached and writes `server.pid` and `server.json` (engine, repo, port, started_at). Logs go to `server.log`.
@@ -142,7 +142,7 @@ Defaults are the **newest** release of each model. `--model-version` takes a per
 | olmOCR 2 | `mlx-community/olmOCR-2-7B-1025-8bit` (`--quant 4bit` available) | — | Upstream `build_no_anchoring_v4_yaml_prompt()`, verbatim. This is olmOCR 2's own default | Longest side 1288 px. About 16 s/page. Output has YAML front-matter, which is parsed for rotation, then stripped. **Drops headers and footers**, so they come from the Apple pass (§4.3) |
 | PaddleOCR-VL | **1.6 bf16** (`PaddlePaddle/PaddleOCR-VL-1.6`, 2.4 GB). `--quant 4bit` = `mlx-community/PaddleOCR-VL-1.6-4bit` | `1.5` (`mlx-community/PaddleOCR-VL-1.5-bf16`), `1.0` (`PaddlePaddle/PaddleOCR-VL`) | Full-page `OCR:`. Tables found by Apple Vision are cropped and sent with `Table Recognition:`, which returns OTSL `<fcel>…<nl>` and is converted to GFM | About 2.5 s/page. Full-page `OCR:` was word-perfect on the test page, so per-block cropping is reduced to tables only |
 | dots | **dots.mocr** (`mlx-community/dots.mocr-8bit`). Confirmed successor (rednote-hilab, same prompt family). Not `dots.mocr-svg` | `dots.ocr` (original) | Official `prompt_layout_all_en`, verbatim. It returns a JSON **array** of `{bbox, category, text}`, which our converter turns into Markdown. `prompt_ocr` is the cheap mode | About 34 s/page at 200 DPI, dominated by prefill of about 5k image tokens; lower DPI is tuned in Phase 6. Tables come out as HTML, converted to GFM. Formulas come out as LaTeX |
-| Apple | Built in | — | `RecognizeDocumentsRequest` with `recognitionLanguages = [en-US]` and auto-detect off | About 300 DPI, about 0.15 s/page at 8 jobs. The bridge rebuilds reading order from the bboxes and drops paragraphs that duplicate table or list text. Margin line numbers are filtered by bbox. List markers come from `markerString` |
+| Apple | Built in | — | `RecognizeDocumentsRequest` with `[en-US]`, auto-detect off and **language correction off**, which caused a `cv`→`cr` error | **About 200 DPI**: on the fixture, 300 and 400 DPI were *less* accurate. Tuned in Phase 2, about 0.15 s/page at 8 jobs. The bridge rebuilds reading order from the bboxes and drops paragraphs that duplicate table or list text. Margin line numbers are filtered by bbox. List markers come from `markerString` |
 
 All model calls use `temperature 0`.
 
@@ -164,7 +164,7 @@ olmOCR drops page headers, footers and Bates numbers, and the other engines labe
    - Re-running the same command resumes automatically. A mismatched fingerprint or settings, or `--overwrite`, starts fresh.
    - The final `.md` is assembled by page number and written atomically (temp file + rename).
 4. **Guarding against VLM failure modes:**
-   - **Per-page timeout.** The server cannot cancel a request, so on timeout **the server is restarted** and the page retried once. A plain retry would queue behind the stuck request.
+   - **Per-page timeout**, set per engine from `max_tokens` divided by the measured decode rate, plus prefill time. dots is already 34 s on a normal page, so one fixed timeout would restart it constantly. The server cannot cancel a request, so on timeout **the server is restarted** and the page retried once. A plain retry would queue behind the stuck request.
    - **Truncation.** `finish_reason == "length"` means the page was cut off. Retry with a higher `max_tokens`, then flag the page.
    - **Repetition loops.** Detect them, retry with a higher repetition penalty, then fall back to Apple Vision and flag the page.
    - **Empty output.** Retry once, then fall back.
@@ -187,11 +187,11 @@ olmOCR drops page headers, footers and Bates numbers, and the other engines labe
   | Engine | Default `--jobs` | Why |
   |---|---|---|
   | `apple` | Number of performance cores | Vision runs in-process and scales across cores |
-  | model engines | 2 | Measured: 2 at once gives 1.1–1.35× and 4 gives 1.1–1.4×, so more adds latency for little gain. The server also gets `--max-num-seqs` equal to jobs |
+  | model engines | **1** | Measured gains were 0.91–1.42×. Batching changed outputs on 2 of 3 engines, and sequential runs are byte-identical. Rendering and the Apple side-pass still overlap with the model call. `--jobs >1` is opt-in and prints a reproducibility note |
   | text-layer pages | Separate fast path | They never take a slot |
 
 - **The limit counts requests, not pages.** PaddleOCR-VL sends several requests per page.
-- **Server concurrency (measured).** mlx-vlm batches requests continuously, so they don't simply queue, but the gain is small. Concurrent batching can change **whitespace only** in the output.
+- **Server concurrency (measured).** mlx-vlm batches requests continuously. The gain is small, and batching makes output depend on what else is in the batch. That is why the default is 1.
 - **Thread safety.**
   - Every bridge call creates its own Vision request, with nothing shared between calls. Rust runs these calls on `tokio`'s blocking pool.
   - Each render worker uses its own `PDFDocument`.
@@ -222,8 +222,8 @@ The YAML front-matter can be turned off with `--no-front-matter`.
 | ✅ **0a. Model spike** (no Rust) | Throwaway `uv` env with mlx-vlm. Run `mlx_vlm.server` with each engine on one test page. Send 2 concurrent requests and time them. Confirm the dots.mocr lineage and its prompts | Each engine returns usable text, or the blocker is documented. Concurrency behavior and the `--jobs` default are recorded in `docs/spike.md` |
 | ✅ **0b. Bridge spike** | Install rustup. `cargo new ocr`. Swift `OcrBridge` static lib. A **real `RecognizeDocumentsRequest`** on a test image, called from a Rust worker thread through FFI | Rust prints recognized paragraphs and tables from Vision. If Option A fails, Option B (helper binary) works |
 | **1. CLI + config + setup gate** | Full clap tree, config file, setup (Apple path), gate warnings, exit codes | `ocr scan` before setup warns and exits 2. Argument conflicts are rejected |
-| **2. Apple engine end-to-end** | PDF render, text-layer extraction, Vision → Markdown, file/dir modes, default naming, `--file-type` | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files |
-| **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for `apple`, whitespace-normalized for model engines |
+| **2. Apple engine end-to-end** | PDF render, text-layer extraction, Vision → Markdown, file/dir modes, default naming, `--file-type` | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files. On the fixture, the case number and every dollar amount are exact |
+| **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings |
 | **4. Server management** | `setup` (venv, weights, RAM check), start/stop/status/restart, readiness probe | Start, stop and status work for each engine. A killed server is detected and restarted |
 | **5. Model engines** | olmOCR (v4 prompt), dots (layout JSON → Markdown), PaddleOCR-VL (full page + table crops with OTSL→GFM), Apple side-pass, timeout/restart, truncation, loop detection, fallback | Each engine passes the eval set |
 | **6. Quality** | Eval harness, tuned defaults, opt-in legal cleanup | CER targets met on the eval set |
@@ -259,7 +259,8 @@ Resolved 2026-10-07:
 
 Still open:
 
-1. **Hardware floor** (measured peak RSS): olmOCR 8-bit 6.5 GB, dots 3.3 GB, Paddle bf16 2.4 GB. Setup warns below 16 GB RAM for olmOCR and suggests `--quant 4bit`.
+1. **Hardware floor** (vmmap physical footprint): olmOCR 8-bit 10.9 GB, dots 7.3 GB, Paddle bf16 3.8 GB. Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM, and refuses 8-bit below 16 GB without `--force`.
 2. **Text-layer trust.** Bad hidden OCR layers from older scanners exist. The `auto` heuristics need tuning on real samples.
-3. **Throughput expectations.** A 300-page scan takes about 1 minute with Apple, 10 minutes with Paddle, 60 minutes with olmOCR and 2.5 hours with dots. The CLI shows an ETA, and the README should state these figures.
-4. **Privacy.** Everything is local. Servers bind to localhost only. There is no telemetry. After setup, HF downloads are the only network access, and `HF_HUB_OFFLINE=1` is set at runtime.
+3. **Throughput expectations.** A 300-page scan takes about 1 minute with Apple, 12 minutes with Paddle, 80 minutes with olmOCR and 2.9 hours with dots. The CLI shows an ETA, and the README should state these figures.
+4. **Apple accuracy on legal numbers.** On one page, Vision's errors depended on DPI. Phase 2 tunes this on the eval set. A dual-DPI cross-check that flags pages where numbers disagree is a candidate.
+5. **Privacy.** Everything is local. Servers bind to localhost only. There is no telemetry. After setup, HF downloads are the only network access, and `HF_HUB_OFFLINE=1` is set at runtime.

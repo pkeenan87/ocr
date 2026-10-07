@@ -23,6 +23,13 @@ struct BlockOut: Encodable {
     var rows: [[String]]? = nil
 }
 
+struct Options: Decodable {
+    var languages: [String] = ["en-US"]
+    var autoDetectLanguage = false
+    var languageCorrection = true
+    var customWords: [String] = []
+}
+
 struct PageOut: Encodable {
     var ok: Bool
     var error: String? = nil
@@ -42,9 +49,13 @@ private func overlaps(_ a: [Double], _ b: [Double]) -> Bool {
     return area > 0 && (ix * iy) / area > 0.5
 }
 
-private func recognize(path: String) async -> PageOut {
+private func recognize(path: String, options: Options) async -> PageOut {
     do {
-        let request = RecognizeDocumentsRequest()
+        var request = RecognizeDocumentsRequest()
+        request.textRecognitionOptions.recognitionLanguages = options.languages.map { Locale.Language(identifier: $0) }
+        request.textRecognitionOptions.automaticallyDetectLanguage = options.autoDetectLanguage
+        request.textRecognitionOptions.useLanguageCorrection = options.languageCorrection
+        request.textRecognitionOptions.customWords = options.customWords
         let observations = try await request.perform(on: URL(fileURLWithPath: path))
         var blocks: [BlockOut] = []
         for obs in observations {
@@ -81,12 +92,16 @@ private func recognize(path: String) async -> PageOut {
 }
 
 @_cdecl("ocr_bridge_recognize_document")
-public func ocr_bridge_recognize_document(_ path: UnsafePointer<CChar>) -> UnsafeMutablePointer<CChar>? {
+public func ocr_bridge_recognize_document(
+    _ path: UnsafePointer<CChar>, _ optionsJSON: UnsafePointer<CChar>?
+) -> UnsafeMutablePointer<CChar>? {
     let p = String(cString: path)
+    let options = optionsJSON
+        .flatMap { try? JSONDecoder().decode(Options.self, from: Data(String(cString: $0).utf8)) } ?? Options()
     let box = ResultBox()
     let done = DispatchSemaphore(value: 0)
     Task.detached {
-        let page = await recognize(path: p)
+        let page = await recognize(path: p, options: options)
         let data = (try? JSONEncoder().encode(page)) ?? Data(#"{"ok":false,"error":"encode failed"}"#.utf8)
         box.json = String(decoding: data, as: UTF8.self)
         done.signal()

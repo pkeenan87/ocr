@@ -60,7 +60,7 @@
 
 Single page, temperature 0. Images are olmOCR at 1288 px on the longest side, and the others at 200 DPI (1700×2200).
 
-| Engine / weights | Ready (`/health`, real probe) | s/page | ×2 conc. | ×4 conc. | Peak RSS | Quality on test page |
+| Engine / weights | Ready (`/health`, real probe) | s/page | ×2 conc. | ×4 conc. | Peak RSS (psutil, **undercounts**) | Quality on test page |
 |---|---|---|---|---|---|---|
 | PaddleOCR-VL 1.6 4bit (`mlx-community/PaddleOCR-VL-1.6-4bit`) | 6 s, 8.4 s | 2.4 | 1.15× | 1.25× | 1.5 GB | Words perfect. Table comes out as space-aligned text. Footer and Bates kept |
 | PaddleOCR-VL 1.6 bf16 (`PaddlePaddle/PaddleOCR-VL-1.6`) | –, 5.1 s | 2.6 | 0.91× | 1.21× | 2.4 GB | Same words as 4bit, with better paragraph joining |
@@ -77,19 +77,55 @@ Single page, temperature 0. Images are olmOCR at 1288 px on the longest side, an
   - For dots, a short request sent after abandoning a large-prefill request **waited 26 s**. Restart-on-timeout is justified.
 - **`/health` vs readiness.** `/health` answered 2–3 s before a real generation succeeded, so the probe request is needed.
 
+### Memory, re-measured with `vmmap --summary` (physical footprint peak, after one real page)
+
+psutil RSS missed Metal and unified-memory allocations. These are the real numbers:
+
+| Engine | Weights on disk | Physical footprint peak |
+|---|---|---|
+| olmOCR 2 8bit | 8.8 GiB | **10.9 GB** |
+| dots.mocr 8bit | 4.1 GiB | **7.3 GB** |
+| PaddleOCR-VL 1.6 bf16 | 1.8 GiB | **3.8 GB** |
+
+### Apple Vision accuracy matrix (`cargo run --release --example vision_bench -- <img> matrix`)
+
+The checks are exact matches for the case number, all four dollar amounts and the Bates number.
+
+| Render | correction on | correction off |
+|---|---|---|
+| 150 DPI | all ok | all ok |
+| 200 DPI | all ok | all ok |
+| 250 DPI | misses `$48,250.00` | misses `$48,250.00` |
+| 300 DPI | misses case no. + `$22,375.50` | misses `$22,375.50` |
+| 400 DPI | misses case no. + 2 amounts | misses case no. + 2 amounts |
+
+- **Language correction caused** the `cv`→`cr` error at 300 DPI.
+- Auto-detect vs `en-US` made no difference here, apart from the Korean-glyph error earlier.
+- **Higher DPI is not better.** Vision does best at about 150–200 DPI.
+- This is one page, so Phase 2 must tune it on the eval set.
+- **Idea for legal accuracy:** run Vision at 2 DPIs and flag pages where numeric tokens disagree. It is cheap, at about 0.15 s per pass.
+
 ## Decisions fed back into PLAN.md
 
-1. **`--jobs` defaults.** `apple` gets the performance-core count. Model engines get 2: concurrency gains only 1.1–1.4×, and 4 adds latency for little extra.
+1. **`--jobs` defaults.** `apple` gets the performance-core count.
+   - **Model engines get 1, with `--max-num-seqs 1`.**
+   - Concurrency gained only 0.91–1.42×, and Paddle bf16 was slower with 2 jobs.
+   - Batching changed outputs on 2 of 3 engines. Only whitespace changed on this page, but batch-dependent numerics could flip a digit.
+   - Sequential runs were byte-identical. Rendering and the Apple side-pass still run in parallel with the model request.
+   - `--jobs >1` on a model engine is allowed, with a printed reproducibility note.
 2. **Paddle.** Default to `PaddlePaddle/PaddleOCR-VL-1.6` bf16. It is only 2.4 GB, needs no conversion, and joins paragraphs better.
    - Full-page `OCR:` is accurate enough, so the plan is simplified: run full-page `OCR:`, and use Apple Vision **only to find tables**, which are cropped and sent with `Table Recognition:` (OTSL→GFM).
    - This replaces cropping every block.
 3. **Bates and footers.** olmOCR drops them. For every model engine, a fast Apple Vision pass (about 0.15 s per page in parallel) extracts header and footer lines and Bates numbers for page markers. The model output is still used for the body.
 4. **Restart-on-timeout** stays (§5.4), with the dots measurement above as justification.
-5. **Determinism criterion.** "Identical output for `--jobs 1` and `--jobs 8`" applies byte-for-byte to `apple`. For model engines it applies after whitespace normalization.
-6. **RAM.** olmOCR 8-bit peaks at 6.5 GB, so a 16 GB Mac is fine with 8-bit. The setup RAM check warns below 16 GB for olmOCR.
-7. **Throughput** for setting expectations on a 300-page scanned filing, with `--jobs 2`:
+5. **Determinism criterion.** At default settings, output is byte-identical across runs for every engine.
+6. **RAM** (vmmap). olmOCR 8-bit 10.9 GB, dots 7.3 GB, Paddle 3.8 GB.
+   - Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM.
+   - It refuses 8-bit below 16 GB unless `--force` is given.
+8. **Apple defaults.** Render at 200 DPI, language correction off, `en-US`. The Phase 2 exit criterion is that the case number and every dollar amount on the fixture are exact.
+7. **Throughput** for setting expectations on a 300-page scanned filing, at default `--jobs 1` for model engines:
    - Apple: about 1 minute.
-   - Paddle: about 10 minutes.
-   - olmOCR: about 60 minutes.
-   - dots: about 2.5 hours.
+   - Paddle: about 12 minutes.
+   - olmOCR: about 80 minutes.
+   - dots: about 2.9 hours.
    - Phase 6 should test lower DPI for dots, because 5k prompt tokens per page makes prefill dominate.

@@ -1,3 +1,142 @@
-fn main() {
-    println!("ocr — local document OCR (under construction; see PLAN.md)");
+use std::process::ExitCode;
+
+use clap::Parser;
+
+use ocr::cli::{Cli, Command, Engine, ScanArgs, ServerCommand, SetupArgs, StartArgs};
+use ocr::config::Config;
+use ocr::error::CliError;
+use ocr::input::{self, Plan};
+
+fn main() -> ExitCode {
+    match run(Cli::parse()) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("{e}");
+            ExitCode::from(e.exit_code())
+        }
+    }
+}
+
+fn run(cli: Cli) -> Result<(), CliError> {
+    match cli.command {
+        Command::Server { command } => match command {
+            ServerCommand::Setup(args) => setup(&args),
+            ServerCommand::Start(args) => start(&args),
+            ServerCommand::Stop | ServerCommand::Status => {
+                println!("no server running");
+                Ok(())
+            }
+        },
+        Command::Scan(args) => scan(&args),
+    }
+}
+
+/// Setup gate (PLAN §3): warns, and fails unless the engine is usable.
+fn gate(engine: Engine) -> Result<(), CliError> {
+    match Config::load()? {
+        None => {
+            let warning = "⚠ ocr is not set up yet. Run `ocr server setup` first.";
+            if engine == Engine::Apple {
+                eprintln!("{warning}");
+                Ok(())
+            } else {
+                Err(CliError::Setup(warning.into()))
+            }
+        }
+        Some(cfg) if cfg.is_installed(engine) => Ok(()),
+        Some(_) => {
+            let n = engine.name();
+            Err(CliError::Setup(format!(
+                "⚠ Engine '{n}' is not installed. Run `ocr server setup --model {n}`."
+            )))
+        }
+    }
+}
+
+fn setup(args: &SetupArgs) -> Result<(), CliError> {
+    let mut cfg = Config::load()?.unwrap_or_default();
+    cfg.mark_apple_installed();
+    cfg.save()?;
+    std::fs::create_dir_all(ocr::config::state_dir()?).map_err(anyhow::Error::from)?;
+    println!("apple engine ready (no download needed)");
+
+    if args.requested_models().is_empty() {
+        return Ok(());
+    }
+    Err(CliError::Setup(
+        "model engine installation is not implemented yet (Phase 4)".into(),
+    ))
+}
+
+fn start(args: &StartArgs) -> Result<(), CliError> {
+    if args.model == Engine::Apple {
+        return Err(CliError::Usage(
+            "the apple engine runs in-process and needs no server".into(),
+        ));
+    }
+    gate(args.model)?;
+    Err(CliError::Server("not implemented yet (Phase 4)".into()))
+}
+
+fn scan(args: &ScanArgs) -> Result<(), CliError> {
+    args.model.resolve_version(args.model_version.as_deref())?;
+    gate(args.model)?;
+
+    let plan = match (&args.input_file, &args.input_dir) {
+        (Some(f), _) => input::plan_single(
+            f,
+            args.output_file.as_deref(),
+            args.file_type,
+            args.overwrite,
+        )?,
+        (None, Some(d)) => input::plan_dir(
+            d,
+            args.output_dir.as_deref(),
+            args.recursive,
+            args.file_type,
+            args.overwrite,
+        )?,
+        (None, None) => unreachable!("clap requires an input"),
+    };
+    for note in &plan.notes {
+        eprintln!("{note}");
+    }
+    if args.model != Engine::Apple && args.jobs.is_some_and(|j| j > 1) {
+        eprintln!("note: --jobs > 1 with a model engine; output may not be byte-reproducible");
+    }
+    if plan.skipped_existing > 0 {
+        eprintln!(
+            "skipped {} file(s) with existing output (use --overwrite)",
+            plan.skipped_existing
+        );
+    }
+    if plan.items.is_empty() {
+        eprintln!("⚠ no matching files to process");
+        return Ok(());
+    }
+
+    if args.dry_run {
+        println!(
+            "Dry run: {} file(s), jobs {}",
+            plan.items.len(),
+            args.effective_jobs()
+        );
+        print_mapping(&plan);
+        return Ok(());
+    }
+    if args.model != Engine::Apple {
+        return Err(CliError::Server(format!(
+            "model server not running; run 'ocr server start --model {}'",
+            args.model.name()
+        )));
+    }
+    println!("OCR pipeline not implemented yet (Phase 2)");
+    print_mapping(&plan);
+    Ok(())
+}
+
+fn print_mapping(plan: &Plan) {
+    for item in &plan.items {
+        println!("{} -> {}", item.input.display(), item.output.display());
+    }
 }

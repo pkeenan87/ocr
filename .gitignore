@@ -1,0 +1,4 @@
+/target
+/bridge/.build
+/spike/.venv
+/spike/out

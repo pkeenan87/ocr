@@ -129,8 +129,9 @@ impl SetupArgs {
 
 #[derive(Debug, Args)]
 pub struct StartArgs {
-    #[arg(long, value_enum, default_value = "olmocr")]
-    pub model: Engine,
+    /// Engine to serve (default: the only installed model engine)
+    #[arg(long, value_enum)]
+    pub model: Option<Engine>,
     #[arg(long, default_value_t = 8080)]
     pub port: u16,
 }

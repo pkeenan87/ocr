@@ -34,7 +34,7 @@ It must handle legal documents that run to hundreds of pages. That means it has 
 
 ```
 ocr server setup  [--model <engine>...] [--all] [--quant 4bit|8bit|bf16] [--non-interactive]
-ocr server start  [--model <engine>] [--port 8080]
+ocr server start  [--model <engine>] [--port 8080]   (default: the only installed model engine)
 ocr server stop
 ocr server status
 
@@ -49,6 +49,8 @@ options:
   --pages 1-50,75                              (page range subset)
   --overwrite                                  (discard existing output + checkpoints; otherwise re-runs auto-resume / skip finished files)
   --page-markers / --no-page-markers           (default: on)
+  --no-front-matter                            (omit the YAML header, §6)
+  --dry-run                                    (print the input → output mapping and exit)
   --use-text-layer auto|never|always           (born-digital PDFs: use embedded text instead of OCR)
   --legal-cleanup                              (opt-in, off by default: strip pleading line numbers / running headers)
   --dpi <n>                                    (override render resolution)
@@ -221,8 +223,15 @@ The YAML front-matter can be turned off with `--no-front-matter`.
 |---|---|---|
 | ✅ **0a. Model spike** (no Rust) | Throwaway `uv` env with mlx-vlm. Run `mlx_vlm.server` with each engine on one test page. Send 2 concurrent requests and time them. Confirm the dots.mocr lineage and its prompts | Each engine returns usable text, or the blocker is documented. Concurrency behavior and the `--jobs` default are recorded in `docs/spike.md` |
 | ✅ **0b. Bridge spike** | Install rustup. `cargo new ocr`. Swift `OcrBridge` static lib. A **real `RecognizeDocumentsRequest`** on a test image, called from a Rust worker thread through FFI | Rust prints recognized paragraphs and tables from Vision. If Option A fails, Option B (helper binary) works |
-| **1. CLI + config + setup gate** | Full clap tree, config file, setup (Apple path), gate warnings, exit codes | `ocr scan` before setup warns and exits 2. Argument conflicts are rejected |
-| **2. Apple engine end-to-end** | PDF render, text-layer extraction, Vision → Markdown, file/dir modes, default naming, `--file-type` | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files. On the fixture, the case number and every dollar amount are exact |
+| ✅ **1. CLI + config + setup gate** | Full clap tree, config file, setup (Apple path), gate warnings, exit codes | `ocr scan` before setup: `apple` warns and continues, model engines exit 2. Argument conflicts are rejected |
+| **2. Apple engine end-to-end** | Inside the Swift bridge:
+- page count;
+- text layer per page;
+- render page *n* to a white-filled `CGContext`, then Vision. No temp PNGs; one document per worker; multi-page TIFF counted via ImageIO.
+
+Then reading order, Vision → Markdown, `--no-front-matter`, and writing files.
+
+**Reading order:** keep Vision's paragraph order and insert tables and lists before the first paragraph below them, instead of sorting top-left globally, which interleaves columns. | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files. On the clean fixture **and** on a degraded-scan fixture (image-only, skew, noise, JPEG), the case number and every dollar amount are exact through the production render path. This re-checks the 200 DPI default. Two-column text comes out column by column |
 | **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings |
 | **4. Server management** | `setup` (venv, weights, RAM check), start/stop/status/restart, readiness probe | Start, stop and status work for each engine. A killed server is detected and restarted |
 | **5. Model engines** | olmOCR (v4 prompt), dots (layout JSON → Markdown), PaddleOCR-VL (full page + table crops with OTSL→GFM), Apple side-pass, timeout/restart, truncation, loop detection, fallback | Each engine passes the eval set |

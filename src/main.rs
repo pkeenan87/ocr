@@ -69,13 +69,40 @@ fn setup(args: &SetupArgs) -> Result<(), CliError> {
 }
 
 fn start(args: &StartArgs) -> Result<(), CliError> {
-    if args.model == Engine::Apple {
-        return Err(CliError::Usage(
-            "the apple engine runs in-process and needs no server".into(),
-        ));
-    }
-    gate(args.model)?;
+    let model = match args.model {
+        Some(Engine::Apple) => {
+            return Err(CliError::Usage(
+                "the apple engine runs in-process and needs no server".into(),
+            ));
+        }
+        Some(m) => m,
+        None => default_server_model()?,
+    };
+    gate(model)?;
     Err(CliError::Server("not implemented yet (Phase 4)".into()))
+}
+
+/// With no `--model`, serve the one installed model engine; otherwise ask the user to choose.
+fn default_server_model() -> Result<Engine, CliError> {
+    let config = Config::load().map_err(|e| CliError::Setup(e.to_string()))?;
+    let installed: Vec<Engine> = config
+        .map(|c| {
+            Engine::MODELS
+                .into_iter()
+                .filter(|m| c.is_installed(*m))
+                .collect()
+        })
+        .unwrap_or_default();
+    match installed.as_slice() {
+        [only] => Ok(*only),
+        [] => Err(CliError::Setup(
+            "no model engine is installed. Run `ocr server setup --model <engine>`.".into(),
+        )),
+        many => Err(CliError::Usage(format!(
+            "several model engines are installed; choose one with --model ({})",
+            many.iter().map(|m| m.name()).collect::<Vec<_>>().join(", ")
+        ))),
+    }
 }
 
 fn scan(args: &ScanArgs) -> Result<(), CliError> {

@@ -1,5 +1,6 @@
 //! `ocr` — local document OCR for macOS.
 
+pub mod anchor;
 pub mod checkpoint;
 pub mod cli;
 pub mod config;

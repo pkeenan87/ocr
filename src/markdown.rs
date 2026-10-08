@@ -61,6 +61,10 @@ pub struct PageResult {
     pub flagged: bool,
     /// Set when OCR failed; the body is then empty.
     pub error: Option<String>,
+    /// Transcript pages only: `Some(true)` if the line numbers were re-anchored to the page
+    /// geometry, `Some(false)` if the engine's own numbering is kept (unverified).
+    #[serde(default)]
+    pub line_numbers: Option<bool>,
 }
 
 /// Values for the YAML header.
@@ -471,6 +475,13 @@ pub fn assemble(front: Option<&FrontMatter>, pages: &[PageResult], markers: bool
             list(&|p| p.column_split),
             list(&|p| p.transcript),
         );
+        if pages.iter().any(|p| p.line_numbers.is_some()) {
+            head.push_str(&format!(
+                "line_numbers: {{anchored: {}, unverified: {}}}\n",
+                list(&|p| p.line_numbers == Some(true)),
+                list(&|p| p.line_numbers == Some(false)),
+            ));
+        }
         if f.model {
             head.push_str(&format!(
                 "table_pages: {}\nfallback_pages: {}\n",
@@ -653,6 +664,7 @@ mod tests {
             table: false,
             fallback: false,
             flagged: false,
+            line_numbers: None,
             error: error.map(String::from),
         };
         let pages = [
@@ -693,6 +705,7 @@ mod tests {
             table: false,
             fallback: false,
             flagged: false,
+            line_numbers: None,
             error: None,
         }
     }

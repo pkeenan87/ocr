@@ -344,6 +344,59 @@ fn four_up_transcript_is_flagged() {
 }
 
 #[test]
+fn full_page_transcript_lines_are_numbered_by_geometry() {
+    let e = Env::new(&["transcript_full.pdf"]);
+    let (md, _) = e.scan("transcript_full.pdf", &NEVER);
+    assert!(
+        md.contains("line_numbers: {anchored: [1], unverified: []}"),
+        "{md}"
+    );
+    // Vision drops the numbers 1-7 and misreads some `Q.`/`A.`, but every physical line
+    // carries its own slot number and its own text.
+    for n in 1..=25 {
+        assert!(
+            md.lines()
+                .any(|l| l.starts_with(&format!("{n} ")) && l.contains(&format!("Line {n} of"))),
+            "line {n} missing:\n{md}"
+        );
+    }
+}
+
+#[test]
+fn four_up_mini_pages_are_numbered_in_page_order() {
+    let e = Env::new(&["four_up.pdf"]);
+    let (md, _) = e.scan("four_up.pdf", &NEVER);
+    assert!(
+        md.contains("line_numbers: {anchored: [1], unverified: []}"),
+        "{md}"
+    );
+    let heads: Vec<&str> = md.lines().filter(|l| l.starts_with("Page ")).collect();
+    assert_eq!(heads, ["Page 41", "Page 42", "Page 43", "Page 44"], "{md}");
+    // Each mini-page holds slots 1-25 in order; most lines are read well enough to check the
+    // question number printed on them (`Question <page-index>.<line>`).
+    let mut exact = 0;
+    let mut page = 0;
+    let mut slot = 0;
+    for l in md.lines() {
+        if l.starts_with("Page ") {
+            page += 1;
+            slot = 0;
+        } else if let Some((n, text)) = l.split_once(' ')
+            && let Ok(n) = n.parse::<u32>()
+        {
+            slot += 1;
+            assert_eq!(n, slot, "slots out of order on page {page}: {l}");
+            exact += usize::from(text.contains(&format!("Question {page}.{n} ")));
+        }
+    }
+    assert_eq!(slot, 25);
+    assert!(
+        exact >= 90,
+        "only {exact}/100 lines carry the right question:\n{md}"
+    );
+}
+
+#[test]
 fn ordinary_pages_are_not_flagged_as_transcripts() {
     let e = Env::new(&["legal.pdf", "two_column.pdf"]);
     for name in ["legal.pdf", "two_column.pdf"] {

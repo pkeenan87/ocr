@@ -17,6 +17,9 @@ olmOCR front matter; `longtable` adds a table of 80 identical rows (olmOCR text,
 element), which must not be mistaken for a loop; `truncated` cuts the dots JSON in the middle of an element with finish
 stop.
 
+With FAKE_REPLIES naming a JSON list of strings, the `OCR:` reply of request number `n` is
+`list[(n - 1) % len(list)]` instead of `fake ocr text WxH` (needs FAKE_LOG for the numbering).
+
 Every real request is logged as one JSON line to stderr (`fake_server: REQ {...}`, so into the
 server log) and, if FAKE_LOG names a file, appended there too. With FAKE_LOG the request number
 `n` counts the lines in that file, so it survives server restarts:
@@ -149,6 +152,12 @@ class Handler(BaseHTTPRequestHandler):
             time.sleep(float(os.environ.get("FAKE_SLEEP_SECS", "30")))
         w, h = png_size(images[0]) if images else (0, 0)
         content, reason = reply(prompt, w, h, active)
+        # FAKE_REPLIES: a JSON file with a list of strings; `OCR:` request number k (of this log)
+        # gets list[(k - 1) % len]. Lets a test serve realistic page text.
+        canned = os.environ.get("FAKE_REPLIES")
+        if canned and not probe and prompt == "OCR:" and reason == "stop":
+            replies = json.load(open(canned))
+            content = replies[(n - 1) % len(replies)]
         if LOG and not probe:
             with LOCK, open(LOG + ".end", "a") as f:
                 f.write(json.dumps({"n": n, "t": time.time()}) + "\n")

@@ -57,6 +57,14 @@ pub struct Block {
     pub rows: Option<Vec<Vec<String>>>,
 }
 
+/// One physical text line as Vision reads it (`DocumentObservation.Container.Text.lines`).
+#[derive(Debug, Clone, Deserialize)]
+pub struct Line {
+    pub text: String,
+    /// Normalized [x, y, w, h], origin top-left.
+    pub bbox: [f64; 4],
+}
+
 /// Text-recognition settings passed to Vision.
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -68,6 +76,8 @@ pub struct Options {
     /// Normalized crop [x, y, w, h] (top-left origin) of the rendered page to recognize.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub crop: Option<[f64; 4]>,
+    /// Also return the line-level observations (`Page::lines`); used on transcript candidates.
+    pub lines: bool,
 }
 
 impl Default for Options {
@@ -79,6 +89,7 @@ impl Default for Options {
             language_correction: false,
             custom_words: Vec::new(),
             crop: None,
+            lines: false,
         }
     }
 }
@@ -93,6 +104,8 @@ struct PageOut {
     height: u32,
     #[serde(default)]
     blocks: Vec<Block>,
+    #[serde(default)]
+    lines: Vec<Line>,
 }
 
 /// Recognized content of one rendered page.
@@ -102,6 +115,8 @@ pub struct Page {
     pub width: u32,
     pub height: u32,
     pub blocks: Vec<Block>,
+    /// Physical text lines; empty unless `Options::lines` was set.
+    pub lines: Vec<Line>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
@@ -204,6 +219,7 @@ pub fn recognize_page(path: &Path, page_index: usize, dpi: u32, options: &Option
         width: page.width,
         height: page.height,
         blocks: page.blocks,
+        lines: page.lines,
     })
 }
 

@@ -5,6 +5,7 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 
+use crate::anchor::{self, MiniPage};
 use crate::cli::TextLayer;
 use crate::input::PageRanges;
 use crate::layout;
@@ -147,6 +148,7 @@ fn blank_page(number: usize) -> PageResult {
         table: false,
         fallback: false,
         flagged: false,
+        line_numbers: None,
         error: None,
     }
 }
@@ -164,6 +166,15 @@ pub(crate) fn vision_page(path: &Path, index: usize, s: &Settings) -> PageResult
             result.column_split = page.split;
             result.transcript = page.transcript;
             result.bates = bates;
+            let mut body = body;
+            if page.transcript {
+                // Apple's text is Vision's own lines; the numbers come from the slot grid.
+                let applied = anchor::apply(&page.mini, None);
+                result.line_numbers = Some(applied.is_some());
+                if let Some(a) = applied {
+                    body = a.body;
+                }
+            }
             (result.body, result.currency_fixes) = if s.currency_fix {
                 markdown::fix_currency(&body)
             } else {
@@ -183,6 +194,8 @@ pub struct Recognized {
     pub split: bool,
     /// Whether the page looks like a deposition transcript (flagged only).
     pub transcript: bool,
+    /// Transcript pages: the mini-pages with their Vision lines (empty if unreadable).
+    pub mini: Vec<MiniPage>,
 }
 
 /// First Vision pass and region detection of one page.
@@ -195,6 +208,8 @@ pub struct SidePass {
     pub crops: Vec<(usize, [f64; 4])>,
     /// Whether the full-page blocks look like a deposition transcript.
     pub transcript: bool,
+    /// Transcript pages: the mini-pages with their Vision lines (empty if unreadable).
+    pub mini: Vec<MiniPage>,
 }
 
 impl SidePass {
@@ -220,11 +235,18 @@ pub fn side_pass(path: &Path, index: usize, dpi: u32, options: &Options) -> Resu
         .map(|gray| regions::detect(&gray, &tables))
         .unwrap_or_default();
     let crops = regions::crop_rects(&regions, COLUMN_PAD_X, COLUMN_PAD_Y);
+    let transcript = layout::looks_like_transcript(&page.blocks);
+    let mini = if transcript {
+        anchor::locate(path, index, options)
+    } else {
+        Vec::new()
+    };
     Ok(SidePass {
-        transcript: layout::looks_like_transcript(&page.blocks),
+        transcript,
         blocks: page.blocks,
         regions,
         crops,
+        mini,
     })
 }
 
@@ -243,6 +265,7 @@ pub fn recognize_with_columns(
             transcript: side.transcript,
             blocks: side.blocks,
             split: false,
+            mini: side.mini,
         });
     }
     let SidePass {
@@ -250,11 +273,13 @@ pub fn recognize_with_columns(
         regions,
         crops,
         transcript,
+        mini,
     } = side;
     let first_pass = |blocks: Vec<Block>| Recognized {
         transcript,
         blocks,
         split: false,
+        mini: mini.clone(),
     };
     let mut recognized: Vec<Vec<Block>> = Vec::new();
     for (_, rect) in &crops {
@@ -273,6 +298,7 @@ pub fn recognize_with_columns(
         transcript: layout::looks_like_transcript(&ordered) || transcript,
         blocks: ordered,
         split: true,
+        mini,
     })
 }
 

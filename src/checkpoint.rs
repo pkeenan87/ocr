@@ -258,6 +258,7 @@ mod tests {
             table: true,
             fallback: false,
             flagged: true,
+            line_numbers: Some(true),
             error: None,
         }
     }

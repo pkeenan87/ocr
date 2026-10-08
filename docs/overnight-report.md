@@ -231,3 +231,16 @@ Every real crash happened within 0.81 s of launch. Log: `spike/out/cap4_crash_te
 - **Real-document evidence is thin for olmOCR:** it was never judged on real filings.
 - All "Still open" items in PLAN §8 (hardware floor, text-layer trust, Apple legal-number accuracy, privacy) remain open; the throughput item is now filled with measured figures.
 - Check that the Paddle 94.9% transcript result (below the 95% target) is acceptable.
+
+## Final verification (2026-10-08 18:27)
+
+- Real-model tests (`OCR_REAL_MODELS=1 cargo test --release --test <engine> -- --ignored`), run one at a time on a quiet machine after the re-anchoring merge and the hint update:
+
+  | Engine | Result | Time |
+  |---|---|---|
+  | paddle | pass | 49 s |
+  | olmOCR | pass | 171 s |
+  | dots | pass | 113 s |
+
+- Full suite: 244 passed, 0 failed, 4 ignored (the real-model tests, run separately above).
+- No model servers or scans left running.

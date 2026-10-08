@@ -558,3 +558,17 @@ The options as they were put:
     - `tests/cli.rs` compares paths with `\` normalised to `/`.
   - **Windows coverage** comes from `tests/cli.rs`, `tests/server.rs`, `tests/document.rs` and the unit tests. The engine tests that use the fake server need Vision and stay macOS-only.
   - **Done when** (unchanged): the CI is green, and a scan runs on a Windows machine with an NVIDIA GPU.
+
+- 2026-10-08, **7g, first Linux eval** (PaddleOCR-VL 1.6, CPU build, accept seeds 10–12, no production family; `eval/out/results/paddle-linux-cpu*.json`):
+
+  | Family | Pages | Column crops first | Full page first (now) |
+  |---|---|---|---|
+  | fax | 6 | 0.0% | 0.0% |
+  | contract | 14 | 0.1% | 0.0% |
+  | pleading | 11 | 5.5% | 5.5% (Bates 100%) |
+  | table | 6 | 52.0% | 12.3% (recall 100%) |
+  | transcript4up | 9 | 43.8% | 56.6% (lines 28.8%) |
+
+  - **Decision made for you:** off the Mac, PaddleOCR-VL reads the full page first and keeps the column crops for a loop or truncation, as olmOCR does. Without Vision's table masks, the column split cut tables into fragments.
+  - **Your decision:** 4-up transcripts stay on full page until the Mac's PaddleOCR-VL transcript4up numbers on the same seeds are in. If the Mac is about as poor, this is a shared limit; if not, detect the 2x2 layout and crop the panels.
+  - `eval/run.py` runs off the Mac now: no BSD `time` or `vmmap`; it reads `/proc` VmHWM, `nvidia-smi` and `ru_maxrss`.

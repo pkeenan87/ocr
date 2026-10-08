@@ -345,6 +345,13 @@ Resolved 2026-10-07:
 
 - 2026-10-08, **Apple stays at 200 DPI (your decision).** On tune seeds 0–9, 150 DPI scored slightly better (token recall 98.2% vs 97.4%, CER 3.10% vs 3.29%). The default stays at 200 so that the golden outputs, and the behaviour they guard, don't change. `--dpi 150` remains available.
 
+- 2026-10-08, **Apple Vision start-up crash: limit of 2 (your decision) plus automatic recovery.**
+  - **The crash:** a SIGSEGV in Apple's private TextRecognition framework when several recognitions start at once. Every real crash happened within 0.81 s of launch.
+  - **What didn't work:** a first-use gate or a warm-up call (crashes fell only from 4.7% to 3.3% of launches).
+  - **What did:** a limit of 2 concurrent Vision requests gave 0 crashes in 100 launches, at about 1.5× slower parallel Apple throughput. You chose that limit.
+  - **Safety net:** `ocr scan` also runs as a supervisor that re-runs a crashed child from its checkpoints, up to 3 retries.
+  - **Benchmark target:** the Phase 3 300-page figure (28.4 s) will be re-measured under the limit, and the new figure becomes the target.
+
 Still open:
 
 1. **Hardware floor** (vmmap physical footprint): olmOCR 8-bit 10.9 GB, dots 7.3 GB, Paddle bf16 3.8 GB. Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM, and refuses 8-bit below 16 GB without `--force`.

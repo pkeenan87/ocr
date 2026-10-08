@@ -27,6 +27,7 @@ def main():
     ap.add_argument("--state")
     ap.add_argument("--ocr", default=str(ROOT / "target/release/ocr"))
     ap.add_argument("--tag", default="")
+    ap.add_argument("--dpi", type=int)
     a = ap.parse_args()
     env = dict(os.environ)
     if a.config:
@@ -42,7 +43,7 @@ def main():
         md = out / "transcript4up.md"
         r = subprocess.run([a.ocr, "scan", "--input-file", str(d / "transcript4up.pdf"),
                             "--output-file", str(md), "--model", a.engine, "--overwrite",
-                            "--quiet"], env=env, capture_output=True, text=True)
+                            "--quiet"] + (["--dpi", str(a.dpi)] if a.dpi else []), env=env, capture_output=True, text=True)
         if r.returncode != 0:
             print(f"seed {seed}: scan failed ({r.returncode}): {r.stderr[-400:]}")
             continue

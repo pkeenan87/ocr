@@ -32,8 +32,14 @@ const INLIER: f64 = 0.4;
 const MAX_MEDIAN_RESIDUAL: f64 = 0.15;
 /// Plausible slot pitch as a fraction of the (region's) page height.
 const PITCH_RANGE: (f64, f64) = (0.004, 0.08);
-/// Words of a region must be matched at least this well, on both sides.
+/// Share of a region's Vision words that must be matched: the physical lines are all found in
+/// the engine's text.
 pub const MIN_COVERAGE: f64 = 0.8;
+/// Share of a region's engine words that must be matched. Lower than the Vision side because a
+/// model that repeats or invents lines leaves extra words that align to nothing, yet the lines
+/// it did read are still placed reliably. Tuned on seeds 3-9 (Paddle): 94.0% lines exact at 0.8,
+/// 95.2% at 0.5 (one sheet rescued from "unverified"); unchanged on seeds 0-2.
+pub const MIN_ENGINE_COVERAGE: f64 = 0.5;
 /// Two words match if their normalized edit similarity is at least this.
 const MATCH_SIM: f64 = 0.5;
 /// Header labels of a multi-up sheet are different grid rows or columns beyond this spacing.
@@ -821,7 +827,7 @@ pub fn apply(mini: &[MiniPage], engine: Option<&str>) -> Option<Applied> {
     let mut base = 0;
     for (r, &i) in regions.iter().enumerate() {
         let lines = &layouts[r].lines;
-        let ok = aligned.engine_coverage[r] >= MIN_COVERAGE
+        let ok = aligned.engine_coverage[r] >= MIN_ENGINE_COVERAGE
             && aligned.vision_coverage[r] >= MIN_COVERAGE;
         let header = if mini.len() == 1 {
             engine_header

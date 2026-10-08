@@ -33,6 +33,10 @@ pub(crate) const LOOP_PENALTY: f64 = 1.15;
 const BACKOFF_SECS: [f64; 3] = [0.5, 1.0, 2.0];
 /// Padding of band and table crops, as a fraction of the page.
 const CROP_PAD: f64 = 0.01;
+/// Least resolution of the mini-page crops of a transcript sheet. Tuned on eval seeds 0-2
+/// (`transcript4up`, Paddle): lines exact 90.4% at 150, 93.5% at 175, 95.4% at 200, then worse
+/// (90.2% at 225 with a failed seed, 75.8% at 250, 84.9% at 300: the model drops or repeats lines).
+const TRANSCRIPT_CROP_DPI: u32 = 200;
 
 /// Repetition detector: unit length range, repeat count, and the tail it looks at.
 const MIN_UNIT: usize = 10;
@@ -838,13 +842,20 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
             }
         ));
     }
+    // Mini-page crops of a transcript are rendered at no less than TRANSCRIPT_CROP_DPI: Paddle
+    // drops or repeats lines in 8 pt print at its 150 DPI default (docs/spike.md).
+    let dpi = if split && transcript {
+        s.dpi.max(TRANSCRIPT_CROP_DPI)
+    } else {
+        s.dpi
+    };
     Work::Model(Prepared {
         index,
         bates,
         transcript,
         mini,
         column_split: split,
-        planned: render_specs(path, index, s.dpi, &specs, engine),
+        planned: render_specs(path, index, dpi, &specs, engine),
         alt,
     })
 }

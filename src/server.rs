@@ -645,6 +645,33 @@ fn weights_missing(tail: &str) -> bool {
         || t.contains("failed to open gguf")
 }
 
+/// Windows starts children with every inheritable handle of the parent, so a detached server
+/// would also hold `ocr`'s own stdout and stderr: whatever reads `ocr`'s output (a pipe to `tee`,
+/// a test harness) then waits for the server to exit. Unix closes them in the child. The flag
+/// is cleared on the originals only; std hands a child its stdio as fresh duplicates, so
+/// `Stdio::inherit` keeps working for other children.
+#[cfg(windows)]
+fn keep_std_handles_from_children() {
+    use std::ffi::c_void;
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn GetStdHandle(which: u32) -> *mut c_void;
+        fn SetHandleInformation(handle: *mut c_void, mask: u32, flags: u32) -> i32;
+    }
+    const HANDLE_FLAG_INHERIT: u32 = 1;
+    // STD_INPUT_HANDLE, STD_OUTPUT_HANDLE, STD_ERROR_HANDLE: (DWORD)-10, -11, -12.
+    for which in [-10i32, -11, -12] {
+        // SAFETY: GetStdHandle has no preconditions; SetHandleInformation only changes a flag
+        // and fails harmlessly on a null or invalid handle.
+        unsafe {
+            let handle = GetStdHandle(which as u32);
+            if !handle.is_null() && handle as isize != -1 {
+                SetHandleInformation(handle, HANDLE_FLAG_INHERIT, 0);
+            }
+        }
+    }
+}
+
 /// Spawns the server described by `template` (pid and started_at are replaced) and waits for readiness.
 fn launch(template: &ServerInfo) -> Result<ServerInfo, CliError> {
     let state = state_dir()?;
@@ -666,6 +693,8 @@ fn launch(template: &ServerInfo) -> Result<ServerInfo, CliError> {
     // Own process group, so the terminal's Ctrl-C reaches the scan but not the server.
     #[cfg(unix)]
     cmd.process_group(0);
+    #[cfg(windows)]
+    keep_std_handles_from_children();
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;

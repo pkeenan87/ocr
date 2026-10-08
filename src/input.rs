@@ -317,7 +317,8 @@ mod tests {
                     .strip_prefix(base)
                     .unwrap()
                     .to_string_lossy()
-                    .into_owned()
+                    // Compared as `/` paths on every platform.
+                    .replace('\\', "/")
             })
             .collect()
     }

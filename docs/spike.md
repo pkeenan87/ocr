@@ -328,7 +328,7 @@ Sheets unverified (fallback rate): 0 of 7 on seeds 40-42 for every engine. On se
 **Paddle misses 95% on held-out seeds 40-42 (94.9%).** The remaining misses are the model's, not the numbering's: it drops whole lines, repeats a line three times, invents extra Q lines, or reads `Q.` as another letter. The engine's words are kept as produced, so those lines cannot become exact. Of the 36 inexact lines, a loose check finds the text elsewhere on the page for 23 (usually because the model dropped or duplicated a line, shifting the following lines, and the text repeats in the transcript), and the text wrong or missing for 13.
 
 **Notes.**
-- The stderr transcript hints ("drops line numbers ... use --model paddleocr-vl") are left unchanged: a test asserts them, and they are now stale for the line numbers (not for Apple's `Q.`/`A.` misreads).
+- The stderr transcript hints were updated afterwards (40562ab). Apple now says line numbers were re-anchored, points to `line_numbers.unverified` and recommends dots-ocr. Model engines warn only when a transcript page could not be re-anchored.
 - A `Page N` header is added from Vision's reading when the engine put several mini-pages on one sheet; for a single-region page it is only kept if the engine wrote one.
 - Dots and olmOCR read the whole sheet; their regions may come out in any order (all orders of up to 4 regions are tried) and the output is always in `Page N` order.
 - `examples/anchor_replay.rs` re-anchors saved engine output offline; `eval/anchor_diag.py` classifies misses.

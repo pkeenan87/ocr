@@ -507,3 +507,6 @@ The options as they were put:
     - The VRAM check (7e).
     - `ocr scan` itself: the side-pass still calls Vision (7d-2).
     - Timeouts. `engines::limits` timeouts come from Apple Silicon rates, and the CPU/iGPU path will need longer ones; `OCR_REQUEST_TIMEOUT_SECS` overrides them meanwhile.
+  - **The library path** is built from every folder in the install that holds `.so`/`.dll` files, so CUDA's runtime is found wherever its archive unpacks. It is `LD_LIBRARY_PATH` on Linux and `PATH` on Windows.
+  - **Checkpoints and builds:** the checkpoint identity includes the build variant, so switching between Vulkan and CPU (or CUDA) re-OCRs pages instead of reusing them. On this machine Vulkan and CPU gave byte-identical text, but CUDA kernels can differ numerically, so the conservative choice stands.
+  - **`ocr scan` already runs off the Mac.** On this machine with the CPU build, `legal.pdf` took 7.6 s with every value exact. The Vision side-pass fails quietly and the page goes as one full-page `OCR:` request. **Missing:** the Bates number is in the text but not in the page marker (`<!-- page 1 -->`). Fixing that is the core of 7d-2.

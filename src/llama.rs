@@ -225,6 +225,39 @@ pub fn server_binary(variant: Variant) -> Option<PathBuf> {
     fetch::find_file(&install_dir(variant).ok()?, server_exe())
 }
 
+/// Every directory of an unpacked build that holds shared libraries (`.so*`, `.dll`). The CUDA
+/// runtime archive may unpack beside `llama-server` or apart from it, so the server's library
+/// path is built from all of them rather than from the archive layout.
+pub fn library_dirs(variant: Variant) -> Vec<PathBuf> {
+    let Ok(root) = install_dir(variant) else {
+        return Vec::new();
+    };
+    let is_lib = |p: &Path| {
+        let name = p.file_name().unwrap_or_default().to_string_lossy();
+        name.ends_with(".dll") || name.ends_with(".so") || name.contains(".so.")
+    };
+    let mut dirs = Vec::new();
+    let mut queue = vec![root];
+    while let Some(dir) = queue.pop() {
+        let Ok(entries) = std::fs::read_dir(&dir) else {
+            continue;
+        };
+        let mut has_lib = false;
+        for p in entries.flatten().map(|e| e.path()) {
+            if p.is_dir() {
+                queue.push(p);
+            } else {
+                has_lib |= is_lib(&p);
+            }
+        }
+        if has_lib {
+            dirs.push(dir);
+        }
+    }
+    dirs.sort();
+    dirs
+}
+
 /// Downloads, verifies and unpacks llama.cpp (and the CUDA runtime) for `variant`; returns the
 /// `llama-server` path. Archives are kept in `<state>/downloads` so a re-run skips them.
 pub fn install(variant: Variant) -> Result<PathBuf, CliError> {

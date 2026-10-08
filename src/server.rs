@@ -684,8 +684,8 @@ fn mlx_command(engine: &str, repo: &str, port: u16) -> Result<ServerCommand, Cli
 }
 
 /// llama-server's argv and env off macOS, from the build and weights setup installed. One slot,
-/// as on the Mac. On Linux the server's own directory goes on `LD_LIBRARY_PATH`, for the CUDA
-/// runtime libraries unpacked beside it.
+/// as on the Mac. The build's library directories (llama.cpp's own and the CUDA runtime's) go
+/// first on `LD_LIBRARY_PATH` (Linux) or `PATH` (Windows).
 #[cfg(not(target_os = "macos"))]
 fn llama_command(
     engine: Engine,
@@ -724,14 +724,17 @@ fn llama_command(
         &model, &mmproj, port, engine, slots, variant,
     ));
     let mut env = Vec::new();
-    if cfg!(target_os = "linux")
-        && let Some(dir) = program.parent()
-    {
-        let mut path = dir.to_string_lossy().into_owned();
-        if let Ok(old) = std::env::var("LD_LIBRARY_PATH") {
-            path = format!("{path}:{old}");
-        }
-        env.push(("LD_LIBRARY_PATH".into(), path));
+    let var = if cfg!(windows) {
+        "PATH"
+    } else {
+        "LD_LIBRARY_PATH"
+    };
+    let mut dirs = llama::library_dirs(variant);
+    dirs.extend(program.parent().map(Path::to_path_buf));
+    dirs.dedup();
+    dirs.extend(std::env::var_os(var).iter().flat_map(std::env::split_paths));
+    if let Ok(joined) = std::env::join_paths(dirs) {
+        env.push((var.into(), joined.to_string_lossy().into_owned()));
     }
     Ok((argv, env, Some(slots)))
 }

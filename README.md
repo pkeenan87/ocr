@@ -1,6 +1,6 @@
 # ocr
 
-Local, private OCR of PDFs and images to Markdown on Apple Silicon. Nothing is uploaded anywhere.
+Local, private OCR of PDFs and images to Markdown on Apple Silicon, and on Linux and Windows machines with a GPU (see [Linux and Windows](#linux-and-windows)). Nothing is uploaded anywhere.
 
 `ocr` is a single command-line tool with four engines:
 
@@ -70,6 +70,66 @@ Model engines also need a running server:
     ocr server stop
 
 `server start` defaults to the only installed model engine. Only one model runs at a time. The server binds to 127.0.0.1 and `start` waits until a real test request succeeds. If you `scan` with a model engine and no matching server is running, the scan exits 3 with `model server not running; run 'ocr server start --model <engine>'`.
+
+## Linux and Windows
+
+Status: Phase 7 (PLAN.md §9). Linux was tested on a Ryzen 9950X, which has no discrete GPU, with the CPU build. The RTX 3090 (CUDA) run and a native Windows run are still to come. Windows builds and tests run in CI.
+
+Off the Mac:
+- There is no Apple Vision, so `apple` is not offered and **`paddleocr-vl` is the default engine**.
+- The models run in llama.cpp's `llama-server` (release b11510) instead of mlx-vlm, from GGUF weights. No Python is needed.
+- PDFs are rendered with pdfium (`chromium/7881`).
+
+**Requirements:**
+- Linux x86-64 or Windows 10 (version 1803 or later) x86-64. Setup uses the `curl` and `tar` that ship with both.
+- Rust, to build.
+- A GPU is strongly recommended: NVIDIA (CUDA), or any GPU with its own memory through Vulkan.
+
+**Setup** probes the hardware, downloads the matching llama.cpp build, pdfium and the weights, and checks every file against a pinned sha256:
+
+    cargo build --release
+    ocr server setup --model paddleocr-vl
+    ocr server start --model paddleocr-vl
+    ocr scan --input-file filing.pdf
+
+**How the build is chosen:**
+
+| Hardware | llama.cpp build |
+|---|---|
+| NVIDIA driver (`nvidia-smi`) | CUDA 12 or 13, whichever the driver supports |
+| A Vulkan GPU with its own memory (AMD, Intel Arc, ...) | Vulkan |
+| Integrated graphics only, or no GPU | CPU, with a warning |
+
+Integrated graphics get the CPU build because it was 6x faster than Vulkan on a Ryzen's built-in Radeon. With the CPU build:
+- `olmocr` and `dots-ocr` need `--force` at setup.
+- `paddleocr-vl` runs at about 8 s a page on a 16-core CPU.
+- Request timeouts are four times as long.
+
+Set `OCR_LLAMA_VARIANT=cuda12|cuda13|vulkan|cpu` to override the choice. If a CUDA build won't start, try `OCR_LLAMA_VARIANT=vulkan ocr server setup --model <engine>`; NVIDIA cards run Vulkan too.
+
+**Memory:** need is the GGUF files plus about 1.5 GB. Setup warns above 85% of GPU memory and refuses above 100% unless `--force`.
+
+| Engine (`--quant`) | Weights | Needs about |
+|---|---|---|
+| paddleocr-vl 1.6 (bf16, the only GGUF) | 1.8 GB | 3.3 GB |
+| dots-ocr, dots.ocr (8bit = Q8_0) | 3.2 GB | 4.7 GB |
+| olmocr (4bit = Q4_K_M) | 6.0 GB | 7.5 GB |
+| olmocr (8bit = Q8_0, default) | 9.5 GB | 10.9 GB |
+| olmocr (bf16) | 16.6 GB | 18.1 GB |
+
+Measured: PaddleOCR-VL on the CPU build uses 2.1 GB resident. TODO(eval): measure GPU memory on the RTX 3090.
+
+**Differences from the Mac:**
+- dots defaults to `dots.ocr`, because llama.cpp's support for dots.mocr is unconfirmed. Only PaddleOCR-VL 1.6 and 1.5 are offered.
+- Without the Apple Vision side-pass:
+  - Bates numbers come from the model's own text.
+  - olmOCR, which drops footers, gets two extra small requests per page, for the bottom-right and bottom-left corners. A Bates number centred under the footer is not found.
+  - There are no table crops and no transcript detection.
+  - A page the model fails is recorded as failed, and a re-run retries it, instead of falling back to Apple Vision text.
+- Column detection still works: it runs on the rendered bitmap.
+- HEIC images are refused; convert them to PNG or JPEG.
+
+Files live in `~/.local/share/ocr` (Linux) or `%LOCALAPPDATA%\ocr` (Windows). Config lives in `~/.config/ocr` or `%APPDATA%\ocr`.
 
 ## Scanning
 
@@ -209,12 +269,17 @@ Guidance:
 
 ## Privacy
 
-Everything runs on your machine. Model servers bind to 127.0.0.1 only, there is no telemetry, and the only network access is the Hugging Face and Python package downloads during `ocr server setup`. At run time the servers are started with `HF_HUB_OFFLINE=1`.
+Everything runs on your machine. Model servers bind to 127.0.0.1 only, and there is no telemetry. The only network access is the downloads during `ocr server setup`:
+- macOS: Hugging Face and Python packages. At run time the servers start with `HF_HUB_OFFLINE=1`.
+- Linux and Windows: the pinned llama.cpp and pdfium releases from GitHub, and the GGUF weights from Hugging Face, all checked by sha256.
 
 ## Development
 
     cargo test --release                       # unit and integration tests
     OCR_REAL_MODELS=1 cargo test --release     # also run tests against real model servers (slow, needs setup)
+    scripts/xcheck.sh                          # from Linux: type-check the Windows and macOS targets
+
+Off macOS, tests that render documents need pdfium. It is found at `$OCR_PDFIUM_LIB`, `<state>/pdfium/` (setup installs it there), next to the binary, or on the system library path. CI (`.github/workflows/ci.yml`) runs fmt, clippy and the tests on Linux and Windows. The macOS tests need a Mac with macOS 26.
 
 Layout: `src/` (Rust CLI and pipeline), `bridge/` (Swift static library for Apple Vision and PDF rendering), `tests/`, `examples/` (probes), `spike/` (Phase 0 to 2b experiments and fixtures), `eval/` (Phase 6 evaluation harness, see [eval/README.md](eval/README.md)).
 

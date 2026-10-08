@@ -41,15 +41,52 @@ def to_mb(s):
     return n * {"B": 1 / 1048576, "K": 1 / 1024, "M": 1, "G": 1024}[u]
 
 
-def server_peak_mb(state_dir):
-    """Peak physical footprint of the running server in MB, or None."""
+def server_pid(state_dir):
     try:
-        pid = json.load(open(Path(state_dir) / "server.json"))["pid"]
+        return json.load(open(Path(state_dir) / "server.json"))["pid"]
     except (OSError, KeyError, ValueError):
         return None
-    r = subprocess.run(["vmmap", "--summary", str(pid)], capture_output=True, text=True)
-    m = re.search(r"Physical footprint \(peak\):\s+([\d.]+[BKMG])", r.stdout)
-    return round(to_mb(m.group(1)), 1) if m else None
+
+
+def server_peak_mb(state_dir):
+    """Peak memory of the running server in MB, or None: the physical footprint peak from
+    `vmmap` on macOS, the resident peak (VmHWM) on Linux. GPU memory is `server_vram_mb`."""
+    pid = server_pid(state_dir)
+    if pid is None:
+        return None
+    if sys.platform == "darwin":
+        r = subprocess.run(["vmmap", "--summary", str(pid)], capture_output=True, text=True)
+        m = re.search(r"Physical footprint \(peak\):\s+([\d.]+[BKMG])", r.stdout)
+        return round(to_mb(m.group(1)), 1) if m else None
+    try:
+        m = re.search(r"VmHWM:\s+(\d+) kB", open(f"/proc/{pid}/status").read())
+    except OSError:
+        return None
+    return round(int(m.group(1)) / 1024, 1) if m else None
+
+
+def server_vram_mb(state_dir):
+    """GPU memory the server holds now (NVIDIA, via nvidia-smi), in MB, or None."""
+    pid = server_pid(state_dir)
+    try:
+        r = subprocess.run(["nvidia-smi", "--query-compute-apps=pid,used_memory", "--format=csv,noheader,nounits"],
+                           capture_output=True, text=True)
+    except OSError:
+        return None
+    for line in r.stdout.splitlines():
+        p, _, mb = line.partition(",")
+        if p.strip() == str(pid):
+            return float(mb)
+    return None
+
+
+def child_peak_mb():
+    """Largest resident peak of any child so far (off macOS, where BSD `time -l` is missing)."""
+    try:
+        import resource
+    except ImportError:  # Windows
+        return None
+    return round(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024, 1)  # Linux: KiB
 
 
 def aggregate(entries):
@@ -78,7 +115,7 @@ def main():
     ap.add_argument("--families", help="comma list (default: every family found in each set except production)")
     ap.add_argument("--keep-furniture", action="store_true", help="score headers/footers/Bates too")
     ap.add_argument("--use-real-config", action="store_true")
-    ap.add_argument("--ocr-bin", default=str(ROOT / "target/release/ocr"))
+    ap.add_argument("--ocr-bin", default=str(ROOT / "target/release" / ("ocr.exe" if os.name == "nt" else "ocr")))
     ap.add_argument("--git-rev", default=subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
                                                         capture_output=True, text=True).stdout.strip())
     a = ap.parse_args()
@@ -105,7 +142,9 @@ def main():
         for fam in fams:
             pdf, gtp, md = set_dir / f"{fam}.pdf", set_dir / f"{fam}.gt.json", out / tag / set_dir.name / f"{fam}.md"
             gt = json.load(open(gtp))
-            cmd = ["/usr/bin/time", "-l", a.ocr_bin, "scan", "--input-file", str(pdf), "--output-file", str(md),
+            # BSD `time -l` gives the peak footprint on macOS; elsewhere `child_peak_mb`.
+            timer = ["/usr/bin/time", "-l"] if sys.platform == "darwin" else []
+            cmd = timer + [a.ocr_bin, "scan", "--input-file", str(pdf), "--output-file", str(md),
                    "--model", a.engine, "--overwrite", "--quiet"]
             if a.dpi:
                 cmd += ["--dpi", str(a.dpi)]
@@ -125,9 +164,10 @@ def main():
                     break
                 crashes += 1
             m = re.search(r"(\d+)\s+peak memory footprint", p.stderr)
+            peak = round(int(m.group(1)) / 1048576, 1) if m else (None if timer else child_peak_mb())
             entry = {"wall_s": round(wall, 2), "pages": len(gt["pages"]), "exit_code": p.returncode,
                      "pages_per_s": round(len(gt["pages"]) / wall, 3),
-                     "ocr_peak_mb": round(int(m.group(1)) / 1048576, 1) if m else None, "crashes": crashes}
+                     "ocr_peak_mb": peak, "crashes": crashes}
             if p.returncode not in (0, 1) or not md.exists():
                 entry["error"] = p.stderr.strip()[-500:]
             else:
@@ -145,6 +185,7 @@ def main():
 
     if a.engine in MODEL_ENGINES:
         result["server_peak_mb"] = server_peak_mb(state_dir)
+        result["server_vram_mb"] = server_vram_mb(state_dir)
     result["last_summary"] = {fam: aggregate(es) for fam, es in this_run.items()}
     json.dump(result, open(res_path, "w"), indent=1)
 
@@ -159,7 +200,7 @@ def main():
               f"{f(g['token_recall'])} | {f(g['bates_accuracy'])} | {f(g['transcript_line_accuracy'])} | "
               f"{g['pages_per_s']} | {g['wall_s']} | {g['ocr_peak_mb']} | {g['crashes']} |")
     if a.engine in MODEL_ENGINES:
-        print(f"\nServer peak physical footprint: {result.get('server_peak_mb')} MB")
+        print(f"\nServer peak memory: {result.get('server_peak_mb')} MB; GPU memory: {result.get('server_vram_mb')} MB")
 
 
 if __name__ == "__main__":

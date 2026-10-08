@@ -129,3 +129,27 @@ The checks are exact matches for the case number, all four dollar amounts and th
    - olmOCR: about 80 minutes.
    - dots: about 2.9 hours.
    - Phase 6 should test lower DPI for dots, because 5k prompt tokens per page makes prefill dominate.
+
+## Phase 2b pre-check: deposition transcripts (2026-10-07)
+
+**Setup.** `examples/crop_probe.rs` runs the production `RecognizeDocumentsRequest` on crops. `spike/transcript_qa.py` runs PaddleOCR-VL through `mlx_vlm.server`. The fixtures are:
+- `spike/heldout/four_up.pdf`: 4-up, Courier 6.5 pt, 25 numbered `Q.` lines per mini-page;
+- `spike/out/transcript_full.pdf`: one full-size page, Courier 12 pt, alternating `Q.`/`A.`.
+
+**Apple Vision.**
+
+| Input | Result |
+|---|---|
+| 4-up, one mini-page cropped | Text mostly right, but the region becomes a 25-row "table". `Q.` is misread as `l.`, `e.` or `2.` |
+| 4-up crops, by DPI | Exact `Q. Question k.n…` lines: 200 DPI 17/100, 300 DPI 30/100, 400 DPI 41/100, 600 DPI 34/100. Language correction and custom words `Q.`/`A.` make no difference |
+| Full-size transcript at 200 DPI | 19/25 correct Q/A markers, and **every line number dropped**: the number column comes back as empty table cells |
+
+**PaddleOCR-VL 1.6 bf16, prompt `OCR:`.**
+
+| Input | Exact (line number + Q/A + text) |
+|---|---|
+| Full-size transcript | 25/25 |
+| 4-up quadrant crops | 100/100 |
+| 4-up **whole page, uncropped** | 100/100 |
+
+**Conclusion.** Region detection cannot fix Apple Vision on transcripts. The recognizer itself loses line numbers and Q/A markers, which are what page:line citation depends on. PaddleOCR-VL handles them with no layout help.

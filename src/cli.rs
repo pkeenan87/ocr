@@ -215,7 +215,8 @@ pub struct ScanArgs {
     /// Omit the YAML header
     #[arg(long)]
     pub no_front_matter: bool,
-    /// Use a PDF's embedded text instead of OCR (default: never for apple, auto for model engines)
+    /// Use a PDF's embedded text instead of OCR (default: never; the text-layer path has no
+    /// layout handling, so margin numbers come out inline, tables are flattened and Bates is lost)
     #[arg(long, value_enum)]
     pub use_text_layer: Option<TextLayer>,
     /// Strip pleading line numbers and running headers
@@ -240,13 +241,10 @@ pub struct ScanArgs {
 pub const DEFAULT_DPI: u32 = 200;
 
 impl ScanArgs {
-    /// Apple's text-layer path skips layout handling (columns, tables, margin numbers, Bates),
-    /// so Vision is the default there; model engines fall back to `auto`.
+    /// The text-layer path skips all layout handling (columns, tables, margin numbers, Bates),
+    /// so OCR is the default for every engine; `auto` and `always` are opt-in.
     pub fn effective_text_layer(&self) -> TextLayer {
-        self.use_text_layer.unwrap_or(match self.model {
-            Engine::Apple => TextLayer::Never,
-            _ => TextLayer::Auto,
-        })
+        self.use_text_layer.unwrap_or(TextLayer::Never)
     }
 
     pub fn page_markers(&self) -> bool {

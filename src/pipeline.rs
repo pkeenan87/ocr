@@ -23,8 +23,8 @@ const REGION_DPI: u32 = 100;
 /// white space. Clamped at the neighbouring gutter midpoints and bands, so the horizontal pad
 /// reaches the midpoint of the gutter. Tuned on held-out seeds 0-9: a 1% horizontal pad
 /// misread words on `two_column.pdf` that the midpoint pad reads exactly.
-const COLUMN_PAD_X: f64 = 1.0;
-const COLUMN_PAD_Y: f64 = 0.02;
+pub(crate) const COLUMN_PAD_X: f64 = 1.0;
+pub(crate) const COLUMN_PAD_Y: f64 = 0.02;
 
 /// Run-wide settings.
 pub struct Settings {
@@ -36,6 +36,7 @@ pub struct Settings {
     pub front_matter: bool,
     pub currency_fix: bool,
     pub quiet: bool,
+    pub verbose: bool,
     pub options: Options,
 }
 
@@ -63,6 +64,7 @@ pub fn run_file(item: &Item, s: &Settings) -> Result<FileReport> {
         pages: info.pages,
         engine: ENGINE_NAME,
         generated: chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+        model: false,
     };
     let md = markdown::assemble(s.front_matter.then_some(&front), &results, s.page_markers);
     write_atomic(&item.output, &md)?;
@@ -92,14 +94,14 @@ pub fn run_file(item: &Item, s: &Settings) -> Result<FileReport> {
         pages: results.len(),
         flagged: results
             .iter()
-            .filter(|r| r.error.is_some())
+            .filter(|r| r.error.is_some() || r.flagged)
             .map(|r| r.number)
             .collect(),
     })
 }
 
 /// 0-based indices to process: the `--pages` subset, with out-of-range pages warned about.
-fn select_pages(total: usize, ranges: Option<&PageRanges>, input: &Path) -> Vec<usize> {
+pub(crate) fn select_pages(total: usize, ranges: Option<&PageRanges>, input: &Path) -> Vec<usize> {
     let Some(ranges) = ranges else {
         return (0..total).collect();
     };
@@ -146,29 +148,33 @@ fn process_pages(path: &Path, kind: DocKind, pages: &[usize], s: &Settings) -> V
 }
 
 fn process_page(path: &Path, kind: DocKind, index: usize, s: &Settings) -> PageResult {
-    let number = index + 1;
-    if kind == DocKind::Pdf
-        && s.text_layer != TextLayer::Never
-        && let Ok(text) = vision::text_layer(path, index)
-    {
-        let usable = match s.text_layer {
-            TextLayer::Always => !text.trim().is_empty(),
-            _ => markdown::text_layer_usable(&text),
-        };
-        if usable {
-            return PageResult {
-                number,
-                source: Source::TextLayer,
-                body: markdown::render_text_layer(&text),
-                bates: None,
-                column_split: false,
-                transcript: false,
-                currency_fixes: 0,
-                error: None,
-            };
-        }
+    text_layer_page(path, kind, index, s).unwrap_or_else(|| vision_page(path, index, s))
+}
+
+/// The page from its embedded text, if `--use-text-layer` asks for it and the text is usable.
+pub(crate) fn text_layer_page(
+    path: &Path,
+    kind: DocKind,
+    index: usize,
+    s: &Settings,
+) -> Option<PageResult> {
+    if kind != DocKind::Pdf || s.text_layer == TextLayer::Never {
+        return None;
     }
-    let mut result = PageResult {
+    let text = vision::text_layer(path, index).ok()?;
+    let usable = match s.text_layer {
+        TextLayer::Always => !text.trim().is_empty(),
+        _ => markdown::text_layer_usable(&text),
+    };
+    usable.then(|| PageResult {
+        source: Source::TextLayer,
+        body: markdown::render_text_layer(&text),
+        ..blank_page(index + 1)
+    })
+}
+
+fn blank_page(number: usize) -> PageResult {
+    PageResult {
         number,
         source: Source::Vision,
         body: String::new(),
@@ -176,8 +182,16 @@ fn process_page(path: &Path, kind: DocKind, index: usize, s: &Settings) -> PageR
         column_split: false,
         transcript: false,
         currency_fixes: 0,
+        table: false,
+        fallback: false,
+        flagged: false,
         error: None,
-    };
+    }
+}
+
+/// The page through Apple Vision with column handling, as the apple engine renders it.
+pub(crate) fn vision_page(path: &Path, index: usize, s: &Settings) -> PageResult {
+    let mut result = blank_page(index + 1);
     match recognize_with_columns(path, index, s.dpi, &s.options) {
         Ok(page) => {
             let (body, bates) = if page.split {
@@ -209,6 +223,49 @@ pub struct Recognized {
     pub transcript: bool,
 }
 
+/// First Vision pass and region detection of one page.
+pub struct SidePass {
+    /// Blocks of the full-page Vision pass.
+    pub blocks: Vec<Block>,
+    /// Regions in reading order; empty if the grayscale render failed.
+    pub regions: Vec<regions::Region>,
+    /// Padded crop rectangles of the column regions, as Apple crops them.
+    pub crops: Vec<(usize, [f64; 4])>,
+    /// Whether the full-page blocks look like a deposition transcript.
+    pub transcript: bool,
+}
+
+impl SidePass {
+    pub fn columns(&self) -> usize {
+        self.regions
+            .iter()
+            .filter(|r| r.kind == Kind::Column)
+            .count()
+    }
+}
+
+/// Vision pass over the full page, then region detection on a grayscale render. A failed
+/// render only costs the region handling, never the page.
+pub fn side_pass(path: &Path, index: usize, dpi: u32, options: &Options) -> Result<SidePass> {
+    let page = vision::recognize_page(path, index, dpi, options)?;
+    let tables: Vec<[f64; 4]> = page
+        .blocks
+        .iter()
+        .filter(|b| b.kind == "table")
+        .map(|b| b.bbox)
+        .collect();
+    let regions = vision::render_gray(path, index, REGION_DPI)
+        .map(|gray| regions::detect(&gray, &tables))
+        .unwrap_or_default();
+    let crops = regions::crop_rects(&regions, COLUMN_PAD_X, COLUMN_PAD_Y);
+    Ok(SidePass {
+        transcript: layout::looks_like_transcript(&page.blocks),
+        blocks: page.blocks,
+        regions,
+        crops,
+    })
+}
+
 /// Vision pass over the full page, then region detection on a grayscale render. If the page
 /// has two or more column regions, each is cropped and recognized on its own (Vision merges
 /// same-baseline lines across columns) and bands are taken from the first pass.
@@ -218,27 +275,25 @@ pub fn recognize_with_columns(
     dpi: u32,
     options: &Options,
 ) -> Result<Recognized> {
-    let page = vision::recognize_page(path, index, dpi, options)?;
+    let side = side_pass(path, index, dpi, options)?;
+    if side.columns() < 2 {
+        return Ok(Recognized {
+            transcript: side.transcript,
+            blocks: side.blocks,
+            split: false,
+        });
+    }
+    let SidePass {
+        blocks: first_blocks,
+        regions,
+        crops,
+        transcript,
+    } = side;
     let first_pass = |blocks: Vec<Block>| Recognized {
-        transcript: layout::looks_like_transcript(&blocks),
+        transcript,
         blocks,
         split: false,
     };
-    let tables: Vec<[f64; 4]> = page
-        .blocks
-        .iter()
-        .filter(|b| b.kind == "table")
-        .map(|b| b.bbox)
-        .collect();
-    // A failed render only costs the column handling, never the page.
-    let Ok(gray) = vision::render_gray(path, index, REGION_DPI) else {
-        return Ok(first_pass(page.blocks));
-    };
-    let regions = regions::detect(&gray, &tables);
-    if regions.iter().filter(|r| r.kind == Kind::Column).count() < 2 {
-        return Ok(first_pass(page.blocks));
-    }
-    let crops = regions::crop_rects(&regions, COLUMN_PAD_X, COLUMN_PAD_Y);
     let mut recognized: Vec<Vec<Block>> = Vec::new();
     for (_, rect) in &crops {
         let crop = Options {
@@ -248,13 +303,12 @@ pub fn recognize_with_columns(
         match vision::recognize_page(path, index, dpi, &crop) {
             Ok(col) => recognized.push(drop_duplicate_titles(col.blocks)),
             // Keep the full-page reading rather than lose the page.
-            Err(_) => return Ok(first_pass(page.blocks)),
+            Err(_) => return Ok(first_pass(first_blocks)),
         }
     }
-    let ordered = assemble_regions(&regions, &crops, recognized, &page.blocks);
+    let ordered = assemble_regions(&regions, &crops, recognized, &first_blocks);
     Ok(Recognized {
-        transcript: layout::looks_like_transcript(&ordered)
-            || layout::looks_like_transcript(&page.blocks),
+        transcript: layout::looks_like_transcript(&ordered) || transcript,
         blocks: ordered,
         split: true,
     })
@@ -324,7 +378,7 @@ fn assemble_regions(
 }
 
 /// Writes `<out>.tmp` next to `out`, then renames it into place.
-fn write_atomic(out: &Path, contents: &str) -> Result<()> {
+pub(crate) fn write_atomic(out: &Path, contents: &str) -> Result<()> {
     if let Some(parent) = out.parent().filter(|p| !p.as_os_str().is_empty()) {
         fs::create_dir_all(parent)
             .with_context(|| format!("cannot create {}", parent.display()))?;

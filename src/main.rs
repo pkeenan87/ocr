@@ -4,10 +4,12 @@ use clap::Parser;
 
 use ocr::cli::{Cli, Command, Engine, ScanArgs, ServerCommand, SetupArgs, StartArgs};
 use ocr::config::Config;
+use ocr::engines::MLX_VLM_PIN;
 use ocr::error::CliError;
 use ocr::input::{self, Plan};
+use ocr::model_engine;
 use ocr::pipeline::{self, Settings};
-use ocr::server;
+use ocr::server::{self, ServerInfo};
 use ocr::vision::Options;
 
 fn main() -> ExitCode {
@@ -148,13 +150,14 @@ fn scan(args: &ScanArgs) -> Result<(), CliError> {
         return Ok(());
     }
     if args.model != Engine::Apple {
-        return model_gate(args);
+        let info = model_gate(args)?;
+        return run_model(args, &plan, info);
     }
     run_apple(args, &plan)
 }
 
 /// Model-engine scan gate (PLAN §3): the right server must be running.
-fn model_gate(args: &ScanArgs) -> Result<(), CliError> {
+fn model_gate(args: &ScanArgs) -> Result<ServerInfo, CliError> {
     let name = args.model.name();
     let Some(info) = server::running() else {
         return Err(CliError::Server(format!(
@@ -169,14 +172,17 @@ fn model_gate(args: &ScanArgs) -> Result<(), CliError> {
             info.engine, info.repo
         )));
     }
-    Err(CliError::Server(
-        "model scanning arrives with the Paddle engine".into(),
-    ))
+    if args.model != Engine::PaddleocrVl {
+        return Err(CliError::Server(format!(
+            "{name} scanning is not implemented yet"
+        )));
+    }
+    Ok(info)
 }
 
-/// Runs the apple pipeline over every planned file; failed pages or files make the run partial.
-fn run_apple(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
-    let settings = Settings {
+/// Settings shared by every engine.
+fn settings(args: &ScanArgs) -> Settings {
+    Settings {
         dpi: args.effective_dpi(),
         jobs: args.effective_jobs(),
         pages: args.pages.clone(),
@@ -185,8 +191,51 @@ fn run_apple(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
         front_matter: !args.no_front_matter,
         currency_fix: !args.no_currency_fix,
         quiet: args.quiet,
+        verbose: args.verbose,
         options: Options::default(),
-    };
+    }
+}
+
+/// Runs the PaddleOCR-VL engine over every planned file. Pages that fell back to Apple Vision
+/// or failed make the run partial; a stopped server ends it with exit 3.
+fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliError> {
+    let mlx = Config::load()?
+        .and_then(|c| c.runtime)
+        .map_or_else(|| MLX_VLM_PIN.to_string(), |r| r.mlx_vlm);
+    let ctx = model_engine::Ctx::new(info, &mlx);
+    let settings = settings(args);
+    let mut problems = Vec::new();
+    for item in &plan.items {
+        match model_engine::run_file(item, &settings, &ctx) {
+            Ok(report) if report.flagged.is_empty() => {}
+            Ok(report) => problems.push(format!(
+                "{}: {} of {} pages flagged (pages {:?}); see fallback_pages in the front matter",
+                item.input.display(),
+                report.flagged.len(),
+                report.pages,
+                report.flagged
+            )),
+            Err(model_engine::RunError::Stopped(msg)) => {
+                return Err(CliError::Server(format!("{msg}; re-run to start over")));
+            }
+            Err(model_engine::RunError::Other(e)) => {
+                problems.push(format!("{}: {e:#}", item.input.display()));
+            }
+        }
+    }
+    if problems.is_empty() {
+        Ok(())
+    } else {
+        Err(CliError::Partial(format!(
+            "completed with problems:\n  {}",
+            problems.join("\n  ")
+        )))
+    }
+}
+
+/// Runs the apple pipeline over every planned file; failed pages or files make the run partial.
+fn run_apple(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
+    let settings = settings(args);
     let mut problems = Vec::new();
     for item in &plan.items {
         match pipeline::run_file(item, &settings) {

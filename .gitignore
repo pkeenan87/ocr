@@ -2,3 +2,4 @@
 /bridge/.build
 /spike/.venv
 /spike/out
+eval/out/

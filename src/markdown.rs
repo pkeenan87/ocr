@@ -51,6 +51,12 @@ pub struct PageResult {
     pub transcript: bool,
     /// Number of `S`-to-`$` currency corrections made.
     pub currency_fixes: usize,
+    /// Whether a model-recognized table was converted on this page.
+    pub table: bool,
+    /// Whether the model failed and the body is the Apple Vision text instead.
+    pub fallback: bool,
+    /// Set when the page needs a human look even though it has a body (fallback, bad table).
+    pub flagged: bool,
     /// Set when OCR failed; the body is then empty.
     pub error: Option<String>,
 }
@@ -62,6 +68,8 @@ pub struct FrontMatter<'a> {
     pub pages: usize,
     pub engine: &'a str,
     pub generated: String,
+    /// Model engine: adds `table_pages` and `fallback_pages` and has no `currency_fixes`.
+    pub model: bool,
 }
 
 /// Pleading margin line numbers (1-28) are dropped by default: Vision reads them only partially
@@ -261,29 +269,38 @@ fn number_list(v: impl Iterator<Item = usize>) -> String {
 pub fn assemble(front: Option<&FrontMatter>, pages: &[PageResult], markers: bool) -> String {
     let mut out = String::new();
     if let Some(f) = front {
-        let layer = pages
-            .iter()
-            .filter(|p| p.source == Source::TextLayer && p.error.is_none());
-        let flagged = pages.iter().filter(|p| p.error.is_some());
-        let split = pages.iter().filter(|p| p.column_split);
-        let transcripts = pages.iter().filter(|p| p.transcript);
-        let fixes: Vec<String> = pages
-            .iter()
-            .filter(|p| p.currency_fixes > 0)
-            .map(|p| format!("{}: {}", p.number, p.currency_fixes))
-            .collect();
-        out.push_str(&format!(
-            "---\nsource: {}\npages: {}\nengine: {}\ngenerated: {}\ntext_layer_pages: {}\ncolumn_split_pages: {}\ntranscript_pages: {}\ncurrency_fixes: {{{}}}\nflagged_pages: {}\n---\n\n",
+        let list = |keep: &dyn Fn(&PageResult) -> bool| {
+            number_list(pages.iter().filter(|p| keep(p)).map(|p| p.number))
+        };
+        let mut head = format!(
+            "---\nsource: {}\npages: {}\nengine: {}\ngenerated: {}\ntext_layer_pages: {}\ncolumn_split_pages: {}\ntranscript_pages: {}\n",
             yaml_str(f.source),
             f.pages,
             yaml_str(f.engine),
             f.generated,
-            number_list(layer.map(|p| p.number)),
-            number_list(split.map(|p| p.number)),
-            number_list(transcripts.map(|p| p.number)),
-            fixes.join(", "),
-            number_list(flagged.map(|p| p.number)),
+            list(&|p| p.source == Source::TextLayer && p.error.is_none()),
+            list(&|p| p.column_split),
+            list(&|p| p.transcript),
+        );
+        if f.model {
+            head.push_str(&format!(
+                "table_pages: {}\nfallback_pages: {}\n",
+                list(&|p| p.table),
+                list(&|p| p.fallback),
+            ));
+        } else {
+            let fixes: Vec<String> = pages
+                .iter()
+                .filter(|p| p.currency_fixes > 0)
+                .map(|p| format!("{}: {}", p.number, p.currency_fixes))
+                .collect();
+            head.push_str(&format!("currency_fixes: {{{}}}\n", fixes.join(", ")));
+        }
+        head.push_str(&format!(
+            "flagged_pages: {}\n---\n\n",
+            list(&|p| p.error.is_some() || p.flagged)
         ));
+        out.push_str(&head);
     }
     let texts: Vec<String> = pages.iter().map(|p| page_text(p, markers)).collect();
     out.push_str(&texts.join("\n\n"));
@@ -441,6 +458,9 @@ mod tests {
             column_split: false,
             transcript: false,
             currency_fixes: 0,
+            table: false,
+            fallback: false,
+            flagged: false,
             error: error.map(String::from),
         };
         let pages = [
@@ -459,6 +479,7 @@ mod tests {
             pages: 2,
             engine: "apple (Vision RecognizeDocuments)",
             generated: "t".into(),
+            model: false,
         };
         let md = assemble(Some(&front), &pages, true);
         assert!(md.starts_with(

@@ -283,8 +283,13 @@ pub fn running() -> Option<ServerInfo> {
     }
 }
 
-/// Stops a verified server: SIGTERM to its group, SIGKILL after 10 s, then removes `server.json`.
+/// Stops a verified server: removes `server.json`, then SIGTERM to its group and SIGKILL after 10 s.
 pub fn stop_server(info: &ServerInfo) {
+    // Remove `server.json` first: a scan that loses its connection to this server must be able
+    // to tell a user stop (file gone) from a crash (file left behind).
+    if let Ok(p) = info_path() {
+        let _ = fs::remove_file(p);
+    }
     killpg(info.pid, libc::SIGTERM);
     let deadline = Instant::now() + Duration::from_secs(10);
     while pid_alive(info.pid) && Instant::now() < deadline {
@@ -297,14 +302,11 @@ pub fn stop_server(info: &ServerInfo) {
             std::thread::sleep(Duration::from_millis(50));
         }
     }
-    if let Ok(p) = info_path() {
-        let _ = fs::remove_file(p);
-    }
 }
 
 // ----------------------------------------------------------------- HTTP
 
-fn agent(timeout: Duration) -> ureq::Agent {
+pub(crate) fn agent(timeout: Duration) -> ureq::Agent {
     ureq::Agent::config_builder()
         .timeout_global(Some(timeout))
         .http_status_as_error(false)
@@ -337,7 +339,7 @@ fn probe_ok(port: u16, repo: &str, timeout: Duration) -> bool {
         .is_ok_and(|r| r.status().as_u16() == 200)
 }
 
-fn base64(data: &[u8]) -> String {
+pub(crate) fn base64(data: &[u8]) -> String {
     const T: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::new();
     for c in data.chunks(3) {
@@ -471,7 +473,14 @@ fn launch(template: &ServerInfo) -> Result<ServerInfo, CliError> {
 
     let timeout = ready_timeout();
     match wait_ready(&mut child, &info, timeout) {
-        Ok(()) => Ok(info),
+        Ok(()) => {
+            // Reap the server when it exits: a restart in this process would otherwise find the
+            // previous child a zombie, which still looks alive, and wait out the kill timeouts.
+            std::thread::spawn(move || {
+                let _ = child.wait();
+            });
+            Ok(info)
+        }
         Err(reason) => {
             killpg(info.pid, libc::SIGKILL);
             let _ = child.wait();
@@ -644,8 +653,16 @@ pub fn start(args: &StartArgs, engine: Engine) -> Result<(), CliError> {
 
 /// Stops and restarts the server with its recorded argv and env, waiting for readiness.
 pub fn restart(info: &ServerInfo) -> Result<ServerInfo, CliError> {
-    stop_server(info);
+    // A dead pid may have been reused by an unrelated process: only stop what is ours.
+    if is_ours(info) {
+        stop_server(info);
+    }
     launch(info)
+}
+
+/// Whether `server.json` still exists. `stop` removes it, a crash leaves it behind.
+pub fn info_file_exists() -> bool {
+    info_path().is_ok_and(|p| p.exists())
 }
 
 // ------------------------------------------------------- stop / status

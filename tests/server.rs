@@ -343,7 +343,7 @@ fn scan_gate() {
         .stderr(predicate::str::contains("paddleocr-vl"));
     scan("dots-ocr")
         .code(3)
-        .stderr(predicate::str::contains("arrives with the Paddle engine"));
+        .stderr(predicate::str::contains("not implemented yet"));
     e.cmd()
         .args([
             "scan",

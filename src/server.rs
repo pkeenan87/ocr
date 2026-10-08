@@ -176,7 +176,8 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
             ..Default::default()
         }
     } else if cfg!(not(target_os = "macos")) {
-        install_llama_runtime()?
+        let engines: Vec<_> = plan.iter().map(|p| (p.0, p.1, p.2)).collect();
+        install_llama_runtime(&engines, args.force)?
     } else {
         let uv = find_uv().ok_or_else(|| {
             CliError::Setup(format!(
@@ -216,27 +217,96 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
     Ok(())
 }
 
-/// Off macOS: picks the llama.cpp build for this machine's GPU, installs it and pdfium.
+/// Off macOS (PLAN §9.2): probes the GPU, picks the llama.cpp build, checks that every engine
+/// being installed fits its memory (refusing without `--force` when it doesn't, and refusing
+/// olmocr and dots on the CPU build), then installs llama.cpp and pdfium.
 #[cfg(not(target_os = "macos"))]
-fn install_llama_runtime() -> Result<Runtime, CliError> {
-    use crate::llama;
-    let (variant, why) = llama::detect_variant()?;
+fn install_llama_runtime(
+    engines: &[(Engine, Option<&str>, Quant)],
+    force: bool,
+) -> Result<Runtime, CliError> {
+    use crate::llama::{self, Fit};
+    let hw = llama::probe()?;
+    let variant = hw.variant;
+    let gpu = hw
+        .gpu
+        .as_ref()
+        .map(|g| format!("{} ({} MiB)", g.name, g.memory_mib));
     println!(
-        "llama.cpp {} ({} build: {why})",
+        "llama.cpp {} ({} build: {})",
         llama::LLAMA_BUILD,
-        variant.name()
+        variant.name(),
+        hw.reason
     );
+    if let Some(g) = &gpu {
+        println!("GPU: {g}");
+    }
+    if !variant.uses_gpu() {
+        eprintln!("{}", llama::cpu_warning());
+    }
+    let (memory_gb, dedicated, what) = match (&hw.gpu, variant.uses_gpu()) {
+        (Some(g), true) => (
+            Some(g.memory_mib as f64 * 1048576.0 / 1e9),
+            true,
+            "GPU memory",
+        ),
+        _ => (llama::ram_gb(), false, "system memory"),
+    };
+    for &(engine, version, quant) in engines {
+        let name = engine.name();
+        if !variant.uses_gpu() && !llama::cpu_ok(engine) {
+            if !force {
+                return Err(CliError::Setup(format!(
+                    "error: {name} is too slow without a GPU; use paddleocr-vl, or pass --force to install it anyway"
+                )));
+            }
+            eprintln!("⚠ {name} without a GPU will be very slow; continuing because of --force");
+        }
+        let Some(gguf) = engines::gguf(engine, version, quant) else {
+            continue;
+        };
+        let need = llama::need_gb(&gguf);
+        let Some(have) = memory_gb else {
+            eprintln!("⚠ cannot determine {what}; skipping the memory check for {name}");
+            continue;
+        };
+        let q = quant.name();
+        let hint = if engine == Engine::Olmocr && quant != Quant::Q4 {
+            " Try `--quant 4bit`."
+        } else {
+            ""
+        };
+        match llama::fit(need, have, dedicated) {
+            Fit::Ok => {}
+            Fit::Tight => eprintln!(
+                "⚠ {name} {q} needs about {need:.1} GB and this machine has {have:.1} GB of {what}, so it may be tight.{hint}"
+            ),
+            Fit::TooBig if force => eprintln!(
+                "⚠ {name} {q} needs about {need:.1} GB but this machine has {have:.1} GB of {what}; continuing because of --force"
+            ),
+            Fit::TooBig => {
+                return Err(CliError::Setup(format!(
+                    "error: {name} {q} needs about {need:.1} GB but this machine has only {have:.1} GB of {what}.{hint} \
+                     Pass --force to install anyway."
+                )));
+            }
+        }
+    }
     llama::install(variant)?;
     llama::install_pdfium()?;
     Ok(Runtime {
         llama_cpp: Some(llama::LLAMA_BUILD.into()),
         llama_variant: Some(variant.name().into()),
+        gpu,
         ..Default::default()
     })
 }
 
 #[cfg(target_os = "macos")]
-fn install_llama_runtime() -> Result<Runtime, CliError> {
+fn install_llama_runtime(
+    _: &[(Engine, Option<&str>, Quant)],
+    _: bool,
+) -> Result<Runtime, CliError> {
     unreachable!("macOS runs mlx-vlm")
 }
 
@@ -705,6 +775,9 @@ fn llama_command(
         .and_then(|r| r.llama_variant)
         .and_then(|v| Variant::parse(&v))
         .ok_or_else(missing)?;
+    if !variant.uses_gpu() {
+        eprintln!("{}", llama::cpu_warning());
+    }
     let gguf = engines::gguf(engine, version, quant).ok_or_else(missing)?;
     let model = llama::model_path(&gguf, gguf.model.name)?;
     let mmproj = llama::model_path(&gguf, gguf.mmproj.name)?;
@@ -909,6 +982,21 @@ fn footprint(pid: u32) -> Option<String> {
         .map(|v| v.trim().to_string())
 }
 
+/// `used / total MiB` of the NVIDIA GPU(s), if `nvidia-smi` answers.
+fn nvidia_memory_used() -> Option<String> {
+    let out = Command::new("nvidia-smi")
+        .args([
+            "--query-gpu=memory.used,memory.total",
+            "--format=csv,noheader,nounits",
+        ])
+        .output()
+        .ok()?;
+    let text = String::from_utf8_lossy(&out.stdout);
+    let line = text.lines().next()?.trim().to_string();
+    let (used, total) = line.split_once(',')?;
+    (out.status.success()).then(|| format!("{} / {} MiB used", used.trim(), total.trim()))
+}
+
 fn format_uptime(secs: i64) -> String {
     let (h, m, s) = (secs / 3600, secs % 3600 / 60, secs % 60);
     if h > 0 {
@@ -943,6 +1031,17 @@ pub fn status() -> Result<(), CliError> {
         "not reachable"
     };
     println!("health:  {health}");
+    if let Some(rt) = Config::load()?.and_then(|c| c.runtime)
+        && rt.llama_cpp.is_some()
+    {
+        println!("build:   {}", rt.id());
+        if let Some(gpu) = rt.gpu {
+            println!("gpu:     {gpu}");
+        }
+        if let Some(used) = nvidia_memory_used() {
+            println!("vram:    {used}");
+        }
+    }
     if let Some(fp) = footprint(info.pid) {
         if cfg!(target_os = "macos") {
             println!("memory:  {fp} physical footprint");

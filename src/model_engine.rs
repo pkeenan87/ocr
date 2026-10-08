@@ -489,7 +489,13 @@ impl Ctx {
         jobs: usize,
     ) -> Self {
         let in_flight = jobs.min(max_num_seqs(&info)).max(1);
-        let lim = engines::limits(spec.engine());
+        let mut lim = engines::limits(spec.engine());
+        // The timeouts come from Apple Silicon rates; llama.cpp's CPU build (runtime id
+        // `llama.cpp <build> cpu`) gets four times as long (PLAN §9.7).
+        if mlx_vlm.ends_with(" cpu") {
+            lim.timeout_secs *= 4;
+            lim.retry_timeout_secs *= 4;
+        }
         let over: Option<u64> = std::env::var("OCR_REQUEST_TIMEOUT_SECS")
             .ok()
             .and_then(|v| v.parse().ok())

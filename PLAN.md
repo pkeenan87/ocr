@@ -409,7 +409,7 @@ VRAM is then checked against the engine and quant, with the same tiers as the RA
 | ✅ **7c. Portable document layer** (Mac comparison pending) | `Document` trait over `document_info`, `text_layer`, `render_gray`, `render_png_fit`. pdfium + `image`/`tiff` implementation, including multi-page TIFF and rotation | On the non-table fixtures, `regions.rs` makes the same column and band decisions as on the Mac (renders need not be byte-identical). Table pages differ by design: there are no Vision table masks |
 | ✅ **7d-1. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`, under the same key so Mac checkpoints stay valid. Setup downloads with `curl` and verifies the sha256 of: the pinned llama.cpp archive (plus cudart for CUDA), pdfium, and the GGUF weights pinned by HF revision. Minimal GPU probe to pick the archive, with an `OCR_LLAMA_VARIANT` override. `-c` per engine from `Limits` x slots | Start, stop, status and restart pass with the fake server on Linux. A real paddleocr-vl server starts on this machine (Vulkan or CPU) |
 | **7d-2. Engine layer off the Mac** | A non-Mac `side_pass` (bitmap regions, no blocks). `find_bates` runs on the model's output. Paddle's table-crop branch is off. Failed pages are flagged with no fallback text. The olmOCR footer-strip request (§9.5) | `paddleocr-vl`, `olmocr` and `dots-ocr` each scan `three_pages.pdf` on the Linux GPU machine, with Bates numbers in the page markers |
-| **7e. GPU gate** | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
+| ✅ **7e. GPU gate** (CUDA path untested until the 3090) | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
 | **7f. Windows** | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
 | **7g. Eval and docs** | Run the eval set (seeds 10–12) on Linux; compare with the Mac and vLLM numbers. README: Linux/Windows requirements, speeds, VRAM table | CER within an agreed margin of the Mac numbers per engine |
 
@@ -510,3 +510,20 @@ The options as they were put:
   - **The library path** is built from every folder in the install that holds `.so`/`.dll` files, so CUDA's runtime is found wherever its archive unpacks. It is `LD_LIBRARY_PATH` on Linux and `PATH` on Windows.
   - **Checkpoints and builds:** the checkpoint identity includes the build variant, so switching between Vulkan and CPU (or CUDA) re-OCRs pages instead of reusing them. On this machine Vulkan and CPU gave byte-identical text, but CUDA kernels can differ numerically, so the conservative choice stands.
   - **`ocr scan` already runs off the Mac.** On this machine with the CPU build, `legal.pdf` took 7.6 s with every value exact. The Vision side-pass fails quietly and the page goes as one full-page `OCR:` request. **Missing:** the Bates number is in the text but not in the page marker (`<!-- page 1 -->`). Fixing that is the core of 7d-2.
+
+- 2026-10-08, **7e built.** Decisions made in the implementation:
+  - **Probe order:**
+    1. `OCR_LLAMA_VARIANT`.
+    2. `nvidia-smi`: name, memory and CUDA version. 13 or more picks cuda13, below that cuda12.
+    3. If a Vulkan driver is installed, setup fetches the Vulkan build (31 MB) and runs `llama-server -v --list-devices`. ggml-vulkan's `uma:` flag separates integrated graphics (`uma: 1`) from GPUs with their own memory. The largest `uma: 0` device gets the Vulkan build.
+    4. Integrated-only, or nothing found, gets the CPU build.
+    
+    This works the same on Linux and Windows, with no sysfs or WMI. It also handles a stale `nvidia_icd.json` with no driver, the case found on this machine.
+  - **The warning** keeps your first line. The second line gives the measured speed instead of "minutes per page", which was wrong for PaddleOCR-VL (about 8 s a page on this 16-core CPU). It is shown by `setup` and on every `server start` with the CPU build.
+  - **olmocr and dots on the CPU build** are refused by setup without `--force` (your decision). On the CPU build, request timeouts are multiplied by 4, unless `OCR_REQUEST_TIMEOUT_SECS` is set.
+  - **Memory check:** need = GGUF model + mmproj + 1.5 GB (KV cache at `--ctx-size` plus compute buffers).
+    - Against GPU memory: OK up to 85%, warn up to 100%, refuse above without `--force`.
+    - Against RAM on the CPU build: the §8.1 RAM rule.
+    - An RTX 3090 fits every engine and quant, olmOCR bf16 (18.1 GB) included.
+  - **Status:** `server status` shows the build, the GPU setup found and, with NVIDIA, VRAM used. `[runtime] gpu` records the GPU.
+  - **Checked on this machine:** setup with no override found the integrated Radeon and chose CPU, with the warning. olmocr was refused. start/status/stop work. CUDA, discrete Vulkan and Windows are covered only by parser tests and the type-check.

@@ -36,6 +36,9 @@ pub struct Runtime {
     /// llama.cpp build: cuda12, cuda13, vulkan or cpu.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub llama_variant: Option<String>,
+    /// The GPU setup found for it, e.g. `NVIDIA GeForce RTX 3090 (24576 MiB)`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gpu: Option<String>,
 }
 
 impl Runtime {

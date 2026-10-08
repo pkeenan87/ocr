@@ -145,22 +145,71 @@ fn release_url(asset: &Asset) -> String {
     )
 }
 
-// ---------------------------------------------------------------- GPU probe
+// ---------------------------------------------------------------- GPU probe (PLAN §9.2)
 
-/// The CUDA version the NVIDIA driver supports (`nvidia-smi`'s "CUDA Version: 13.0"), if an
-/// NVIDIA GPU and driver are present.
-fn nvidia_cuda_major() -> Option<u32> {
-    let out = Command::new("nvidia-smi").output().ok()?;
-    if !out.status.success() {
+/// What kind of GPU the model runs on.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GpuKind {
+    Nvidia,
+    /// A Vulkan GPU with its own memory (`uma: 0`).
+    Discrete,
+    /// Integrated graphics sharing system memory (`uma: 1`): slower than the CPU build here.
+    Integrated,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Gpu {
+    pub name: String,
+    pub kind: GpuKind,
+    /// Total device memory, MiB.
+    pub memory_mib: u64,
+}
+
+/// The probe's choice: the build to install and the GPU it found (if any).
+#[derive(Debug, Clone, PartialEq)]
+pub struct Hardware {
+    pub variant: Variant,
+    pub gpu: Option<Gpu>,
+    pub reason: String,
+}
+
+/// NVIDIA GPUs (name, total MiB) and the CUDA version the driver supports, from `nvidia-smi`.
+fn nvidia() -> Option<(Vec<(String, u64)>, u32)> {
+    let header = Command::new("nvidia-smi").output().ok()?;
+    if !header.status.success() {
         return None;
     }
-    let text = String::from_utf8_lossy(&out.stdout);
+    let text = String::from_utf8_lossy(&header.stdout);
+    let cuda = parse_cuda_major(&text)?;
+    let query = Command::new("nvidia-smi")
+        .args([
+            "--query-gpu=name,memory.total",
+            "--format=csv,noheader,nounits",
+        ])
+        .output()
+        .ok()?;
+    let gpus = parse_nvidia_gpus(&String::from_utf8_lossy(&query.stdout));
+    (!gpus.is_empty()).then_some((gpus, cuda))
+}
+
+/// "CUDA Version: 13.0" in `nvidia-smi`'s header.
+fn parse_cuda_major(text: &str) -> Option<u32> {
     let rest = &text[text.find("CUDA Version:")? + "CUDA Version:".len()..];
     rest.trim_start()
         .split(|c: char| !c.is_ascii_digit())
         .next()?
         .parse()
         .ok()
+}
+
+/// `name, MiB` lines from `nvidia-smi --query-gpu=name,memory.total`.
+fn parse_nvidia_gpus(text: &str) -> Vec<(String, u64)> {
+    text.lines()
+        .filter_map(|l| {
+            let (name, mib) = l.rsplit_once(',')?;
+            Some((name.trim().to_string(), mib.trim().parse().ok()?))
+        })
+        .collect()
 }
 
 /// Whether a Vulkan driver is installed (an ICD manifest on Linux, the loader on Windows).
@@ -177,30 +226,200 @@ fn vulkan_present() -> bool {
         .any(|e| e.path().extension().is_some_and(|x| x == "json"))
 }
 
-/// Picks the llama.cpp build: `$OCR_LLAMA_VARIANT` if set, else CUDA for an NVIDIA driver
-/// (13.x when the driver supports CUDA 13), else Vulkan if a driver is installed, else CPU.
-/// Returns the variant and why it was chosen.
-pub fn detect_variant() -> Result<(Variant, String), CliError> {
+/// Vulkan devices from `llama-server -v --list-devices`: ggml-vulkan's
+/// `ggml_vulkan: 0 = NAME (driver) | uma: 1 | ...` line says whether memory is unified, and
+/// `  Vulkan0: NAME (16073 MiB, 15109 MiB free)` gives the memory.
+fn parse_vulkan_devices(log: &str) -> Vec<Gpu> {
+    let mut uma = std::collections::BTreeMap::new();
+    for line in log.lines() {
+        if let Some(rest) = line.split("ggml_vulkan: ").nth(1)
+            && let Some((index, desc)) = rest.split_once(" = ")
+            && let Ok(index) = index.trim().parse::<usize>()
+            && let Some(flag) = desc.split("uma: ").nth(1)
+        {
+            uma.insert(index, flag.starts_with('1'));
+        }
+    }
+    log.lines()
+        .filter_map(|line| {
+            let rest = line.trim().strip_prefix("Vulkan")?;
+            let (index, desc) = rest.split_once(": ")?;
+            let index: usize = index.parse().ok()?;
+            let open = desc.rfind(" (")?;
+            let mib = desc[open + 2..].split(" MiB").next()?.parse().ok()?;
+            let kind = if *uma.get(&index)? {
+                GpuKind::Integrated
+            } else {
+                GpuKind::Discrete
+            };
+            Some(Gpu {
+                name: desc[..open].to_string(),
+                kind,
+                memory_mib: mib,
+            })
+        })
+        .collect()
+}
+
+fn vulkan_devices(server: &Path) -> Vec<Gpu> {
+    let mut cmd = Command::new(server);
+    cmd.args(["-v", "--list-devices"]);
+    if let Some(dir) = server.parent() {
+        let var = if cfg!(windows) {
+            "PATH"
+        } else {
+            "LD_LIBRARY_PATH"
+        };
+        let mut dirs = vec![dir.to_path_buf()];
+        dirs.extend(std::env::var_os(var).iter().flat_map(std::env::split_paths));
+        if let Ok(joined) = std::env::join_paths(dirs) {
+            cmd.env(var, joined);
+        }
+    }
+    cmd.output()
+        .map(|o| {
+            let mut log = String::from_utf8_lossy(&o.stdout).into_owned();
+            log.push_str(&String::from_utf8_lossy(&o.stderr));
+            parse_vulkan_devices(&log)
+        })
+        .unwrap_or_default()
+}
+
+/// Picks the llama.cpp build (PLAN §9.2): `$OCR_LLAMA_VARIANT` if set; else CUDA for an NVIDIA
+/// driver (13.x when it supports CUDA 13); else, if Vulkan is installed, the Vulkan build is
+/// fetched and asked for its devices, and a GPU with its own memory gets it; else the CPU
+/// build. Integrated graphics get the CPU build too: on a Ryzen 9950X's Radeon it was 6x
+/// slower than the CPU (docs/spike.md).
+pub fn probe() -> Result<Hardware, CliError> {
+    let nv = nvidia();
+    let nv_gpu = nv.as_ref().and_then(|(gpus, _)| {
+        gpus.iter().max_by_key(|g| g.1).map(|(name, mib)| Gpu {
+            name: name.clone(),
+            kind: GpuKind::Nvidia,
+            memory_mib: *mib,
+        })
+    });
     if let Ok(v) = std::env::var("OCR_LLAMA_VARIANT") {
         let variant = Variant::parse(&v).ok_or_else(|| {
             CliError::Usage(format!(
                 "OCR_LLAMA_VARIANT must be one of cuda12, cuda13, vulkan, cpu (got {v})"
             ))
         })?;
-        return Ok((variant, "OCR_LLAMA_VARIANT".into()));
+        let gpu = if variant.uses_gpu() { nv_gpu } else { None };
+        return Ok(Hardware {
+            variant,
+            gpu,
+            reason: "OCR_LLAMA_VARIANT".into(),
+        });
     }
-    if let Some(major) = nvidia_cuda_major() {
-        let v = if major >= 13 {
+    if let (Some((_, cuda)), Some(gpu)) = (nv, nv_gpu) {
+        let variant = if cuda >= 13 {
             Variant::Cuda13
         } else {
             Variant::Cuda12
         };
-        return Ok((v, format!("NVIDIA driver supports CUDA {major}")));
+        return Ok(Hardware {
+            variant,
+            gpu: Some(gpu),
+            reason: format!("NVIDIA driver supports CUDA {cuda}"),
+        });
     }
     if vulkan_present() {
-        return Ok((Variant::Vulkan, "Vulkan driver found".into()));
+        let server = install(Variant::Vulkan)?;
+        let devices = vulkan_devices(&server);
+        if let Some(gpu) = devices
+            .iter()
+            .filter(|g| g.kind == GpuKind::Discrete)
+            .max_by_key(|g| g.memory_mib)
+        {
+            return Ok(Hardware {
+                variant: Variant::Vulkan,
+                gpu: Some(gpu.clone()),
+                reason: "Vulkan GPU with its own memory".into(),
+            });
+        }
+        if let Some(gpu) = devices.into_iter().next() {
+            return Ok(Hardware {
+                variant: Variant::Cpu,
+                reason: format!("only integrated graphics ({})", gpu.name),
+                gpu: None,
+            });
+        }
     }
-    Ok((Variant::Cpu, "no NVIDIA or Vulkan driver found".into()))
+    Ok(Hardware {
+        variant: Variant::Cpu,
+        gpu: None,
+        reason: "no NVIDIA or Vulkan GPU found".into(),
+    })
+}
+
+/// The no-GPU warning (PLAN §9.2), shown by setup and `server start` on the CPU build.
+pub fn cpu_warning() -> &'static str {
+    "⚠ No supported GPU found (NVIDIA with CUDA, or a discrete GPU with Vulkan).\n  \
+     ocr will run the model on the CPU, which is much slower: paddleocr-vl took about 8 s a \
+     page on a 16-core CPU, and olmocr and dots are several times slower than that."
+}
+
+/// Whether `engine` may be installed on the CPU build without `--force`: only PaddleOCR-VL
+/// (0.9B) is practical there (PLAN §9.5).
+pub fn cpu_ok(engine: Engine) -> bool {
+    engine == Engine::PaddleocrVl
+}
+
+/// Memory an engine needs to run: its GGUF files plus 1.5 GB for the KV cache (sized by
+/// `ctx_size`) and compute buffers. PaddleOCR-VL measured 2.1 GB resident on the CPU build for
+/// 1.8 GB of files (docs/spike.md).
+pub fn need_gb(gguf: &Gguf) -> f64 {
+    (gguf.model.size + gguf.mmproj.size) as f64 / 1e9 + 1.5
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Fit {
+    Ok,
+    /// Fits, but tightly: llama.cpp may leave some layers on the CPU.
+    Tight,
+    TooBig,
+}
+
+/// GPU memory: fits under 85% of it, tight up to 100%, too big above. System memory (CPU
+/// build), which the OS and other programs share: the RAM rule of PLAN §8.1, tight when 1.5x
+/// the need exceeds it, too big above 75% of it.
+pub fn fit(need_gb: f64, memory_gb: f64, dedicated: bool) -> Fit {
+    let (ok, max) = if dedicated {
+        (memory_gb * 0.85, memory_gb)
+    } else {
+        (memory_gb / 1.5, memory_gb * 0.75)
+    };
+    if need_gb <= ok {
+        Fit::Ok
+    } else if need_gb <= max {
+        Fit::Tight
+    } else {
+        Fit::TooBig
+    }
+}
+
+/// Installed system memory, GB (Linux `/proc/meminfo`, Windows via `sysinfo`).
+pub fn ram_gb() -> Option<f64> {
+    #[cfg(windows)]
+    {
+        let mut sys = sysinfo::System::new();
+        sys.refresh_memory();
+        Some(sys.total_memory() as f64 / 1e9)
+    }
+    #[cfg(not(windows))]
+    {
+        let text = std::fs::read_to_string("/proc/meminfo").ok()?;
+        let kib: f64 = text
+            .lines()
+            .find_map(|l| l.strip_prefix("MemTotal:"))?
+            .trim()
+            .trim_end_matches("kB")
+            .trim()
+            .parse()
+            .ok()?;
+        Some(kib * 1024.0 / 1e9)
+    }
 }
 
 // ---------------------------------------------------------------- install
@@ -403,6 +622,53 @@ pub fn server_args(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parses_nvidia_smi() {
+        let header = "| NVIDIA-SMI 580.82  Driver Version: 580.82  CUDA Version: 13.0 |";
+        assert_eq!(parse_cuda_major(header), Some(13));
+        assert_eq!(parse_cuda_major("CUDA Version: 12.8"), Some(12));
+        assert_eq!(
+            parse_nvidia_gpus("NVIDIA GeForce RTX 3090, 24576\n"),
+            [("NVIDIA GeForce RTX 3090".to_string(), 24576)]
+        );
+    }
+
+    #[test]
+    fn parses_vulkan_devices() {
+        // This machine (integrated Radeon), plus a made-up discrete card.
+        let log = "0.00.5 D ggml_vulkan: 0 = AMD Ryzen 9 9950X 16-Core Processor (RADV \
+                   RAPHAEL_MENDOCINO) (radv) | uma: 1 | fp16: dot2 | bf16: 0\n\
+                   0.00.5 D ggml_vulkan: 1 = AMD Radeon RX 7900 XTX (RADV NAVI31) (radv) | uma: 0 | fp16: 1\n\
+                   Available devices:\n  \
+                   Vulkan0: AMD Ryzen 9 9950X 16-Core Processor (RADV RAPHAEL_MENDOCINO) (16073 MiB, 15109 MiB free)\n  \
+                   Vulkan1: AMD Radeon RX 7900 XTX (RADV NAVI31) (24560 MiB, 24000 MiB free)\n";
+        let devices = parse_vulkan_devices(log);
+        assert_eq!(devices.len(), 2);
+        assert_eq!(devices[0].kind, GpuKind::Integrated);
+        assert_eq!(devices[0].memory_mib, 16073);
+        assert_eq!(devices[1].kind, GpuKind::Discrete);
+        assert_eq!(devices[1].name, "AMD Radeon RX 7900 XTX (RADV NAVI31)");
+        // Without the verbose ggml_vulkan lines the kind is unknown, so nothing is reported.
+        assert!(parse_vulkan_devices("  Vulkan0: X (1 MiB, 1 MiB free)").is_empty());
+    }
+
+    #[test]
+    fn memory_tiers() {
+        let paddle = engines::gguf(Engine::PaddleocrVl, None, crate::cli::Quant::Bf16).unwrap();
+        let olmocr = engines::gguf(Engine::Olmocr, None, crate::cli::Quant::Q8).unwrap();
+        let olmocr16 = engines::gguf(Engine::Olmocr, None, crate::cli::Quant::Bf16).unwrap();
+        // An RTX 3090 (24 GiB): everything fits, bf16 olmOCR included.
+        for g in [paddle, olmocr, olmocr16] {
+            assert_eq!(fit(need_gb(&g), 25.8, true), Fit::Ok);
+        }
+        // An 8 GB card: olmOCR 8-bit (about 10.9 GB) does not.
+        assert_eq!(fit(need_gb(&olmocr), 8.6, true), Fit::TooBig);
+        assert_eq!(fit(need_gb(&paddle), 8.6, true), Fit::Ok);
+        // CPU build with 16 GB of RAM: olmOCR is tight, Paddle fine.
+        assert_eq!(fit(need_gb(&olmocr), 16.0, false), Fit::Tight);
+        assert_eq!(fit(need_gb(&paddle), 16.0, false), Fit::Ok);
+    }
 
     #[test]
     fn variants_round_trip() {

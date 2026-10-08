@@ -410,7 +410,7 @@ VRAM is then checked against the engine and quant, with the same tiers as the RA
 | ✅ **7d-1. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`, under the same key so Mac checkpoints stay valid. Setup downloads with `curl` and verifies the sha256 of: the pinned llama.cpp archive (plus cudart for CUDA), pdfium, and the GGUF weights pinned by HF revision. Minimal GPU probe to pick the archive, with an `OCR_LLAMA_VARIANT` override. `-c` per engine from `Limits` x slots | Start, stop, status and restart pass with the fake server on Linux. A real paddleocr-vl server starts on this machine (Vulkan or CPU) |
 | ✅ **7d-2. Engine layer off the Mac** (dots and the GPU run pending) | A non-Mac `side_pass` (bitmap regions, no blocks). `find_bates` runs on the model's output. Paddle's table-crop branch is off. Failed pages are flagged with no fallback text. The olmOCR footer-strip request (§9.5) | `paddleocr-vl`, `olmocr` and `dots-ocr` each scan `three_pages.pdf` on the Linux GPU machine, with Bates numbers in the page markers |
 | ✅ **7e. GPU gate** (CUDA path untested until the 3090) | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
-| **7f. Windows** (code and CI written; CI not yet run) | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
+| **7f. Windows** (CI green on Linux and Windows; a real Windows + NVIDIA run is pending, no machine yet) | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
 | **7g. Eval and docs** | Run the eval set (seeds 10–12) on Linux; compare with the Mac and vLLM numbers. README: Linux/Windows requirements, speeds, VRAM table | CER within an agreed margin of the Mac numbers per engine |
 
 ### 9.5 Decisions
@@ -572,3 +572,11 @@ The options as they were put:
   - **Decision made for you:** off the Mac, PaddleOCR-VL reads the full page first and keeps the column crops for a loop or truncation, as olmOCR does. Without Vision's table masks, the column split cut tables into fragments.
   - **Your decision:** 4-up transcripts stay on full page until the Mac's PaddleOCR-VL transcript4up numbers on the same seeds are in. If the Mac is about as poor, this is a shared limit; if not, detect the 2x2 layout and crop the panels.
   - `eval/run.py` runs off the Mac now: no BSD `time` or `vmmap`; it reads `/proc` VmHWM, `nvidia-smi` and `ru_maxrss`.
+
+- 2026-10-08, **7f: CI green on Windows.** All 142 tests pass on `windows-latest` and `ubuntu-latest` (run 37832290941); the one ignored test needs a real model server. The first runs found:
+  - **A real bug.** A detached server inherited `ocr`'s stdout/stderr handles, so anything reading `ocr`'s output (the tests, a pipe to `tee`) waited for the server to exit. Fixed: `ocr` clears the inherit flag on its std handles before spawning the server.
+  - **Git's CRLF conversion** broke the verbatim-prompt tests. Fixed: `spike/upstream/** -text`.
+  - **One path test** compared paths with `/`.
+  - **Git Bash's GNU `tar`** in the CI step (not in `ocr`).
+  
+  **Still open:** a scan on a real Windows machine with an NVIDIA GPU. You have none yet.

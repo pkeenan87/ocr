@@ -3,3 +3,4 @@
 /spike/.venv
 /spike/out
 eval/out/
+.env

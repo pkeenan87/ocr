@@ -76,6 +76,7 @@ def main():
     ap.add_argument("--dpi", type=int)
     ap.add_argument("--extra-args", default="")
     ap.add_argument("--families", help="comma list (default: every family found in each set except production)")
+    ap.add_argument("--first-pages", type=int, help="scan only pages 1-N (--pages 1-N) and score against the first N ground-truth pages")
     ap.add_argument("--keep-furniture", action="store_true", help="score headers/footers/Bates too")
     ap.add_argument("--use-real-config", action="store_true")
     ap.add_argument("--ocr-bin", default=str(ROOT / "target/release/ocr"))
@@ -105,10 +106,14 @@ def main():
         for fam in fams:
             pdf, gtp, md = set_dir / f"{fam}.pdf", set_dir / f"{fam}.gt.json", out / tag / set_dir.name / f"{fam}.md"
             gt = json.load(open(gtp))
+            if a.first_pages:
+                gt["pages"] = gt["pages"][:a.first_pages]
             cmd = ["/usr/bin/time", "-l", a.ocr_bin, "scan", "--input-file", str(pdf), "--output-file", str(md),
                    "--model", a.engine, "--overwrite", "--quiet"]
             if a.dpi:
                 cmd += ["--dpi", str(a.dpi)]
+            if a.first_pages:
+                cmd += ["--pages", f"1-{a.first_pages}"]
             cmd += shlex.split(a.extra_args)
             busy = subprocess.run("pgrep -fl 'mlx_vlm|ocr scan|cargo'", shell=True, capture_output=True, text=True).stdout
             busy = [l for l in busy.splitlines() if "run.py" not in l and "pgrep" not in l and "mlx_vlm.server" not in l]

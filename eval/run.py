@@ -63,7 +63,8 @@ def aggregate(entries):
             "bates_accuracy": ratio("bates_ok", "bates_total"),
             "transcript_line_accuracy": ratio("tl_ok", "tl_total"),
             "pages_per_s": round(g("pages") / g("wall_s"), 3), "wall_s": round(g("wall_s"), 1),
-            "ocr_peak_mb": max(e["ocr_peak_mb"] or 0 for e in ok)}
+            "ocr_peak_mb": max(e["ocr_peak_mb"] or 0 for e in ok),
+            "crashes": sum(e.get("crashes", 0) for e in entries)}
 
 
 def main():
@@ -113,13 +114,20 @@ def main():
             busy = [l for l in busy.splitlines() if "run.py" not in l and "pgrep" not in l and "mlx_vlm.server" not in l]
             if busy and a.engine == "apple":
                 print("WARNING busy machine:", busy, file=sys.stderr)
-            t0 = time.perf_counter()
-            p = subprocess.run(cmd, env=env, capture_output=True, text=True)
-            wall = time.perf_counter() - t0
+            # Apple Vision occasionally segfaults inside TextRecognition (objc_retain, about 1%
+            # of runs, Phase 6 finding). A signal death is retried (max 3 attempts) and counted.
+            crashes = 0
+            while True:
+                t0 = time.perf_counter()
+                p = subprocess.run(cmd, env=env, capture_output=True, text=True)
+                wall = time.perf_counter() - t0
+                if p.returncode >= 0 or crashes >= 2:
+                    break
+                crashes += 1
             m = re.search(r"(\d+)\s+peak memory footprint", p.stderr)
             entry = {"wall_s": round(wall, 2), "pages": len(gt["pages"]), "exit_code": p.returncode,
                      "pages_per_s": round(len(gt["pages"]) / wall, 3),
-                     "ocr_peak_mb": round(int(m.group(1)) / 1048576, 1) if m else None}
+                     "ocr_peak_mb": round(int(m.group(1)) / 1048576, 1) if m else None, "crashes": crashes}
             if p.returncode not in (0, 1) or not md.exists():
                 entry["error"] = p.stderr.strip()[-500:]
             else:
@@ -142,14 +150,14 @@ def main():
 
     f = lambda v: "-" if v is None else f"{v * 100:.1f}%"
     print(f"\ngit {a.git_rev}  tag {tag}  dpi {a.dpi}  extra '{a.extra_args}'  keep_furniture {a.keep_furniture}")
-    print("| family | sets | pages | CER | token recall | Bates | transcript lines | pages/s | wall s | ocr peak MB |")
-    print("|---|---|---|---|---|---|---|---|---|---|")
+    print("| family | sets | pages | CER | token recall | Bates | transcript lines | pages/s | wall s | ocr peak MB | crashes (retried) |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|")
     for fam, g in result["last_summary"].items():
         if not g:
             print(f"| {fam} | ALL FAILED |"); continue
         print(f"| {fam} | {g['sets']}{' ('+str(g['failed'])+' failed)' if g['failed'] else ''} | {g['pages']} | {f(g['cer'])} | "
               f"{f(g['token_recall'])} | {f(g['bates_accuracy'])} | {f(g['transcript_line_accuracy'])} | "
-              f"{g['pages_per_s']} | {g['wall_s']} | {g['ocr_peak_mb']} |")
+              f"{g['pages_per_s']} | {g['wall_s']} | {g['ocr_peak_mb']} | {g['crashes']} |")
     if a.engine in MODEL_ENGINES:
         print(f"\nServer peak physical footprint: {result.get('server_peak_mb')} MB")
 

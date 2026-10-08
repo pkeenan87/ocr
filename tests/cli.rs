@@ -6,7 +6,11 @@ use tempfile::{TempDir, tempdir};
 
 const PDF: &[u8] = b"%PDF-1.7\n";
 const PNG: &[u8] = &[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0];
-const WARNING: &str = "ocr is not set up yet. Run `ocr server setup` first.";
+const WARNING: &str = if cfg!(target_os = "macos") {
+    "ocr is not set up yet. Run `ocr server setup` first."
+} else {
+    "ocr is not set up yet. Run `ocr server setup --model paddleocr-vl` first."
+};
 
 struct Env {
     config: TempDir,

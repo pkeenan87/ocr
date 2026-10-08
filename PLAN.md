@@ -452,5 +452,7 @@ The options as they were put:
   - **Tests:** the Vision-dependent test files are `#![cfg(target_os = "macos")]`. `tests/cli.rs` uses a fake paddleocr-vl install off the Mac; two of its tests are macOS-only. `tests/server.rs` passes on Linux unchanged.
   - **How it was checked:**
     - Linux: build, clippy, and 118 tests pass.
-    - `cargo check --all-targets` is clean for `x86_64-pc-windows-msvc` and `aarch64-apple-darwin`, run with the official rustc 1.98.1 because Arch's rustc rejects official std builds. The macOS check skips the Swift bridge build, so Mac tests still need a run on a Mac.
+    - `cargo check --all-targets` is clean for `x86_64-pc-windows-msvc` and `aarch64-apple-darwin`. **`scripts/xcheck.sh`** reproduces this: it caches an official rustc and the std builds in `~/.cache/ocr-xcheck`, because Arch's rustc rejects official std builds. `OCR_SKIP_BRIDGE=1` makes `build.rs` skip the Swift bridge for the macOS check, so Mac tests still need a run on a Mac.
+    - **Not run anywhere yet:** the `lock_server` change from `flock` to `File::lock`/`try_lock`. Its test is in `tests/resume.rs`, which is macOS-only. std uses `flock` on both macOS and Linux, so the behaviour should be the same.
+  - Off the Mac, the setup gate's hint reads `ocr server setup --model paddleocr-vl`.
   - A `char` range comparison in `markdown.rs` didn't type-check for Windows; it is fixed portably.

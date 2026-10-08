@@ -63,7 +63,11 @@ fn run(cli: Cli) -> Result<(), CliError> {
 fn gate(engine: Engine) -> Result<(), CliError> {
     match Config::load()? {
         None => {
-            let warning = "⚠ ocr is not set up yet. Run `ocr server setup` first.";
+            let warning = if cfg!(target_os = "macos") {
+                "⚠ ocr is not set up yet. Run `ocr server setup` first."
+            } else {
+                "⚠ ocr is not set up yet. Run `ocr server setup --model paddleocr-vl` first."
+            };
             if engine == Engine::Apple {
                 eprintln!("{warning}");
                 Ok(())

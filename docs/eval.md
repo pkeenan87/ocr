@@ -2,6 +2,10 @@
 
 Harness: `eval/` (see [eval/README.md](../eval/README.md)). Everything here is reproducible from the seeds.
 
+## Update 2026-10-08: Apple default is now 150 DPI (user decision)
+
+2026-10-08 (later): the user switched Apple to 150 DPI. Evidence: tune seeds 0-9 token recall 98.2% vs 97.4%, CER 3.10% vs 3.29%; accept seeds 10-39 token recall 98.4% vs 97.4% (fax 96.3% vs 88.5%); pleading CER 2.1% vs 1.7% and pleading Bates 87.6% vs 88.6% are slightly worse at 150. Goldens regenerated; critical tokens verified unchanged. The 300-page benchmark (`spike/out/bench300/big.pdf`, Vision limit 2, quiet machine) at 150 DPI: 85-87 s and worker peak memory footprint 178 MB (84-96 s and 192 MB at 200). The figures below marked 200 DPI were measured before the change. olmOCR's Apple side pass keeps 200.
+
 ## Read this first
 
 - **The fixtures are synthetic and template-based.** `eval/generate.py` builds pleadings, contracts, 4-up transcripts, fax scans, tables and a 500-page production from real-sentence templates with exact ground truth. They are not real filings. Real documents will be messier.

@@ -93,7 +93,7 @@ Usage (`ocr scan --help`):
     --no-front-matter          Omit the YAML header
     --use-text-layer <MODE>    auto, never, always (default: never)
     --legal-cleanup            Strip running headers and footers repeated across pages (opt-in)
-    --dpi <N>                  Render resolution, 72-600 (default 200; paddleocr-vl 150; dots-ocr 100)
+    --dpi <N>                  Render resolution, 72-600 (default 150; dots-ocr 100)
     --jobs <N>                 Total pages in flight across the whole run [alias: --parallel]
     --quiet / --verbose
     --dry-run                  Print the planned input -> output mapping and exit
@@ -121,7 +121,7 @@ Notes on the options:
 - **`--model-version`** pins an older model release; it applies to `paddleocr-vl` and `dots-ocr` only.
 - **`--jobs` / `--parallel`** is the total number of pages in flight. The default is the number of performance cores for Apple and 1 for model engines. A model server handles one request at a time (`--max-num-seqs 1`), so `--jobs` above 1 on a model engine only overlaps rendering, the Apple side-pass and assembly, and prints a note. Output is the same for `--jobs 1` and `--jobs 8`.
 - **`--use-text-layer`** defaults to `never` for every engine. The text-layer path has no layout handling: margin line numbers come out inline, tables are flattened and the Bates number is lost. Use `auto` or `always` only for clean born-digital PDFs where speed matters.
-- **`--dpi`** has a per-engine default tuned in Phase 6: Apple 200 (150 scored better on the synthetic fixtures, mostly on fax scans, but 200 is kept so the goldens stay stable; try `--dpi 150` on poor scans), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so.
+- **`--dpi`** has a per-engine default tuned in Phase 6: Apple 150 (switched from 200 on 2026-10-08 by user decision: 150 scored better on the synthetic fixtures, mostly on fax scans; pleading CER and Bates were slightly worse, so use `--dpi 200` on clean pleadings if that matters), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so.
 - **`--legal-cleanup`** is opt-in because it changes citable text. A line is stripped when it sits in the top or bottom three lines of at least half the pages (minimum 3 pages); lines of 20 or more characters match fuzzily. Transcript pages, table rows, Bates numbers and page markers are never stripped. It runs at assembly time, so toggling it never redoes OCR.
 - **`--no-currency-fix`**: Vision sometimes reads `$` as `S`. By default `S22,375.50` becomes `$22,375.50` on Apple pages (counted per page in the front matter). Model-engine output is not touched.
 - **`--file-type`**: pdf is `.pdf`; image is `.png .jpg .jpeg .tif .tiff .heic .bmp .gif .webp` (multi-page TIFF is a multi-page document). In directory mode it filters which files are picked up.
@@ -183,16 +183,16 @@ Every page starts with a marker, `<!-- page 42 -->`, or with the Bates number wh
 
 | Engine | Best for | Speed (measured) | 300-page estimate | Memory (server peak) |
 |---|---|---|---|---|
-| apple | General documents, contracts, pleadings, scans, bulk runs. Transcripts work (line numbers re-anchored) but dots-ocr is more accurate | about 3.1-3.6 pages/s with the Vision limit of 2 (16 pages/s before the limit; see below) | about 90 s (84-96 s) | `ocr` worker about 192 MB |
+| apple | General documents, contracts, pleadings, scans, bulk runs. Transcripts work (line numbers re-anchored) but dots-ocr is more accurate | about 3.4-3.5 pages/s at 150 DPI with the Vision limit of 2 (16 pages/s before the limit; see below) | about 85-87 s | `ocr` worker about 178 MB |
 | paddleocr-vl | The fastest model engine; text-heavy documents, tables | about 0.19 pages/s (5.3 s/page at 150 DPI) | about 27 minutes | 4.0 GB |
 | olmocr | Clean prose and tables in ordinary documents | about 0.06 pages/s (about 16 s/page, from the spike) | about 80 minutes | 11-11.5 GB (5.5 GB at 4bit, estimated) |
 | dots-ocr | **Deposition transcripts (most accurate)** and layout-heavy pages | about 0.086 pages/s (11.6 s/page at 100 DPI) | about 58 minutes | 6.8 GB |
 
-Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 84-96 s, about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes. Accuracy on the synthetic eval set (accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
+Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 85-87 s at the 150 DPI default (84-96 s at 200 DPI), about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes. Accuracy on the synthetic eval set (accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
 
 | Engine | Token recall | CER | Bates | Notes |
 |---|---|---|---|---|
-| apple | 97.4% (no transcripts) | 2.3% | 93/105 pages on pleadings | fax scans 88.5% at 200 DPI, 96.3% at 150 |
+| apple | 97.4% (no transcripts) | 2.3% | 93/105 pages on pleadings | fax scans 96.3% at the 150 DPI default (88.5% at 200) |
 | paddleocr-vl | 99.6% (no transcripts) | 3.3% (pleading CER inflated by margin numbers) | 100% | transcripts 81.5% recall; lines exact 25% before re-anchoring, 94.9% after |
 | dots-ocr | 100% (no transcripts and 99.8% on a 60-page production) | 0.6% | 100% | transcripts 100% recall; lines exact 68% before re-anchoring, 99.9% after |
 | olmocr | 99.3% (no transcripts) | 0.0% | 10 of 11 pages | transcripts 96.9% recall; lines exact 30% before re-anchoring, 99.9% after |

@@ -220,9 +220,9 @@ fn a_changed_dpi_discards_the_checkpoints() {
     let e = Apple::new();
     let partial = e.interrupted(&[]);
     assert!(pages_in(&partial) >= 2);
-    let (_, stderr) = e.run("doc.pdf", "out.md", &["--jobs", "1", "--dpi", "150"]);
+    let (_, stderr) = e.run("doc.pdf", "out.md", &["--jobs", "1", "--dpi", "200"]);
     assert!(
-        stderr.contains("discarding checkpoints") && stderr.contains("--dpi (200 -> 150)"),
+        stderr.contains("discarding checkpoints") && stderr.contains("--dpi (150 -> 200)"),
         "{stderr}"
     );
     assert_eq!(summary_count(&stderr, "resumed from checkpoint"), 0);

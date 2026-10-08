@@ -186,6 +186,7 @@ Every real crash happened within 0.81 s of launch. Log: `spike/out/cap4_crash_te
 - 2026-10-08: Phase 3 design: checkpoints hold full page results, markers/front matter/`--pages`/`--legal-cleanup` applied at assembly; failed pages retried on re-run; model requests capped at the server's `--max-num-seqs` (1) via `flock`.
 - 2026-10-08: `--legal-cleanup` rules (top/bottom 3 lines on at least 50% of pages, fuzzy match at 20+ characters).
 - 2026-10-08: per-engine DPI by pre-written rules: paddleocr-vl 150 (recall before CER), dots 100.
+- 2026-10-08: Apple default DPI 200 -> 150 by user decision; goldens regenerated.
 - 2026-10-08: transcript hints and docs now recommend dots-ocr; Paddle transcript crops render at no less than 200 DPI.
 - 2026-10-08: abandoned parallel stage-B model runs after finding that two servers on one GPU cut combined throughput below half of one.
 
@@ -225,7 +226,7 @@ Every real crash happened within 0.81 s of launch. Log: `spike/out/cap4_crash_te
 
 ## Needs your decision or check
 
-- **Apple DPI default:** 150 scored better than 200 (tune recall 98.2% vs 97.4%; accept fax 96.3% vs 88.5%). You decided to keep 200; the goldens are tied to it. Revisit if fax scans matter.
+- **Apple DPI default:** 150 scored better than 200 (tune recall 98.2% vs 97.4%; accept fax 96.3% vs 88.5%). You first decided to keep 200; on 2026-10-08 you switched Apple to 150 and the goldens were regenerated (critical tokens unchanged; 300 pages in 85-87 s).
 - **Apple on real filings:** 3.57 mean readability and 73% garbled pages. Decide whether Apple should stay the default, or whether to fix follow-up 1 first.
 - **Apple cost of the limit of 2:** confirmed twice, noted for completeness.
 - **Real-document evidence is thin for olmOCR:** it was never judged on real filings.

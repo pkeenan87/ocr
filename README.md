@@ -183,12 +183,12 @@ Every page starts with a marker, `<!-- page 42 -->`, or with the Bates number wh
 
 | Engine | Best for | Speed (measured) | 300-page estimate | Memory (server peak) |
 |---|---|---|---|---|
-| apple | General documents, contracts, pleadings, scans, bulk runs. Transcripts work (line numbers re-anchored) but dots-ocr is more accurate | about 16 pages/s on a 500-page production (before the Vision concurrency cap, see below) | well under a minute | `ocr` about 0.5 GB |
+| apple | General documents, contracts, pleadings, scans, bulk runs. Transcripts work (line numbers re-anchored) but dots-ocr is more accurate | about 3.1-3.6 pages/s with the Vision limit of 2 (16 pages/s before the limit; see below) | about 90 s (84-96 s) | `ocr` worker about 192 MB |
 | paddleocr-vl | The fastest model engine; text-heavy documents, tables | about 0.19 pages/s (5.3 s/page at 150 DPI) | about 27 minutes | 4.0 GB |
 | olmocr | Clean prose and tables in ordinary documents | about 0.06 pages/s (about 16 s/page, from the spike) | about 80 minutes | 11-11.5 GB (5.5 GB at 4bit, estimated) |
 | dots-ocr | **Deposition transcripts (most accurate)** and layout-heavy pages | about 0.086 pages/s (11.6 s/page at 100 DPI) | about 58 minutes | 6.8 GB |
 
-Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput after the Vision concurrency cap (2 at a time, a crash fix) is slower, about 1.5x; the re-measured figure is pending. Accuracy on the synthetic eval set (accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
+Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 84-96 s, about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes. Accuracy on the synthetic eval set (accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
 
 | Engine | Token recall | CER | Bates | Notes |
 |---|---|---|---|---|

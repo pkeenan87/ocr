@@ -16,7 +16,7 @@ Harness: `eval/` (see [eval/README.md](../eval/README.md)). Everything here is r
 | Apple tune and accept, Apple 500-page production, Paddle tune, dots tune | `570c3f8` (sources identical to `6b25df7`; no code change affected Phase 6 scoring) | the `results` files print `git 570c3f8` (tune) or `git c59c933` (HEAD at that moment; sources unchanged) |
 | Paddle, dots and olmOCR accept; Paddle 500-page production; dots and olmOCR 60-page slices; legal-cleanup; pleading table | **`2631d47`**, "per-engine default DPI" | The results files print `git 2631d47` or `git 3659093`: that is only `HEAD` when the run started. The binary (`target/release/ocr`, built 09:45 on 2026-10-08) was **not** rebuilt after `2631d47`. |
 
-- `3659093` merged the Apple Vision start-up crash fix (Vision capped at 2 concurrent requests, plus a supervisor that re-runs a crashed child). **No number below comes from a binary with the cap.** Apple accuracy is unaffected by the cap, which only limits concurrency. **Apple throughput under the cap is pending** (coordinator is re-measuring the 300-page benchmark): `TODO(apple-capped-pages/s)`.
+- `3659093` merged the Apple Vision start-up crash fix (Vision capped at 2 concurrent requests, plus a supervisor that re-runs a crashed child). **No number below comes from a binary with the cap.** Apple accuracy is unaffected by the cap, which only limits concurrency. Apple throughput under the cap was measured separately on a quiet machine (binary de8b78a+): about 3.1-3.6 pages/s, about 90 s per 300 pages (84-96 s), versus 29.0 s unlimited. Worker peak memory is 192 MB (`OCR_SCAN_CHILD=1 /usr/bin/time -l`).
 - Every earlier eval number (from before Phase 3) was discarded.
 - The user's real `~/.config/ocr` and `~/Library/Application Support/ocr` were never touched: all runs use `eval/out/state/{config,state}`. Weights came from the shared HF cache.
 
@@ -159,7 +159,7 @@ Quiet-machine figures where I have them; the source of each is stated.
 | Engine | Pages/s | Source | 300-page estimate | `ocr` peak | Server peak (vmmap) |
 |---|---|---|---|---|---|
 | apple (200 DPI, pre-cap) | 16.3 | seed 10 production, 500 pages, 30.8 s, quiet | about 20 s | 503 MB | - |
-| apple, with the Vision cap of 2 | `TODO(apple-capped-pages/s)` | pending | pending | pending | - |
+| apple, with the Vision cap of 2 | about 3.1-3.6 | `spike/out/bench300/big.pdf`, 300 pages, 84-96 s, quiet, binary de8b78a+ | about 90 s | 192 MB (worker) | - |
 | paddleocr-vl (150 DPI) | 0.19 | seed 10 production, 500 pages in 2668 s (5.3 s/page), started after 12:58, one crashed-and-retried attempt not counted. Not a perfectly quiet run: a benchmark agent started near the end | about 27 min | 314 MB | 4.0 GB (4096 MB) |
 | dots-ocr (100 DPI) | 0.086 | production pages 1-60, 698 s (11.6 s/page), 13:32-13:44, quiet | about 58 min | 314 MB | 6.8 GB (6758 MB; 7.6 GB in the 200 DPI tune) |
 | olmocr | 0.06 | docs/spike.md, quiet (about 16 s/page). My 60-page slice took 2466 s (41 s/page) and was **contended** | about 80 min | 379 MB | 11.2-11.5 GB (11162 MB accept, 11469 MB slice) |
@@ -220,7 +220,7 @@ Related Paddle pleading finding: its pleading CER (13.3% accept) is not from mis
 
 ## Known gaps
 
-- **Apple Vision segfaults (product bug).** `ocr` crashed with SIGSEGV intermittently in the old binary: first-pass Apple accept had 6 crashes in about 300 scans (contract seeds 18, 28, 34, 39 at 200 DPI; transcript4up seed 28 at 200; pleading seed 22 at 150), and later runs recorded retried crashes: Apple 150 accept pleading seed 38, Apple legal-cleanup contract (2), Paddle tune 150 transcript4up (2), Paddle accept pleading (1), Paddle cleanup (1), Paddle production (1). `eval/run.py` retried them (max 3 attempts) and counts them in the `crashes` column; the retried result is the one reported. The 9 crash reports in `~/Library/Logs/DiagnosticReports/ocr-*.ips` all show the same fault: `objc_retain` inside Apple's `TextRecognition`, an initialization race at process start (within 0.8 s of launch, 6-10 threads inside it). The fix is merged (`3659093`: Vision capped at 2 concurrent requests, plus a supervisor that re-runs a crashed child from its checkpoints) but not measured here.
+- **Apple Vision segfaults (product bug).** `ocr` crashed with SIGSEGV intermittently in the old binary: first-pass Apple accept had 6 crashes in about 300 scans (contract seeds 18, 28, 34, 39 at 200 DPI; transcript4up seed 28 at 200; pleading seed 22 at 150), and later runs recorded retried crashes: Apple 150 accept pleading seed 38, Apple legal-cleanup contract (2), Paddle tune 150 transcript4up (2), Paddle accept pleading (1), Paddle cleanup (1), Paddle production (1). `eval/run.py` retried them (max 3 attempts) and counts them in the `crashes` column; the retried result is the one reported. The 9 crash reports in `~/Library/Logs/DiagnosticReports/ocr-*.ips` all show the same fault: `objc_retain` inside Apple's `TextRecognition`, an initialization race at process start (within 0.8 s of launch, 6-10 threads inside it). The fix is merged (`3659093`: Vision capped at 2 concurrent requests, plus a supervisor that re-runs a crashed child from its checkpoints) and measured separately (docs/spike.md, "Vision limit: crash test at 4 and quiet benchmark").
 - Apple Bates accuracy on the accept pleading seeds is 88.6% (100% on the tune seeds); it also limits olmOCR's and dots' Bates when they rely on the side-pass. Not investigated.
 - Paddle transcripts and pleading tables (above). Transcript line numbers are re-anchored for every engine; pages under `line_numbers.unverified` still need checking.
 - Paddle pleading pages occasionally lose or repeat paragraphs without being flagged.
@@ -228,7 +228,6 @@ Related Paddle pleading finding: its pleading CER (13.3% accept) is not from mis
 - Apple flags transcript pages; its line numbers are re-anchored (97.4% exact on held-out seeds) but dots-ocr is more accurate.
 - Synthetic fixtures only; no handwriting; no multi-language; skew and noise are one recipe.
 - Full 500-page olmOCR and dots runs were not done. Their 300-page times are extrapolations from 60-page slices (dots) or the spike (olmOCR).
-- Apple throughput under the Vision cap is pending (placeholder above).
 - olmOCR timings in my runs were contended and are not reported as speeds.
 - Model-engine accept samples are small (3 seeds for dots and olmOCR).
 - The machine slept 00:31-07:45 on 2026-10-08, in the middle of the Paddle tune; tune timings are not used (only accuracy).

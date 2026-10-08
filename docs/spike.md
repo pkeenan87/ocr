@@ -333,3 +333,29 @@ Sheets unverified (fallback rate): 0 of 7 on seeds 40-42 for every engine. On se
 - Dots and olmOCR read the whole sheet; their regions may come out in any order (all orders of up to 4 regions are tried) and the output is always in `Page N` order.
 - `examples/anchor_replay.rs` re-anchors saved engine output offline; `eval/anchor_diag.py` classifies misses.
 
+
+## Vision limit: crash test at 4 and quiet benchmark (2026-10-08)
+
+**Quiet-machine 300-page benchmark** (`spike/out/bench300/big.pdf`, binary at de8b78a+, nothing else running):
+
+| Vision limit | Time | Notes |
+|---|---|---|
+| Unlimited (`OCR_VISION_MAX_CONCURRENT=64`) | 29.0 s | |
+| 3 | 57.3 s | |
+| 2 (default) | 84-96 s | about 3x slower than unlimited |
+
+- With the limit of 2, peak memory of the worker process is 192 MB, measured via `OCR_SCAN_CHILD=1 /usr/bin/time -l`. Under the supervisor, `/usr/bin/time` measures the parent, about 2 MB.
+- All 300 pages were correct: case number 200/200, two-column 100/100.
+- The earlier "about 1.36-1.5x" estimate was measured while dots was running on the GPU, and it understated the cost.
+
+**Crash test** (`spike/repro_init_race.sh`, bench mode, 12 threads, with dots running concurrently; log in `spike/out/cap4_crash_test.log`):
+
+| Limit | Launches | Crashes |
+|---|---|---|
+| Unlimited control | 100 | 6 (6%), codes 139 x5 and 133 |
+| 4 | 300 | 7 (2.3%) |
+| 2 | 100 + 100 earlier (bench and scan) | 0 |
+
+- Every real crash happened within 0.81 s of process launch.
+- The supervisor retries from checkpoints.
+- Decision (user, 2026-10-08, second time): keep the limit at 2 after seeing the corrected 3x cost.

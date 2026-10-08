@@ -1,6 +1,6 @@
 # `ocr` — Local Document OCR CLI for macOS
 
-Plan v3 · 2026-10-07. Incorporates the Fable review and the Phase 0 measurements in [docs/spike.md](docs/spike.md).
+Plan v3 · 2026-10-07 (updated 2026-10-08, Phase 6 done). Incorporates the Fable review and the Phase 0 measurements in [docs/spike.md](docs/spike.md).
 
 ## 1. Goal
 
@@ -191,7 +191,7 @@ olmOCR drops page headers, footers and Bates numbers, and the other engines labe
   - The 300-page benchmark took 28.9 s with a 407 MB peak.
   - The remaining misses are mostly Vision character errors on text in the right place.
 
-    **Transcripts are out of Apple's reach** (docs/spike.md, Phase 2b pre-check). Vision drops deposition line numbers and misreads `Q.`/`A.`, while PaddleOCR-VL got 100/100, even on an uncropped 4-up page. Decided 2026-10-07: Apple flags transcript pages and suggests `--model paddleocr-vl`. **Build order after 2b: server management (4) and the PaddleOCR-VL engine (5, Paddle first), then the long-doc pipeline (3).**
+    **Transcripts are out of Apple's reach** (docs/spike.md, Phase 2b pre-check). Vision drops deposition line numbers and misreads `Q.`/`A.`, while PaddleOCR-VL got 100/100, even on an uncropped 4-up page. Decided 2026-10-07: Apple flags transcript pages and suggested `--model paddleocr-vl`. **Superseded 2026-10-08:** line numbers are re-anchored to page geometry for every engine, the hints point to `line_numbers.unverified`, and dots-ocr is the recommended engine for transcripts (§8). **Build order after 2b: server management (4) and the PaddleOCR-VL engine (5, Paddle first), then the long-doc pipeline (3).**
 - **Pleading margin line numbers** (1–2 digits in the left 12% of the page) are always dropped from the body. This **changes the v2 decision**, which made it opt-in. Vision reads them only partially and they break up paragraphs. Recovering `page:line` citations properly needs per-line alignment, which is deferred.
 - **Apple ignores the text layer by default.** The text-layer path skips all layout handling: margin numbers came out inline, tables were flattened and the Bates number was lost. Feeding text-layer lines through the same layout code, using PDFKit `selectionsByLine()` bounds, is deferred; after that, `auto` can become the Apple default.
 - **Scale:** a 300-page mixed PDF took 29 s with a 470 MB peak footprint (vmmap) at `--jobs 8`. Every legal and two-column page was exact.
@@ -267,11 +267,11 @@ The YAML front-matter can be turned off with `--no-front-matter`.
 | ✅ **0b. Bridge spike** | Install rustup. `cargo new ocr`. Swift `OcrBridge` static lib. A **real `RecognizeDocumentsRequest`** on a test image, called from a Rust worker thread through FFI | Rust prints recognized paragraphs and tables from Vision. If Option A fails, Option B (helper binary) works |
 | ✅ **1. CLI + config + setup gate** | Full clap tree, config file, setup (Apple path), gate warnings, exit codes | `ocr scan` before setup: `apple` warns and continues, model engines exit 2. Argument conflicts are rejected |
 | ✅ **2. Apple engine end-to-end** | Swift bridge gains page count, per-page text layer, and render-page-*n*-then-Vision (white-filled `CGContext`, no temp PNGs, one document per worker, multi-page TIFF via ImageIO). Vision → Markdown, `--no-front-matter`, file writing. **Reading order:** keep Vision's paragraph order and insert tables/lists before the first paragraph below them; a global top-left sort interleaves columns | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files. On the clean fixture **and** on a degraded-scan fixture (image-only, skew, noise, JPEG), the case number and every dollar amount are exact through the production render path. This re-checks the 200 DPI default. Two-column text comes out column by column |
-| ✅ **2b. Robust region detection (contracts)** | Find column regions from the rendered bitmap. Projection profiles at about 100 DPI, with Vision's table boxes masked as solid ink, long thin rule lines removed, and tolerance for scan speckle and skew. Each column region is then cropped for Vision. Flag likely transcript pages (`transcript_pages` in the front matter, plus a stderr hint to use `--model paddleocr-vl`). `heldout.py` becomes seeded and randomized: tune on seeds 0–9 only | On seeds 10–39 (never looked at while tuning), clean and degraded: ≥ 95% of lines found and in order for column layouts. Byte-identical golden output for `legal.pdf`, `legal_scan.pdf` and `two_column.pdf`, apart from `generated:`. 4-up and transcript pages are flagged rather than solved. 300-page benchmark re-run against 29 s / 470 MB |
+| ✅ **2b. Robust region detection (contracts)** | Find column regions from the rendered bitmap. Projection profiles at about 100 DPI, with Vision's table boxes masked as solid ink, long thin rule lines removed, and tolerance for scan speckle and skew. Each column region is then cropped for Vision. Flag likely transcript pages (`transcript_pages` in the front matter, plus a stderr hint; the hint originally pointed to `--model paddleocr-vl` and now points to `line_numbers.unverified` and recommends dots-ocr, see §8). `heldout.py` becomes seeded and randomized: tune on seeds 0–9 only | On seeds 10–39 (never looked at while tuning), clean and degraded: ≥ 95% of lines found and in order for column layouts. Byte-identical golden output for `legal.pdf`, `legal_scan.pdf` and `two_column.pdf`, apart from `generated:`. 4-up and transcript pages are flagged rather than solved. 300-page benchmark re-run against 29 s / 470 MB |
 | ✅ **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings, except the `generated:` timestamp line |
 | ✅ **4. Server management** | `setup` (venv, weights, RAM check), start/stop/status/restart, readiness probe | Start, stop and status work for each engine. A killed server is detected and restarted |
 | ✅ **5. Model engines** | olmOCR (v4 prompt), dots (layout JSON → Markdown), PaddleOCR-VL (full page + table crops with OTSL→GFM), Apple side-pass, timeout/restart, truncation, loop detection, fallback | Each engine passes the eval set |
-| **6. Quality** | Eval harness, tuned defaults, opt-in legal cleanup | CER targets met on the eval set |
+| ✅ **6. Quality** | Eval harness, tuned defaults, opt-in legal cleanup | CER targets met on the eval set |
 
 **Deferred** (after v1):
 - re-rendering rotated pages;
@@ -312,7 +312,7 @@ Resolved 2026-10-07:
 
 - 2026-10-08, **olmOCR and dots built** (docs/spike.md, "olmOCR and dots engine spike"). Decisions made for you:
   - **Full page by default for both.** Both read `two_column` and `narrow_unequal` at 100% without cropping. Crops are used only as the first answer to a loop, or to a truncation for dots.
-  - **olmOCR scores 0/25 on full-size transcripts** because it drops the line-number margin, so it now prints the hint to use paddleocr-vl. dots scores 25/25 and 100/100.
+  - **olmOCR scores 0/25 on full-size transcripts** because it drops the line-number margin, so it printed a hint to use paddleocr-vl (superseded 2026-10-08: hints now point to `line_numbers.unverified` and recommend dots-ocr). dots scores 25/25 and 100/100.
   - **Limits per engine** (`engines::limits`):
 
     | Engine | max_tokens | Retry max_tokens | Timeout |
@@ -350,12 +350,55 @@ Resolved 2026-10-07:
   - **What didn't work:** a first-use gate or a warm-up call (crashes fell only from 4.7% to 3.3% of launches).
   - **What did:** a limit of 2 concurrent Vision requests gave 0 crashes in 100 launches, at about 1.5× slower parallel Apple throughput. You chose that limit.
   - **Safety net:** `ocr scan` also runs as a supervisor that re-runs a crashed child from its checkpoints, up to 3 retries.
-  - **Benchmark target:** the Phase 3 300-page figure (28.4 s) will be re-measured under the limit, and the new figure becomes the target.
+  - **Benchmark target:** the Phase 3 300-page figure (28.4 s) will be re-measured under the limit, and the new figure becomes the target. (Done, see the 2026-10-08 note below: 84-96 s.)
+
+- 2026-10-08, **Phase 6 done.** Eval harness, tuned defaults and opt-in legal cleanup are in; results are in [docs/eval.md](docs/eval.md) and the full day is summarised in [docs/overnight-report.md](docs/overnight-report.md).
+
+- 2026-10-08, **Apple Vision limit of 2 kept, with the corrected cost (your decision, second time).**
+  - **Quiet-machine 300-page benchmark** (`spike/out/bench300/big.pdf`, binary at de8b78a+, nothing else running): unlimited (`OCR_VISION_MAX_CONCURRENT=64`) 29.0 s; limit 3 57.3 s; limit 2 (default) 84-96 s, **about 3x slower than unlimited**. Worker peak memory at the limit of 2 is 192 MB (`OCR_SCAN_CHILD=1 /usr/bin/time -l`; under the supervisor `/usr/bin/time` sees only the parent, about 2 MB). All 300 pages correct: case number 200/200, two-column 100/100.
+  - The earlier "about 1.36-1.5x" estimate was measured while dots was using the GPU and understated the cost. You kept the limit of 2 after seeing the corrected figure.
+  - **Crash test** (`spike/repro_init_race.sh`, bench mode, 12 threads, dots running concurrently; `spike/out/cap4_crash_test.log`): unlimited control 6 crashes in 100 launches (6%; codes 139 x5 and 133); limit 4 7 in 300 (2.3%); limit 2 0 in 200 (100 bench + 100 earlier, bench and scan). Every real crash happened within 0.81 s of launch. The supervisor retries from checkpoints.
+
+- 2026-10-08, **Transcript line-number re-anchoring** (merged de8b78a, hints updated 40562ab). Lines exact on held-out seeds 40-42 (`transcript4up`), before to after: dots 68% to 99.9%, olmOCR 30% to 99.9%, Apple 38% to 97.4%, paddleocr-vl 25% to 94.9%. Paddle misses the 95% target because of its own text errors (dropped, repeated or invented lines). Seeds 10-12 were burned by retuning, so only the 40-42 numbers count. Hints now point to `line_numbers.unverified` and recommend dots-ocr for transcripts. Evidence for the Paddle renumbering finding: `spike/transcript_paddle_probe.py`.
+
+- 2026-10-08, **Per-engine default DPI** (commit 2631d47; docs/eval.md): apple 200, paddleocr-vl 150, dots-ocr 100; olmOCR is fixed at 1288 px. Apple stays at 200 by your decision although 150 scored better (tune recall 98.2% vs 97.4%; accept fax 96.3% vs 88.5%).
+
+- 2026-10-08, **Public set** (20 CourtListener filings, 230 pages; `eval/out/public/compare.txt`, judged by Jev, `eval/JUDGE.md`):
+
+  | Engine | Mean readability | Pages < 3.5 | Garbled |
+  |---|---|---|---|
+  | dots | 4.39 | 7% | 11% |
+  | paddleocr-vl | 4.16 | 19% | 28% |
+  | Apple | 3.57 | 48% | 73% |
+
+  - dots took about 2 h for 230 pages (partly contended); Apple about 2 min. One dots document exited 1 (`scan-removed-3`, flagged pages). The first 5 dots documents were first run at 200 DPI with an older binary; all 20 were redone at the 100 DPI default (old partial outputs: `eval/out/public/dots-ocr-200dpi-partial`).
+  - Paddle repeated text on 4% of real pages, below the loop detector's 6-repeat threshold.
+  - **Apple failure modes on real filings** (eval/PUBLIC_SET.md): column split firing on single-column pages and cutting lines mid-word; full-page transcripts not detected; pilcrow never read correctly (0/48) and section sign read as S or $ on typewriter scans; Garamond r/t confusion; pleading prose emitted as a table and repeated; `flagged_pages` stayed empty even where the judge rated 67% of deposition pages poor.
+
+- 2026-10-08, **Other Phase 6 findings** (docs/eval.md):
+  - **Paddle pleading-table bug:** a full-width table crop pulls margin line numbers into the table as an extra first column.
+  - **Apple Bates accuracy** on accept pleading pages is 88.6%; not investigated.
+  - **Concurrency lesson:** two model servers sharing the GPU dropped combined throughput below half of one server; parallel stage-B runs were abandoned.
+  - The Mac slept 00:31-07:45, pausing all work for about 7 h.
+  - Full 500-page olmOCR and dots runs were skipped (60-page slices only), olmOCR was not run on the public filings, and handwriting is not scored.
 
 Still open:
 
-1. **Hardware floor** (vmmap physical footprint): olmOCR 8-bit 10.9 GB, dots 7.3 GB, Paddle bf16 3.8 GB. Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM, and refuses 8-bit below 16 GB without `--force`.
+1. **Hardware floor** (vmmap physical footprint, Phase 6 re-measure): olmOCR 8-bit 11.2 GB, dots 6.8 GB (at 100 DPI), Paddle bf16 4.0 GB. Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM, and refuses 8-bit below 16 GB without `--force`.
 2. **Text-layer trust.** Bad hidden OCR layers from older scanners exist. The `auto` heuristics need tuning on real samples.
-3. **Throughput expectations.** A 300-page scan takes about 1 minute with Apple, 12 minutes with Paddle, 80 minutes with olmOCR and 2.9 hours with dots. The CLI shows an ETA, and the README should state these figures.
+3. **Throughput expectations (measured, quiet machine, Phase 6).** A 300-page scan takes about 1.5 minutes with Apple at the Vision limit of 2, about 27 minutes with Paddle, about 58 minutes with dots at 100 DPI and about 80 minutes with olmOCR. The CLI shows an ETA, and the README states these figures. (Earlier estimates of 1 min, 12 min and 2.9 h are superseded.)
 4. **Apple accuracy on legal numbers.** On one page, Vision's errors depended on DPI. Phase 2 tunes this on the eval set. A dual-DPI cross-check that flags pages where numbers disagree is a candidate.
 5. **Privacy.** Everything is local. Servers bind to localhost only. There is no telemetry. After setup, HF downloads are the only network access, and `HF_HUB_OFFLINE=1` is set at runtime.
+6. **Follow-ups from Phase 6**, in priority order:
+   1. Apple column split firing on single-column real filings.
+   2. Paddle pleading-table margin column.
+   3. Pilcrow and section-sign misreads (Apple).
+   4. Paddle repetition below the loop-detector threshold on real pages.
+   5. Apple Bates accuracy of 88.6% on pleadings.
+   6. Apple `flagged_pages` never set on bad pages; consider wiring the judge's signals or a heuristic.
+   7. Pleading margin-number inconsistency across engines.
+   8. olmOCR rotated-page Bates gap.
+   9. A text-layer path with layout handling.
+   10. The flaky `tests/resume.rs::model_directory_output_does_not_depend_on_jobs`, which failed once at server start.
+   11. Report the Vision crash to Apple via Feedback Assistant, with `spike/repro_init_race.sh`.
+7. **Pending on other machines:** the Linux vLLM reference ([docs/linux-reference-eval.md](docs/linux-reference-eval.md), branch `linux-reference-eval`) and the Azure Document Intelligence comparison ([docs/azure-eval.md](docs/azure-eval.md), branch `azure-eval`).

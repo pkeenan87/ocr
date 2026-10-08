@@ -270,7 +270,7 @@ The YAML front-matter can be turned off with `--no-front-matter`.
 | ✅ **2b. Robust region detection (contracts)** | Find column regions from the rendered bitmap. Projection profiles at about 100 DPI, with Vision's table boxes masked as solid ink, long thin rule lines removed, and tolerance for scan speckle and skew. Each column region is then cropped for Vision. Flag likely transcript pages (`transcript_pages` in the front matter, plus a stderr hint to use `--model paddleocr-vl`). `heldout.py` becomes seeded and randomized: tune on seeds 0–9 only | On seeds 10–39 (never looked at while tuning), clean and degraded: ≥ 95% of lines found and in order for column layouts. Byte-identical golden output for `legal.pdf`, `legal_scan.pdf` and `two_column.pdf`, apart from `generated:`. 4-up and transcript pages are flagged rather than solved. 300-page benchmark re-run against 29 s / 470 MB |
 | **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings, except the `generated:` timestamp line |
 | ✅ **4. Server management** | `setup` (venv, weights, RAM check), start/stop/status/restart, readiness probe | Start, stop and status work for each engine. A killed server is detected and restarted |
-| **5. Model engines** | olmOCR (v4 prompt), dots (layout JSON → Markdown), PaddleOCR-VL (full page + table crops with OTSL→GFM), Apple side-pass, timeout/restart, truncation, loop detection, fallback | Each engine passes the eval set |
+| ✅ **5. Model engines** | olmOCR (v4 prompt), dots (layout JSON → Markdown), PaddleOCR-VL (full page + table crops with OTSL→GFM), Apple side-pass, timeout/restart, truncation, loop detection, fallback | Each engine passes the eval set |
 | **6. Quality** | Eval harness, tuned defaults, opt-in legal cleanup | CER targets met on the eval set |
 
 **Deferred** (after v1):
@@ -309,6 +309,23 @@ Resolved 2026-10-07:
   - Every timeout restarts the server, because the server can't cancel a request.
   - Table crops are full-width bands. On pleading paper the margin numbers therefore land inside `Table Recognition:` crops. Phase 6 checks this on the pleading eval family.
 - 2026-10-07, **Phase 3 must fix:** with `--jobs >1` on a model engine, requests queue inside a server started with `--max-num-seqs 1`, and the client's timeout clock includes that queue wait. olmOCR (about 16 s/page) or dots (about 34 s/page) at `--jobs 8` would time out; each timeout restarts the server and kills all in-flight requests, so the failures cascade. Fix: cap in-flight model requests at the server's `--max-num-seqs`, which is in `server.json` argv, or start the timeout clock only when the request reaches the head of the queue.
+
+- 2026-10-08, **olmOCR and dots built** (docs/spike.md, "olmOCR and dots engine spike"). Decisions made for you:
+  - **Full page by default for both.** Both read `two_column` and `narrow_unequal` at 100% without cropping. Crops are used only as the first answer to a loop, or to a truncation for dots.
+  - **olmOCR scores 0/25 on full-size transcripts** because it drops the line-number margin, so it now prints the hint to use paddleocr-vl. dots scores 25/25 and 100/100.
+  - **Limits per engine** (`engines::limits`):
+
+    | Engine | max_tokens | Retry max_tokens | Timeout |
+    |---|---|---|---|
+    | olmOCR | 4096 | 8000 (upstream's limit) | 220 s |
+    | dots | 8192 | — | 190 s |
+    | Paddle | 4096 | 8192 | 45 s |
+
+  - **dots never gets `repetition_penalty`**, because it corrupts the JSON. Its ladder is crops, then `prompt_ocr`, then the Apple fallback. A page answered by `prompt_ocr` is not flagged.
+  - **Persistent truncation falls back to Apple and is flagged**, rather than keeping the truncated text.
+  - **olmOCR ignores `--dpi`**, because images are always 1288 px on the longest side, and prints a note saying so.
+  - **Known limit:** on a sideways page the Apple side-pass sees nothing useful. With olmOCR, the Bates number is then missing from that page's marker. A follow-up could run the side-pass on the turned image.
+  - **Measured on an idle machine:** olmOCR takes about 16 s/page; dots about 35 s/page at 200 DPI, or 9 s/page at 100 DPI, where all tokens on `legal_scan` were still exact. Phase 6 tunes the dots DPI.
 
 Still open:
 

@@ -30,7 +30,9 @@ pub struct Progress {
 impl Progress {
     /// `per_file`: also draw a bar per file in progress (directory mode).
     pub fn new(quiet: bool, per_file: bool) -> Self {
-        if quiet || !std::io::stderr().is_terminal() {
+        let target = ProgressDrawTarget::stderr_with_hz(10);
+        // Also hidden for TERM=dumb, where `println` would swallow the lines.
+        if quiet || !std::io::stderr().is_terminal() || target.is_hidden() {
             return Self {
                 overall: ProgressBar::hidden(),
                 files: Mutex::default(),
@@ -38,7 +40,7 @@ impl Progress {
                 per_file: false,
             };
         }
-        let multi = MultiProgress::with_draw_target(ProgressDrawTarget::stderr_with_hz(10));
+        let multi = MultiProgress::with_draw_target(target);
         let overall = multi.add(ProgressBar::new(0));
         overall.set_style(
             ProgressStyle::with_template(

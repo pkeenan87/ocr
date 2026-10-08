@@ -245,3 +245,26 @@ Prompt `build_no_anchoring_v4_yaml_prompt()`, text part first, max_tokens 8000 a
 2. Invalid or cut-off JSON that ended with `stop`: retry once; if it stays invalid, the complete elements of the better reply are kept and the page is flagged. With no complete element it counts as a loop.
 3. A loop (detector on the extracted text fields, tables cut out) or `finish_reason: length`: the crop plan if the page has one, then `prompt_ocr` as plain text on the page, then Apple Vision with a flag. A reply cut off by `length` is not kept as partial elements: crops and `prompt_ocr` are tried first and Apple's complete page beats a partial one.
 4. `repetition_penalty` is never sent. A page answered by `prompt_ocr` is not flagged (it is a normal answer, but without headers, footers or structure; Bates still comes from the side-pass).
+
+## Phase 3: long-document pipeline (2026-10-08)
+
+### 300-page benchmark (apple defaults, nothing else running)
+
+`spike/out/bench300/big.pdf` is `three_pages.pdf` x 100, run with `/usr/bin/time -l`:
+
+| Run | Wall time | Peak memory footprint |
+|---|---|---|
+| Baseline (Phase 2b, vmmap) | 29 s | 470 MB |
+| Phase 3, clean run (all pages checkpointed, then assembled from the records) | 28.4 s (10.6 pages/s) | 487 MB (max RSS 737 MB) |
+| Phase 3, SIGKILL at 151 checkpoints, then re-run | 14.3 s (149 pages OCR'd, 151 resumed) | 491 MB |
+
+Checkpointing and assembly from disk cost nothing measurable in time and about 17 MB of footprint.
+
+### Live `--jobs` check (real servers, temp state dir, `three_pages.pdf`, 3 pages)
+
+| Engine | `--jobs 1` | `--jobs 8` | Output |
+|---|---|---|---|
+| olmocr (8-bit) | 47.0 s | 46.9 s | identical apart from `generated:` |
+| dots-ocr (dots.mocr 8-bit) | 108.0 s | 108.0 s | identical apart from `generated:` |
+
+For model engines this tests side-pass and assembly concurrency, not model batching: requests are capped at the server's `--max-num-seqs` (1), so `--jobs 8` makes the same one-at-a-time requests as `--jobs 1` and prints the cap note.

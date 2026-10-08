@@ -207,9 +207,21 @@ impl SidePass {
 }
 
 /// Vision pass over the full page, then region detection on a grayscale render. A failed
-/// render only costs the region handling, never the page.
+/// render only costs the region handling, never the page. Off macOS there is no Vision: the
+/// regions come from the bitmap alone, without table masks, and there are no blocks (so no
+/// table crops, Bates numbers or transcript detection from them; PLAN §9.5).
 pub fn side_pass(path: &Path, index: usize, dpi: u32, options: &Options) -> Result<SidePass> {
+    #[cfg(target_os = "macos")]
     let page = vision::recognize_page(path, index, dpi, options)?;
+    #[cfg(not(target_os = "macos"))]
+    let page = {
+        let _ = (dpi, options);
+        vision::Page {
+            width: 0,
+            height: 0,
+            blocks: Vec::new(),
+        }
+    };
     let tables: Vec<[f64; 4]> = page
         .blocks
         .iter()

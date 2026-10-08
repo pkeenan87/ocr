@@ -527,3 +527,13 @@ The options as they were put:
     - An RTX 3090 fits every engine and quant, olmOCR bf16 (18.1 GB) included.
   - **Status:** `server status` shows the build, the GPU setup found and, with NVIDIA, VRAM used. `[runtime] gpu` records the GPU.
   - **Checked on this machine:** setup with no override found the integrated Radeon and chose CPU, with the warning. olmocr was refused. start/status/stop work. CUDA, discrete Vulkan and Windows are covered only by parser tests and the type-check.
+
+- 2026-10-08, **7d-2, PaddleOCR-VL part built** (the olmOCR footer strip is pending its test). Decisions made in the implementation:
+  - **Side-pass off the Mac:** `pipeline::side_pass` returns bitmap regions with no Vision blocks. `choose_plan` therefore still splits multi-column pages into column and band crops, and with no blocks, the table-crop branch switches itself off. No transcript detection.
+  - **Bates numbers:** taken from the last 4 non-empty lines of the model's text. The bottom-most, right-most match of the existing Bates regex wins. Off the Mac only; the Mac keeps Vision's.
+  - **Failed pages off the Mac** have no Apple text to fall back to, so they are recorded as failed and a re-run retries them.
+  - **Checked on this machine** (CPU build, PaddleOCR-VL 1.6):
+    - The page markers of `three_pages.pdf` and `two_column.pdf` match the Mac goldens exactly, Bates included.
+    - `two_column` and `narrow_unequal_seed2` are split by column: narrow_unequal has 42/42 lines in order. On the Mac, Paddle full-page collapsed to 10–28 lines on this layout.
+    - `legal.pdf` (with its table) is not split.
+    - About 4–8 s a page.

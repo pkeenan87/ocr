@@ -848,14 +848,29 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
     let started = Instant::now();
     let result = match ctx.spec.run(ctx, path, &prep, s) {
         Ok(out) => PageResult {
+            // Off macOS there is no Vision side-pass: the Bates number comes from the model's
+            // own text, which keeps the footer (PLAN §9.5).
+            bates: prep.bates.clone().or_else(|| {
+                cfg!(not(target_os = "macos"))
+                    .then(|| markdown::find_bates_in_text(&out.body))
+                    .flatten()
+            }),
             body: out.body,
-            bates: prep.bates.clone(),
             column_split: prep.column_split,
             transcript: prep.transcript,
             table: out.table,
             flagged: out.flagged,
             ..blank(number)
         },
+        Err(Fail::Failed(reason)) if cfg!(not(target_os = "macos")) => {
+            // No Apple Vision text to fall back to: the page fails, and a re-run retries it.
+            progress::line(format!("warning: page {number}: {reason}"));
+            PageResult {
+                transcript: prep.transcript,
+                error: Some(reason),
+                ..blank(number)
+            }
+        }
         Err(Fail::Failed(reason)) => {
             progress::line(format!(
                 "warning: page {number}: {reason}; using the Apple Vision text"

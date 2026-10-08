@@ -52,8 +52,8 @@ options:
   --no-front-matter                            (omit the YAML header, §6)
   --no-currency-fix                            (keep Vision's raw `S1,234.56`; default fixes it to `$1,234.56`)
   --dry-run                                    (print the input → output mapping and exit)
-  --use-text-layer auto|never|always           (born-digital PDFs: use embedded text instead of OCR)
-  --legal-cleanup                              (opt-in, off by default: strip pleading line numbers / running headers)
+  --use-text-layer auto|never|always           (embedded PDF text instead of OCR; default never for apple, auto for model engines)
+  --legal-cleanup                              (opt-in: strip running headers/footers; margin line numbers are always dropped, §4.4)
   --dpi <n>                                    (override render resolution)
   --jobs <n> | --parallel <n>                  (total pages in flight across the whole run; default per engine, see §5.1)
   --quiet | --verbose
@@ -165,8 +165,22 @@ olmOCR drops page headers, footers and Bates numbers, and the other engines labe
   - Vision merges lines from different columns that share a baseline, which garbles both columns.
   - When `find_columns` detects at least 2 columns, each column is cropped and re-recognized on its own. The crop runs to the gutter midpoint, with 10% vertical padding.
   - This costs about 2× Vision time on those pages only. Pages are listed in `column_split_pages`.
-  - The thresholds were tuned on the fixtures only, so validate them on real contracts and 4-up transcripts.
-- **Pleading margin line numbers** (1–2 digits in the left 12% of the page) are dropped from the body by default. Vision reads them only partially, and they break up the paragraphs.
+  - The thresholds were tuned on the fixtures only.
+
+  **Held-out check** (`spike/heldout.py`, scored by `spike/score_heldout.py`). These are layouts the thresholds were never tuned on:
+
+  | Page | Lines found | Order | Column split |
+  |---|---|---|---|
+  | narrow, unequal columns (62/34, 12 pt gutter) | 21/40 | ok | missed |
+  | columns in lower half only | 24/30 | ok | missed |
+  | indented block quote | 17/18 | ok | none (correct) |
+  | right-aligned signature block | 18/18 | ok | split (harmless false positive) |
+  | 4-up deposition transcript | 24/100 | mostly | missed. 300 and 400 DPI don't help |
+
+  The block-based column detector is not robust. **Phase 2b** replaces it.
+- **Pleading margin line numbers** (1–2 digits in the left 12% of the page) are always dropped from the body. This **changes the v2 decision**, which made it opt-in. Vision reads them only partially and they break up paragraphs. Recovering `page:line` citations properly needs per-line alignment, which is deferred.
+- **Apple ignores the text layer by default.** The text-layer path skips all layout handling: margin numbers came out inline, tables were flattened and the Bates number was lost. Feeding text-layer lines through the same layout code, using PDFKit `selectionsByLine()` bounds, is deferred; after that, `auto` can become the Apple default.
+- **Scale:** a 300-page mixed PDF took 29 s with a 470 MB peak footprint (vmmap) at `--jobs 8`. Every legal and two-column page was exact.
 - **Currency fix.** On Vision pages, `S` before a money pattern (`\bS(\d{1,3}(,\d{3})+|\d+)\.\d{2}\b`) becomes `$`. Fixes are counted per page in `currency_fixes`.
 
 ## 5. Making it robust for hundreds of pages
@@ -239,7 +253,8 @@ The YAML front-matter can be turned off with `--no-front-matter`.
 | ✅ **0b. Bridge spike** | Install rustup. `cargo new ocr`. Swift `OcrBridge` static lib. A **real `RecognizeDocumentsRequest`** on a test image, called from a Rust worker thread through FFI | Rust prints recognized paragraphs and tables from Vision. If Option A fails, Option B (helper binary) works |
 | ✅ **1. CLI + config + setup gate** | Full clap tree, config file, setup (Apple path), gate warnings, exit codes | `ocr scan` before setup: `apple` warns and continues, model engines exit 2. Argument conflicts are rejected |
 | ✅ **2. Apple engine end-to-end** | Swift bridge gains page count, per-page text layer, and render-page-*n*-then-Vision (white-filled `CGContext`, no temp PNGs, one document per worker, multi-page TIFF via ImageIO). Vision → Markdown, `--no-front-matter`, file writing. **Reading order:** keep Vision's paragraph order and insert tables/lists before the first paragraph below them; a global top-left sort interleaves columns | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files. On the clean fixture **and** on a degraded-scan fixture (image-only, skew, noise, JPEG), the case number and every dollar amount are exact through the production render path. This re-checks the 200 DPI default. Two-column text comes out column by column |
-| **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings |
+| **2b. Robust region detection** | Find columns, 4-up grids and lower-half columns from the rendered bitmap: whitespace/ink projection profiles that tolerate thin rule lines, instead of Vision's merged blocks. Optionally compare Vision line confidence between the full page and candidate crops | The held-out set reaches ≥ 95% of lines, in order, including the 4-up transcript. The Phase 2 fixtures do not regress |
+| **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings, except the `generated:` timestamp line |
 | **4. Server management** | `setup` (venv, weights, RAM check), start/stop/status/restart, readiness probe | Start, stop and status work for each engine. A killed server is detected and restarted |
 | **5. Model engines** | olmOCR (v4 prompt), dots (layout JSON → Markdown), PaddleOCR-VL (full page + table crops with OTSL→GFM), Apple side-pass, timeout/restart, truncation, loop detection, fallback | Each engine passes the eval set |
 | **6. Quality** | Eval harness, tuned defaults, opt-in legal cleanup | CER targets met on the eval set |

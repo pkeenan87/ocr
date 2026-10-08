@@ -118,7 +118,7 @@ The checks are exact matches for the case number, all four dollar amounts and th
    - This replaces cropping every block.
 3. **Bates and footers.** olmOCR drops them. For every model engine, a fast Apple Vision pass (about 0.15 s per page in parallel) extracts header and footer lines and Bates numbers for page markers. The model output is still used for the body.
 4. **Restart-on-timeout** stays (§5.4), with the dots measurement above as justification.
-5. **Determinism criterion.** At default settings, output is byte-identical across runs for every engine.
+5. **Determinism criterion.** At default settings, output is byte-identical across runs for every engine, except the `generated:` front-matter timestamp.
 6. **RAM** (vmmap). olmOCR 8-bit 10.9 GB, dots 7.3 GB, Paddle 3.8 GB.
    - Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM.
    - It refuses 8-bit below 16 GB unless `--force` is given.

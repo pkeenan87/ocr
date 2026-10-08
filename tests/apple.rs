@@ -181,9 +181,12 @@ fn jobs_do_not_change_output() {
 }
 
 #[test]
-fn auto_uses_the_text_layer_on_born_digital_pdfs() {
+fn apple_defaults_to_vision_and_auto_uses_the_text_layer() {
     let e = Env::new(&["legal.pdf"]);
     let (md, _) = e.scan("legal.pdf", &[]);
+    assert!(md.contains("text_layer_pages: []"), "{md}");
+    assert!(md.contains("Bates SMITH000123"), "{md}");
+    let (md, _) = e.scan("legal.pdf", &["--overwrite", "--use-text-layer", "auto"]);
     assert!(md.contains("text_layer_pages: [1]"), "{md}");
     assert!(md.contains("3:26-cv-04417"), "{md}");
 }

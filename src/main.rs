@@ -168,7 +168,7 @@ fn run_apple(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
         dpi: args.effective_dpi(),
         jobs: args.effective_jobs(),
         pages: args.pages.clone(),
-        text_layer: args.use_text_layer,
+        text_layer: args.effective_text_layer(),
         page_markers: args.page_markers(),
         front_matter: !args.no_front_matter,
         currency_fix: !args.no_currency_fix,

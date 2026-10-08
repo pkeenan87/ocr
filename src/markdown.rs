@@ -17,7 +17,7 @@ const MAX_MARGIN_NUMBER: u32 = 28;
 static BATES: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\b[A-Z]{2,}[-_ ]?\d{5,}\b").unwrap());
 
 static CURRENCY: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\bS(\d{1,3}(?:,\d{3})+|\d+)\.\d{2}\b").unwrap());
+    LazyLock::new(|| Regex::new(r"\bS(\d{1,3}(?:,\d{3})+|\d{4,})\.\d{2}\b").unwrap());
 
 /// Vision reads `$` as `S` on noisy scans. Rewrites money-shaped tokens (`S22,375.50`) only, and
 /// returns the new text with the number of replacements.
@@ -379,6 +379,9 @@ mod tests {
             "AS22.50",
             "$22.50",
             "S22.5",
+            "S2.10",
+            "S1.01",
+            "S123.45",
         ] {
             assert_eq!(fix_currency(keep), (keep.to_string(), 0), "{keep}");
         }

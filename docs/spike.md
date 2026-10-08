@@ -319,3 +319,24 @@ For model engines this tests side-pass and assembly concurrency, not model batch
 - **Archive layout:** everything is flat in `llama-b11510/`. `llama-server` is a small launcher with its `.so` files (symlink chains included) beside it; `ocr` adds that directory to `LD_LIBRARY_PATH`.
 - **Through `ocr` itself:** `ocr server setup --model paddleocr-vl` downloads, verifies and unpacks llama.cpp, pdfium and the GGUFs. `server start` is then ready in 3.4 s (Vulkan) or 0.8 s (CPU), and `status` and `stop` work.
 - **Not tested:** `repetition_penalty` (the loop retry), olmOCR, dots, CUDA.
+
+## olmOCR footer strip and Bates corners (2026-10-08, Linux CPU build, PLAN §9.5)
+
+**Setup.** olmOCR 2, Q4_K_M GGUF, llama.cpp b11510 CPU build. Prompt: the upstream v4 prompt, text first. Images: 1288 px on the longest side.
+
+**Footer strip: fails.** The bottom 10% or 15% of `legal.pdf` and `legal_scan.pdf` came back as front matter and nothing else (31 tokens), even though the strip clearly shows `COMPLAINT - Page 1 of 14` and `SMITH000123`. The front matter itself was valid (`is_rotation_valid: True`). A plain "transcribe everything" prompt returned the footer line but still dropped the Bates number. olmOCR treats the strip as page furniture.
+
+**Bottom-right corner alone (`0.7, 0.9, 0.3, 0.1`): works.** It returned `SMITH000123` with the normal prompt.
+
+**Implemented (your decision):** off the Mac, when the page text has no Bates number, olmOCR gets the bottom-right corner and then the bottom-left corner (`0.0, 0.9, 0.3, 0.1`). Each request is capped at 256 tokens, and the first Bates match wins. Results through `ocr scan`:
+
+| Test | Bates in marker |
+|---|---|
+| `legal.pdf` (bottom right) | `SMITH000123` |
+| `legal_scan.pdf` (scan, bottom right) | `SMITH000123` |
+| `three_pages.pdf` (page 2 has none) | 1 and 3: `SMITH000123`; 2: none. Matches the Mac golden |
+| `legal.pdf` restamped bottom left `DEF000456` | `DEF000456` |
+| `legal.pdf` restamped bottom centre `ABC000789`, under the footer | **none**. A known limit: a centred Bates is not covered |
+| eval `production` seed 10, pages 1–4 (bottom right, Helvetica) | `ACME0000001`–`ACME0000004`, all correct |
+
+**Cost:** about 52 s a page against about 40 s without the corners, on the CPU build. On a GPU each corner should take about a second. A page with no Bates number pays for both corners.

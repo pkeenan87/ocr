@@ -234,6 +234,7 @@ fn layout_requests(ctx: &Ctx, reqs: &[Planned]) -> Result<Output, Fail> {
         body: String::new(),
         table: false,
         flagged: false,
+        bates: None,
     };
     let mut parts = Vec::new();
     for req in reqs {
@@ -321,6 +322,7 @@ fn plain_text(ctx: &Ctx, page: &Planned) -> Result<Output, Fail> {
             body,
             table: converted > 0,
             flagged: false,
+            bates: None,
         });
     }
 }

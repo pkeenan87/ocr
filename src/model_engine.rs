@@ -737,6 +737,8 @@ pub struct Output {
     pub(crate) body: String,
     pub(crate) table: bool,
     pub(crate) flagged: bool,
+    /// A Bates number the engine read itself (olmOCR's corner requests off macOS).
+    pub(crate) bates: Option<String>,
 }
 
 fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fail> {
@@ -744,6 +746,7 @@ fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fa
         body: String::new(),
         table: false,
         flagged: false,
+        bates: None,
     };
     let mut parts = Vec::new();
     for req in reqs {
@@ -773,6 +776,13 @@ pub struct Prepared {
     pub(crate) planned: Result<Vec<Planned>, String>,
     /// Region crops to try if the single full-page request loops or is cut off.
     pub(crate) alt: Option<Vec<Spec>>,
+}
+
+impl Prepared {
+    /// The Bates number the Apple side-pass found (macOS only).
+    pub(crate) fn bates(&self) -> Option<&str> {
+        self.bates.as_deref()
+    }
 }
 
 /// Renders the images of `specs` the way `spec` wants them (`--dpi`, or an exact longest side).
@@ -850,7 +860,7 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
         Ok(out) => PageResult {
             // Off macOS there is no Vision side-pass: the Bates number comes from the model's
             // own text, which keeps the footer (PLAN §9.5).
-            bates: prep.bates.clone().or_else(|| {
+            bates: prep.bates.clone().or(out.bates).or_else(|| {
                 cfg!(not(target_os = "macos"))
                     .then(|| markdown::find_bates_in_text(&out.body))
                     .flatten()

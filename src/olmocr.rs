@@ -10,6 +10,7 @@ use regex::Regex;
 
 use crate::cli::Engine;
 use crate::htmltable;
+use crate::markdown;
 use crate::model_engine::{
     Ctx, Fail, LOOP_PENALTY, Output, Planned, Prepared, Prompt, ScanEngine, Spec,
     has_repetition_loop, render_specs,
@@ -161,7 +162,7 @@ impl ScanEngine for Olmocr {
 
     fn run(&self, ctx: &Ctx, path: &Path, prep: &Prepared, s: &Settings) -> Result<Output, Fail> {
         let planned = prep.planned.as_ref().map_err(|e| Fail::Failed(e.clone()))?;
-        match run_requests(ctx, path, prep, s, planned, true, prep.alt.is_some()) {
+        let mut out = match run_requests(ctx, path, prep, s, planned, true, prep.alt.is_some()) {
             Err(Fail::Degenerate) => {
                 let specs = prep.alt.as_deref().unwrap_or_default();
                 let crops =
@@ -169,8 +170,57 @@ impl ScanEngine for Olmocr {
                 run_requests(ctx, path, prep, s, &crops, false, false)
             }
             other => other,
+        }?;
+        if cfg!(not(target_os = "macos"))
+            && prep_bates_missing(prep)
+            && markdown::find_bates_in_text(&out.body).is_none()
+        {
+            out.bates = corner_bates(ctx, path, prep, s)?;
+        }
+        Ok(out)
+    }
+}
+
+/// Bottom-right, then bottom-left corner of the page (normalized top-left [x, y, w, h]), where
+/// Bates numbers are stamped. olmOCR drops a whole footer strip as page furniture, but reads a
+/// corner on its own (docs/spike.md, "olmOCR footer strip").
+const BATES_CORNERS: [[f64; 4]; 2] = [[0.7, 0.9, 0.3, 0.1], [0.0, 0.9, 0.3, 0.1]];
+
+/// Enough for a front matter and a short line.
+const CORNER_MAX_TOKENS: u32 = 256;
+
+fn prep_bates_missing(prep: &Prepared) -> bool {
+    prep.bates().is_none()
+}
+
+/// Off macOS, where no Vision side-pass reads the footer: asks olmOCR for each Bates corner in
+/// turn and returns the first Bates number found. A corner that fails or reads nothing is
+/// skipped; only a stopped server ends the page.
+fn corner_bates(
+    ctx: &Ctx,
+    path: &Path,
+    prep: &Prepared,
+    s: &Settings,
+) -> Result<Option<String>, Fail> {
+    for crop in BATES_CORNERS {
+        let Ok(png) =
+            vision::render_png_fit(path, prep.index, s.dpi, Some(crop), Some(MAX_SIDE), 0)
+        else {
+            continue;
+        };
+        let req = Planned::new(Prompt::Olmocr, &png, true);
+        match ctx.send(&req, CORNER_MAX_TOKENS, None) {
+            Ok(reply) => {
+                let body = parse_reply(&reply.text).body;
+                if let Some(bates) = markdown::find_bates_in_text(&body) {
+                    return Ok(Some(bates));
+                }
+            }
+            Err(stopped @ Fail::Stopped(_)) => return Err(stopped),
+            Err(_) => {}
         }
     }
+    Ok(None)
 }
 
 fn run_requests(
@@ -186,6 +236,7 @@ fn run_requests(
         body: String::new(),
         table: false,
         flagged: false,
+        bates: None,
     };
     let mut parts = Vec::new();
     for req in reqs {

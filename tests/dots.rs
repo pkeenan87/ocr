@@ -43,9 +43,9 @@ fn layout_json_becomes_markdown() {
     let md = e.markdown("legal_scan.pdf");
     for want in [
         "FAKE RUNNING HEADER",
-        "# FAKE TITLE 1700x2200",
+        "# FAKE TITLE 850x1100",
         "## Section A",
-        "fake dots text 1700x2200",
+        "fake dots text 850x1100",
         "first item\n\nsecond item",
         "| Invoice | Date | Amount |\n| --- | --- | --- |\n| INV-1001 | 2026-01-05 | $48,250.00 |",
         "$$E = mc^{2}$$",
@@ -71,8 +71,8 @@ fn layout_json_becomes_markdown() {
     assert_eq!(reqs[0]["max_tokens"], 8192);
     assert_eq!(
         (reqs[0]["w"].as_u64(), reqs[0]["h"].as_u64()),
-        (Some(1700), Some(2200)),
-        "200 DPI"
+        (Some(850), Some(1100)),
+        "100 DPI (the dots default)"
     );
     no_penalty(&reqs);
 }
@@ -199,7 +199,7 @@ fn loop_that_clears_in_plain_text_is_not_a_fallback() {
     let reqs = e.requests();
     assert_eq!(kinds(&reqs), ["layout", "ocr"], "{reqs:?}");
     let md = e.markdown("transcript_full.pdf");
-    assert!(md.contains("fake dots plain text 1700x2200"), "{md}");
+    assert!(md.contains("fake dots plain text 850x1100"), "{md}");
     assert!(md.contains("fallback_pages: []\n"), "{md}");
 }
 
@@ -212,7 +212,7 @@ fn looping_page_with_regions_is_retried_as_crops() {
     let reqs = e.requests();
     assert_eq!(kinds(&reqs), ["layout", "layout", "layout"], "{reqs:?}");
     assert!(
-        reqs[1..].iter().all(|r| r["h"].as_u64().unwrap() < 2200),
+        reqs[1..].iter().all(|r| r["h"].as_u64().unwrap() < 1100),
         "{reqs:?}"
     );
     no_penalty(&reqs);
@@ -231,7 +231,7 @@ fn looping_crop_goes_to_plain_text() {
     no_penalty(&reqs);
     assert!(
         e.markdown("signature_block.pdf")
-            .contains("fake dots plain text 1700x2200")
+            .contains("fake dots plain text 850x1100")
     );
 }
 

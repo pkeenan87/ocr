@@ -168,10 +168,10 @@ fn legal_scan_uses_side_pass_bates_and_table_recognition() {
     );
     assert!(p.contains(&"OCR:"), "{p:?}");
     assert!(reqs.iter().all(|r| r["max_tokens"] == 4096));
-    // Bands and the table are crops of a 1700x2200 page.
+    // Bands and the table are crops of a 1275x1650 page.
     assert!(
         reqs.iter()
-            .all(|r| r["w"] == 1700 && r["h"].as_u64().unwrap() < 2200)
+            .all(|r| r["w"] == 1275 && r["h"].as_u64().unwrap() < 1650)
     );
 }
 
@@ -183,12 +183,12 @@ fn transcript_is_one_full_page_request() {
     let md = e.markdown("transcript_full.pdf");
     assert!(md.contains("transcript_pages: [1]\n"), "{md}");
     assert!(md.contains("table_pages: []\n"), "{md}");
-    assert!(md.contains("fake ocr text 1700x2200"), "{md}");
+    assert!(md.contains("fake ocr text 1275x1650"), "{md}");
     let reqs = e.requests();
     assert_eq!(prompts(&reqs), ["OCR:"], "{reqs:?}");
     assert_eq!(
         (reqs[0]["w"].as_u64(), reqs[0]["h"].as_u64()),
-        (Some(1700), Some(2200))
+        (Some(1275), Some(1650))
     );
 }
 
@@ -215,7 +215,7 @@ fn narrow_columns_are_cropped() {
     let reqs = e.requests();
     assert_eq!(prompts(&reqs), ["OCR:", "OCR:"], "{reqs:?}");
     assert!(
-        reqs.iter().all(|r| r["w"].as_u64().unwrap() < 1700),
+        reqs.iter().all(|r| r["w"].as_u64().unwrap() < 1275),
         "{reqs:?}"
     );
     assert_eq!(md.matches("fake ocr text").count(), 2, "{md}");
@@ -288,10 +288,10 @@ fn looping_full_page_is_retried_with_region_crops() {
     assert_eq!(reqs.len(), 3, "{reqs:?}");
     assert_eq!(
         (reqs[0]["w"].as_u64(), reqs[0]["h"].as_u64()),
-        (Some(1700), Some(2200))
+        (Some(1275), Some(1650))
     );
     assert!(
-        reqs[1..].iter().all(|r| r["h"].as_u64().unwrap() < 2200),
+        reqs[1..].iter().all(|r| r["h"].as_u64().unwrap() < 1650),
         "{reqs:?}"
     );
     assert!(
@@ -311,7 +311,7 @@ fn empty_output_is_retried_once() {
     assert_eq!(e.requests().len(), 2);
     assert!(
         e.markdown("transcript_full.pdf")
-            .contains("fake ocr text 1700x2200")
+            .contains("fake ocr text 1275x1650")
     );
 }
 

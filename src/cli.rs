@@ -232,7 +232,7 @@ pub struct ScanArgs {
     /// Strip running headers and footers repeated across pages (opt-in)
     #[arg(long)]
     pub legal_cleanup: bool,
-    /// Render resolution, 72-600 (default 200)
+    /// Render resolution, 72-600 (default 200; paddleocr-vl 150; dots-ocr 100)
     #[arg(long, value_name = "N", value_parser = clap::value_parser!(u32).range(72..=600))]
     pub dpi: Option<u32>,
     /// Total pages in flight across the whole run
@@ -247,8 +247,13 @@ pub struct ScanArgs {
     pub dry_run: bool,
 }
 
-/// Default render resolution for the apple engine.
+/// Default render resolution (apple, and the Apple side-pass of olmocr). Apple's default must stay
+/// 200: the goldens were generated at it and the user decided to keep it (Phase 6).
 pub const DEFAULT_DPI: u32 = 200;
+/// Phase 6 tuning (docs/eval.md): paddleocr-vl scored best on tune seeds 0-4 at 150 DPI.
+pub const PADDLE_DPI: u32 = 150;
+/// Phase 6 tuning (docs/eval.md): dots-ocr was as accurate at 100 DPI as at 200, and 3-4x faster.
+pub const DOTS_DPI: u32 = 100;
 
 impl ScanArgs {
     /// The text-layer path skips all layout handling (columns, tables, margin numbers, Bates),
@@ -261,9 +266,13 @@ impl ScanArgs {
         !self.no_page_markers
     }
 
-    /// Effective `--dpi`: explicit value, else 200 (docs/spike.md).
+    /// Effective `--dpi`: explicit value, else the engine default (200; paddleocr-vl 150; dots-ocr 100).
     pub fn effective_dpi(&self) -> u32 {
-        self.dpi.unwrap_or(DEFAULT_DPI)
+        self.dpi.unwrap_or(match self.model {
+            Engine::PaddleocrVl => PADDLE_DPI,
+            Engine::DotsOcr => DOTS_DPI,
+            _ => DEFAULT_DPI,
+        })
     }
 
     /// Effective `--jobs`: explicit value, else performance cores (apple) or 1 (model engines).

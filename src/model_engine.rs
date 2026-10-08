@@ -97,11 +97,6 @@ pub trait ScanEngine: Sync {
     fn text_first(&self) -> bool {
         false
     }
-    /// Whether to point transcript pages at `--model paddleocr-vl` (docs/spike.md: this
-    /// engine scores below 95% on transcripts).
-    fn transcript_hint(&self) -> bool {
-        false
-    }
     /// The request plan of a page and whether it is a column split.
     fn plan(&self, side: &SidePass) -> (Vec<Spec>, bool);
     /// Runs the plan with the engine's retry ladder. `Fail::Failed` means: use Apple's text.
@@ -965,12 +960,11 @@ impl Backend for Ctx {
         self.is_stopped()
     }
 
-    fn transcript_note(&self, input: &Path, pages: &str) -> Option<String> {
-        self.spec.transcript_hint().then(|| {
+    fn transcript_note(&self, input: &Path, _: &str, unverified: &str) -> Option<String> {
+        (!unverified.is_empty()).then(|| {
             format!(
-                "note: {} looks like a deposition transcript (pages {pages}); {} drops line numbers on transcripts — use --model paddleocr-vl",
-                input.display(),
-                self.spec.engine().name()
+                "note: {}: transcript pages {unverified} could not be re-anchored to page geometry (line_numbers.unverified); verify page:line citations against the PDF",
+                input.display()
             )
         })
     }

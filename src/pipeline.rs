@@ -79,9 +79,9 @@ impl Backend for Apple {
         Err(Fail::Failed("the apple engine has no model step".into()))
     }
 
-    fn transcript_note(&self, input: &Path, pages: &str) -> Option<String> {
+    fn transcript_note(&self, input: &Path, pages: &str, _: &str) -> Option<String> {
         Some(format!(
-            "note: {} looks like a deposition transcript (pages {pages}); Apple Vision drops line numbers and misreads Q./A. — use --model paddleocr-vl",
+            "note: {} looks like a deposition transcript (pages {pages}); line numbers were re-anchored to page geometry — pages listed under line_numbers.unverified in the front matter need checking, and dots-ocr is the most accurate engine for transcripts",
             input.display()
         ))
     }

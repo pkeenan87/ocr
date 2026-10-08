@@ -154,11 +154,6 @@ impl ScanEngine for Olmocr {
         (vec![(Prompt::Olmocr, None)], false)
     }
 
-    /// Transcripts: measured 0/25 line numbers kept on a full-size page (docs/spike.md).
-    fn transcript_hint(&self) -> bool {
-        true
-    }
-
     fn run(&self, ctx: &Ctx, path: &Path, prep: &Prepared, s: &Settings) -> Result<Output, Fail> {
         let planned = prep.planned.as_ref().map_err(|e| Fail::Failed(e.clone()))?;
         match run_requests(ctx, path, prep, s, planned, true, prep.alt.is_some()) {

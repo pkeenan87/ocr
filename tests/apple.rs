@@ -330,7 +330,10 @@ fn concurrent_start_up_always_finishes_with_the_clean_output() {
 
 fn flag_note(stderr: &str) -> bool {
     stderr.contains("looks like a deposition transcript")
-        && stderr.contains("use --model paddleocr-vl")
+        && stderr.contains("line numbers were re-anchored to page geometry")
+        && stderr.contains("line_numbers.unverified in the front matter need checking")
+        && stderr.contains("dots-ocr is the most accurate engine for transcripts")
+        && !stderr.contains("paddleocr-vl")
 }
 
 #[test]

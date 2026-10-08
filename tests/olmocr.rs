@@ -81,17 +81,22 @@ fn dpi_is_ignored_with_a_note() {
 }
 
 #[test]
-fn transcripts_point_to_paddle() {
-    // Measured 0/25 line numbers kept on a full-size transcript page.
+fn unverified_transcript_page_gets_the_verify_hint() {
+    // The fake reply does not match the page geometry, so the page stays unverified.
     let e = env(&["transcript_full.pdf"]);
     e.serve(&[]);
     e.scan("transcript_full.pdf", &[], &[])
         .success()
         .stderr(predicate::str::contains(
-            "olmocr drops line numbers on transcripts — use --model paddleocr-vl",
-        ));
+            "transcript_full.pdf: transcript pages 1 could not be re-anchored to page geometry (line_numbers.unverified); verify page:line citations against the PDF",
+        ))
+        .stderr(predicate::str::contains("paddleocr-vl").not());
     let md = e.markdown("transcript_full.pdf");
     assert!(md.contains("transcript_pages: [1]\n"), "{md}");
+    assert!(
+        md.contains("line_numbers: {anchored: [], unverified: [1]}\n"),
+        "{md}"
+    );
 }
 
 #[test]
@@ -386,11 +391,6 @@ fn jobs_do_not_change_the_output() {
 
 // ------------------------------------------------------------- real model
 
-/// Whether olmOCR keeps transcript line numbers (docs/spike.md: it does not on a full-size page,
-/// 0/25); the test asserts the scores only for an engine that reaches 95%, and otherwise that the
-/// hint to use paddleocr-vl is printed.
-const TRANSCRIPTS_OK: bool = false;
-
 /// Real uv venv + weights from the HF cache + a real server. Run with
 /// `OCR_REAL_MODELS=1 cargo test --release real_olmocr -- --ignored --nocapture`.
 #[test]
@@ -504,20 +504,18 @@ fn real_olmocr_engine() {
         })
         .count();
     println!("transcript_full: {full}/25 exact, four_up: {four}/100 exact");
-    if TRANSCRIPTS_OK {
-        if full != 25 || four != 100 {
-            failures
-                .borrow_mut()
-                .push(format!("transcripts {full}/25, {four}/100"));
-        }
-    } else if (full + four) as f64 / 125.0 >= 0.95 {
+    // Line numbers are re-anchored to the page geometry (docs/spike.md): 99.9% lines exact.
+    if ((full + four) as f64 / 125.0) < 0.95 {
         failures
             .borrow_mut()
-            .push("transcripts now score >= 95%: set TRANSCRIPTS_OK".into());
-    } else if !stderr.contains("use --model paddleocr-vl") {
+            .push(format!("transcripts {full}/25, {four}/100"));
+    }
+    // The verify hint appears exactly when the front matter lists an unverified page.
+    let unverified = !md.contains("unverified: []");
+    if unverified != stderr.contains("could not be re-anchored to page geometry") {
         failures
             .borrow_mut()
-            .push("no paddleocr-vl hint on a transcript".into());
+            .push("transcript hint does not match line_numbers.unverified".into());
     }
 
     // Narrow unequal columns: the full-page decision keeps >= 95% of the lines, in order.

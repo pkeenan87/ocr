@@ -91,7 +91,7 @@ fn dpi_override_changes_the_render() {
 }
 
 #[test]
-fn columns_are_not_split_up_front_and_transcripts_need_no_hint() {
+fn columns_are_not_split_up_front_and_unverified_transcripts_get_the_verify_hint() {
     let e = env(&["narrow_unequal_seed2.pdf", "transcript_full.pdf"]);
     e.serve(&[]);
     e.scan("narrow_unequal_seed2.pdf", &[], &[]).success();
@@ -100,9 +100,12 @@ fn columns_are_not_split_up_front_and_transcripts_need_no_hint() {
             .contains("column_split_pages: []\n")
     );
     assert_eq!(e.requests().len(), 1);
-    // dots keeps transcript line numbers (25/25 and 100/100, docs/spike.md): no hint.
+    // The fake reply does not match the page geometry: the page stays unverified and says so.
     e.scan("transcript_full.pdf", &[], &[])
         .success()
+        .stderr(predicate::str::contains(
+            "transcript_full.pdf: transcript pages 1 could not be re-anchored to page geometry (line_numbers.unverified); verify page:line citations against the PDF",
+        ))
         .stderr(predicate::str::contains("paddleocr-vl").not());
 }
 
@@ -385,10 +388,6 @@ fn jobs_do_not_change_the_output() {
 
 // ------------------------------------------------------------- real model
 
-/// dots keeps transcript line numbers (docs/spike.md: 25/25 and 100/100), so the scores are
-/// asserted; an engine below 95% would get the paddleocr-vl hint instead.
-const TRANSCRIPTS_OK: bool = true;
-
 /// Real uv venv + weights from the HF cache + a real server. Run with
 /// `OCR_REAL_MODELS=1 cargo test --release real_dots -- --ignored --nocapture`.
 #[test]
@@ -488,16 +487,17 @@ fn real_dots_engine() {
         })
         .count();
     println!("transcript_full: {full}/25 exact, four_up: {four}/100 exact");
-    if TRANSCRIPTS_OK {
-        if full != 25 || four != 100 {
-            failures
-                .borrow_mut()
-                .push(format!("transcripts {full}/25, {four}/100"));
-        }
-    } else if !stderr.contains("use --model paddleocr-vl") {
+    if full != 25 || four != 100 {
         failures
             .borrow_mut()
-            .push("no paddleocr-vl hint on a transcript".into());
+            .push(format!("transcripts {full}/25, {four}/100"));
+    }
+    // The verify hint appears exactly when the front matter lists an unverified page.
+    let unverified = !md.contains("unverified: []");
+    if unverified != stderr.contains("could not be re-anchored to page geometry") {
+        failures
+            .borrow_mut()
+            .push("transcript hint does not match line_numbers.unverified".into());
     }
 
     // Narrow unequal columns: the full-page decision keeps >= 95% of the lines, in order.

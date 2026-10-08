@@ -246,8 +246,10 @@ fn merged_wraps_and_sequential_numbers_come_out_with_geometry_numbering() {
     let replies_path = e.path("replies.json");
     fs::write(&replies_path, serde_json::to_string(&replies).unwrap()).unwrap();
     e.serve(&[("FAKE_REPLIES", replies_path.to_str().unwrap())]);
+    // Every page is anchored: no hint on stderr.
     e.scan("transcript4up_seed0.pdf", &["--pages", "1"], &[])
-        .success();
+        .success()
+        .stderr(predicate::str::contains("could not be re-anchored").not());
     let md = e.markdown("transcript4up_seed0.pdf");
     assert!(md.contains("transcript_pages: [1]\n"), "{md}");
     assert!(
@@ -275,7 +277,10 @@ fn text_that_does_not_match_the_page_is_kept_and_marked_unverified() {
     let e = Env::new(&["transcript4up_seed0.pdf"]);
     e.serve(&[]);
     e.scan("transcript4up_seed0.pdf", &["--pages", "1"], &[])
-        .success();
+        .success()
+        .stderr(predicate::str::contains(
+            "transcript4up_seed0.pdf: transcript pages 1 could not be re-anchored to page geometry (line_numbers.unverified); verify page:line citations against the PDF",
+        ));
     let md = e.markdown("transcript4up_seed0.pdf");
     assert!(
         md.contains("line_numbers: {anchored: [], unverified: [1]}\n"),

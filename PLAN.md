@@ -338,6 +338,11 @@ Resolved 2026-10-07:
     - Resume after a kill at 151 pages: 14.3 s.
     - Live `three_pages.pdf` at `--jobs 1` vs `--jobs 8`: identical for paddleocr-vl (14.3 s), olmocr (47 s) and dots (108 s).
 
+- 2026-10-08, **`--legal-cleanup` built** (commit fc68c84). It runs at assembly time, so turning it on or off never redoes pages. Rules:
+  - A line is stripped if it appears in the top 3 or bottom 3 lines of at least 50% of eligible pages (minimum 3 pages), comparing with digits normalized.
+  - Transcript pages, table rows, Bates numbers and page markers are never stripped.
+  - **Decision made for you:** lines of 20 or more characters match fuzzily, allowing about 1 edit per 20 characters. Apple misreads the same header differently on different pages ("Assel" vs "Asset"), so exact matching left it in. Shorter lines must match exactly.
+
 Still open:
 
 1. **Hardware floor** (vmmap physical footprint): olmOCR 8-bit 10.9 GB, dots 7.3 GB, Paddle bf16 3.8 GB. Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM, and refuses 8-bit below 16 GB without `--force`.

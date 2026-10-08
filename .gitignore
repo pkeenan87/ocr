@@ -4,3 +4,4 @@
 /spike/out
 eval/out/
 .env
+__pycache__/

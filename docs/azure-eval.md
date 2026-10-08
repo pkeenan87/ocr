@@ -10,6 +10,17 @@ Open Claude Code in an empty working folder on the work machine (Windows, macOS 
 
 ---
 
+> **Transcript line numbers: compare raw against raw.** Since 2026-10-08 the Mac's `ocr` re-anchors transcript line numbers to page geometry, using Apple Vision line positions (`src/anchor.rs`), for every engine. That is post-processing which Azure does not get. For **transcript-line accuracy**, compare against the Mac's **before re-anchoring** numbers, the raw engine output:
+>
+> | Engine | Transcript lines, raw | After re-anchoring (held-out seeds 40–42) |
+> |---|---|---|
+> | dots-ocr | 68% | 99.9% |
+> | olmocr | 30% | 99.9% |
+> | apple | 38% | 97.4% |
+> | paddleocr-vl | 25% | 94.9% |
+>
+> The raw numbers are from seeds 10–12; see `docs/eval.md`'s Transcripts section and docs/spike.md, "Transcript line-number re-anchoring". Report the after-anchoring numbers only as context. Every other metric (CER, token recall, Bates) is unaffected and compares directly.
+
 ## Prompt
 
 You are running a one-off accuracy comparison for the `ocr` project: Azure AI Document Intelligence (`prebuilt-layout`, Markdown output) against the Mac engines. You call the Azure REST API yourself and write any glue code you need. Keep that glue code out of the commit (put it in `eval/out/azure/tools/`, which is gitignored). The user pays for Azure, so respect the page budget below.
@@ -213,6 +224,8 @@ The CLI is `PY eval/score.py <gt.json> <output.md> [--strip-line-numbers]`, but 
 - Compare against the Apple table in `eval/PUBLIC_SET.md`; the thresholds are the same calibrated defaults.
 - Judging 230 pages cost about $0.02 for Apple.
 - The judge sends page text to the Vercel AI Gateway. That is allowed for public documents only (`eval/JUDGE.md`).
+
+- **Transcript lines:** compare against the Mac's *raw* (before re-anchoring) numbers, not the re-anchored ones. See the "compare raw against raw" note at the top of `docs/azure-eval.md` for the table and the reason.
 
 ### 7. Cost, then the user's OK
 

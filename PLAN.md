@@ -359,3 +359,81 @@ Still open:
 3. **Throughput expectations.** A 300-page scan takes about 1 minute with Apple, 12 minutes with Paddle, 80 minutes with olmOCR and 2.9 hours with dots. The CLI shows an ETA, and the README should state these figures.
 4. **Apple accuracy on legal numbers.** On one page, Vision's errors depended on DPI. Phase 2 tunes this on the eval set. A dual-DPI cross-check that flags pages where numbers disagree is a candidate.
 5. **Privacy.** Everything is local. Servers bind to localhost only. There is no telemetry. After setup, HF downloads are the only network access, and `HF_HUB_OFFLINE=1` is set at runtime.
+
+## 9. Linux and Windows with a GPU (Phase 7)
+
+**Goal.** `ocr` builds and runs on Linux and Windows machines with a GPU, using the three model engines. macOS is unchanged. This replaces the deferred "`llama-server` backend" item in §7.
+
+### 9.1 What changes off the Mac
+
+| Mac today | Linux / Windows |
+|---|---|
+| Apple Vision engine (default) | Not available. Default engine is `paddleocr-vl`. The shared types in `vision.rs` (`Block`, `Page`, `DocKind`, `Options`, …) stay portable; only the FFI block and the recognize functions are macOS-only |
+| Swift bridge: PDF info, text layer, rendering (PDFKit / ImageIO) | `pdfium-render` (pinned pdfium binary, downloaded by setup) + `image`/`tiff` crates, behind a `Document` trait. The Mac keeps the bridge |
+| `mlx-vlm` server in a `uv` venv | `llama-server` from a pinned llama.cpp `b####` release (CUDA, Vulkan or CPU build), downloaded by setup with checksum. **No Python, no uv, no venv** off the Mac |
+| `mlx-community/*` weights | GGUF + mmproj repos per engine (§9.3), downloaded from HF with `ureq` |
+| RAM check (unified memory) | GPU check + VRAM check (§9.2) |
+| Apple side-pass: Bates, footers, table regions, transcript detection, fallback text | Model output plus an olmOCR footer request (§9.5). Bitmap region detection (`regions.rs`) still runs, without Vision's table masks |
+| Supervisor (exists only for Vision crashes) | Not compiled |
+| `flock`, `process_group`/`killpg`, `ps`, `sysctl`, `vmmap` | `std::fs::File::lock`, `sysinfo`, Windows job object (kill the tree), `available_parallelism` |
+| State dir `~/Library/Application Support/ocr` | `dirs::data_dir()/ocr` (`~/.local/share/ocr`, `%APPDATA%\ocr`); `$OCR_STATE_DIR` still wins |
+
+### 9.2 GPU check
+
+`ocr server setup` (and `server start`) probes the hardware:
+1. **NVIDIA:** `nvidia-smi --query-gpu=name,memory.total,driver_version` succeeds → CUDA build of llama-server. The driver's CUDA version picks the 12.x or 13.x archive.
+2. **Otherwise, a discrete AMD/Intel GPU** → Vulkan build. The probe is a 7a item: `vulkaninfo` is not installed by default, so the likely route is loading the Vulkan loader and listing devices (or asking the downloaded `llama-server --list-devices`).
+3. **Integrated GPU only, or none** → the warning below, and the CPU build.
+
+    ⚠ No supported GPU found (NVIDIA with CUDA, or a discrete GPU with Vulkan).
+      ocr will run the model on the CPU, which is very slow (minutes per page).
+
+VRAM is then checked against the engine and quant, with the same tiers as the RAM check (§8.1): silent, warn, or refuse without `--force`. Floors come from the 7a spike. `ocr server status` shows the GPU and VRAM in use.
+
+### 9.3 Weights (to confirm in 7a)
+
+| Engine | Default off the Mac | Other quants |
+|---|---|---|
+| paddleocr-vl 1.6 | `PaddlePaddle/PaddleOCR-VL-1.6-GGUF` (official, f16) | 1.5: `PaddlePaddle/PaddleOCR-VL-1.5-GGUF`. 1.0: community only |
+| olmocr | `bartowski/allenai_olmOCR-2-7B-1025-GGUF` Q8_0 + mmproj f16 | Q4_K_M, bf16 |
+| dots-ocr | `ggml-org/dots.ocr-GGUF` Q8_0 (first-party, llama.cpp support merged in PR #17575). `--model-version dots.mocr` only if 7a shows a community GGUF works | f16 |
+
+`--quant 4bit|8bit|bf16` maps to Q4_K_M / Q8_0 / f16-or-bf16 where the repo has it.
+
+### 9.4 Phases
+
+| Phase | Deliverable | Done when |
+|---|---|---|
+| **7a. Backend spike** (no Rust, on the RTX 3090 machine) | Pinned llama-server build with each GGUF. Run the four prompts (`OCR:`, `Table Recognition:`, olmOCR v4 YAML, `prompt_layout_all_en`) through llama-server's chat templates. Test `-np 2` with images. Measure VRAM and s/page per engine and quant. Compare output with the Mac's MLX output and the vLLM reference. Send olmOCR a footer-strip crop: does the Bates number come back? (It is trained to drop footers, and option (b) in §9.5 depends on this.) Settle the Vulkan device probe | `docs/spike.md` records: prompt compatibility (same output shape as MLX), whether parallel image slots work, VRAM floors, speeds. Any engine that fails is documented with its blocker |
+| **7b. Build portability** | `build.rs` and the FFI half of `vision.rs` gated on `target_os = "macos"` (types stay shared). `.cargo/config.toml` rustflags moved under `[target.aarch64-apple-darwin]`. Supervisor macOS-only. `flock` → `File::lock`. Process and memory calls → `sysinfo` / job object. `Engine::Apple` hidden off the Mac | `cargo build` and the unit tests pass on Linux (Mac-only tests gated). `cargo check --target x86_64-pc-windows-msvc` passes. Mac tests unchanged |
+| **7c. Portable document layer** | `Document` trait over `document_info`, `text_layer`, `render_gray`, `render_png_fit`. pdfium + `image`/`tiff` implementation, including multi-page TIFF and rotation | On the non-table fixtures, `regions.rs` makes the same column and band decisions as on the Mac (renders need not be byte-identical). Table pages differ by design: there are no Vision table masks |
+| **7d. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`. Setup downloads the release archive (plus cudart), pdfium and weights. **Engine layer off the Mac:** a non-Mac `side_pass` (bitmap regions, no blocks), `find_bates` on the model's output, Paddle's table-crop branch off, failed pages flagged without fallback text, plus whatever §9.5 decision 1 adds | `paddleocr-vl`, `olmocr` and `dots-ocr` each scan `three_pages.pdf` on the Linux GPU machine. Start, stop, status, restart and the killed-server test pass |
+| **7e. GPU gate** | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
+| **7f. Windows** | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
+| **7g. Eval and docs** | Run the eval set (seeds 10–12) on Linux; compare with the Mac and vLLM numbers. README: Linux/Windows requirements, speeds, VRAM table | CER within an agreed margin of the Mac numbers per engine |
+
+### 9.5 Decisions
+
+**Decided 2026-10-08 (your decisions):**
+- **Side-pass:** option (b). Bates numbers come from the model output for Paddle and dots. olmOCR gets a footer-strip request, if 7a shows that it returns the Bates number; if not, it falls back to a Paddle `OCR:` on the strip. No table crops, no fallback text.
+- **dots default off the Mac:** `dots.ocr` (`ggml-org/dots.ocr-GGUF`).
+- **No GPU:** always warn. `paddleocr-vl` carries on, on the CPU. `olmocr` and `dots-ocr` refuse without `--force`.
+
+The options as they were put:
+
+1. **Replacing the Apple side-pass.** On the Mac, Vision supplies every model engine with Bates numbers and footers, the table regions Paddle crops, and fallback text when the model fails. Options:
+   - **(a) Accept the loss and document it.** Bates come from the model's own text (`markdown::find_bates` on its output). That works for Paddle and dots, which keep footers. **olmOCR would have no Bates numbers.** Paddle runs full-page `OCR:` only, without table crops. A failed page is flagged with no fallback text.
+   - **(b) An extra footer/header strip request through the running model** for olmOCR only. Restores Bates for olmOCR at roughly one short request per page. Everything else as in (a).
+   - **(c) A separate CPU OCR pass** (e.g. a pure-Rust or ONNX OCR model) as a stand-in for Vision: Bates, fallback text and transcript hints for all engines. The most faithful, but a second OCR stack to maintain and tune.
+   
+   Under (a) and (b), **transcript detection is also lost**: it reads Vision's margin-number blocks (`layout::looks_like_transcript`). olmOCR's "use paddleocr-vl" hint on transcripts goes with it, unless it is rebuilt from the bitmap margin.
+
+   Recommendation: **(b)** if 7a shows olmOCR returns Bates from a footer strip. If it doesn't, (b) becomes "run a Paddle `OCR:` on the strip", which means Paddle must be installed alongside olmOCR. Revisit (c) if failed pages without fallback text matter in practice.
+2. **dots default off the Mac.** `dots.ocr` (first-party GGUF, supported in llama.cpp) or `dots.mocr` (the Mac default; community GGUF, support unconfirmed). Recommendation: **dots.ocr** unless 7a shows dots.mocr works.
+3. **No GPU: warn or refuse?** Recommendation: **warn, then carry on** on CPU for `paddleocr-vl` (0.9B is usable on CPU). For `olmocr` and `dots-ocr`, refuse without `--force`, matching the RAM check.
+
+### 9.6 Testing reality
+
+- This machine (AMD integrated GPU, no NVIDIA driver) can test the build, the document layer, the no-GPU warning and CPU runs. It can't test CUDA.
+- The RTX 3090 machine (`docs/linux-reference-eval.md`) is the Linux acceptance target.
+- Windows acceptance needs a Windows machine with an NVIDIA GPU. None is known to be available yet.

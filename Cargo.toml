@@ -18,6 +18,9 @@ tl = "0.7.8"
 toml = "1.1.6"
 ureq = { version = "3", default-features = false }
 
+[target.'cfg(windows)'.dependencies]
+sysinfo = { version = "0.39.6", default-features = false, features = ["system"] }
+
 [dev-dependencies]
 assert_cmd = "2.2.2"
 predicates = "3.1.4"

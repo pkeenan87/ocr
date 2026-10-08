@@ -39,22 +39,28 @@ pub struct Config {
     pub runtime: Option<Runtime>,
 }
 
-/// Directory holding `config.toml`: `$OCR_CONFIG_DIR` or `~/.config/ocr`.
+/// Directory holding `config.toml`: `$OCR_CONFIG_DIR`, else `~/.config/ocr` (`%APPDATA%\ocr` on
+/// Windows).
 pub fn config_dir() -> Result<PathBuf> {
     if let Some(d) = std::env::var_os("OCR_CONFIG_DIR") {
         return Ok(d.into());
+    }
+    if cfg!(windows) {
+        let dir = dirs::config_dir().ok_or_else(|| anyhow!("cannot determine config directory"))?;
+        return Ok(dir.join("ocr"));
     }
     let home = dirs::home_dir().ok_or_else(|| anyhow!("cannot determine home directory"))?;
     Ok(home.join(".config/ocr"))
 }
 
-/// State directory: `$OCR_STATE_DIR` or `~/Library/Application Support/ocr`.
+/// State directory: `$OCR_STATE_DIR`, else the platform data dir plus `ocr`
+/// (`~/Library/Application Support/ocr`, `~/.local/share/ocr`, `%LOCALAPPDATA%\ocr`).
 pub fn state_dir() -> Result<PathBuf> {
     if let Some(d) = std::env::var_os("OCR_STATE_DIR") {
         return Ok(d.into());
     }
-    let home = dirs::home_dir().ok_or_else(|| anyhow!("cannot determine home directory"))?;
-    Ok(home.join("Library/Application Support/ocr"))
+    let data = dirs::data_local_dir().ok_or_else(|| anyhow!("cannot determine data directory"))?;
+    Ok(data.join("ocr"))
 }
 
 pub fn config_path() -> Result<PathBuf> {

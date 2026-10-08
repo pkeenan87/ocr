@@ -202,7 +202,7 @@ pub fn text_layer_usable(text: &str) -> bool {
     }
     let bad = chars
         .iter()
-        .filter(|c| **c == '\u{FFFD}' || c.is_control() || ('\u{E000}'..='\u{F8FF}').contains(c))
+        .filter(|c| **c == '\u{FFFD}' || c.is_control() || ('\u{E000}'..='\u{F8FF}').contains(*c))
         .count();
     (bad as f64) / (chars.len() as f64) < 0.05
 }

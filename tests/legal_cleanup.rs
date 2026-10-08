@@ -1,6 +1,9 @@
 //! `--legal-cleanup` end to end (PLAN §5.5): the eval `contract` family through real Apple Vision,
 //! and toggling the flag on a resumed run. Needs the spike venv to generate the PDFs.
 
+// Needs Apple Vision (PLAN §9).
+#![cfg(target_os = "macos")]
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command as StdCommand, Stdio};

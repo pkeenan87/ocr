@@ -37,8 +37,16 @@ pub enum ServerCommand {
     Status,
 }
 
+/// `ocr scan --model` default: Apple Vision on macOS, PaddleOCR-VL elsewhere (PLAN §9).
+#[cfg(target_os = "macos")]
+pub const DEFAULT_ENGINE: &str = "apple";
+#[cfg(not(target_os = "macos"))]
+pub const DEFAULT_ENGINE: &str = "paddleocr-vl";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum Engine {
+    /// Apple Vision, in-process. macOS only.
+    #[cfg_attr(not(target_os = "macos"), value(skip))]
     Apple,
     Olmocr,
     PaddleocrVl,
@@ -197,7 +205,7 @@ pub struct ScanArgs {
         conflicts_with = "input_file"
     )]
     pub output_dir: Option<PathBuf>,
-    #[arg(long, value_enum, default_value = "apple")]
+    #[arg(long, value_enum, default_value = DEFAULT_ENGINE)]
     pub model: Engine,
     /// Pin an older model release (paddleocr-vl: 1.6|1.5|1.0, dots-ocr: dots.mocr|dots.ocr)
     #[arg(long, value_name = "V")]
@@ -292,8 +300,11 @@ fn parse_jobs(s: &str) -> Result<usize, String> {
     }
 }
 
-/// Performance-core count via sysctl, falling back to available parallelism.
+/// Performance-core count via sysctl (macOS), falling back to available parallelism.
 pub fn perf_cores() -> usize {
+    #[cfg(not(target_os = "macos"))]
+    return std::thread::available_parallelism().map_or(1, |n| n.get());
+    #[cfg(target_os = "macos")]
     std::process::Command::new("sysctl")
         .args(["-n", "hw.perflevel0.physicalcpu"])
         .output()

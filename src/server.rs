@@ -3,6 +3,7 @@
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom};
 use std::net::TcpListener;
+#[cfg(unix)]
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -135,6 +136,12 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
         return Ok(());
     }
     let fake = std::env::var_os("OCR_FAKE_INSTALL").is_some_and(|v| v == "1");
+    if cfg!(not(target_os = "macos")) && !fake {
+        return Err(CliError::Setup(
+            "error: model servers are not supported on this platform yet (PLAN §9, Phase 7d)"
+                .into(),
+        ));
+    }
 
     // Resolve and check everything up front so nothing is downloaded for a doomed request.
     let mut plan = Vec::new();
@@ -232,12 +239,14 @@ fn check_ram(engine: Engine, quant: Quant, force: bool) -> Result<(), CliError> 
 
 // ------------------------------------------------------- process helpers
 
+#[cfg(unix)]
 fn pid_alive(pid: u32) -> bool {
     // SAFETY: signal 0 only checks existence.
     let r = unsafe { libc::kill(pid as i32, 0) };
     r == 0 || std::io::Error::last_os_error().raw_os_error() == Some(libc::EPERM)
 }
 
+#[cfg(unix)]
 fn killpg(pid: u32, sig: i32) {
     // SAFETY: plain signal delivery to the process group we created (pgid == pid).
     unsafe {
@@ -245,6 +254,19 @@ fn killpg(pid: u32, sig: i32) {
     }
 }
 
+/// Asks the server's process group to exit (SIGTERM).
+#[cfg(unix)]
+fn terminate(pid: u32) {
+    killpg(pid, libc::SIGTERM);
+}
+
+/// Kills the server's process group outright (SIGKILL).
+#[cfg(unix)]
+fn force_kill(pid: u32) {
+    killpg(pid, libc::SIGKILL);
+}
+
+#[cfg(unix)]
 fn process_command(pid: u32) -> Option<String> {
     let out = Command::new("ps")
         .args(["-o", "command=", "-p", &pid.to_string()])
@@ -252,6 +274,49 @@ fn process_command(pid: u32) -> Option<String> {
         .ok()?;
     let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
     (out.status.success() && !s.is_empty()).then_some(s)
+}
+
+/// The process `pid`, refreshed with its command line.
+#[cfg(windows)]
+fn process<T>(pid: u32, f: impl FnOnce(&sysinfo::Process) -> T) -> Option<T> {
+    use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
+    let pid = Pid::from_u32(pid);
+    let mut sys = System::new();
+    sys.refresh_processes_specifics(
+        ProcessesToUpdate::Some(&[pid]),
+        true,
+        ProcessRefreshKind::nothing().with_cmd(UpdateKind::Always),
+    );
+    sys.process(pid).map(f)
+}
+
+#[cfg(windows)]
+fn pid_alive(pid: u32) -> bool {
+    process(pid, |_| ()).is_some()
+}
+
+/// Windows has no SIGTERM for a console-less child; llama-server is a single process, so stop
+/// it with TerminateProcess.
+#[cfg(windows)]
+fn terminate(pid: u32) {
+    force_kill(pid);
+}
+
+#[cfg(windows)]
+fn force_kill(pid: u32) {
+    process(pid, |p| p.kill());
+}
+
+#[cfg(windows)]
+fn process_command(pid: u32) -> Option<String> {
+    let cmd = process(pid, |p| {
+        p.cmd()
+            .iter()
+            .map(|a| a.to_string_lossy().into_owned())
+            .collect::<Vec<_>>()
+            .join(" ")
+    })?;
+    (!cmd.is_empty()).then_some(cmd)
 }
 
 fn is_ours(info: &ServerInfo) -> bool {
@@ -283,20 +348,21 @@ pub fn running() -> Option<ServerInfo> {
     }
 }
 
-/// Stops a verified server: removes `server.json`, then SIGTERM to its group and SIGKILL after 10 s.
+/// Stops a verified server: removes `server.json`, then SIGTERM to its group and SIGKILL after 10 s
+/// (on Windows, TerminateProcess).
 pub fn stop_server(info: &ServerInfo) {
     // Remove `server.json` first: a scan that loses its connection to this server must be able
     // to tell a user stop (file gone) from a crash (file left behind).
     if let Ok(p) = info_path() {
         let _ = fs::remove_file(p);
     }
-    killpg(info.pid, libc::SIGTERM);
+    terminate(info.pid);
     let deadline = Instant::now() + Duration::from_secs(10);
     while pid_alive(info.pid) && Instant::now() < deadline {
         std::thread::sleep(Duration::from_millis(100));
     }
     if pid_alive(info.pid) {
-        killpg(info.pid, libc::SIGKILL);
+        force_kill(info.pid);
         let end = Instant::now() + Duration::from_secs(3);
         while pid_alive(info.pid) && Instant::now() < end {
             std::thread::sleep(Duration::from_millis(50));
@@ -456,10 +522,19 @@ fn launch(template: &ServerInfo) -> Result<ServerInfo, CliError> {
     let mut cmd = Command::new(&template.argv[0]);
     cmd.args(&template.argv[1..])
         .envs(template.env.iter().map(|(k, v)| (k, v)))
-        .process_group(0)
         .stdin(Stdio::null())
         .stdout(logfile.try_clone().map_err(anyhow::Error::from)?)
         .stderr(logfile);
+    // Own process group, so the terminal's Ctrl-C reaches the scan but not the server.
+    #[cfg(unix)]
+    cmd.process_group(0);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW);
+    }
     let mut child = cmd
         .spawn()
         .map_err(|e| CliError::Server(format!("cannot start {}: {e}", template.argv[0])))?;
@@ -482,7 +557,7 @@ fn launch(template: &ServerInfo) -> Result<ServerInfo, CliError> {
             Ok(info)
         }
         Err(reason) => {
-            killpg(info.pid, libc::SIGKILL);
+            force_kill(info.pid);
             let _ = child.wait();
             let _ = fs::remove_file(&path);
             let tail = log_tail(&log, offset);

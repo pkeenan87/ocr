@@ -2,6 +2,10 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn main() {
+    // The Swift bridge to Apple Vision exists only on macOS (PLAN §9).
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("macos") {
+        return;
+    }
     let manifest = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
     let bridge = manifest.join("bridge");
 

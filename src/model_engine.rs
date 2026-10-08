@@ -9,7 +9,6 @@
 //! the server. A request's timeout clock starts only once it holds both.
 
 use std::fs::{File, OpenOptions};
-use std::os::fd::AsRawFd;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Condvar, Mutex};
@@ -444,8 +443,8 @@ impl Drop for Slot<'_> {
     }
 }
 
-/// Locks one of `slots` files `server.lock`, `server.lock.1`, ... in the state dir with
-/// `flock`, waiting until one is free. With one slot this is a plain blocking exclusive lock.
+/// Locks one of `slots` files `server.lock`, `server.lock.1`, ... in the state dir (an
+/// exclusive `File::lock`), waiting until one is free. With one slot this is a plain blocking exclusive lock.
 /// `None` if the state dir is unusable (the run then relies on its own permits).
 fn lock_server(slots: usize) -> Option<File> {
     let dir = state_dir().ok()?;
@@ -465,19 +464,12 @@ fn lock_server(slots: usize) -> Option<File> {
     };
     if slots <= 1 {
         let f = open(0)?;
-        loop {
-            if unsafe { libc::flock(f.as_raw_fd(), libc::LOCK_EX) } == 0 {
-                return Some(f);
-            }
-            if std::io::Error::last_os_error().kind() != std::io::ErrorKind::Interrupted {
-                return None;
-            }
-        }
+        return f.lock().is_ok().then_some(f);
     }
     loop {
         for k in 0..slots {
             let f = open(k)?;
-            if unsafe { libc::flock(f.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } == 0 {
+            if f.try_lock().is_ok() {
                 return Some(f);
             }
         }

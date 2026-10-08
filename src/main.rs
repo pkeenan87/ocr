@@ -16,11 +16,14 @@ use ocr::vision::Options;
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
-    if supervised(&cli) {
-        return supervisor::supervise();
-    }
-    if supervisor::is_child() {
-        supervisor::exit_with_parent();
+    #[cfg(target_os = "macos")]
+    {
+        if supervised(&cli) {
+            return supervisor::supervise();
+        }
+        if supervisor::is_child() {
+            supervisor::exit_with_parent();
+        }
     }
     let result = run(cli);
     if std::env::var_os("OCR_TEST_VISION_STATS").is_some() {
@@ -38,7 +41,8 @@ fn main() -> ExitCode {
     }
 }
 
-/// Whether this scan runs as a supervised child (see `ocr::supervisor`).
+/// Whether this scan runs as a supervised child (see `ocr::supervisor`; macOS only).
+#[cfg(target_os = "macos")]
 fn supervised(cli: &Cli) -> bool {
     matches!(&cli.command, Command::Scan(a) if !a.dry_run) && !supervisor::is_child()
 }
@@ -79,10 +83,19 @@ fn gate(engine: Engine) -> Result<(), CliError> {
 
 fn setup(args: &SetupArgs) -> Result<(), CliError> {
     let mut cfg = Config::load()?.unwrap_or_default();
-    cfg.mark_apple_installed();
+    if cfg!(not(target_os = "macos")) && args.requested_models().is_empty() {
+        return Err(CliError::Usage(
+            "choose an engine to install, e.g. `ocr server setup --model paddleocr-vl` (Apple Vision is macOS only)".into(),
+        ));
+    }
+    if cfg!(target_os = "macos") {
+        cfg.mark_apple_installed();
+    }
     cfg.save()?;
     std::fs::create_dir_all(ocr::config::state_dir()?).map_err(anyhow::Error::from)?;
-    println!("apple engine ready (no download needed)");
+    if cfg!(target_os = "macos") {
+        println!("apple engine ready (no download needed)");
+    }
 
     server::setup_models(args, &mut cfg)
 }

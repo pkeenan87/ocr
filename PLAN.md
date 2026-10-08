@@ -405,7 +405,7 @@ VRAM is then checked against the engine and quant, with the same tiers as the RA
 | Phase | Deliverable | Done when |
 |---|---|---|
 | **7a. Backend spike** (no Rust, on the RTX 3090 machine) | Pinned llama-server build with each GGUF. Run the four prompts (`OCR:`, `Table Recognition:`, olmOCR v4 YAML, `prompt_layout_all_en`) through llama-server's chat templates. Test `-np 2` with images. Measure VRAM and s/page per engine and quant. Compare output with the Mac's MLX output and the vLLM reference. Send olmOCR a footer-strip crop: does the Bates number come back? (It is trained to drop footers, and option (b) in §9.5 depends on this.) Settle the Vulkan device probe | `docs/spike.md` records: prompt compatibility (same output shape as MLX), whether parallel image slots work, VRAM floors, speeds. Any engine that fails is documented with its blocker |
-| **7b. Build portability** | `build.rs` and the FFI half of `vision.rs` gated on `target_os = "macos"` (types stay shared). `.cargo/config.toml` rustflags moved under `[target.aarch64-apple-darwin]`. Supervisor macOS-only. `flock` → `File::lock`. Process and memory calls → `sysinfo` / job object. `Engine::Apple` hidden off the Mac | `cargo build` and the unit tests pass on Linux (Mac-only tests gated). `cargo check --target x86_64-pc-windows-msvc` passes. Mac tests unchanged |
+| ✅ **7b. Build portability** | `build.rs` and the FFI half of `vision.rs` gated on `target_os = "macos"` (types stay shared). `.cargo/config.toml` rustflags moved under `[target.aarch64-apple-darwin]`. Supervisor macOS-only. `flock` → `File::lock`. Process and memory calls → `sysinfo` / job object. `Engine::Apple` hidden off the Mac | `cargo build` and the unit tests pass on Linux (Mac-only tests gated). `cargo check --target x86_64-pc-windows-msvc` passes. Mac tests unchanged |
 | **7c. Portable document layer** | `Document` trait over `document_info`, `text_layer`, `render_gray`, `render_png_fit`. pdfium + `image`/`tiff` implementation, including multi-page TIFF and rotation | On the non-table fixtures, `regions.rs` makes the same column and band decisions as on the Mac (renders need not be byte-identical). Table pages differ by design: there are no Vision table masks |
 | **7d. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`. Setup downloads the release archive (plus cudart), pdfium and weights. **Engine layer off the Mac:** a non-Mac `side_pass` (bitmap regions, no blocks), `find_bates` on the model's output, Paddle's table-crop branch off, failed pages flagged without fallback text, plus whatever §9.5 decision 1 adds | `paddleocr-vl`, `olmocr` and `dots-ocr` each scan `three_pages.pdf` on the Linux GPU machine. Start, stop, status, restart and the killed-server test pass |
 | **7e. GPU gate** | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
@@ -437,3 +437,20 @@ The options as they were put:
 - This machine (AMD integrated GPU, no NVIDIA driver) can test the build, the document layer, the no-GPU warning and CPU runs. It can't test CUDA.
 - The RTX 3090 machine (`docs/linux-reference-eval.md`) is the Linux acceptance target.
 - Windows acceptance needs a Windows machine with an NVIDIA GPU. None is known to be available yet.
+
+### 9.7 Progress notes
+
+- 2026-10-08, **7b built.** Decisions made in the implementation:
+  - `vision.rs` keeps the shared types and `render_png`. The bridge moved to `vision/apple.rs`. `vision/portable.rs` has stubs that return errors: "not supported yet (7c)" for documents, and "macOS only" for Vision.
+  - **Windows stop is TerminateProcess**, via `sysinfo`, instead of a job object. llama-server is a single process, so there is no process tree to kill. The server starts with `CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW`, the Windows equivalent of `process_group(0)`. `sysinfo` is a Windows-only dependency. Linux keeps the Unix signal and `ps` code.
+  - **Directories:**
+    - State: `dirs::data_local_dir()/ocr`. Unchanged on the Mac; `~/.local/share/ocr` on Linux; `%LOCALAPPDATA%\ocr` on Windows.
+    - Config: `%APPDATA%\ocr` on Windows; unchanged elsewhere.
+  - **Off the Mac:**
+    - `server setup` with no `--model` is a usage error.
+    - A real model install fails with "not supported on this platform yet (7d)". `OCR_FAKE_INSTALL` still works for tests.
+  - **Tests:** the Vision-dependent test files are `#![cfg(target_os = "macos")]`. `tests/cli.rs` uses a fake paddleocr-vl install off the Mac; two of its tests are macOS-only. `tests/server.rs` passes on Linux unchanged.
+  - **How it was checked:**
+    - Linux: build, clippy, and 118 tests pass.
+    - `cargo check --all-targets` is clean for `x86_64-pc-windows-msvc` and `aarch64-apple-darwin`, run with the official rustc 1.98.1 because Arch's rustc rejects official std builds. The macOS check skips the Swift bridge build, so Mac tests still need a run on a Mac.
+  - A `char` range comparison in `markdown.rs` didn't type-check for Windows; it is fixed portably.

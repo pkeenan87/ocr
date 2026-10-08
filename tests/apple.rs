@@ -1,5 +1,8 @@
 //! End-to-end tests of the apple engine. These run real Apple Vision on this Mac.
 
+// Needs Apple Vision (PLAN §9).
+#![cfg(target_os = "macos")]
+
 use std::fs;
 use std::path::{Path, PathBuf};
 

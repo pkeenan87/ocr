@@ -2,6 +2,9 @@
 //! side-pass is real Vision on this Mac. The `#[ignore]`d test at the end drives the real model
 //! (OCR_REAL_MODELS=1).
 
+// Needs Apple Vision (PLAN §9).
+#![cfg(target_os = "macos")]
+
 mod common;
 
 use std::fs;

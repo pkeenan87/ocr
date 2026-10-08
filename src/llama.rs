@@ -286,7 +286,7 @@ fn vulkan_devices(server: &Path) -> Vec<Gpu> {
 }
 
 /// Picks the llama.cpp build (PLAN §9.2): `$OCR_LLAMA_VARIANT` if set; else CUDA for an NVIDIA
-/// driver (13.x when it supports CUDA 13); else, if Vulkan is installed, the Vulkan build is
+/// driver that supports CUDA 12 or later (13.x when it supports CUDA 13); else, if Vulkan is installed, the Vulkan build is
 /// fetched and asked for its devices, and a GPU with its own memory gets it; else the CPU
 /// build. Integrated graphics get the CPU build too: on a Ryzen 9950X's Radeon it was 6x
 /// slower than the CPU (docs/spike.md).
@@ -313,16 +313,23 @@ pub fn probe() -> Result<Hardware, CliError> {
         });
     }
     if let (Some((_, cuda)), Some(gpu)) = (nv, nv_gpu) {
-        let variant = if cuda >= 13 {
-            Variant::Cuda13
-        } else {
-            Variant::Cuda12
-        };
-        return Ok(Hardware {
-            variant,
-            gpu: Some(gpu),
-            reason: format!("NVIDIA driver supports CUDA {cuda}"),
-        });
+        if cuda >= 12 {
+            let variant = if cuda >= 13 {
+                Variant::Cuda13
+            } else {
+                Variant::Cuda12
+            };
+            return Ok(Hardware {
+                variant,
+                gpu: Some(gpu),
+                reason: format!("NVIDIA driver supports CUDA {cuda}"),
+            });
+        }
+        // The CUDA builds need a CUDA 12 driver; an older one may still run Vulkan.
+        eprintln!(
+            "⚠ the NVIDIA driver supports only CUDA {cuda}; llama.cpp's CUDA builds need 12 or later. \
+             Update the driver for the CUDA build; trying Vulkan."
+        );
     }
     if vulkan_present() {
         let server = install(Variant::Vulkan)?;
@@ -478,7 +485,9 @@ pub fn library_dirs(variant: Variant) -> Vec<PathBuf> {
 }
 
 /// Downloads, verifies and unpacks llama.cpp (and the CUDA runtime) for `variant`; returns the
-/// `llama-server` path. Archives are kept in `<state>/downloads` so a re-run skips them.
+/// `llama-server` path. Archives are kept in `<state>/downloads` so a re-run skips them, and a
+/// build already unpacked (its `.unpacked` stamp lists the archives' checksums) is left alone:
+/// unpacking over it would replace the files of a running server (and fails on Windows).
 pub fn install(variant: Variant) -> Result<PathBuf, CliError> {
     let (archive, cudart) = assets(variant).ok_or_else(|| {
         CliError::Setup(format!(
@@ -488,11 +497,24 @@ pub fn install(variant: Variant) -> Result<PathBuf, CliError> {
     })?;
     let downloads = state_dir()?.join("downloads");
     let dir = install_dir(variant)?;
-    for asset in std::iter::once(archive).chain(cudart) {
+    let assets: Vec<Asset> = std::iter::once(archive).chain(cudart).collect();
+    let stamp = dir.join(".unpacked");
+    let want: String = assets.iter().map(|a| format!("{}\n", a.sha256)).collect();
+    if std::fs::read_to_string(&stamp).is_ok_and(|s| s == want)
+        && let Some(server) = server_binary(variant)
+    {
+        println!(
+            "llama.cpp {LLAMA_BUILD} {}: already installed",
+            variant.name()
+        );
+        return Ok(server);
+    }
+    for asset in &assets {
         let file = downloads.join(asset.name);
-        fetch::download(&release_url(&asset), &file, asset.sha256, asset.name)?;
+        fetch::download(&release_url(asset), &file, asset.sha256, asset.name)?;
         fetch::extract(&file, &dir)?;
     }
+    std::fs::write(&stamp, want).map_err(anyhow::Error::from)?;
     server_binary(variant).ok_or_else(|| {
         CliError::Setup(format!(
             "error: {} not found after unpacking llama.cpp into {}",
@@ -571,15 +593,26 @@ pub fn install_weights(gguf: &Gguf) -> Result<(), CliError> {
 
 // ---------------------------------------------------------------- server argv
 
+/// Highest `--dpi` the server's context is sized for (paddleocr-vl and dots-ocr; olmOCR images
+/// are a fixed 1288 px). The server is started without knowing the scans' DPI, so it is sized
+/// for this one; a scan above it is warned that long pages may be cut short.
+pub const MAX_DPI: u32 = 300;
+
 /// Prompt tokens to budget per request on top of the reply (`engines::limits`), so the KV cache
 /// is sized for the work rather than the model's full trained context (131072 tokens per slot
-/// for PaddleOCR-VL by default). Measured: PaddleOCR-VL 1253 at 150 DPI (docs/spike.md),
-/// olmOCR about 1790 at 1288 px; dots about 5035 at 200 DPI (fewer at its 100 DPI default).
+/// for PaddleOCR-VL by default). Image tokens grow with the square of the DPI, so the budget is
+/// the measured count scaled to `MAX_DPI`, plus 15%. Measured (docs/spike.md): PaddleOCR-VL
+/// 1253 at 150 DPI; dots 1386 at 100 DPI (5035 at 200, so the square overestimates); olmOCR
+/// about 1790 at 1288 px.
 fn prompt_budget(engine: Engine) -> u32 {
+    let scaled = |tokens: u32, dpi: u32| {
+        let r = f64::from(MAX_DPI) / f64::from(dpi);
+        (f64::from(tokens) * r * r * 1.15).ceil() as u32
+    };
     match engine {
         Engine::Olmocr => 2048,
-        Engine::PaddleocrVl => 4096,
-        _ => 6144,
+        Engine::PaddleocrVl => scaled(1253, 150),
+        _ => scaled(1386, 100),
     }
 }
 
@@ -697,10 +730,12 @@ mod tests {
 
     #[test]
     fn context_is_sized_per_slot() {
-        // Paddle: 8192 retry tokens + 4096 prompt = 12288 per slot.
-        assert_eq!(ctx_size(Engine::PaddleocrVl, 1), 12288);
-        assert_eq!(ctx_size(Engine::PaddleocrVl, 2), 24576);
+        // Paddle: 8192 retry tokens + 5764 prompt (1253 x 4 x 1.15, 300 DPI) -> 14336 per slot.
+        assert_eq!(ctx_size(Engine::PaddleocrVl, 1), 14336);
+        assert_eq!(ctx_size(Engine::PaddleocrVl, 2), 28672);
         assert_eq!(ctx_size(Engine::Olmocr, 1), 10240);
+        // dots: 8192 + 14346 (1386 x 9 x 1.15) -> 23552.
+        assert_eq!(ctx_size(Engine::DotsOcr, 1), 23552);
         let args = server_args(
             Path::new("m.gguf"),
             Path::new("p.gguf"),

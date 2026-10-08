@@ -171,11 +171,15 @@ impl ScanEngine for Olmocr {
             }
             other => other,
         }?;
-        if cfg!(not(target_os = "macos"))
-            && prep_bates_missing(prep)
-            && markdown::find_bates_in_text(&out.body).is_none()
-        {
-            out.bates = corner_bates(ctx, path, prep, s)?;
+        // Corner requests cost two model calls a page, so a document stops getting them once
+        // its first pages showed no Bates numbers (`Ctx::want_bates_corners`).
+        if cfg!(not(target_os = "macos")) && prep_bates_missing(prep) {
+            if markdown::find_bates_in_text(&out.body).is_some() {
+                ctx.note_bates(path, true);
+            } else if ctx.want_bates_corners(path) {
+                out.bates = corner_bates(ctx, path, prep, s)?;
+                ctx.note_bates(path, out.bates.is_some());
+            }
         }
         Ok(out)
     }

@@ -28,6 +28,13 @@ unsafe extern "C" {
         height: *mut i32,
     ) -> *mut u8;
     fn ocr_bridge_free_bytes(ptr: *mut u8);
+    fn ocr_bridge_render_png(
+        path: *const c_char,
+        page_index: i32,
+        dpi: i32,
+        crop: *const f64,
+        out_len: *mut usize,
+    ) -> *mut u8;
 }
 
 /// One list entry; the marker is kept apart from the text.
@@ -224,6 +231,32 @@ pub fn render_gray(path: &Path, page_index: usize, dpi: u32) -> Result<GrayImage
         height,
         pixels,
     })
+}
+
+/// Renders a page (optionally cropped to a normalized top-left [x, y, w, h]) as PNG bytes.
+pub fn render_png(
+    path: &Path,
+    page_index: usize,
+    dpi: u32,
+    crop: Option<[f64; 4]>,
+) -> Result<Vec<u8>> {
+    let c_path = cstr(&path.to_string_lossy())?;
+    let mut len = 0usize;
+    let ptr = unsafe {
+        ocr_bridge_render_png(
+            c_path.as_ptr(),
+            page_index as i32,
+            dpi as i32,
+            crop.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
+            &mut len,
+        )
+    };
+    if ptr.is_null() || len == 0 {
+        bail!("cannot render page {} as PNG", page_index + 1);
+    }
+    let bytes = unsafe { std::slice::from_raw_parts(ptr, len) }.to_vec();
+    unsafe { ocr_bridge_free_bytes(ptr) };
+    Ok(bytes)
 }
 
 /// Recognize one page image. Blocks the calling thread; safe to call from many threads at once.

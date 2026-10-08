@@ -111,10 +111,16 @@ pub struct SetupArgs {
     /// Install every engine
     #[arg(long)]
     pub all: bool,
+    /// Model release (paddleocr-vl: 1.6|1.5|1.0, dots-ocr: dots.mocr|dots.ocr)
+    #[arg(long, value_name = "V")]
+    pub model_version: Option<String>,
     #[arg(long, value_enum)]
     pub quant: Option<Quant>,
     #[arg(long)]
     pub non_interactive: bool,
+    /// Install despite the RAM check
+    #[arg(long)]
+    pub force: bool,
 }
 
 impl SetupArgs {
@@ -132,8 +138,17 @@ pub struct StartArgs {
     /// Engine to serve (default: the only installed model engine)
     #[arg(long, value_enum)]
     pub model: Option<Engine>,
+    /// Model release (default: the one recorded by setup)
+    #[arg(long, value_name = "V")]
+    pub model_version: Option<String>,
+    /// Quantization (default: the one recorded by setup)
+    #[arg(long, value_enum)]
+    pub quant: Option<Quant>,
     #[arg(long, default_value_t = 8080)]
     pub port: u16,
+    /// Replace a running server of a different engine or repo
+    #[arg(long)]
+    pub force: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]

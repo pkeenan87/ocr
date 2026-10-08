@@ -7,6 +7,7 @@ use ocr::config::Config;
 use ocr::error::CliError;
 use ocr::input::{self, Plan};
 use ocr::pipeline::{self, Settings};
+use ocr::server;
 use ocr::vision::Options;
 
 fn main() -> ExitCode {
@@ -24,10 +25,8 @@ fn run(cli: Cli) -> Result<(), CliError> {
         Command::Server { command } => match command {
             ServerCommand::Setup(args) => setup(&args),
             ServerCommand::Start(args) => start(&args),
-            ServerCommand::Stop | ServerCommand::Status => {
-                println!("no server running");
-                Ok(())
-            }
+            ServerCommand::Stop => server::stop(),
+            ServerCommand::Status => server::status(),
         },
         Command::Scan(args) => scan(&args),
     }
@@ -62,12 +61,7 @@ fn setup(args: &SetupArgs) -> Result<(), CliError> {
     std::fs::create_dir_all(ocr::config::state_dir()?).map_err(anyhow::Error::from)?;
     println!("apple engine ready (no download needed)");
 
-    if args.requested_models().is_empty() {
-        return Ok(());
-    }
-    Err(CliError::Setup(
-        "model engine installation is not implemented yet (Phase 4)".into(),
-    ))
+    server::setup_models(args, &mut cfg)
 }
 
 fn start(args: &StartArgs) -> Result<(), CliError> {
@@ -81,7 +75,7 @@ fn start(args: &StartArgs) -> Result<(), CliError> {
         None => default_server_model()?,
     };
     gate(model)?;
-    Err(CliError::Server("not implemented yet (Phase 4)".into()))
+    server::start(args, model)
 }
 
 /// With no `--model`, serve the one installed model engine; otherwise ask the user to choose.
@@ -154,12 +148,30 @@ fn scan(args: &ScanArgs) -> Result<(), CliError> {
         return Ok(());
     }
     if args.model != Engine::Apple {
-        return Err(CliError::Server(format!(
-            "model server not running; run 'ocr server start --model {}'",
-            args.model.name()
-        )));
+        return model_gate(args);
     }
     run_apple(args, &plan)
+}
+
+/// Model-engine scan gate (PLAN §3): the right server must be running.
+fn model_gate(args: &ScanArgs) -> Result<(), CliError> {
+    let name = args.model.name();
+    let Some(info) = server::running() else {
+        return Err(CliError::Server(format!(
+            "model server not running; run 'ocr server start --model {name}'"
+        )));
+    };
+    let (_, _, repo) = server::resolve_model(args.model, args.model_version.as_deref(), None)?;
+    if info.engine != name || info.repo != repo {
+        return Err(CliError::Server(format!(
+            "running server is {} ({}), but the scan needs {name} ({repo}); \
+             run 'ocr server start --model {name} --force'",
+            info.engine, info.repo
+        )));
+    }
+    Err(CliError::Server(
+        "model scanning arrives with the Paddle engine".into(),
+    ))
 }
 
 /// Runs the apple pipeline over every planned file; failed pages or files make the run partial.

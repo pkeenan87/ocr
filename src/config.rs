@@ -15,9 +15,18 @@ pub const CONFIG_VERSION: u32 = 1;
 pub struct EngineEntry {
     pub installed: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub repo: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quant: Option<String>,
+}
+
+/// Managed Python environment versions recorded by setup.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Runtime {
+    pub python: String,
+    pub mlx_vlm: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -26,6 +35,8 @@ pub struct Config {
     pub created_at: String,
     #[serde(default)]
     pub engines: BTreeMap<String, EngineEntry>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub runtime: Option<Runtime>,
 }
 
 /// Directory holding `config.toml`: `$OCR_CONFIG_DIR` or `~/.config/ocr`.
@@ -56,6 +67,7 @@ impl Config {
             version: CONFIG_VERSION,
             created_at: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
             engines: BTreeMap::new(),
+            runtime: None,
         }
     }
 
@@ -112,6 +124,7 @@ mod tests {
             "olmocr".into(),
             EngineEntry {
                 installed: true,
+                version: Some("v".into()),
                 repo: Some("r".into()),
                 quant: Some("8bit".into()),
             },

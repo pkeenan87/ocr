@@ -343,6 +343,40 @@ public func ocr_bridge_render_gray(
     }
 }
 
+/// Renders a page exactly as `recognize_page` does, optionally cropped to a normalized
+/// top-left-origin rect [x, y, w, h], and encodes it as PNG for model engines.
+/// Release with ocr_bridge_free_bytes. Null on failure.
+@_cdecl("ocr_bridge_render_png")
+public func ocr_bridge_render_png(
+    _ path: UnsafePointer<CChar>, _ pageIndex: Int32, _ dpi: Int32,
+    _ crop: UnsafePointer<Double>?, _ outLen: UnsafeMutablePointer<Int>?
+) -> UnsafeMutablePointer<UInt8>? {
+    outLen?.pointee = 0
+    let p = String(cString: path)
+    do {
+        var image = isPDF(p)
+            ? try renderPDFPage(path: p, index: Int(pageIndex), dpi: Double(dpi))
+            : try loadImage(path: p, index: Int(pageIndex), dpi: Double(dpi))
+        if let c = crop {
+            let w = Double(image.width), h = Double(image.height)
+            let rect = CGRect(x: c[0] * w, y: c[1] * h, width: c[2] * w, height: c[3] * h).integral
+            guard let cropped = image.cropping(to: rect) else { return nil }
+            image = cropped
+        }
+        let data = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(data, "public.png" as CFString, 1, nil) else {
+            return nil
+        }
+        CGImageDestinationAddImage(dest, image, nil)
+        guard CGImageDestinationFinalize(dest), let buffer = malloc(data.length) else { return nil }
+        memcpy(buffer, data.bytes, data.length)
+        outLen?.pointee = data.length
+        return buffer.assumingMemoryBound(to: UInt8.self)
+    } catch {
+        return nil
+    }
+}
+
 @_cdecl("ocr_bridge_free_bytes")
 public func ocr_bridge_free_bytes(_ ptr: UnsafeMutablePointer<UInt8>?) {
     free(ptr)

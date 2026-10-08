@@ -153,3 +153,21 @@ The checks are exact matches for the case number, all four dollar amounts and th
 | 4-up **whole page, uncropped** | 100/100 |
 
 **Conclusion.** Region detection cannot fix Apple Vision on transcripts. The recognizer itself loses line numbers and Q/A markers, which are what page:line citation depends on. PaddleOCR-VL handles them with no layout help.
+
+## Paddle engine spike (2026-10-07, production render path)
+
+**Setup.** PNGs come from `examples/render_png`, which uses the bridge's `ocr_bridge_render_png`. The model is `PaddlePaddle/PaddleOCR-VL-1.6` (bf16), with prompt `OCR:` and `--max-num-seqs 1`. Scripts: `spike/paddle_spike.py`, `spike/paddle_crops.py`.
+
+1. **Legal fixtures, full page.** `legal.pdf` and `legal_scan.pdf` at 150, 200 and 300 DPI: the case number, all 4 amounts and the Bates number are exact. Paddle shows **no `$`→`S` error**, so the currency fix stays Apple-only.
+2. **Columns, full page.**
+   - `two_column.pdf`: 30/30 in order.
+   - Held-out seeds 0–2: perfect on `two_col_title_footer`, `signature_block` and `block_quote`, and 80–100% on `lower_half_columns`.
+   - **`narrow_unequal` collapses: 10–28 of 28–42 lines.** Paddle garbles the dense narrow columns and then loops ("…obligation in the part of the case under the…") until `max_tokens` 4096. Seven of the roughly 40 requests hit 4096 tokens.
+   - **With the Phase 2b column crops, the same page gives 42/42 in order and both requests finish with `stop`.** So Paddle uses the 2b regions too.
+3. **Table bands.** On `legal_scan.pdf`, bands above and below the table run with `OCR:` and the table crop runs with `Table Recognition:`. All tokens are exact. The table comes back as OTSL (`<fcel>cell…<nl>`), which converts to GFM. Banding drops the blank lines between paragraphs in the band text.
+4. **Timing.**
+   - Prefill is about 990 tok/s; a full page is about 1253 prompt tokens, so about 1.3 s.
+   - Decode is about 250 tok/s normally and about 218 tok/s on long outputs.
+   - A normal page generates 150–800 tokens, 1–4 s in total.
+   - A runaway to 4096 tokens takes about 19 s.
+   - **Timeout:** 45 s per request, derived as 2 × (prefill + 4096/218).

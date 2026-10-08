@@ -139,15 +139,18 @@ fn setup_is_idempotent_and_writes_config() {
 }
 
 #[test]
-fn setup_with_model_engine_is_not_implemented() {
+fn setup_rejects_unavailable_quant_and_version() {
     let e = Env::new();
-    for args in [&["--model", "olmocr"][..], &["--all", "--non-interactive"]] {
+    for args in [
+        &["--model", "paddleocr-vl", "--quant", "8bit"][..],
+        &["--model", "olmocr", "--model-version", "1"],
+        &["--model", "dots-ocr", "--model-version", "9"],
+    ] {
         e.cmd()
             .args(["server", "setup"])
             .args(args)
             .assert()
-            .code(2)
-            .stderr(predicate::str::contains("not implemented yet (Phase 4)"));
+            .code(2);
     }
     // The apple config is still written.
     assert!(e.config.path().join("config.toml").exists());

@@ -11,16 +11,31 @@ unsafe extern "C" {
         path: *const c_char,
         options_json: *const c_char,
     ) -> *mut c_char;
+    fn ocr_bridge_document_info(path: *const c_char) -> *mut c_char;
+    fn ocr_bridge_text_layer(path: *const c_char, page_index: i32) -> *mut c_char;
+    fn ocr_bridge_recognize_page(
+        path: *const c_char,
+        page_index: i32,
+        dpi: i32,
+        options_json: *const c_char,
+    ) -> *mut c_char;
     fn ocr_bridge_free(ptr: *mut c_char);
 }
 
-#[derive(Debug, Deserialize)]
+/// One list entry; the marker is kept apart from the text.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ListItem {
+    pub marker: String,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct Block {
     pub kind: String,
     /// Normalized [x, y, w, h], origin top-left.
     pub bbox: [f64; 4],
     pub text: Option<String>,
-    pub items: Option<Vec<String>>,
+    pub items: Option<Vec<ListItem>>,
     pub rows: Option<Vec<Vec<String>>>,
 }
 
@@ -32,6 +47,9 @@ pub struct Options {
     pub auto_detect_language: bool,
     pub language_correction: bool,
     pub custom_words: Vec<String>,
+    /// Normalized crop [x, y, w, h] (top-left origin) of the rendered page to recognize.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub crop: Option<[f64; 4]>,
 }
 
 impl Default for Options {
@@ -39,8 +57,10 @@ impl Default for Options {
         Self {
             languages: vec!["en-US".into()],
             auto_detect_language: false,
-            language_correction: true,
+            // Correction turned `cv` into `cr` in the spike; no DPI/fixture difference since (spike matrix).
+            language_correction: false,
             custom_words: Vec::new(),
+            crop: None,
         }
     }
 }
@@ -50,7 +70,118 @@ struct PageOut {
     ok: bool,
     error: Option<String>,
     #[serde(default)]
+    width: u32,
+    #[serde(default)]
+    height: u32,
+    #[serde(default)]
     blocks: Vec<Block>,
+}
+
+/// Recognized content of one rendered page.
+#[derive(Debug)]
+pub struct Page {
+    /// Rendered bitmap size in pixels.
+    pub width: u32,
+    pub height: u32,
+    pub blocks: Vec<Block>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum DocKind {
+    Pdf,
+    Image,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DocInfo {
+    pub kind: DocKind,
+    pub pages: usize,
+}
+
+#[derive(Debug, Deserialize)]
+struct InfoOut {
+    ok: bool,
+    error: Option<String>,
+    kind: Option<DocKind>,
+    #[serde(default)]
+    pages: usize,
+}
+
+#[derive(Debug, Deserialize)]
+struct TextOut {
+    ok: bool,
+    error: Option<String>,
+    #[serde(default)]
+    text: String,
+}
+
+fn cstr(s: &str) -> Result<CString> {
+    CString::new(s.as_bytes()).context("string contains NUL")
+}
+
+/// Takes ownership of a bridge string and frees it.
+unsafe fn take(ptr: *mut c_char) -> Result<String> {
+    if ptr.is_null() {
+        bail!("vision bridge returned null");
+    }
+    let s = unsafe { CStr::from_ptr(ptr) }
+        .to_string_lossy()
+        .into_owned();
+    unsafe { ocr_bridge_free(ptr) };
+    Ok(s)
+}
+
+/// Page count and kind (PDF or image). Multi-page TIFF reports its frame count.
+pub fn document_info(path: &Path) -> Result<DocInfo> {
+    let c_path = cstr(&path.to_string_lossy())?;
+    let json = unsafe { take(ocr_bridge_document_info(c_path.as_ptr()))? };
+    let info: InfoOut = serde_json::from_str(&json).context("bad JSON from vision bridge")?;
+    match (info.ok, info.kind) {
+        (true, Some(kind)) => Ok(DocInfo {
+            kind,
+            pages: info.pages,
+        }),
+        _ => bail!(
+            "{}",
+            info.error.unwrap_or_else(|| "unreadable document".into())
+        ),
+    }
+}
+
+/// Embedded text of a PDF page (0-based index); empty for images.
+pub fn text_layer(path: &Path, page_index: usize) -> Result<String> {
+    let c_path = cstr(&path.to_string_lossy())?;
+    let json = unsafe { take(ocr_bridge_text_layer(c_path.as_ptr(), page_index as i32))? };
+    let out: TextOut = serde_json::from_str(&json).context("bad JSON from vision bridge")?;
+    if !out.ok {
+        bail!("text layer: {}", out.error.unwrap_or_default());
+    }
+    Ok(out.text)
+}
+
+/// Render page `page_index` (0-based) at `dpi` and recognize it. Opens the document on every
+/// call, blocks the calling thread, and is safe to call from many threads at once.
+pub fn recognize_page(path: &Path, page_index: usize, dpi: u32, options: &Options) -> Result<Page> {
+    let c_path = cstr(&path.to_string_lossy())?;
+    let c_opts = cstr(&serde_json::to_string(options)?)?;
+    let json = unsafe {
+        take(ocr_bridge_recognize_page(
+            c_path.as_ptr(),
+            page_index as i32,
+            dpi as i32,
+            c_opts.as_ptr(),
+        ))?
+    };
+    let page: PageOut = serde_json::from_str(&json).context("bad JSON from vision bridge")?;
+    if !page.ok {
+        bail!("vision: {}", page.error.unwrap_or_default());
+    }
+    Ok(Page {
+        width: page.width,
+        height: page.height,
+        blocks: page.blocks,
+    })
 }
 
 /// Recognize one page image. Blocks the calling thread; safe to call from many threads at once.
@@ -58,13 +189,10 @@ pub fn recognize_document(image: &Path, options: &Options) -> Result<Vec<Block>>
     let c_path = CString::new(image.to_string_lossy().as_bytes()).context("path contains NUL")?;
     let c_opts = CString::new(serde_json::to_string(options)?)?;
     let json = unsafe {
-        let ptr = ocr_bridge_recognize_document(c_path.as_ptr(), c_opts.as_ptr());
-        if ptr.is_null() {
-            bail!("vision bridge returned null");
-        }
-        let s = CStr::from_ptr(ptr).to_string_lossy().into_owned();
-        ocr_bridge_free(ptr);
-        s
+        take(ocr_bridge_recognize_document(
+            c_path.as_ptr(),
+            c_opts.as_ptr(),
+        ))?
     };
     let page: PageOut = serde_json::from_str(&json).context("bad JSON from vision bridge")?;
     if !page.ok {

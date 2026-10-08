@@ -194,13 +194,19 @@ pub struct ScanArgs {
     /// Omit per-page markers
     #[arg(long, overrides_with = "page_markers")]
     pub no_page_markers: bool,
+    /// Keep `S` where Vision misread `$` in amounts such as S22,375.50
+    #[arg(long)]
+    pub no_currency_fix: bool,
+    /// Omit the YAML header
+    #[arg(long)]
+    pub no_front_matter: bool,
     #[arg(long, value_enum, default_value = "auto")]
     pub use_text_layer: TextLayer,
     /// Strip pleading line numbers and running headers
     #[arg(long)]
     pub legal_cleanup: bool,
-    /// Override render resolution
-    #[arg(long, value_name = "N", value_parser = clap::value_parser!(u32).range(1..))]
+    /// Render resolution, 72-600 (default 200)
+    #[arg(long, value_name = "N", value_parser = clap::value_parser!(u32).range(72..=600))]
     pub dpi: Option<u32>,
     /// Total pages in flight across the whole run
     #[arg(long, visible_alias = "parallel", value_name = "N", value_parser = parse_jobs)]
@@ -214,9 +220,17 @@ pub struct ScanArgs {
     pub dry_run: bool,
 }
 
+/// Default render resolution for the apple engine.
+pub const DEFAULT_DPI: u32 = 200;
+
 impl ScanArgs {
     pub fn page_markers(&self) -> bool {
         !self.no_page_markers
+    }
+
+    /// Effective `--dpi`: explicit value, else 200 (docs/spike.md).
+    pub fn effective_dpi(&self) -> u32 {
+        self.dpi.unwrap_or(DEFAULT_DPI)
     }
 
     /// Effective `--jobs`: explicit value, else performance cores (apple) or 1 (model engines).

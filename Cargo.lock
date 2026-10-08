@@ -427,6 +427,7 @@ dependencies = [
  "clap",
  "dirs",
  "predicates",
+ "regex",
  "serde",
  "serde_json",
  "tempfile",

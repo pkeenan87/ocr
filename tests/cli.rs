@@ -249,12 +249,10 @@ fn single_file_errors() {
         .assert()
         .code(2);
     e.cmd()
-        .args(["scan", "--input-file", "a.pdf", "--overwrite"])
+        .args(["scan", "--dry-run", "--input-file", "a.pdf", "--overwrite"])
         .assert()
         .success()
-        .stdout(predicate::str::contains(
-            "OCR pipeline not implemented yet (Phase 2)",
-        ));
+        .stdout(predicate::str::contains("a.pdf -> a.md"));
 }
 
 #[test]

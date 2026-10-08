@@ -6,6 +6,8 @@ use ocr::cli::{Cli, Command, Engine, ScanArgs, ServerCommand, SetupArgs, StartAr
 use ocr::config::Config;
 use ocr::error::CliError;
 use ocr::input::{self, Plan};
+use ocr::pipeline::{self, Settings};
+use ocr::vision::Options;
 
 fn main() -> ExitCode {
     match run(Cli::parse()) {
@@ -157,9 +159,44 @@ fn scan(args: &ScanArgs) -> Result<(), CliError> {
             args.model.name()
         )));
     }
-    println!("OCR pipeline not implemented yet (Phase 2)");
-    print_mapping(&plan);
-    Ok(())
+    run_apple(args, &plan)
+}
+
+/// Runs the apple pipeline over every planned file; failed pages or files make the run partial.
+fn run_apple(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
+    let settings = Settings {
+        dpi: args.effective_dpi(),
+        jobs: args.effective_jobs(),
+        pages: args.pages.clone(),
+        text_layer: args.use_text_layer,
+        page_markers: args.page_markers(),
+        front_matter: !args.no_front_matter,
+        currency_fix: !args.no_currency_fix,
+        quiet: args.quiet,
+        options: Options::default(),
+    };
+    let mut problems = Vec::new();
+    for item in &plan.items {
+        match pipeline::run_file(item, &settings) {
+            Ok(report) if report.flagged.is_empty() => {}
+            Ok(report) => problems.push(format!(
+                "{}: {} of {} pages failed OCR (pages {:?})",
+                item.input.display(),
+                report.flagged.len(),
+                report.pages,
+                report.flagged
+            )),
+            Err(e) => problems.push(format!("{}: {e:#}", item.input.display())),
+        }
+    }
+    if problems.is_empty() {
+        Ok(())
+    } else {
+        Err(CliError::Partial(format!(
+            "completed with problems:\n  {}",
+            problems.join("\n  ")
+        )))
+    }
 }
 
 fn print_mapping(plan: &Plan) {

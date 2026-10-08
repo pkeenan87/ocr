@@ -50,6 +50,7 @@ options:
   --overwrite                                  (discard existing output + checkpoints; otherwise re-runs auto-resume / skip finished files)
   --page-markers / --no-page-markers           (default: on)
   --no-front-matter                            (omit the YAML header, §6)
+  --no-currency-fix                            (keep Vision's raw `S1,234.56`; default fixes it to `$1,234.56`)
   --dry-run                                    (print the input → output mapping and exit)
   --use-text-layer auto|never|always           (born-digital PDFs: use embedded text instead of OCR)
   --legal-cleanup                              (opt-in, off by default: strip pleading line numbers / running headers)
@@ -155,6 +156,19 @@ olmOCR drops page headers, footers and Bates numbers, and the other engines labe
 - the table regions that PaddleOCR-VL crops;
 - the fallback text if the model fails.
 
+### 4.4 Apple layout handling (built in Phase 2)
+
+- **Reading order** is a recursive XY-cut over the block bboxes (`src/layout.rs`). Vision's own paragraph order is not trusted.
+  - It applies an x-cut only when each side covers at least 30% of the node's height.
+  - Otherwise it cuts at the widest y-gap.
+- **Column-aware second pass.**
+  - Vision merges lines from different columns that share a baseline, which garbles both columns.
+  - When `find_columns` detects at least 2 columns, each column is cropped and re-recognized on its own. The crop runs to the gutter midpoint, with 10% vertical padding.
+  - This costs about 2× Vision time on those pages only. Pages are listed in `column_split_pages`.
+  - The thresholds were tuned on the fixtures only, so validate them on real contracts and 4-up transcripts.
+- **Pleading margin line numbers** (1–2 digits in the left 12% of the page) are dropped from the body by default. Vision reads them only partially, and they break up the paragraphs.
+- **Currency fix.** On Vision pages, `S` before a money pattern (`\bS(\d{1,3}(,\d{3})+|\d+)\.\d{2}\b`) becomes `$`. Fixes are counted per page in `currency_fixes`.
+
 ## 5. Making it robust for hundreds of pages
 
 1. **Stream, don't load.** Pages are rendered one at a time into a bounded channel, so memory stays flat whether the document has 10 pages or 2,000.
@@ -224,7 +238,7 @@ The YAML front-matter can be turned off with `--no-front-matter`.
 | ✅ **0a. Model spike** (no Rust) | Throwaway `uv` env with mlx-vlm. Run `mlx_vlm.server` with each engine on one test page. Send 2 concurrent requests and time them. Confirm the dots.mocr lineage and its prompts | Each engine returns usable text, or the blocker is documented. Concurrency behavior and the `--jobs` default are recorded in `docs/spike.md` |
 | ✅ **0b. Bridge spike** | Install rustup. `cargo new ocr`. Swift `OcrBridge` static lib. A **real `RecognizeDocumentsRequest`** on a test image, called from a Rust worker thread through FFI | Rust prints recognized paragraphs and tables from Vision. If Option A fails, Option B (helper binary) works |
 | ✅ **1. CLI + config + setup gate** | Full clap tree, config file, setup (Apple path), gate warnings, exit codes | `ocr scan` before setup: `apple` warns and continues, model engines exit 2. Argument conflicts are rejected |
-| **2. Apple engine end-to-end** | Swift bridge gains page count, per-page text layer, and render-page-*n*-then-Vision (white-filled `CGContext`, no temp PNGs, one document per worker, multi-page TIFF via ImageIO). Vision → Markdown, `--no-front-matter`, file writing. **Reading order:** keep Vision's paragraph order and insert tables/lists before the first paragraph below them; a global top-left sort interleaves columns | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files. On the clean fixture **and** on a degraded-scan fixture (image-only, skew, noise, JPEG), the case number and every dollar amount are exact through the production render path. This re-checks the 200 DPI default. Two-column text comes out column by column |
+| ✅ **2. Apple engine end-to-end** | Swift bridge gains page count, per-page text layer, and render-page-*n*-then-Vision (white-filled `CGContext`, no temp PNGs, one document per worker, multi-page TIFF via ImageIO). Vision → Markdown, `--no-front-matter`, file writing. **Reading order:** keep Vision's paragraph order and insert tables/lists before the first paragraph below them; a global top-left sort interleaves columns | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files. On the clean fixture **and** on a degraded-scan fixture (image-only, skew, noise, JPEG), the case number and every dollar amount are exact through the production render path. This re-checks the 200 DPI default. Two-column text comes out column by column |
 | **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings |
 | **4. Server management** | `setup` (venv, weights, RAM check), start/stop/status/restart, readiness probe | Start, stop and status work for each engine. A killed server is detected and restarted |
 | **5. Model engines** | olmOCR (v4 prompt), dots (layout JSON → Markdown), PaddleOCR-VL (full page + table crops with OTSL→GFM), Apple side-pass, timeout/restart, truncation, loop detection, fallback | Each engine passes the eval set |

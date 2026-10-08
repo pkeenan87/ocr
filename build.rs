@@ -51,7 +51,14 @@ fn main() {
     );
     println!("cargo:rustc-link-arg=-Wl,-rpath,/usr/lib/swift");
 
-    for fw in ["Foundation", "Vision", "CoreGraphics", "CoreML", "ImageIO"] {
+    for fw in [
+        "Foundation",
+        "Vision",
+        "CoreGraphics",
+        "CoreML",
+        "ImageIO",
+        "PDFKit",
+    ] {
         println!("cargo:rustc-link-lib=framework={fw}");
     }
 }

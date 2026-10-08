@@ -51,3 +51,46 @@ page.render(scale=300 / 72).to_pil().save(f"{out}/legal_300dpi.png")
 img = page.render(scale=1288 / (H)).to_pil()
 img.save(f"{out}/legal_1288.png")
 print(img.size)
+
+# --- Phase 2 fixtures -------------------------------------------------------
+import io, random
+from PIL import Image, ImageFilter
+from reportlab.lib.utils import ImageReader
+
+# Degraded scan: image-only PDF, 300 DPI, 0.5° skew, noise, blur, JPEG q=55.
+random.seed(7)
+scan = pdfium.PdfDocument(f"{out}/legal.pdf")[0].render(scale=300 / 72).to_pil().convert("L")
+scan = scan.rotate(0.5, resample=Image.BICUBIC, expand=False, fillcolor=255)
+px = scan.load()
+w, h = scan.size
+for _ in range(w * h // 150):
+    x, y = random.randrange(w), random.randrange(h)
+    px[x, y] = random.choice((0, 90, 180))
+scan = scan.filter(ImageFilter.GaussianBlur(0.6))
+buf = io.BytesIO(); scan.save(buf, "JPEG", quality=55); buf.seek(0)
+c = canvas.Canvas(f"{out}/legal_scan.pdf", pagesize=letter)
+c.drawImage(ImageReader(buf), 0, 0, W, H)
+c.save()
+
+# Two-column page: each column is a numbered sequence so order is checkable.
+c = canvas.Canvas(f"{out}/two_column.pdf", pagesize=letter)
+c.setFont("Times-Bold", 14)
+c.drawCentredString(W / 2, H - 60, "ASSET PURCHASE AGREEMENT")
+c.setFont("Times-Roman", 11)
+left = [f"Left column sentence {i} concerns the transfer of assets." for i in range(1, 16)]
+right = [f"Right column sentence {i} concerns the purchase price." for i in range(1, 16)]
+for i, (l, r) in enumerate(zip(left, right)):
+    yy = H - 100 - i * 30
+    for xx, sent in ((54, l), (W / 2 + 18, r)):
+        head, tail = sent.split(" concerns ")
+        c.drawString(xx, yy, head + " concerns"); c.drawString(xx, yy - 13, tail)
+c.save()
+
+# Multi-page TIFF (2 frames) and a 3-page PDF combining the fixtures.
+frames = [pdfium.PdfDocument(f"{out}/{n}")[0].render(scale=200 / 72).to_pil().convert("L") for n in ("legal.pdf", "two_column.pdf")]
+frames[0].save(f"{out}/multipage.tif", save_all=True, append_images=frames[1:], compression="tiff_lzw")
+merged = pdfium.PdfDocument.new()
+for n in ("legal.pdf", "two_column.pdf", "legal_scan.pdf"):
+    merged.import_pages(pdfium.PdfDocument(f"{out}/{n}"))
+merged.save(f"{out}/three_pages.pdf")
+print("phase 2 fixtures written")

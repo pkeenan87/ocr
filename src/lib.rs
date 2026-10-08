@@ -4,4 +4,7 @@ pub mod cli;
 pub mod config;
 pub mod error;
 pub mod input;
+pub mod layout;
+pub mod markdown;
+pub mod pipeline;
 pub mod vision;

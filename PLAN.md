@@ -268,7 +268,7 @@ The YAML front-matter can be turned off with `--no-front-matter`.
 | ✅ **1. CLI + config + setup gate** | Full clap tree, config file, setup (Apple path), gate warnings, exit codes | `ocr scan` before setup: `apple` warns and continues, model engines exit 2. Argument conflicts are rejected |
 | ✅ **2. Apple engine end-to-end** | Swift bridge gains page count, per-page text layer, and render-page-*n*-then-Vision (white-filled `CGContext`, no temp PNGs, one document per worker, multi-page TIFF via ImageIO). Vision → Markdown, `--no-front-matter`, file writing. **Reading order:** keep Vision's paragraph order and insert tables/lists before the first paragraph below them; a global top-left sort interleaves columns | A scanned multi-page PDF and a folder of mixed images produce correct `.md` files. On the clean fixture **and** on a degraded-scan fixture (image-only, skew, noise, JPEG), the case number and every dollar amount are exact through the production render path. This re-checks the 200 DPI default. Two-column text comes out column by column |
 | ✅ **2b. Robust region detection (contracts)** | Find column regions from the rendered bitmap. Projection profiles at about 100 DPI, with Vision's table boxes masked as solid ink, long thin rule lines removed, and tolerance for scan speckle and skew. Each column region is then cropped for Vision. Flag likely transcript pages (`transcript_pages` in the front matter, plus a stderr hint to use `--model paddleocr-vl`). `heldout.py` becomes seeded and randomized: tune on seeds 0–9 only | On seeds 10–39 (never looked at while tuning), clean and degraded: ≥ 95% of lines found and in order for column layouts. Byte-identical golden output for `legal.pdf`, `legal_scan.pdf` and `two_column.pdf`, apart from `generated:`. 4-up and transcript pages are flagged rather than solved. 300-page benchmark re-run against 29 s / 470 MB |
-| **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings, except the `generated:` timestamp line |
+| ✅ **3. Long-doc pipeline** | `--jobs` pool, ordered assembly, single-writer manifest, auto-resume, atomic writes, progress, page markers | Killing a run mid-way and re-running resumes. Output is identical for `--jobs 1` and `--jobs 8`: byte-for-byte for every engine at default settings, except the `generated:` timestamp line |
 | ✅ **4. Server management** | `setup` (venv, weights, RAM check), start/stop/status/restart, readiness probe | Start, stop and status work for each engine. A killed server is detected and restarted |
 | ✅ **5. Model engines** | olmOCR (v4 prompt), dots (layout JSON → Markdown), PaddleOCR-VL (full page + table crops with OTSL→GFM), Apple side-pass, timeout/restart, truncation, loop detection, fallback | Each engine passes the eval set |
 | **6. Quality** | Eval harness, tuned defaults, opt-in legal cleanup | CER targets met on the eval set |
@@ -326,6 +326,17 @@ Resolved 2026-10-07:
   - **olmOCR ignores `--dpi`**, because images are always 1288 px on the longest side, and prints a note saying so.
   - **Known limit:** on a sideways page the Apple side-pass sees nothing useful. With olmOCR, the Bates number is then missing from that page's marker. A follow-up could run the side-pass on the turned image.
   - **Measured on an idle machine:** olmOCR takes about 16 s/page; dots about 35 s/page at 200 DPI, or 9 s/page at 100 DPI, where all tokens on `legal_scan` were still exact. Phase 6 tunes the dots DPI.
+
+- 2026-10-08, **Phase 3 built** (docs/spike.md, "Phase 3"). Decisions made for you:
+  - **Checkpoints** store each page's full result before assembly. Page markers, front matter, `--pages` and `--legal-cleanup` are applied at assembly time, so changing them never invalidates checkpoints. The final file is always assembled from checkpoint records, so resumed output equals clean output by construction.
+  - **Failed pages:** a file that ends with failed pages keeps its partial dir. Re-running the same command retries only those pages, and rewrites the `.md` without needing `--overwrite`.
+  - **Model requests are capped at the server's `--max-num-seqs` (1).** Each request holds an `flock` on `<state>/server.lock`, and its timeout clock starts only once it has the lock. `--jobs` still sets the Apple side-pass threads. For model engines, "`--jobs 1` = `--jobs 8`" therefore tests side-pass and assembly concurrency, not model batching.
+  - **"One PDFDocument per worker"** is already satisfied: every bridge call opens its own document and shares nothing.
+  - **No SIGINT message.** Checkpoints persist, and re-running resumes.
+  - **Measured:**
+    - 300 pages: 28.4 s with a 487 MB peak (baseline 29 s / 470 MB).
+    - Resume after a kill at 151 pages: 14.3 s.
+    - Live `three_pages.pdf` at `--jobs 1` vs `--jobs 8`: identical for paddleocr-vl (14.3 s), olmocr (47 s) and dots (108 s).
 
 Still open:
 

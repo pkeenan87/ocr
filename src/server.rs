@@ -1031,7 +1031,8 @@ pub fn status() -> Result<(), CliError> {
         "not reachable"
     };
     println!("health:  {health}");
-    if let Some(rt) = Config::load()?.and_then(|c| c.runtime)
+    // A broken config must not make `status` fail; the build lines are just skipped.
+    if let Some(rt) = Config::load().ok().flatten().and_then(|c| c.runtime)
         && rt.llama_cpp.is_some()
     {
         println!("build:   {}", rt.id());

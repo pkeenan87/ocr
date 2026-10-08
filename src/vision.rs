@@ -1,6 +1,7 @@
 //! Page types shared by every engine, and the page functions behind them. On macOS these are
 //! the Swift bridge (`bridge/`) to PDFKit and Apple Vision's `RecognizeDocumentsRequest`;
-//! elsewhere Apple Vision does not exist (PLAN §9).
+//! elsewhere pdfium and the `image` crate read documents and Apple Vision does not exist
+//! (PLAN §9).
 
 use std::path::Path;
 
@@ -99,3 +100,7 @@ pub use apple::*;
 mod portable;
 #[cfg(not(target_os = "macos"))]
 pub use portable::*;
+#[cfg(not(target_os = "macos"))]
+mod document;
+#[cfg(not(target_os = "macos"))]
+pub use document::*;

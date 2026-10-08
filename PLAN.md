@@ -406,7 +406,7 @@ VRAM is then checked against the engine and quant, with the same tiers as the RA
 |---|---|---|
 | **7a. Backend spike** (no Rust, on the RTX 3090 machine) | Pinned llama-server build with each GGUF. Run the four prompts (`OCR:`, `Table Recognition:`, olmOCR v4 YAML, `prompt_layout_all_en`) through llama-server's chat templates. Test `-np 2` with images. Measure VRAM and s/page per engine and quant. Compare output with the Mac's MLX output and the vLLM reference. Send olmOCR a footer-strip crop: does the Bates number come back? (It is trained to drop footers, and option (b) in §9.5 depends on this.) Settle the Vulkan device probe | `docs/spike.md` records: prompt compatibility (same output shape as MLX), whether parallel image slots work, VRAM floors, speeds. Any engine that fails is documented with its blocker |
 | ✅ **7b. Build portability** | `build.rs` and the FFI half of `vision.rs` gated on `target_os = "macos"` (types stay shared). `.cargo/config.toml` rustflags moved under `[target.aarch64-apple-darwin]`. Supervisor macOS-only. `flock` → `File::lock`. Process and memory calls → `sysinfo` / job object. `Engine::Apple` hidden off the Mac | `cargo build` and the unit tests pass on Linux (Mac-only tests gated). `cargo check --target x86_64-pc-windows-msvc` passes. Mac tests unchanged |
-| **7c. Portable document layer** | `Document` trait over `document_info`, `text_layer`, `render_gray`, `render_png_fit`. pdfium + `image`/`tiff` implementation, including multi-page TIFF and rotation | On the non-table fixtures, `regions.rs` makes the same column and band decisions as on the Mac (renders need not be byte-identical). Table pages differ by design: there are no Vision table masks |
+| ✅ **7c. Portable document layer** (Mac comparison pending) | `Document` trait over `document_info`, `text_layer`, `render_gray`, `render_png_fit`. pdfium + `image`/`tiff` implementation, including multi-page TIFF and rotation | On the non-table fixtures, `regions.rs` makes the same column and band decisions as on the Mac (renders need not be byte-identical). Table pages differ by design: there are no Vision table masks |
 | **7d. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`. Setup downloads the release archive (plus cudart), pdfium and weights. **Engine layer off the Mac:** a non-Mac `side_pass` (bitmap regions, no blocks), `find_bates` on the model's output, Paddle's table-crop branch off, failed pages flagged without fallback text, plus whatever §9.5 decision 1 adds | `paddleocr-vl`, `olmocr` and `dots-ocr` each scan `three_pages.pdf` on the Linux GPU machine. Start, stop, status, restart and the killed-server test pass |
 | **7e. GPU gate** | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
 | **7f. Windows** | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
@@ -456,3 +456,30 @@ The options as they were put:
     - **Not run anywhere yet:** the `lock_server` change from `flock` to `File::lock`/`try_lock`. Its test is in `tests/resume.rs`, which is macOS-only. std uses `flock` on both macOS and Linux, so the behaviour should be the same.
   - Off the Mac, the setup gate's hint reads `ocr server setup --model paddleocr-vl`.
   - A `char` range comparison in `markdown.rs` didn't type-check for Windows; it is fixed portably.
+
+- 2026-10-08, **7c built.** Decisions made in the implementation:
+  - **Free functions instead of a `Document` trait.** There is one implementation per platform, so `vision.rs` re-exports `vision/document.rs` off the Mac, which keeps 7b's `cfg` pattern.
+  - **pdfium is pinned to `chromium/7881`** from bblanchon/pdfium-binaries, matching `pdfium-render` 0.9.4's `pdfium_7881` API. The library is looked for in this order: `$OCR_PDFIUM_LIB`, `<state>/pdfium/`, next to the executable, then the system path. If it isn't found, the error lists every path tried. 7d's setup downloads it into `<state>/pdfium/`. Linux x64 sha256: `1470e21b8b4a3b4ad7f85684e2da11d94f3b69a86d81dee11b9b6709d927ac1d`. A development copy is in `~/.cache/ocr-dev/pdfium-7881`.
+  - **One lock for every pdfium operation**, held from open to close. `pdfium-render`'s `thread_safe` locking per call still segfaulted with several threads rendering at once (found by the tests). PDF pages therefore render one at a time. That costs little off the Mac, where `--jobs` is 1 for model engines and the Apple side-pass is gone.
+  - **Rendering mirrors the bridge:**
+    - Sizes are computed in points with `/Rotate` applied (pdfium already reports the rotated size), rounded per axis, and capped at 16384.
+    - `max_side` scales by the crop's longest side, renders, crops (origin floored, far edge ceiled, like `CGRect.integral`), then resizes to exactly that size.
+    - Rotation is counter-clockwise. Images shrink only when longer than 11 in at the DPI.
+    - **Trap:** `pdfium-render`'s *fixed* size renders the page at 72 DPI into a larger bitmap, without scaling. Target sizes must be used instead.
+  - **Deliberate differences from the Mac:**
+    - Annotations and form fields are not drawn, matching `CGContext.drawPDFPage`. Bates stamps added as annotations would therefore be invisible on both platforms.
+    - Alpha is flattened onto white.
+    - Grayscale uses Rec.709 weights.
+    - The text layer is pdfium's, so spacing and order can differ from PDFKit. `--use-text-layer` defaults to `never`.
+    - HEIC is refused with a clear message.
+    - TIFF supports 1-bit (including CCITT G4 fax), 8- and 16-bit gray, RGB, RGBA and CMYK. Palette TIFFs are not supported. WhiteIsZero is inverted by the `tiff` crate; it is untested here.
+  - **Tests:** `tests/document.rs` runs on both platforms with the same expectations. On a Mac it therefore checks that the bridge and pdfium agree on:
+    - sizes, crops, fits and rotations;
+    - rotated PDF pages;
+    - two-frame G4 TIFF;
+    - encrypted PDFs;
+    - the text layer;
+    - eight concurrent renders.
+    
+    Off the Mac it also compares pixels with pypdfium2's render (mean difference < 2) and checks the HEIC refusal. New fixtures are in `tests/fixtures/`. Linux: 133 tests pass, clippy is clean, and `scripts/xcheck.sh` is clean.
+  - **Acceptance still open:** `examples/region_report` prints render sizes and the regions found without table masks for 14 fixtures. The Linux output is in `docs/region-report-linux.txt`. Run it on the Mac and diff the two to compare column and band decisions.

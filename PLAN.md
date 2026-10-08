@@ -343,6 +343,8 @@ Resolved 2026-10-07:
   - Transcript pages, table rows, Bates numbers and page markers are never stripped.
   - **Decision made for you:** lines of 20 or more characters match fuzzily, allowing about 1 edit per 20 characters. Apple misreads the same header differently on different pages ("Assel" vs "Asset"), so exact matching left it in. Shorter lines must match exactly.
 
+- 2026-10-08, **Apple stays at 200 DPI (your decision).** On tune seeds 0–9, 150 DPI scored slightly better (token recall 98.2% vs 97.4%, CER 3.10% vs 3.29%). The default stays at 200 so that the golden outputs, and the behaviour they guard, don't change. `--dpi 150` remains available.
+
 Still open:
 
 1. **Hardware floor** (vmmap physical footprint): olmOCR 8-bit 10.9 GB, dots 7.3 GB, Paddle bf16 3.8 GB. Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM, and refuses 8-bit below 16 GB without `--force`.

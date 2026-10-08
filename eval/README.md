@@ -11,16 +11,27 @@ Families: `pleading`, `contract`, `transcript4up`, `fax`, `table`, `production` 
 deterministic per seed. `eval/out/` is gitignored.
 
 ## Run and score
-    spike/.venv/bin/python -I eval/run.py --engine apple --set eval/out/seed0 --out eval/out/results
-    spike/.venv/bin/python -I eval/score.py eval/out/seed0/fax.gt.json eval/out/results/apple/fax.md [--diff-page N]
-`run.py` scans each fixture with `target/release/ocr`, scores it, and writes
-`<out>/<engine>.json` (merged per family across runs) plus a Markdown table. `apple` uses a private
-empty config/state dir. Model engines (`paddleocr-vl`, `olmocr`, `dots-ocr`) need a running server
-and use the real config by default; the server's peak footprint is read once from `vmmap` after the
-run. Use `--families` to split e.g. production from the rest, `--dpi` and `--extra-args` to tune.
+    spike/.venv/bin/python -I eval/run.py --engine apple --set eval/out/seed10 eval/out/seed11 --out eval/out/results [--tag NAME]
+    spike/.venv/bin/python -I eval/score.py eval/out/seed0/fax.gt.json eval/out/results/apple/seed0/fax.md [--diff-page N]
+`run.py` scans each fixture of each `--set` with `target/release/ocr`, scores it, and writes
+`<out>/<tag>.json` (per family and seed, merged with earlier runs of the same tag; `--tag` defaults to
+the engine, use one tag per DPI when tuning) plus an aggregated Markdown table (micro-averaged over
+the sets of that invocation). Every engine runs in the ISOLATED state `eval/out/state/{config,state}`
+(`OCR_CONFIG_DIR`/`OCR_STATE_DIR`), never the real `~/.config/ocr`; `--use-real-config` is opt-in.
+Model engines need a server in that state:
+
+    export OCR_CONFIG_DIR=$PWD/eval/out/state/config OCR_STATE_DIR=$PWD/eval/out/state/state
+    target/release/ocr server setup --model paddleocr-vl --non-interactive   # builds a venv, weights come from the HF cache
+    target/release/ocr server start --model paddleocr-vl
+
+The server's peak footprint is read once from `vmmap --summary` after the run (a peak since the server
+started). Exit code 1 (flagged pages) still counts as a result. `production` is only run when named in
+`--families`. Other options: `--dpi`, `--extra-args`, `--keep-furniture`, `--git-rev`.
 Metrics: CER (whitespace-collapsed, Markdown/HTML table syntax removed, quotes/dashes unified),
 token recall, Bates accuracy (page marker), transcript line accuracy (`transcript4up`), pages/s,
-peak MB. Pleading margin numbers are stripped from the output before scoring.
+peak MB. Same scorer flags for every engine: pleading margin numbers are stripped
+(`--strip-line-numbers`, pleading family only) and ground-truth furniture is ignored unless
+`--keep-furniture`.
 
 ## Seed convention
 Tune on seeds 0-9 only. Accept on seeds 10-39, which are never looked at while tuning.

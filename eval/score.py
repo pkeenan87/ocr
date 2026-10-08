@@ -155,6 +155,8 @@ def score(gt, md, strip_line_numbers=False, keep_furniture=False):
         "family": gt.get("family"), "seed": gt.get("seed"), "pages": len(gt["pages"]),
         "pages_in_output": len(pages),
         "cer": round(dist_sum / max(len_sum, 1), 4), "cer_pages": cer_pages,
+        "dist_sum": dist_sum, "len_sum": len_sum, "bates_ok": bates_ok, "bates_total": bates_total,
+        "tl_ok": tl_ok, "tl_total": tl_total,
         "token_recall": round(tok_found / tok_total, 4) if tok_total else None,
         "tokens_found": tok_found, "tokens_total": tok_total,
         "bates_accuracy": round(bates_ok / bates_total, 4) if bates_total else None,

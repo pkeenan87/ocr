@@ -172,11 +172,6 @@ fn model_gate(args: &ScanArgs) -> Result<ServerInfo, CliError> {
             info.engine, info.repo
         )));
     }
-    if args.model == Engine::DotsOcr {
-        return Err(CliError::Server(format!(
-            "{name} scanning is not implemented yet"
-        )));
-    }
     Ok(info)
 }
 

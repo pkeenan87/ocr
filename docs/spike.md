@@ -214,3 +214,34 @@ Prompt `build_no_anchoring_v4_yaml_prompt()`, text part first, max_tokens 8000 a
 - **Empty output** (generic, all engines): the request is retried once; a page whose requests are all empty falls back to Apple and is flagged.
 - **Rotation.** One retry on the turned full page; the crop plan is skipped on a turned page. If the page is still invalid after the turn, the text is kept and the page flagged.
 - **Known limit.** olmOCR drops the footer, and the Apple side-pass cannot read a sideways page, so a rotated page gets no Bates number in its marker (the real rotated-fixture test checks the five body tokens only).
+
+### dots
+
+`dots.mocr-8bit`, `prompt_layout_all_en` verbatim, image first (as in Phase 0), 200 DPI (1700x2200), max_tokens 8192 in the spike.
+
+| Fixture | Result | Prompt tokens | Generated | Server time |
+|---|---|---|---|---|
+| legal, legal_scan, full page | all six tokens exact, footer and Bates kept (as `Page-footer`) | 5035 | 778 | 34.0 s |
+| two_column, full page | 30/30 lines, 29/29 in order | 5035 | 1429 | 39.2 s |
+| two_column, 3 crops | 30/30, 29/29 in order | 285 / 1438 / 1861 | 40 / 689 / 674 | 19.8 s total |
+| narrow_unequal_seed2, full page | 42/42 lines, 41/41 in order | 5035 | 2537 | 48.3 s |
+| narrow_unequal_seed2, 2 crops | 42/42, 41/41 in order | 2732 / 1896 | 1357 / 1111 | 33.9 s total |
+| transcript_full | **25/25 exact** | 5035 | 369 | 30.7 s |
+| four_up | **100/100 exact** | 5035 | 1732 | 41.7 s |
+
+**Plan decision (same rule).** Full page is at 100% on both column fixtures, so the plan is the full page; crops are the first answer to a loop or a cut-off reply only.
+
+**Transcripts.** 25/25 and 100/100, above 95%: no extra hint for dots, and the real-model test asserts the scores.
+
+**Rates** (server log "Request completed", 20 requests): prefill 183 tok/s at 5035 prompt tokens (27.5 s), faster for smaller images (263 tok/s at 2930, 398 tok/s at 1386); decode 124 to 127 tok/s on the full page, up to 151 tok/s on short crops. No other process was using the GPU (see the load note above).
+- **DPI cost** on `legal_scan` (tokens exact at all three): 200 DPI 5035 prompt tokens and 34.1 s; 150 DPI 2930 tokens and 17.1 s; 100 DPI 1386 tokens and 9.1 s. The default stays 200 as specified; lowering it is a Phase 6 tuning decision, with these costs as the input.
+- `max_tokens` is 8192 as in Phase 0: the densest fixture used 2537 tokens, and a dots reply is verbose JSON, so a dense page could pass 4096. There is no larger retry for dots (a cut-off reply goes to crops).
+- Timeout = 2 x (prefill + max_tokens / decode) = 2 x (27.5 + 8192 / 125) = **186 s, catalog 190 s** (same for crops and `prompt_ocr`, which are smaller).
+
+**Reply shape.** A bare JSON array with no code fence in practice (the parser accepts one). bboxes are in pixels of the image sent and are not used. `Title` text comes without a `#` and may hold two lines (the court caption); a heading is one line, so lines are joined with a space. Tables are `<table><thead><tr><td>...` (header cells are `td`, so the first row is the header). The transcript came back as one `Text` element with `\n` between lines, line numbers kept.
+
+**Ladder as built.**
+1. Layout request on the page. A valid array becomes Markdown.
+2. Invalid or cut-off JSON that ended with `stop`: retry once; if it stays invalid, the complete elements of the better reply are kept and the page is flagged. With no complete element it counts as a loop.
+3. A loop (detector on the extracted text fields, tables cut out) or `finish_reason: length`: the crop plan if the page has one, then `prompt_ocr` as plain text on the page, then Apple Vision with a flag. A reply cut off by `length` is not kept as partial elements: crops and `prompt_ocr` are tried first and Apple's complete page beats a partial one.
+4. `repetition_penalty` is never sent. A page answered by `prompt_ocr` is not flagged (it is a normal answer, but without headers, footers or structure; Bates still comes from the side-pass).

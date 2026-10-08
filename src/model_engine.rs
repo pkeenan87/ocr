@@ -380,7 +380,7 @@ pub(crate) struct Reply {
 pub(crate) struct Planned {
     pub(crate) prompt: Prompt,
     pub(crate) url: String,
-    text_first: bool,
+    pub(crate) text_first: bool,
 }
 
 impl Planned {

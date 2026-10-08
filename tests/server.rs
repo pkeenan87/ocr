@@ -341,9 +341,12 @@ fn scan_gate() {
         .code(3)
         .stderr(predicate::str::contains("dots-ocr"))
         .stderr(predicate::str::contains("paddleocr-vl"));
+    // dots is implemented now: the gate lets the scan through (a.pdf itself is not a PDF, so the
+    // file fails, which is exit 1 and not a server or gate error).
     scan("dots-ocr")
-        .code(3)
-        .stderr(predicate::str::contains("not implemented yet"));
+        .code(1)
+        .stderr(predicate::str::contains("not implemented").not())
+        .stderr(predicate::str::contains("cannot read"));
     e.cmd()
         .args([
             "scan",

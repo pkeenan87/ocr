@@ -63,7 +63,9 @@ pub struct Limits {
 
 /// Request limits per engine (docs/spike.md): PaddleOCR-VL prefill 990 tok/s and decode
 /// 218 tok/s; olmOCR prefill 323 tok/s (about 1790 prompt tokens, 5.5 s) and decode 39.5 tok/s,
-/// so 2 x (5.5 + 4096 / 39.5) = 218 s and 2 x (5.5 + 8000 / 39.5) = 416 s.
+/// so 2 x (5.5 + 4096 / 39.5) = 218 s and 2 x (5.5 + 8000 / 39.5) = 416 s; dots at 200 DPI
+/// prefill 183 tok/s (5035 prompt tokens, 27.5 s) and decode 125 tok/s, so
+/// 2 x (27.5 + 8192 / 125) = 186 s. dots has no larger retry (a truncated reply goes to crops).
 pub fn limits(engine: Engine) -> Limits {
     match engine {
         Engine::Olmocr => Limits {
@@ -72,6 +74,12 @@ pub fn limits(engine: Engine) -> Limits {
             retry_max_tokens: 8000,
             timeout_secs: 220,
             retry_timeout_secs: 420,
+        },
+        Engine::DotsOcr => Limits {
+            max_tokens: 8192,
+            retry_max_tokens: 8192,
+            timeout_secs: 190,
+            retry_timeout_secs: 190,
         },
         _ => Limits {
             max_tokens: 4096,

@@ -113,7 +113,14 @@ impl ScanEngine for Paddle {
         Prompt::Ocr
     }
 
+    /// Off macOS the bitmap regions have no Vision table masks, so table columns and 4-up
+    /// transcript panels look like text columns, and splitting them garbled tables (52% CER) and
+    /// transcripts (44%) on accept seeds 10-12. The full page is read first instead, and the
+    /// region crops are kept for a loop or truncation, as for olmOCR (PLAN §9.7).
     fn plan(&self, side: &SidePass) -> (Vec<Spec>, bool) {
+        if cfg!(not(target_os = "macos")) {
+            return (vec![(Prompt::Ocr, None)], false);
+        }
         choose_plan(side)
     }
 

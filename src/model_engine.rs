@@ -3,32 +3,33 @@
 //! message order, image sizing, output parser, retry ladder) sits behind `ScanEngine`: PaddleOCR-VL
 //! is here, olmOCR in `olmocr.rs`, dots in `dots.rs`.
 //!
-//! Model requests go to a server started with `--max-num-seqs 1`. A producer pool runs the
-//! Apple side-pass and renders the images of upcoming pages while consumers (one per `--jobs`)
-//! make the requests, one page at a time each.
+//! Model requests go to a server started with `--max-num-seqs N`. In-flight requests are capped
+//! at min(`--jobs`, N) by a counting gate, and each request also holds a file lock in the state
+//! dir, so a second `ocr scan` on the same server waits for its turn instead of queueing inside
+//! the server. A request's timeout clock starts only once it holds both.
 
+use std::fs::{File, OpenOptions};
+use std::os::fd::AsRawFd;
 use std::path::Path;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::mpsc::sync_channel;
-use std::sync::{Mutex, mpsc};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Condvar, Mutex};
 use std::time::{Duration, Instant};
 
-use anyhow::Context;
-
-use crate::cli::{Engine, perf_cores};
+use crate::cli::Engine;
+use crate::config::state_dir;
 use crate::engines::{self, Limits};
-use crate::markdown::{self, FrontMatter, PageResult};
+use crate::markdown::{self, PageResult};
 use crate::otsl;
-use crate::pipeline::{self, FileReport, Settings, SidePass};
+use crate::pipeline::{self, Settings, SidePass};
+use crate::progress;
 use crate::regions::{Kind, Region};
+use crate::run::{Backend, Work};
 use crate::server::{self, ServerInfo};
 use crate::vision::{self, Block, DocKind};
 
 /// `repetition_penalty` of a loop retry (never used for dots: it corrupts the JSON).
 pub(crate) const LOOP_PENALTY: f64 = 1.15;
 const BACKOFF_SECS: [f64; 3] = [0.5, 1.0, 2.0];
-/// Pages the producers may run ahead of the consumers.
-const LOOKAHEAD: usize = 4;
 /// Padding of band and table crops, as a fraction of the page.
 const CROP_PAD: f64 = 0.01;
 
@@ -408,10 +409,90 @@ pub struct Ctx {
     stopped: AtomicBool,
     /// Front matter engine string.
     pub engine: String,
+    /// The most requests this run keeps in flight: min(`--jobs`, the server's `--max-num-seqs`).
+    in_flight: usize,
+    /// Free request slots.
+    permits: Mutex<usize>,
+    permit_freed: Condvar,
+    mlx_vlm: String,
+}
+
+/// `--max-num-seqs` of the server, from its recorded argv (1 if absent).
+pub fn max_num_seqs(info: &ServerInfo) -> usize {
+    info.argv
+        .iter()
+        .position(|a| a == "--max-num-seqs")
+        .and_then(|i| info.argv.get(i + 1))
+        .and_then(|v| v.parse().ok())
+        .filter(|n| *n > 0)
+        .unwrap_or(1)
+}
+
+/// A request slot: one of the `in_flight` permits of this process, and a lock file of the
+/// server that no other `ocr` process holds. Dropping it frees both.
+struct Slot<'a> {
+    ctx: &'a Ctx,
+    _lock: Option<File>,
+}
+
+impl Drop for Slot<'_> {
+    fn drop(&mut self) {
+        // The lock file closes (and unlocks) first, then the permit is returned.
+        self._lock.take();
+        *self.ctx.permits.lock().unwrap() += 1;
+        self.ctx.permit_freed.notify_one();
+    }
+}
+
+/// Locks one of `slots` files `server.lock`, `server.lock.1`, ... in the state dir with
+/// `flock`, waiting until one is free. With one slot this is a plain blocking exclusive lock.
+/// `None` if the state dir is unusable (the run then relies on its own permits).
+fn lock_server(slots: usize) -> Option<File> {
+    let dir = state_dir().ok()?;
+    std::fs::create_dir_all(&dir).ok()?;
+    let open = |k: usize| {
+        let name = if k == 0 {
+            "server.lock".to_string()
+        } else {
+            format!("server.lock.{k}")
+        };
+        OpenOptions::new()
+            .create(true)
+            .truncate(false)
+            .write(true)
+            .open(dir.join(name))
+            .ok()
+    };
+    if slots <= 1 {
+        let f = open(0)?;
+        loop {
+            if unsafe { libc::flock(f.as_raw_fd(), libc::LOCK_EX) } == 0 {
+                return Some(f);
+            }
+            if std::io::Error::last_os_error().kind() != std::io::ErrorKind::Interrupted {
+                return None;
+            }
+        }
+    }
+    loop {
+        for k in 0..slots {
+            let f = open(k)?;
+            if unsafe { libc::flock(f.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } == 0 {
+                return Some(f);
+            }
+        }
+        std::thread::sleep(Duration::from_millis(20));
+    }
 }
 
 impl Ctx {
-    pub fn new(spec: &'static dyn ScanEngine, info: ServerInfo, mlx_vlm: &str) -> Self {
+    pub fn new(
+        spec: &'static dyn ScanEngine,
+        info: ServerInfo,
+        mlx_vlm: &str,
+        jobs: usize,
+    ) -> Self {
+        let in_flight = jobs.min(max_num_seqs(&info)).max(1);
         let lim = engines::limits(spec.engine());
         let over: Option<u64> = std::env::var("OCR_REQUEST_TIMEOUT_SECS")
             .ok()
@@ -431,7 +512,29 @@ impl Ctx {
             spec,
             state: Mutex::new((0, info)),
             stopped: AtomicBool::new(false),
+            in_flight,
+            permits: Mutex::new(in_flight),
+            permit_freed: Condvar::new(),
+            mlx_vlm: mlx_vlm.to_string(),
         }
+    }
+
+    /// Waits for a request slot. The timeout clock of a request must start after this returns.
+    fn acquire(&self) -> Slot<'_> {
+        let mut free = self.permits.lock().unwrap();
+        while *free == 0 {
+            free = self.permit_freed.wait(free).unwrap();
+        }
+        *free -= 1;
+        drop(free);
+        Slot {
+            ctx: self,
+            _lock: lock_server(self.in_flight),
+        }
+    }
+
+    pub fn in_flight(&self) -> usize {
+        self.in_flight
     }
 
     fn generation(&self) -> u64 {
@@ -455,7 +558,7 @@ impl Ctx {
             self.stopped.store(true, Ordering::SeqCst);
             return Err(Fail::Stopped("server stopped".into()));
         }
-        eprintln!("note: {why}; restarting the model server");
+        progress::line(format!("note: {why}; restarting the model server"));
         match server::restart(&state.1) {
             Ok(info) => {
                 *state = (state.0 + 1, info);
@@ -544,6 +647,9 @@ impl Ctx {
             if self.is_stopped() {
                 return Err(Fail::Stopped("server stopped".into()));
             }
+            // Held across the request and any restart it causes: a restart is only ever done by
+            // the process that holds the server lock.
+            let slot = self.acquire();
             let seen = self.generation();
             match self.post(req, max_tokens, penalty) {
                 Ok(reply) => return Ok(reply),
@@ -559,6 +665,7 @@ impl Ctx {
                     if errors >= BACKOFF_SECS.len() {
                         return Err(Fail::Failed(format!("server error {code}: {msg}")));
                     }
+                    drop(slot);
                     std::thread::sleep(Duration::from_secs_f64(BACKOFF_SECS[errors - 1]));
                 }
                 Err(PostErr::Status(code, msg)) => {
@@ -661,11 +768,6 @@ pub struct Prepared {
     pub(crate) alt: Option<Vec<Spec>>,
 }
 
-enum Work {
-    Done(PageResult),
-    Model(Prepared),
-}
-
 /// Renders the images of `specs` the way `spec` wants them (`--dpi`, or an exact longest side).
 pub(crate) fn render_specs(
     path: &Path,
@@ -713,7 +815,7 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
     if s.verbose && !s.quiet {
         let kinds: Vec<&str> = specs.iter().map(|(p, _)| p.label()).collect();
         let alt = alt.as_ref().map_or(0, Vec::len);
-        eprintln!(
+        progress::line(format!(
             "page {}: plan {kinds:?}{}{}",
             index + 1,
             if transcript { " (transcript)" } else { "" },
@@ -722,7 +824,7 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
             } else {
                 String::new()
             }
-        );
+        ));
     }
     Work::Model(Prepared {
         index,
@@ -748,7 +850,9 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
             ..blank(number)
         },
         Err(Fail::Failed(reason)) => {
-            eprintln!("warning: page {number}: {reason}; using the Apple Vision text");
+            progress::line(format!(
+                "warning: page {number}: {reason}; using the Apple Vision text"
+            ));
             let mut page = pipeline::vision_page(path, prep.index, s);
             if let Some(err) = page.error.take() {
                 page.error = Some(format!("{reason}; Apple Vision fallback failed: {err}"));
@@ -763,7 +867,10 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
         Err(stopped) => return Err(stopped),
     };
     if s.verbose && !s.quiet {
-        eprintln!("page {number}: {:.1}s", started.elapsed().as_secs_f64());
+        progress::line(format!(
+            "page {number}: {:.1}s",
+            started.elapsed().as_secs_f64()
+        ));
     }
     Ok(result)
 }
@@ -784,148 +891,52 @@ fn blank(number: usize) -> PageResult {
     }
 }
 
-/// Errors that end the run.
-#[derive(Debug)]
-pub enum RunError {
-    /// The server was stopped or cannot be reached: exit 3.
-    Stopped(String),
-    Other(anyhow::Error),
-}
-
-impl From<anyhow::Error> for RunError {
-    fn from(e: anyhow::Error) -> Self {
-        Self::Other(e)
+impl Backend for Ctx {
+    fn engine(&self) -> String {
+        self.engine.clone()
     }
-}
 
-/// Converts one file with the model server and writes its Markdown atomically.
-pub fn run_file(
-    item: &crate::input::Item,
-    s: &Settings,
-    ctx: &Ctx,
-) -> Result<FileReport, RunError> {
-    let started = Instant::now();
-    let info = vision::document_info(&item.input)
-        .with_context(|| format!("cannot read {}", item.input.display()))?;
-    let pages = pipeline::select_pages(info.pages, s.pages.as_ref(), &item.input);
-    let results = process_pages(&item.input, info.kind, &pages, s, ctx)?;
-
-    let name = item.input.file_name().map_or_else(
-        || item.input.display().to_string(),
-        |n| n.to_string_lossy().into_owned(),
-    );
-    let front = FrontMatter {
-        source: &name,
-        pages: info.pages,
-        engine: &ctx.engine,
-        generated: chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string(),
-        model: true,
-    };
-    let md = markdown::assemble(s.front_matter.then_some(&front), &results, s.page_markers);
-    pipeline::write_atomic(&item.output, &md)?;
-    let transcripts: Vec<String> = results
-        .iter()
-        .filter(|r| r.transcript)
-        .map(|r| r.number.to_string())
-        .collect();
-    if ctx.spec.transcript_hint() && !transcripts.is_empty() {
-        eprintln!(
-            "note: {} looks like a deposition transcript (pages {}); {} drops line numbers on transcripts — use --model paddleocr-vl",
-            item.input.display(),
-            transcripts.join(", "),
-            ctx.spec.engine().name()
-        );
+    fn name(&self) -> String {
+        self.spec.engine().name().to_string()
     }
-    if !s.quiet {
-        eprintln!(
-            "{} -> {} ({} pages, {:.1}s)",
-            item.input.display(),
-            item.output.display(),
-            results.len(),
-            started.elapsed().as_secs_f64()
-        );
-    }
-    Ok(FileReport {
-        pages: results.len(),
-        flagged: results
-            .iter()
-            .filter(|r| r.error.is_some() || r.flagged)
-            .map(|r| r.number)
-            .collect(),
-    })
-}
 
-/// Producers prepare pages in the background (bounded look-ahead) while `jobs` consumers make
-/// the requests; results land in page order.
-fn process_pages(
-    path: &Path,
-    kind: DocKind,
-    pages: &[usize],
-    s: &Settings,
-    ctx: &Ctx,
-) -> Result<Vec<PageResult>, RunError> {
-    let next = AtomicUsize::new(0);
-    let slots: Mutex<Vec<Option<PageResult>>> = Mutex::new(vec![None; pages.len()]);
-    let fatal: Mutex<Option<String>> = Mutex::new(None);
-    let (tx, rx) = sync_channel::<(usize, Work)>(LOOKAHEAD);
-    let rx = Mutex::new(rx);
-    let producers = perf_cores().clamp(1, pages.len().max(1));
-    let consumers = s.jobs.clamp(1, pages.len().max(1));
-    std::thread::scope(|scope| {
-        for _ in 0..producers {
-            let tx = tx.clone();
-            let next = &next;
-            scope.spawn(move || {
-                while !ctx.is_stopped() {
-                    let slot = next.fetch_add(1, Ordering::Relaxed);
-                    let Some(&index) = pages.get(slot) else { break };
-                    if tx.send((slot, prepare(path, kind, index, s, ctx))).is_err() {
-                        break;
-                    }
-                }
-            });
+    fn model_ids(&self) -> Option<(String, String)> {
+        Some((self.repo.clone(), self.mlx_vlm.clone()))
+    }
+
+    fn producers(&self, s: &Settings) -> usize {
+        s.side_threads
+    }
+
+    fn consumers(&self, s: &Settings) -> usize {
+        s.jobs
+    }
+
+    fn prepare(&self, path: &Path, kind: DocKind, index: usize, s: &Settings) -> Work {
+        prepare(path, kind, index, s, self)
+    }
+
+    fn process(&self, path: &Path, prep: Prepared, s: &Settings) -> Result<PageResult, Fail> {
+        let page = process(path, prep, s, self);
+        if matches!(page, Err(Fail::Stopped(_))) {
+            self.stopped.store(true, Ordering::SeqCst);
         }
-        drop(tx);
-        for _ in 0..consumers {
-            scope.spawn(|| {
-                loop {
-                    let msg: Result<(usize, Work), mpsc::RecvError> = rx.lock().unwrap().recv();
-                    let Ok((slot, work)) = msg else { break };
-                    // After a fatal error keep draining so no producer blocks on a full queue.
-                    if ctx.is_stopped() {
-                        continue;
-                    }
-                    let page = match work {
-                        Work::Done(page) => Ok(page),
-                        Work::Model(prep) => process(path, prep, s, ctx),
-                    };
-                    match page {
-                        Ok(page) => slots.lock().unwrap()[slot] = Some(page),
-                        Err(Fail::Stopped(msg)) => {
-                            ctx.stopped.store(true, Ordering::SeqCst);
-                            fatal.lock().unwrap().get_or_insert(msg);
-                        }
-                        Err(other) => {
-                            ctx.stopped.store(true, Ordering::SeqCst);
-                            fatal.lock().unwrap().get_or_insert(format!("{other:?}"));
-                        }
-                    }
-                }
-            });
-        }
-    });
-    if let Some(msg) = fatal.into_inner().unwrap() {
-        return Err(RunError::Stopped(msg));
+        page
     }
-    if ctx.is_stopped() {
-        return Err(RunError::Stopped("server stopped".into()));
+
+    fn stopped(&self) -> bool {
+        self.is_stopped()
     }
-    Ok(slots
-        .into_inner()
-        .unwrap()
-        .into_iter()
-        .map(|r| r.expect("every queued page produces a result"))
-        .collect())
+
+    fn transcript_note(&self, input: &Path, pages: &str) -> Option<String> {
+        self.spec.transcript_hint().then(|| {
+            format!(
+                "note: {} looks like a deposition transcript (pages {pages}); {} drops line numbers on transcripts — use --model paddleocr-vl",
+                input.display(),
+                self.spec.engine().name()
+            )
+        })
+    }
 }
 
 #[cfg(test)]

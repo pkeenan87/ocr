@@ -254,10 +254,10 @@ fn request(
                 rotation = (rotation + front.rotation_correction) % 360;
                 crop_alt = false; // crops of a turned page make no sense
                 if s.verbose && !s.quiet {
-                    eprintln!(
+                    crate::progress::line(format!(
                         "page {}: rotation invalid; turned {rotation} degrees and retrying",
                         prep.index + 1
-                    );
+                    ));
                 }
                 let png =
                     vision::render_png_fit(path, prep.index, s.dpi, None, Some(MAX_SIDE), rotation)

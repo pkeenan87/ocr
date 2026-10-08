@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 
 use clap::ValueEnum;
 
+use crate::checkpoint;
 use crate::error::CliError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
@@ -72,6 +73,8 @@ pub struct Plan {
     pub items: Vec<Item>,
     /// Files skipped because their output already exists.
     pub skipped_existing: usize,
+    /// Partial dirs next to skipped (finished) outputs; the caller removes them.
+    pub stale_partials: Vec<PathBuf>,
     /// Notes for stderr.
     pub notes: Vec<String>,
 }
@@ -128,7 +131,7 @@ pub fn plan_single(
             input.file_stem().unwrap_or_default().to_string_lossy()
         )),
     };
-    if output.exists() && !overwrite {
+    if output.exists() && !overwrite && !checkpoint::retryable(&output) {
         return Err(CliError::Usage(format!(
             "output exists: {} (use --overwrite)",
             output.display()
@@ -243,8 +246,12 @@ pub fn plan_dir(
         let output = output_dir
             .join(rel.parent().unwrap_or(Path::new("")))
             .join(md);
-        if output.exists() && !overwrite {
+        if output.exists() && !overwrite && !checkpoint::retryable(&output) {
             plan.skipped_existing += 1;
+            let partial = checkpoint::partial_dir(&output);
+            if partial.exists() {
+                plan.stale_partials.push(partial);
+            }
             continue;
         }
         plan.items.push(Item {

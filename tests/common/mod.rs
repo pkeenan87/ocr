@@ -100,6 +100,53 @@ impl Env {
         c
     }
 
+    /// The same command as `scan_cmd`, as a plain `std` command that can be spawned and killed.
+    pub fn std_scan(
+        &self,
+        input: &str,
+        extra: &[&str],
+        env: &[(&str, &str)],
+    ) -> std::process::Command {
+        let mut c = std::process::Command::new(env!("CARGO_BIN_EXE_ocr"));
+        c.env("OCR_CONFIG_DIR", self.config.path())
+            .env("OCR_STATE_DIR", self.state.path())
+            .env("OCR_FAKE_INSTALL", "1")
+            .env("OCR_SERVER_CMD", FAKE)
+            .env("FAKE_LOG", self.path("fake.log"))
+            .env_remove("OCR_REQUEST_TIMEOUT_SECS")
+            .envs(env.iter().copied())
+            .args(["scan", "--model", self.engine, "--input-file", input])
+            .args(extra)
+            .current_dir(self.work.path());
+        c
+    }
+
+    /// The most model requests the fake server had in progress at once (needs `FAKE_LOG`).
+    pub fn max_overlap(&self) -> usize {
+        let read = |name: &str| -> Vec<Value> {
+            fs::read_to_string(self.path(name))
+                .unwrap_or_default()
+                .lines()
+                .map(|l| serde_json::from_str(l).unwrap())
+                .collect()
+        };
+        let mut events: Vec<(f64, i32)> = Vec::new();
+        for r in read("fake.log") {
+            events.push((r["t"].as_f64().unwrap(), 1));
+        }
+        for r in read("fake.log.end") {
+            events.push((r["t"].as_f64().unwrap(), -1));
+        }
+        // An end at the same instant as a start counts first.
+        events.sort_by(|a, b| a.0.total_cmp(&b.0).then(a.1.cmp(&b.1)));
+        let (mut now, mut max) = (0i32, 0i32);
+        for (_, d) in events {
+            now += d;
+            max = max.max(now);
+        }
+        max as usize
+    }
+
     pub fn scan(&self, input: &str, extra: &[&str], env: &[(&str, &str)]) -> Assert {
         self.scan_cmd(input, extra, env).assert()
     }

@@ -3,6 +3,7 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 
 use crate::layout;
 use crate::vision::{Block, ListItem};
@@ -31,14 +32,14 @@ pub fn fix_currency(text: &str) -> (String, usize) {
 }
 
 /// Where a page's text came from.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Source {
     Vision,
     TextLayer,
 }
 
-/// One finished page, ready for assembly.
-#[derive(Debug, Clone)]
+/// One finished page, ready for assembly. This is also the checkpoint record of a page.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PageResult {
     /// 1-based page number.
     pub number: usize,

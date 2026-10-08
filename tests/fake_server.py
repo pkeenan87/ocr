@@ -21,7 +21,9 @@ Every real request is logged as one JSON line to stderr (`fake_server: REQ {...}
 server log) and, if FAKE_LOG names a file, appended there too. With FAKE_LOG the request number
 `n` counts the lines in that file, so it survives server restarts:
 `{"n": 3, "prompt": "OCR:", "max_tokens": 4096, "repetition_penalty": null, "w": 1700, "h": 2200,
-"text_first": false}` (`text_first`: the text part comes before the image part in the message).
+"text_first": false, "t": 1700000000.5}` (`text_first`: the text part comes before the image part
+in the message; `t`: arrival time). With FAKE_LOG a line `{"n": 3, "t": ...}` is also appended to
+`$FAKE_LOG.end` when the reply is sent, so tests can measure how many requests overlap.
 OCR replies are `fake ocr text WxH` (the size of the image received, so crops differ from
 full-page requests); `Table Recognition:` replies are OTSL.
 """
@@ -133,7 +135,7 @@ class Handler(BaseHTTPRequestHandler):
                     n = sum(1 for _ in open(LOG)) + 1 if os.path.exists(LOG) else 1
                 line = json.dumps({"n": n, "prompt": prompt, "max_tokens": max_tokens,
                                    "repetition_penalty": req.get("repetition_penalty"),
-                                   "w": w, "h": h, "text_first": text_first})
+                                   "w": w, "h": h, "text_first": text_first, "t": time.time()})
                 sys.stderr.write("fake_server: REQ " + line + "\n")
                 sys.stderr.flush()
                 if LOG:
@@ -147,6 +149,9 @@ class Handler(BaseHTTPRequestHandler):
             time.sleep(float(os.environ.get("FAKE_SLEEP_SECS", "30")))
         w, h = png_size(images[0]) if images else (0, 0)
         content, reason = reply(prompt, w, h, active)
+        if LOG and not probe:
+            with LOCK, open(LOG + ".end", "a") as f:
+                f.write(json.dumps({"n": n, "t": time.time()}) + "\n")
         self.send(200, {
             "model": MODEL,
             "choices": [{"index": 0, "message": {"role": "assistant", "content": content},

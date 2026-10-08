@@ -1,18 +1,18 @@
-//! Per-file OCR pipeline for the apple engine: page planning, a worker pool, ordered assembly.
+//! The apple engine's page pipeline: text layer or Vision with column handling.
 
 use std::fs;
 use std::path::Path;
-use std::sync::Mutex;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::time::Instant;
 
 use anyhow::{Context, Result};
 
 use crate::cli::TextLayer;
-use crate::input::{Item, PageRanges};
+use crate::input::PageRanges;
 use crate::layout;
-use crate::markdown::{self, FrontMatter, PageResult, Source};
+use crate::markdown::{self, PageResult, Source};
+use crate::model_engine::{Fail, Prepared};
+use crate::progress;
 use crate::regions::{self, Kind};
+use crate::run::{Backend, Work};
 use crate::vision::{self, Block, DocKind, Options};
 
 pub const ENGINE_NAME: &str = "apple (Vision RecognizeDocuments)";
@@ -29,7 +29,11 @@ pub(crate) const COLUMN_PAD_Y: f64 = 0.02;
 /// Run-wide settings.
 pub struct Settings {
     pub dpi: u32,
+    /// `--jobs`: pages in flight (apple) or the cap on model requests (model engines).
     pub jobs: usize,
+    /// Threads for rendering and the Apple pass of model engines.
+    pub side_threads: usize,
+    pub overwrite: bool,
     pub pages: Option<PageRanges>,
     pub text_layer: TextLayer,
     pub page_markers: bool,
@@ -40,64 +44,44 @@ pub struct Settings {
     pub options: Options,
 }
 
-/// Outcome of one file.
-pub struct FileReport {
-    pub pages: usize,
-    /// 1-based numbers of pages whose OCR failed.
-    pub flagged: Vec<usize>,
-}
+/// The apple engine: every page is finished in the producer step.
+pub struct Apple;
 
-/// Converts one planned file and writes its Markdown atomically.
-pub fn run_file(item: &Item, s: &Settings) -> Result<FileReport> {
-    let started = Instant::now();
-    let info = vision::document_info(&item.input)
-        .with_context(|| format!("cannot read {}", item.input.display()))?;
-    let pages = select_pages(info.pages, s.pages.as_ref(), &item.input);
-    let results = process_pages(&item.input, info.kind, &pages, s);
-
-    let name = item.input.file_name().map_or_else(
-        || item.input.display().to_string(),
-        |n| n.to_string_lossy().into_owned(),
-    );
-    let front = FrontMatter {
-        source: &name,
-        pages: info.pages,
-        engine: ENGINE_NAME,
-        generated: chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string(),
-        model: false,
-    };
-    let md = markdown::assemble(s.front_matter.then_some(&front), &results, s.page_markers);
-    write_atomic(&item.output, &md)?;
-    let transcripts: Vec<String> = results
-        .iter()
-        .filter(|r| r.transcript)
-        .map(|r| r.number.to_string())
-        .collect();
-    if !transcripts.is_empty() {
-        eprintln!(
-            "note: {} looks like a deposition transcript (pages {}); Apple Vision drops line numbers and misreads Q./A. — use --model paddleocr-vl",
-            item.input.display(),
-            transcripts.join(", ")
-        );
+impl Backend for Apple {
+    fn engine(&self) -> String {
+        ENGINE_NAME.to_string()
     }
 
-    if !s.quiet {
-        eprintln!(
-            "{} -> {} ({} pages, {:.1}s)",
-            item.input.display(),
-            item.output.display(),
-            results.len(),
-            started.elapsed().as_secs_f64()
-        );
+    fn name(&self) -> String {
+        "apple".to_string()
     }
-    Ok(FileReport {
-        pages: results.len(),
-        flagged: results
-            .iter()
-            .filter(|r| r.error.is_some() || r.flagged)
-            .map(|r| r.number)
-            .collect(),
-    })
+
+    fn model_ids(&self) -> Option<(String, String)> {
+        None
+    }
+
+    fn producers(&self, s: &Settings) -> usize {
+        s.jobs
+    }
+
+    fn consumers(&self, _: &Settings) -> usize {
+        0
+    }
+
+    fn prepare(&self, path: &Path, kind: DocKind, index: usize, s: &Settings) -> Work {
+        Work::Done(process_page(path, kind, index, s))
+    }
+
+    fn process(&self, _: &Path, _: Prepared, _: &Settings) -> Result<PageResult, Fail> {
+        Err(Fail::Failed("the apple engine has no model step".into()))
+    }
+
+    fn transcript_note(&self, input: &Path, pages: &str) -> Option<String> {
+        Some(format!(
+            "note: {} looks like a deposition transcript (pages {pages}); Apple Vision drops line numbers and misreads Q./A. — use --model paddleocr-vl",
+            input.display()
+        ))
+    }
 }
 
 /// 0-based indices to process: the `--pages` subset, with out-of-range pages warned about.
@@ -112,38 +96,14 @@ pub(crate) fn select_pages(total: usize, ranges: Option<&PageRanges>, input: &Pa
             } else {
                 format!("pages {a}-{b}")
             };
-            eprintln!(
+            progress::line(format!(
                 "warning: {span} out of range ({} has {total} pages); skipping missing pages",
                 input.display()
-            );
+            ));
         }
     }
     (0..total)
         .filter(|i| ranges.contains(*i as u32 + 1))
-        .collect()
-}
-
-/// Processes pages on `jobs` threads pulling from a shared queue; results are in page order.
-fn process_pages(path: &Path, kind: DocKind, pages: &[usize], s: &Settings) -> Vec<PageResult> {
-    let next = AtomicUsize::new(0);
-    let slots: Mutex<Vec<Option<PageResult>>> = Mutex::new(vec![None; pages.len()]);
-    std::thread::scope(|scope| {
-        for _ in 0..s.jobs.clamp(1, pages.len().max(1)) {
-            scope.spawn(|| {
-                loop {
-                    let slot = next.fetch_add(1, Ordering::Relaxed);
-                    let Some(&index) = pages.get(slot) else { break };
-                    let result = process_page(path, kind, index, s);
-                    slots.lock().unwrap()[slot] = Some(result);
-                }
-            });
-        }
-    });
-    slots
-        .into_inner()
-        .unwrap()
-        .into_iter()
-        .map(|r| r.expect("every queued page produces a result"))
         .collect()
 }
 

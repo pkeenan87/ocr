@@ -158,6 +158,16 @@ pub enum TextLayer {
     Always,
 }
 
+impl TextLayer {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Auto => "auto",
+            Self::Never => "never",
+            Self::Always => "always",
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 pub struct ScanArgs {
     /// Single input file

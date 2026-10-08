@@ -8,7 +8,8 @@ use ocr::engines::MLX_VLM_PIN;
 use ocr::error::CliError;
 use ocr::input::{self, Plan};
 use ocr::model_engine;
-use ocr::pipeline::{self, Settings};
+use ocr::pipeline::{Apple, Settings};
+use ocr::run;
 use ocr::server::{self, ServerInfo};
 use ocr::vision::Options;
 
@@ -126,8 +127,11 @@ fn scan(args: &ScanArgs) -> Result<(), CliError> {
     for note in &plan.notes {
         eprintln!("{note}");
     }
-    if args.model != Engine::Apple && args.jobs.is_some_and(|j| j > 1) {
-        eprintln!("note: --jobs > 1 with a model engine; output may not be byte-reproducible");
+    if !args.dry_run {
+        // A partial dir next to a finished output is a leftover of an interrupted finish.
+        for dir in &plan.stale_partials {
+            let _ = std::fs::remove_dir_all(dir);
+        }
     }
     if plan.skipped_existing > 0 {
         eprintln!(
@@ -180,6 +184,8 @@ fn settings(args: &ScanArgs) -> Settings {
     Settings {
         dpi: args.effective_dpi(),
         jobs: args.effective_jobs(),
+        side_threads: args.jobs.unwrap_or_else(ocr::cli::perf_cores),
+        overwrite: args.overwrite,
         pages: args.pages.clone(),
         text_layer: args.effective_text_layer(),
         page_markers: args.page_markers(),
@@ -191,8 +197,8 @@ fn settings(args: &ScanArgs) -> Settings {
     }
 }
 
-/// Runs the PaddleOCR-VL engine over every planned file. Pages that fell back to Apple Vision
-/// or failed make the run partial; a stopped server ends it with exit 3.
+/// Runs a model engine over every planned file. Pages that fell back to Apple Vision or failed
+/// make the run partial; a stopped server ends it with exit 3.
 fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliError> {
     let mlx = Config::load()?
         .and_then(|c| c.runtime)
@@ -203,60 +209,62 @@ fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliEr
             "note: --dpi is ignored for olmocr; images are always 1288 px on the longest side"
         );
     }
-    let ctx = model_engine::Ctx::new(spec, info, &mlx);
     let settings = settings(args);
-    let mut problems = Vec::new();
-    for item in &plan.items {
-        match model_engine::run_file(item, &settings, &ctx) {
-            Ok(report) if report.flagged.is_empty() => {}
-            Ok(report) => problems.push(format!(
-                "{}: {} of {} pages flagged (pages {:?}); see fallback_pages in the front matter",
-                item.input.display(),
-                report.flagged.len(),
-                report.pages,
-                report.flagged
-            )),
-            Err(model_engine::RunError::Stopped(msg)) => {
-                return Err(CliError::Server(format!("{msg}; re-run to start over")));
-            }
-            Err(model_engine::RunError::Other(e)) => {
-                problems.push(format!("{}: {e:#}", item.input.display()));
-            }
-        }
+    if args.jobs.is_some_and(|j| j > 1) {
+        eprintln!(
+            "note: model requests are limited to {} at a time by the server (--max-num-seqs); --jobs still sets Apple side-pass threads",
+            model_engine::max_num_seqs(&info)
+        );
     }
-    if problems.is_empty() {
-        Ok(())
-    } else {
-        Err(CliError::Partial(format!(
-            "completed with problems:\n  {}",
-            problems.join("\n  ")
-        )))
-    }
+    let ctx = model_engine::Ctx::new(spec, info, &mlx, settings.jobs);
+    let report = run::run(&plan.items, &ctx, &settings, args.input_dir.is_some());
+    finish(plan, report, true)
 }
 
 /// Runs the apple pipeline over every planned file; failed pages or files make the run partial.
 fn run_apple(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
     let settings = settings(args);
-    let mut problems = Vec::new();
-    for item in &plan.items {
-        match pipeline::run_file(item, &settings) {
-            Ok(report) if report.flagged.is_empty() => {}
-            Ok(report) => problems.push(format!(
-                "{}: {} of {} pages failed OCR (pages {:?})",
-                item.input.display(),
-                report.flagged.len(),
-                report.pages,
-                report.flagged
-            )),
-            Err(e) => problems.push(format!("{}: {e:#}", item.input.display())),
-        }
+    let report = run::run(&plan.items, &Apple, &settings, args.input_dir.is_some());
+    finish(plan, report, false)
+}
+
+/// Exit status of a finished run.
+fn finish(plan: &Plan, report: run::RunReport, model: bool) -> Result<(), CliError> {
+    if let Some(msg) = report.stopped {
+        return Err(CliError::Server(format!("{msg}; re-run to resume")));
     }
+    let mut problems: Vec<(usize, String)> = report
+        .failed
+        .into_iter()
+        .map(|(i, m)| (i, format!("{}: {m}", plan.items[i].input.display())))
+        .collect();
+    for o in report.outcomes.iter().filter(|o| !o.flagged.is_empty()) {
+        let input = plan.items[o.id].input.display();
+        let line = if model {
+            format!(
+                "{input}: {} of {} pages flagged (pages {:?}); see fallback_pages in the front matter",
+                o.flagged.len(),
+                o.pages,
+                o.flagged
+            )
+        } else {
+            format!(
+                "{input}: {} of {} pages failed OCR (pages {:?})",
+                o.flagged.len(),
+                o.pages,
+                o.flagged
+            )
+        };
+        problems.push((o.id, line));
+    }
+    problems.sort();
     if problems.is_empty() {
         Ok(())
     } else {
+        let lines: Vec<String> = problems.into_iter().map(|p| p.1).collect();
         Err(CliError::Partial(format!(
             "completed with problems:\n  {}",
-            problems.join("\n  ")
+            lines.join("\n  ")
         )))
     }
 }

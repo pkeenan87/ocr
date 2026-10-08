@@ -459,7 +459,7 @@ fn server_stopped_mid_run_ends_the_run() {
     let stderr = String::from_utf8_lossy(&out.stderr);
     assert_eq!(out.status.code(), Some(3), "{stderr}");
     assert!(
-        stderr.contains("server stopped; re-run to start over"),
+        stderr.contains("server stopped; re-run to resume"),
         "{stderr}"
     );
 }
@@ -492,12 +492,14 @@ fn jobs_do_not_change_the_output() {
 }
 
 #[test]
-fn jobs_above_one_print_the_reproducibility_note() {
+fn jobs_above_one_print_the_request_cap_note() {
     let e = Env::new(&["transcript_full.pdf"]);
     e.serve(&[]);
     e.scan("transcript_full.pdf", &["--jobs", "2"], &[])
         .success()
-        .stderr(predicate::str::contains("not be byte-reproducible"));
+        .stderr(predicate::str::contains(
+            "note: model requests are limited to 1 at a time by the server (--max-num-seqs); --jobs still sets Apple side-pass threads",
+        ));
 }
 
 // ------------------------------------------------------------- real model

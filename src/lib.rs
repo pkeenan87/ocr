@@ -1,5 +1,6 @@
 //! `ocr` — local document OCR for macOS.
 
+pub mod checkpoint;
 pub mod cli;
 pub mod config;
 pub mod dots;
@@ -13,6 +14,8 @@ pub mod model_engine;
 pub mod olmocr;
 pub mod otsl;
 pub mod pipeline;
+pub mod progress;
 pub mod regions;
+pub mod run;
 pub mod server;
 pub mod vision;

@@ -302,6 +302,14 @@ Resolved 2026-10-07:
 - `--jobs` / `--parallel` is added.
 - The Fable review is incorporated.
 
+- 2026-10-07, **Paddle engine built.** Decisions made in the implementation:
+  - `--use-text-layer` defaults to `never` for **all** engines; the text-layer path has no layout handling yet.
+  - Model output gets no margin-number filter and no currency fix. Paddle keeps transcript line numbers, and it never makes the `$`→`S` error.
+  - The loop retry uses `repetition_penalty 1.15`.
+  - Every timeout restarts the server, because the server can't cancel a request.
+  - Table crops are full-width bands. On pleading paper the margin numbers therefore land inside `Table Recognition:` crops. Phase 6 checks this on the pleading eval family.
+- 2026-10-07, **Phase 3 must fix:** with `--jobs >1` on a model engine, requests queue inside a server started with `--max-num-seqs 1`, and the client's timeout clock includes that queue wait. olmOCR (about 16 s/page) or dots (about 34 s/page) at `--jobs 8` would time out; each timeout restarts the server and kills all in-flight requests, so the failures cascade. Fix: cap in-flight model requests at the server's `--max-num-seqs`, which is in `server.json` argv, or start the timeout clock only when the request reaches the head of the queue.
+
 Still open:
 
 1. **Hardware floor** (vmmap physical footprint): olmOCR 8-bit 10.9 GB, dots 7.3 GB, Paddle bf16 3.8 GB. Setup recommends `--quant 4bit` for olmOCR below 24 GB of RAM, and refuses 8-bit below 16 GB without `--force`.

@@ -1,0 +1,9 @@
+# Eval harness dependencies (eval/generate.py, eval/score.py; eval/judge.py needs only the stdlib).
+# Pinned to the versions that produced the Mac results in docs/eval.md (Python 3.12).
+# Ground truth is text and does not depend on these versions; the rendered fixture PDFs can differ
+# slightly with other reportlab/pypdfium2/Pillow versions.
+reportlab==5.0.1
+pypdfium2==5.14.0
+pillow==12.3.0
+numpy==2.5.3
+rapidfuzz==3.14.6

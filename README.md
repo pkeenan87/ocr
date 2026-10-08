@@ -231,3 +231,4 @@ Documents:
 - [PLAN.md](PLAN.md): the specification and all decisions.
 - [docs/spike.md](docs/spike.md): measurements to date.
 - [docs/eval.md](docs/eval.md): evaluation method, per-engine results, targets and known gaps.
+- [docs/azure-eval.md](docs/azure-eval.md): prompt for an Azure Document Intelligence comparison on another machine.

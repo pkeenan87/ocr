@@ -308,6 +308,26 @@ fn manifest(rel: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join(rel)
 }
 
+/// Guards the Vision concurrent start-up crash (SIGSEGV in objc_retain under TextRecognition;
+/// docs/spike.md). The bridge caps Vision at 2 requests and `scan` retries a crashed run from
+/// its checkpoints, so every launch must still exit 0 with the uninterrupted output.
+/// Probabilistic, so it spawns many processes.
+#[test]
+fn concurrent_start_up_always_finishes_with_the_clean_output() {
+    for run in 0..20 {
+        let e = Env::new(&["three_pages.pdf"]);
+        let (md, err) = e.scan(
+            "three_pages.pdf",
+            &["--jobs", "12", "--quiet", "--use-text-layer", "never"],
+        );
+        assert_eq!(
+            without_generated(&md),
+            golden("three_pages"),
+            "run {run}\n{err}"
+        );
+    }
+}
+
 fn flag_note(stderr: &str) -> bool {
     stderr.contains("looks like a deposition transcript")
         && stderr.contains("use --model paddleocr-vl")

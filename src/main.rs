@@ -11,16 +11,36 @@ use ocr::model_engine;
 use ocr::pipeline::{Apple, Settings};
 use ocr::run;
 use ocr::server::{self, ServerInfo};
+use ocr::supervisor;
 use ocr::vision::Options;
 
 fn main() -> ExitCode {
-    match run(Cli::parse()) {
+    let cli = Cli::parse();
+    if supervised(&cli) {
+        return supervisor::supervise();
+    }
+    if supervisor::is_child() {
+        supervisor::exit_with_parent();
+    }
+    let result = run(cli);
+    if std::env::var_os("OCR_TEST_VISION_STATS").is_some() {
+        eprintln!(
+            "test: vision max concurrent {}",
+            ocr::vision::max_concurrent()
+        );
+    }
+    match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("{e}");
             ExitCode::from(e.exit_code())
         }
     }
+}
+
+/// Whether this scan runs as a supervised child (see `ocr::supervisor`).
+fn supervised(cli: &Cli) -> bool {
+    matches!(&cli.command, Command::Scan(a) if !a.dry_run) && !supervisor::is_child()
 }
 
 fn run(cli: Cli) -> Result<(), CliError> {
@@ -185,7 +205,8 @@ fn settings(args: &ScanArgs) -> Settings {
         dpi: args.effective_dpi(),
         jobs: args.effective_jobs(),
         side_threads: args.jobs.unwrap_or_else(ocr::cli::perf_cores),
-        overwrite: args.overwrite,
+        // A retry after a crash must keep the checkpoints the crashed run wrote.
+        overwrite: args.overwrite && supervisor::attempt() == 0,
         pages: args.pages.clone(),
         text_layer: args.effective_text_layer(),
         page_markers: args.page_markers(),

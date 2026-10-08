@@ -269,3 +269,26 @@ Checkpointing and assembly from disk cost nothing measurable in time and about 1
 | paddleocr-vl (1.6 bf16) | 14.3 s | 14.3 s | identical apart from `generated:` |
 
 For model engines this tests side-pass and assembly concurrency, not model batching: requests are capped at the server's `--max-num-seqs` (1), so `--jobs 8` makes the same one-at-a-time requests as `--jobs 1` and prints the cap note.
+
+## Apple Vision concurrent start-up crash (TextRecognition)
+
+**Signature** (ten `~/Library/Logs/DiagnosticReports/ocr-2026-10-08-*.ips`, including one during a model-engine eval): `EXC_BAD_ACCESS` (SIGSEGV) in `libobjc objc_retain`, called from Apple's private `TextRecognition` framework, called from `Vision`, on `com.apple.root.default-qos.cooperative`, with 3-10 threads inside `TextRecognition` (others in `objc_sync_enter`, CoreML `MLLoader`, ANE `doLoadModel`). **Every real crash happened within 0.81 s of launch; none happened mid-run.**
+
+**Repro**: `spike/repro_init_race.sh [iterations] [threads] [bench|scan]` launches fresh processes (default `vision_bench legal_300dpi.png 10`) and counts crash exits (139 SIGSEGV, 138 SIGBUS, 132 SIGILL, 133 SIGTRAP); in `scan` mode it also counts the supervisor's "Apple Vision crashed" notes.
+
+| Variant (10 simultaneous requests, `vision_bench`) | Launches | SIGSEGV |
+|---|---|---|
+| Baseline | 300 | 14 (4.7%) |
+| First request alone (NSLock gate) | 300 | 10 (3.3%) |
+| Gate plus one extra serial warm call | 100 | 6 |
+| One warm call, 2.5 s idle, then 10 threads | 100 | 8 |
+| Gate, thread starts staggered by 150 ms | 100 | 1 |
+| Cap of 2 concurrent requests | 100 | 0 |
+| Cap of 1 concurrent request | 100 | 0 |
+
+**Conclusion.** The root cause is in Apple's framework. The trigger is concurrent request start-up: with the first-use gate open, the crash comes in the wave right after the first call finishes (the dumps show 9 threads past the gate and none in it), and a completed warm call, even followed by 2.5 s idle, does not help. A first-use gate and warm-up therefore do not fix it. A cap of 2 looks effective (0 in 100) but costs about 1.5x on 16 images (3-4 s uncapped, 5-7 s cap 2, 9-11 s cap 1; noisy, shared machine). 0 in 100 is not proof, since 0 of 100 at a 4.7% rate happens by chance about 0.8% of the time.
+
+**Decision.** The user chose cap 2 for prevention, plus a supervisor for containment:
+- `bridge/Sources/OcrBridge/OcrBridge.swift`: a process-wide semaphore of 2 around every Vision request (`blocking()`); `OCR_VISION_MAX_CONCURRENT` (1-64) overrides it for measurement. `--jobs` keeps its meaning (worker threads); rendering and the rest overlap while Vision recognizes at most 2 pages at a time.
+- `src/supervisor.rs`: a non-dry-run `ocr scan` re-executes itself as a child. If the child dies from SIGSEGV, SIGBUS, SIGILL or SIGTRAP it prints `note: Apple Vision crashed (signal N); resuming from checkpoints (retry k of 3)` and runs again, resuming from the per-page checkpoints. At most 3 retries; SIGINT, SIGTERM and SIGKILL are never retried; the child's exit code is passed through. The parent handles SIGINT with a no-op handler (the child gets Ctrl-C from the terminal's process group), forwards SIGTERM/SIGHUP, and the child exits if the parent is killed. A retry keeps the crashed run's checkpoints even with `--overwrite`; in a directory scan, files that finished before the crash are redone.
+- Tests: `tests/supervisor.rs` injects crashes with `OCR_TEST_CRASH_AFTER=N` (after N checkpoints; `OCR_TEST_CRASH_ATTEMPTS`, `OCR_TEST_CRASH_SIGNAL`) and reads the in-flight peak through `OCR_TEST_VISION_STATS`.

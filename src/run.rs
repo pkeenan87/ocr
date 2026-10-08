@@ -285,6 +285,8 @@ fn writer(
     queue: &Queue,
 ) {
     let mut files: HashMap<usize, Entry> = HashMap::new();
+    let mut checkpointed = 0;
+    crate::supervisor::test_crash_hook(0);
     for msg in rx {
         let id = match msg {
             Msg::Stop => break,
@@ -322,6 +324,9 @@ fn writer(
                         page.number
                     ));
                     e.mem.insert(page.number, page);
+                } else {
+                    checkpointed += 1;
+                    crate::supervisor::test_crash_hook(checkpointed);
                 }
                 e.remaining -= 1;
                 queue.progress.inc(1);

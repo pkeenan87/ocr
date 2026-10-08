@@ -11,6 +11,7 @@ unsafe extern "C" {
         path: *const c_char,
         options_json: *const c_char,
     ) -> *mut c_char;
+    fn ocr_bridge_max_concurrent() -> i32;
     fn ocr_bridge_document_info(path: *const c_char) -> *mut c_char;
     fn ocr_bridge_text_layer(path: *const c_char, page_index: i32) -> *mut c_char;
     fn ocr_bridge_recognize_page(
@@ -175,6 +176,11 @@ pub fn text_layer(path: &Path, page_index: usize) -> Result<String> {
         bail!("text layer: {}", out.error.unwrap_or_default());
     }
     Ok(out.text)
+}
+
+/// The most Vision requests that were in flight at once in this process (the bridge caps it).
+pub fn max_concurrent() -> usize {
+    unsafe { ocr_bridge_max_concurrent() }.max(0) as usize
 }
 
 /// Render page `page_index` (0-based) at `dpi` and recognize it. Opens the document on every

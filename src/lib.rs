@@ -7,4 +7,5 @@ pub mod input;
 pub mod layout;
 pub mod markdown;
 pub mod pipeline;
+pub mod regions;
 pub mod vision;

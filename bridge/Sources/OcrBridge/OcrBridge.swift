@@ -311,6 +311,43 @@ public func ocr_bridge_text_layer(_ path: UnsafePointer<CChar>, _ pageIndex: Int
     return json(TextOut(ok: true, text: page.string ?? ""))
 }
 
+/// Renders a page exactly as `recognize_page` does and returns it as 8-bit DeviceGray, one byte
+/// per pixel, row 0 at the top. Release with ocr_bridge_free_bytes. Null on failure.
+@_cdecl("ocr_bridge_render_gray")
+public func ocr_bridge_render_gray(
+    _ path: UnsafePointer<CChar>, _ pageIndex: Int32, _ dpi: Int32,
+    _ outWidth: UnsafeMutablePointer<Int32>?, _ outHeight: UnsafeMutablePointer<Int32>?
+) -> UnsafeMutablePointer<UInt8>? {
+    outWidth?.pointee = 0
+    outHeight?.pointee = 0
+    let p = String(cString: path)
+    do {
+        let image = isPDF(p)
+            ? try renderPDFPage(path: p, index: Int(pageIndex), dpi: Double(dpi))
+            : try loadImage(path: p, index: Int(pageIndex), dpi: Double(dpi))
+        let w = image.width, h = image.height
+        guard let buffer = calloc(w * h, 1)?.assumingMemoryBound(to: UInt8.self),
+            let ctx = CGContext(
+                data: buffer, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w,
+                space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue)
+        else { return nil }
+        ctx.setFillColor(gray: 1, alpha: 1)
+        ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        ctx.interpolationQuality = .high
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        outWidth?.pointee = Int32(w)
+        outHeight?.pointee = Int32(h)
+        return buffer
+    } catch {
+        return nil
+    }
+}
+
+@_cdecl("ocr_bridge_free_bytes")
+public func ocr_bridge_free_bytes(_ ptr: UnsafeMutablePointer<UInt8>?) {
+    free(ptr)
+}
+
 @_cdecl("ocr_bridge_free")
 public func ocr_bridge_free(_ ptr: UnsafeMutablePointer<CChar>?) {
     free(ptr)

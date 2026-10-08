@@ -1,4 +1,9 @@
-//! Reading order by recursive XY-cut over block bounding boxes (normalized, top-left origin).
+//! Reading order by recursive XY-cut over block bounding boxes (normalized, top-left origin),
+//! and the deposition-transcript check.
+
+use std::sync::LazyLock;
+
+use regex::Regex;
 
 use crate::vision::Block;
 
@@ -6,16 +11,16 @@ use crate::vision::Block;
 const MIN_X_GAP: f64 = 0.02;
 /// Each side of an x-cut must cover this fraction of the node's height.
 const MIN_COLUMN_COVERAGE: f64 = 0.30;
-/// Vision merges same-baseline lines across a gutter into one wide block, so a gutter may be
-/// bridged by blocks covering up to this fraction of the body's height.
-const MAX_GUTTER_COVER: f64 = 0.45;
-/// A column needs at least this many blocks and this much page height.
-const MIN_COLUMN_BLOCKS: usize = 3;
-const MIN_COLUMN_HEIGHT: f64 = 0.15;
-/// Pad column rects by this fraction of the page. Vision reads column crops best with generous
-/// white space; padding is clamped to the page, the gutter midpoints and neighbouring bands.
-const COLUMN_PAD_X: f64 = 1.0;
-const COLUMN_PAD_Y: f64 = 0.10;
+
+/// A page with at least this many `Q.`/`A.` lines is a likely transcript.
+const MIN_QA_LINES: usize = 8;
+/// Page labels of a multi-up transcript must be at least this far apart (fraction of the page)
+/// to count as different grid columns or rows.
+const MIN_GRID_SPACING: f64 = 0.2;
+
+static PAGE_LABEL: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^Page \d+$").unwrap());
+static QA_LINE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*(\d{1,2}\s+)?[QA]\.\s").unwrap());
 
 /// Block indices in reading order. Vision's own order is ignored.
 pub fn reading_order(blocks: &[Block]) -> Vec<usize> {
@@ -25,112 +30,49 @@ pub fn reading_order(blocks: &[Block]) -> Vec<usize> {
     order
 }
 
-/// A multi-column body found on a page.
-#[derive(Debug)]
-pub struct Columns {
-    /// Normalized `[x, y, w, h]` of each column, left to right.
-    pub rects: Vec<[f64; 4]>,
-    /// Blocks inside the column band; to be replaced by re-recognizing the rects.
-    pub covered: Vec<usize>,
+/// Text lines of a block: paragraph lines, list items, and table rows joined by spaces.
+fn lines(b: &Block) -> Vec<String> {
+    let mut v: Vec<String> = b
+        .text
+        .iter()
+        .flat_map(|t| t.lines().map(String::from))
+        .collect();
+    v.extend(
+        b.items
+            .iter()
+            .flatten()
+            .map(|i| format!("{} {}", i.marker, i.text)),
+    );
+    v.extend(b.rows.iter().flatten().map(|r| r.join(" ")));
+    v
 }
 
-/// Finds side-by-side columns: x-gutters bridged by little of the body, with two or more
-/// substantial columns between them. Single-column pages return `None`.
-pub fn find_columns(blocks: &[Block]) -> Option<Columns> {
-    if blocks.len() < 2 * MIN_COLUMN_BLOCKS {
-        return None;
-    }
-    let all: Vec<usize> = (0..blocks.len()).collect();
-    let top = blocks.iter().map(|b| b.bbox[1]).fold(1.0, f64::min);
-    let end = blocks.iter().map(bottom).fold(0.0, f64::max);
-    let span_lo = blocks.iter().map(|b| b.bbox[0]).fold(1.0, f64::min);
-    let span_hi = blocks.iter().map(right).fold(0.0, f64::max);
-
-    // Elementary x-intervals between block edges, merged while barely covered.
-    let mut edges: Vec<f64> = blocks.iter().flat_map(|b| [b.bbox[0], right(b)]).collect();
-    edges.sort_by(f64::total_cmp);
-    edges.dedup();
-    let mut gutters: Vec<(f64, f64)> = Vec::new();
-    for w in edges.windows(2) {
-        let touching: Vec<usize> = all
-            .iter()
-            .copied()
-            .filter(|&i| blocks[i].bbox[0] < w[1] && right(&blocks[i]) > w[0])
-            .collect();
-        if vertical_coverage(&touching, blocks, top, end) > MAX_GUTTER_COVER {
-            continue;
-        }
-        match gutters.last_mut() {
-            Some(g) if (g.1 - w[0]).abs() < 1e-9 => g.1 = w[1],
-            _ => gutters.push((w[0], w[1])),
-        }
-    }
-    gutters.retain(|g| g.1 - g.0 >= MIN_X_GAP);
-    if gutters.is_empty() {
-        return None;
-    }
-
-    // Slices between gutters (and the span ends) with the blocks wholly inside them.
-    let mut bounds = vec![span_lo];
-    for g in &gutters {
-        bounds.extend([g.0, g.1]);
-    }
-    bounds.push(span_hi);
-    let mut cols: Vec<(f64, f64, Vec<usize>)> = Vec::new();
-    let mid = |g: &(f64, f64)| (g.0 + g.1) / 2.0;
-    for (k, pair) in bounds.chunks(2).enumerate() {
-        let members: Vec<usize> = all
-            .iter()
-            .copied()
-            .filter(|&i| blocks[i].bbox[0] >= pair[0] - 1e-9 && right(&blocks[i]) <= pair[1] + 1e-9)
-            .collect();
-        if is_column(&members, blocks) {
-            // Rects may reach to the middle of the gutter, never past it.
-            let lo = k.checked_sub(1).map_or(0.0, |p| mid(&gutters[p]));
-            let hi = gutters.get(k).map_or(1.0, mid);
-            cols.push((lo, hi, members));
-        }
-    }
-    if cols.len() < 2 {
-        return None;
-    }
-    let y0 = cols
+/// Likely deposition transcript: a 2x2 or larger grid of mini-pages (4-up minuscript), each
+/// headed by a `Page N` label, or many numbered `Q.`/`A.` lines. Flag only.
+pub fn looks_like_transcript(blocks: &[Block]) -> bool {
+    let qa = blocks
         .iter()
-        .flat_map(|c| &c.2)
-        .map(|&i| blocks[i].bbox[1])
-        .fold(1.0, f64::min);
-    let y1 = cols
+        .flat_map(lines)
+        .filter(|l| QA_LINE.is_match(l))
+        .count();
+    if qa >= MIN_QA_LINES {
+        return true;
+    }
+    let labels: Vec<(f64, f64)> = blocks
         .iter()
-        .flat_map(|c| &c.2)
-        .map(|&i| bottom(&blocks[i]))
-        .fold(0.0, f64::max);
-    // Do not pad into a title or footer band outside the columns.
-    let mid_y = |b: &Block| b.bbox[1] + b.bbox[3] / 2.0;
-    let above = blocks.iter().filter(|b| mid_y(b) < y0).map(bottom);
-    let below = blocks.iter().filter(|b| mid_y(b) > y1).map(|b| b.bbox[1]);
-    let y0 = (y0 - COLUMN_PAD_Y).max(above.fold(0.0, f64::max).min(y0));
-    let y1 = (y1 + COLUMN_PAD_Y).min(below.fold(1.0, f64::min).max(y1));
-    let rects: Vec<[f64; 4]> = cols
-        .iter()
-        .map(|(lo, hi, m)| {
-            let x0 = m.iter().map(|&i| blocks[i].bbox[0]).fold(1.0, f64::min);
-            let x1 = m.iter().map(|&i| right(&blocks[i])).fold(0.0, f64::max);
-            let (x0, x1) = ((x0 - COLUMN_PAD_X).max(*lo), (x1 + COLUMN_PAD_X).min(*hi));
-            [x0, y0, x1 - x0, y1 - y0]
+        .filter(|b| {
+            lines(b)
+                .first()
+                .is_some_and(|l| PAGE_LABEL.is_match(l.trim()))
         })
+        .map(|b| (b.bbox[0] + b.bbox[2] / 2.0, b.bbox[1] + b.bbox[3] / 2.0))
         .collect();
-    let covered = all
-        .into_iter()
-        .filter(|&i| {
-            let b = &blocks[i];
-            let mid = b.bbox[1] + b.bbox[3] / 2.0;
-            (y0..=y1).contains(&mid)
-                && rects
-                    .iter()
-                    .any(|r| b.bbox[0] < r[0] + r[2] && right(b) > r[0])
-        })
-        .collect();
-    Some(Columns { rects, covered })
+    let spread = |f: fn(&(f64, f64)) -> f64| {
+        let lo = labels.iter().map(f).fold(f64::INFINITY, f64::min);
+        let hi = labels.iter().map(f).fold(f64::NEG_INFINITY, f64::max);
+        hi - lo >= MIN_GRID_SPACING
+    };
+    labels.len() >= 2 && spread(|l| l.0) && spread(|l| l.1)
 }
 
 fn right(b: &Block) -> f64 {
@@ -227,12 +169,6 @@ fn widest_y_split(ids: &[usize], blocks: &[Block]) -> Option<(Vec<usize>, Vec<us
     (best.1 > 0).then(|| (sorted[..best.1].to_vec(), sorted[best.1..].to_vec()))
 }
 
-fn is_column(ids: &[usize], blocks: &[Block]) -> bool {
-    let top = ids.iter().map(|&i| blocks[i].bbox[1]).fold(1.0, f64::min);
-    let end = ids.iter().map(|&i| bottom(&blocks[i])).fold(0.0, f64::max);
-    ids.len() >= MIN_COLUMN_BLOCKS && end - top >= MIN_COLUMN_HEIGHT
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -281,23 +217,6 @@ mod tests {
                 "title", "L0", "L1", "L2", "L3", "L4", "L5", "R0", "R1", "R2", "R3", "R4", "R5"
             ]
         );
-        let cols = find_columns(&blocks).unwrap();
-        assert_eq!(cols.rects.len(), 2);
-        let [x, y, w, _] = cols.rects[0];
-        assert!(x < 0.1 && x + w > 0.45 && x + w <= 0.55);
-        assert!(y >= 0.05 + 0.03, "title stays outside the columns");
-        assert!(!cols.covered.contains(&0));
-        assert_eq!(cols.covered.len(), 12);
-    }
-
-    #[test]
-    fn merged_wide_lines_do_not_hide_the_gutter() {
-        let mut blocks = two_columns();
-        // Vision merged one row across the gutter.
-        blocks.push(b("merged", 0.1, 0.21, 0.8, 0.05));
-        blocks.retain(|x| !matches!(x.text.as_deref(), Some("L1" | "R1")));
-        let cols = find_columns(&blocks).unwrap();
-        assert!(cols.covered.contains(&(blocks.len() - 1)));
     }
 
     #[test]
@@ -323,7 +242,6 @@ mod tests {
                 "footer-right"
             ]
         );
-        assert!(find_columns(&blocks).is_none());
     }
 
     #[test]
@@ -338,6 +256,50 @@ mod tests {
             names(&blocks, &reading_order(&blocks)),
             ["a", "b", "dated", "c"]
         );
-        assert!(find_columns(&blocks).is_none());
+    }
+
+    #[test]
+    fn transcript_by_qa_lines_or_page_grid() {
+        let qa: Vec<Block> = (1..=8)
+            .map(|i| {
+                b(
+                    &format!("{i} Q. Did you attend?"),
+                    0.1,
+                    0.1 + i as f64 * 0.05,
+                    0.5,
+                    0.03,
+                )
+            })
+            .collect();
+        assert!(looks_like_transcript(&qa));
+        assert!(!looks_like_transcript(&qa[..7]));
+        // A table of numbered rows counts through its cells.
+        let mut table = b("", 0.1, 0.1, 0.8, 0.8);
+        table.text = None;
+        table.rows = Some(
+            (1..=8)
+                .map(|i| vec![i.to_string(), "A. Yes, I did.".into()])
+                .collect(),
+        );
+        assert!(looks_like_transcript(&[table]));
+
+        let label = |t: &str, x, y| b(t, x, y, 0.1, 0.02);
+        let grid = [
+            label("Page 41", 0.2, 0.05),
+            label("Page 42", 0.7, 0.05),
+            label("Page 43", 0.2, 0.55),
+        ];
+        assert!(looks_like_transcript(&grid));
+        // Labels in one row are not a grid, and body text mentioning a page is not a label.
+        assert!(!looks_like_transcript(&grid[..2]));
+        assert!(!looks_like_transcript(&[
+            label("Page 41", 0.2, 0.05),
+            b("See Page 9 of the brief", 0.2, 0.6, 0.5, 0.02),
+        ]));
+        // Lowercase list markers in ordinary legal text are not Q/A lines.
+        let list: Vec<Block> = (0..10)
+            .map(|i| b("a. Late delivery", 0.1, 0.1 + i as f64 * 0.05, 0.5, 0.03))
+            .collect();
+        assert!(!looks_like_transcript(&list));
     }
 }

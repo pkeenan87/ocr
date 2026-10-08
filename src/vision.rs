@@ -20,6 +20,14 @@ unsafe extern "C" {
         options_json: *const c_char,
     ) -> *mut c_char;
     fn ocr_bridge_free(ptr: *mut c_char);
+    fn ocr_bridge_render_gray(
+        path: *const c_char,
+        page_index: i32,
+        dpi: i32,
+        width: *mut i32,
+        height: *mut i32,
+    ) -> *mut u8;
+    fn ocr_bridge_free_bytes(ptr: *mut u8);
 }
 
 /// One list entry; the marker is kept apart from the text.
@@ -181,6 +189,40 @@ pub fn recognize_page(path: &Path, page_index: usize, dpi: u32, options: &Option
         width: page.width,
         height: page.height,
         blocks: page.blocks,
+    })
+}
+
+/// An 8-bit grayscale bitmap, one byte per pixel, row 0 at the top.
+#[derive(Debug, Clone)]
+pub struct GrayImage {
+    pub width: usize,
+    pub height: usize,
+    pub pixels: Vec<u8>,
+}
+
+/// Render page `page_index` (0-based) at `dpi` exactly as `recognize_page` does, as grayscale.
+pub fn render_gray(path: &Path, page_index: usize, dpi: u32) -> Result<GrayImage> {
+    let c_path = cstr(&path.to_string_lossy())?;
+    let (mut w, mut h) = (0i32, 0i32);
+    let ptr = unsafe {
+        ocr_bridge_render_gray(
+            c_path.as_ptr(),
+            page_index as i32,
+            dpi as i32,
+            &mut w,
+            &mut h,
+        )
+    };
+    if ptr.is_null() || w <= 0 || h <= 0 {
+        bail!("cannot render page {} as grayscale", page_index + 1);
+    }
+    let (width, height) = (w as usize, h as usize);
+    let pixels = unsafe { std::slice::from_raw_parts(ptr, width * height) }.to_vec();
+    unsafe { ocr_bridge_free_bytes(ptr) };
+    Ok(GrayImage {
+        width,
+        height,
+        pixels,
     })
 }
 

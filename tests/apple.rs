@@ -254,3 +254,145 @@ fn dpi_is_validated() {
             .code(2);
     }
 }
+
+/// The markdown without its `generated:` timestamp line.
+fn without_generated(md: &str) -> String {
+    md.lines()
+        .filter(|l| !l.starts_with("generated:"))
+        .map(|l| format!("{l}\n"))
+        .collect()
+}
+
+fn golden(name: &str) -> String {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/golden/{name}.md"));
+    fs::read_to_string(path).unwrap()
+}
+
+/// Single-column pages must stay byte-identical to the outputs captured before Phase 2b.
+#[test]
+fn golden_single_column_pages_are_byte_identical() {
+    for name in ["legal", "legal_scan"] {
+        let e = Env::new(&[&format!("{name}.pdf")]);
+        let (md, _) = e.scan(&format!("{name}.pdf"), &NEVER);
+        assert_eq!(without_generated(&md), golden(name), "{name}");
+    }
+}
+
+/// Sentences of the two-column page must be exact and in order; the rest may differ.
+fn assert_two_column_sentences(md: &str) {
+    let mut last = 0;
+    for side in ["Left", "Right"] {
+        for i in 1..=15 {
+            let key = format!("{side} column sentence {i} concerns");
+            let at = md
+                .find(&key)
+                .unwrap_or_else(|| panic!("missing {key}\n{md}"));
+            assert!(at > last, "{key} out of order\n{md}");
+            last = at;
+        }
+    }
+}
+
+#[test]
+fn golden_two_column_and_three_pages() {
+    let e = Env::new(&["two_column.pdf", "three_pages.pdf"]);
+    let (md, _) = e.scan("two_column.pdf", &NEVER);
+    assert_eq!(without_generated(&md), golden("two_column"));
+    assert_two_column_sentences(&md);
+    let (md, _) = e.scan("three_pages.pdf", &NEVER);
+    assert_eq!(without_generated(&md), golden("three_pages"));
+    assert_two_column_sentences(&md);
+}
+
+fn manifest(rel: &str) -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join(rel)
+}
+
+fn flag_note(stderr: &str) -> bool {
+    stderr.contains("looks like a deposition transcript")
+        && stderr.contains("use --model paddleocr-vl")
+}
+
+#[test]
+fn four_up_transcript_is_flagged() {
+    let e = Env::new(&[]);
+    fs::copy(manifest("spike/heldout/four_up.pdf"), e.path("four_up.pdf")).unwrap();
+    let (md, err) = e.scan("four_up.pdf", &NEVER);
+    assert!(md.contains("transcript_pages: [1]"), "{md}");
+    assert!(flag_note(&err), "{err}");
+    assert!(err.contains("four_up.pdf"), "{err}");
+}
+
+#[test]
+fn ordinary_pages_are_not_flagged_as_transcripts() {
+    let e = Env::new(&["legal.pdf", "two_column.pdf"]);
+    for name in ["legal.pdf", "two_column.pdf"] {
+        let (md, err) = e.scan(name, &NEVER);
+        assert!(md.contains("transcript_pages: []"), "{md}");
+        assert!(!flag_note(&err), "{err}");
+    }
+}
+
+/// Generates held-out seeds 0-2 (clean and degraded) with the spike venv, scans them and checks
+/// that at least 95% of the expected lines are found and in order. Needs the spike venv; set
+/// `OCR_SKIP_HELDOUT=1` to skip deliberately.
+#[test]
+fn heldout_seeds_are_read_in_order() {
+    if std::env::var_os("OCR_SKIP_HELDOUT").is_some() {
+        return;
+    }
+    let python = manifest("spike/.venv/bin/python");
+    assert!(
+        python.is_file(),
+        "{} not found: create the spike venv or set OCR_SKIP_HELDOUT=1",
+        python.display()
+    );
+    let e = Env::new(&[]);
+    let (mut found, mut total, mut ordered, mut pairs) = (0, 0, 0, 0);
+    for seed in 0..3 {
+        let dir = e.path(&format!("seed{seed}"));
+        std::process::Command::new(&python)
+            .args([
+                "-I",
+                "spike/heldout.py",
+                "--seed",
+                &seed.to_string(),
+                "--out",
+            ])
+            .arg(&dir)
+            .current_dir(manifest("."))
+            .status()
+            .unwrap()
+            .success()
+            .then_some(())
+            .expect("heldout.py failed");
+        e.cmd()
+            .args(["scan", "--input-dir"])
+            .arg(&dir)
+            .args(["--quiet", "--use-text-layer", "never"])
+            .assert()
+            .success();
+        for entry in fs::read_dir(&dir).unwrap().flatten() {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            let Some(family) = name.strip_suffix(".expected.json") else {
+                continue;
+            };
+            let expected: Vec<String> =
+                serde_json::from_str(&fs::read_to_string(entry.path()).unwrap()).unwrap();
+            for variant in [family.to_string(), format!("{family}_scan")] {
+                let md = fs::read_to_string(dir.join(format!("ocr-output/{variant}.md"))).unwrap();
+                let at: Vec<usize> = expected
+                    .iter()
+                    .filter_map(|s| md.find(s.as_str()))
+                    .collect();
+                found += at.len();
+                total += expected.len();
+                pairs += at.len().saturating_sub(1);
+                ordered += at.windows(2).filter(|w| w[1] > w[0]).count();
+            }
+        }
+    }
+    let (f, o) = (found as f64 / total as f64, ordered as f64 / pairs as f64);
+    assert!(f >= 0.95, "found {found}/{total}");
+    assert!(o >= 0.95, "in order {ordered}/{pairs}");
+}

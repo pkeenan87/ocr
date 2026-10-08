@@ -12,9 +12,19 @@ use crate::cli::TextLayer;
 use crate::input::{Item, PageRanges};
 use crate::layout;
 use crate::markdown::{self, FrontMatter, PageResult, Source};
+use crate::regions::{self, Kind};
 use crate::vision::{self, Block, DocKind, Options};
 
 pub const ENGINE_NAME: &str = "apple (Vision RecognizeDocuments)";
+
+/// Resolution of the grayscale render that region detection runs on.
+const REGION_DPI: u32 = 100;
+/// Padding of a column crop, as fractions of the page: Vision reads crops best with generous
+/// white space. Clamped at the neighbouring gutter midpoints and bands, so the horizontal pad
+/// reaches the midpoint of the gutter. Tuned on held-out seeds 0-9: a 1% horizontal pad
+/// misread words on `two_column.pdf` that the midpoint pad reads exactly.
+const COLUMN_PAD_X: f64 = 1.0;
+const COLUMN_PAD_Y: f64 = 0.02;
 
 /// Run-wide settings.
 pub struct Settings {
@@ -56,6 +66,18 @@ pub fn run_file(item: &Item, s: &Settings) -> Result<FileReport> {
     };
     let md = markdown::assemble(s.front_matter.then_some(&front), &results, s.page_markers);
     write_atomic(&item.output, &md)?;
+    let transcripts: Vec<String> = results
+        .iter()
+        .filter(|r| r.transcript)
+        .map(|r| r.number.to_string())
+        .collect();
+    if !transcripts.is_empty() {
+        eprintln!(
+            "note: {} looks like a deposition transcript (pages {}); Apple Vision drops line numbers and misreads Q./A. — use --model paddleocr-vl",
+            item.input.display(),
+            transcripts.join(", ")
+        );
+    }
 
     if !s.quiet {
         eprintln!(
@@ -140,6 +162,7 @@ fn process_page(path: &Path, kind: DocKind, index: usize, s: &Settings) -> PageR
                 body: markdown::render_text_layer(&text),
                 bates: None,
                 column_split: false,
+                transcript: false,
                 currency_fixes: 0,
                 error: None,
             };
@@ -151,13 +174,19 @@ fn process_page(path: &Path, kind: DocKind, index: usize, s: &Settings) -> PageR
         body: String::new(),
         bates: None,
         column_split: false,
+        transcript: false,
         currency_fixes: 0,
         error: None,
     };
     match recognize_with_columns(path, index, s.dpi, &s.options) {
-        Ok((blocks, split)) => {
-            let (body, bates) = markdown::render_blocks(&blocks);
-            result.column_split = split;
+        Ok(page) => {
+            let (body, bates) = if page.split {
+                markdown::render_ordered(&page.blocks)
+            } else {
+                markdown::render_blocks(&page.blocks)
+            };
+            result.column_split = page.split;
+            result.transcript = page.transcript;
             result.bates = bates;
             (result.body, result.currency_fixes) = if s.currency_fix {
                 markdown::fix_currency(&body)
@@ -170,43 +199,128 @@ fn process_page(path: &Path, kind: DocKind, index: usize, s: &Settings) -> PageR
     result
 }
 
-/// Vision pass over the full page; if the layout has two or more column regions, each region is
-/// cropped and recognized on its own (Vision merges same-baseline lines across columns).
-/// Returns the blocks and whether columns were split.
+/// Layout of one recognized page.
+pub struct Recognized {
+    pub blocks: Vec<Block>,
+    /// Whether columns were re-recognized region by region. Blocks are then already in
+    /// reading order.
+    pub split: bool,
+    /// Whether the page looks like a deposition transcript (flagged only).
+    pub transcript: bool,
+}
+
+/// Vision pass over the full page, then region detection on a grayscale render. If the page
+/// has two or more column regions, each is cropped and recognized on its own (Vision merges
+/// same-baseline lines across columns) and bands are taken from the first pass.
 pub fn recognize_with_columns(
     path: &Path,
     index: usize,
     dpi: u32,
     options: &Options,
-) -> Result<(Vec<Block>, bool)> {
+) -> Result<Recognized> {
     let page = vision::recognize_page(path, index, dpi, options)?;
-    let kept: Vec<Block> = page
+    let first_pass = |blocks: Vec<Block>| Recognized {
+        transcript: layout::looks_like_transcript(&blocks),
+        blocks,
+        split: false,
+    };
+    let tables: Vec<[f64; 4]> = page
         .blocks
         .iter()
-        .filter(|b| !markdown::is_pleading_margin_number(b))
-        .cloned()
+        .filter(|b| b.kind == "table")
+        .map(|b| b.bbox)
         .collect();
-    let Some(columns) = layout::find_columns(&kept) else {
-        return Ok((page.blocks, false));
+    // A failed render only costs the column handling, never the page.
+    let Ok(gray) = vision::render_gray(path, index, REGION_DPI) else {
+        return Ok(first_pass(page.blocks));
     };
-    let mut blocks: Vec<Block> = kept
-        .iter()
-        .enumerate()
-        .filter(|(i, _)| !columns.covered.contains(i))
-        .map(|(_, b)| b.clone())
-        .collect();
-    for rect in columns.rects {
+    let regions = regions::detect(&gray, &tables);
+    if regions.iter().filter(|r| r.kind == Kind::Column).count() < 2 {
+        return Ok(first_pass(page.blocks));
+    }
+    let crops = regions::crop_rects(&regions, COLUMN_PAD_X, COLUMN_PAD_Y);
+    let mut recognized: Vec<Vec<Block>> = Vec::new();
+    for (_, rect) in &crops {
         let crop = Options {
-            crop: Some(rect),
+            crop: Some(*rect),
             ..options.clone()
         };
         match vision::recognize_page(path, index, dpi, &crop) {
-            Ok(col) => blocks.extend(drop_duplicate_titles(col.blocks)),
+            Ok(col) => recognized.push(drop_duplicate_titles(col.blocks)),
             // Keep the full-page reading rather than lose the page.
-            Err(_) => return Ok((page.blocks, false)),
+            Err(_) => return Ok(first_pass(page.blocks)),
         }
     }
-    Ok((blocks, true))
+    let ordered = assemble_regions(&regions, &crops, recognized, &page.blocks);
+    Ok(Recognized {
+        transcript: layout::looks_like_transcript(&ordered)
+            || layout::looks_like_transcript(&page.blocks),
+        blocks: ordered,
+        split: true,
+    })
+}
+
+/// Region-ordered blocks: each column's own recognition, and the first-pass blocks that fall
+/// in each band. Margin strips are dropped, and so are first-pass blocks that a column crop
+/// replaces.
+fn assemble_regions(
+    regions: &[regions::Region],
+    crops: &[(usize, [f64; 4])],
+    recognized: Vec<Vec<Block>>,
+    first_pass: &[Block],
+) -> Vec<Block> {
+    let inside = |r: &[f64; 4], x: f64, y: f64| {
+        x >= r[0] && x <= r[0] + r[2] && y >= r[1] && y <= r[1] + r[3]
+    };
+    let mut bands: Vec<(usize, Vec<Block>)> = regions
+        .iter()
+        .enumerate()
+        .filter(|(_, r)| r.kind == Kind::Band)
+        .map(|(i, _)| (i, Vec::new()))
+        .collect();
+    let mut strays = Vec::new();
+    for b in first_pass {
+        let (x, y) = (b.bbox[0] + b.bbox[2] / 2.0, b.bbox[1] + b.bbox[3] / 2.0);
+        if crops.iter().any(|(_, r)| inside(r, x, y))
+            || regions
+                .iter()
+                .any(|r| r.kind == Kind::Margin && inside(&r.rect, x, y))
+        {
+            continue;
+        }
+        // The band containing the block's centre, else the nearest one vertically.
+        let dist = |i: usize| {
+            let r = regions[i].rect;
+            (r[1] - y).max(y - (r[1] + r[3])).max(0.0)
+        };
+        match bands
+            .iter_mut()
+            .min_by(|a, c| dist(a.0).total_cmp(&dist(c.0)))
+        {
+            Some((_, v)) => v.push(b.clone()),
+            None => strays.push(b.clone()),
+        }
+    }
+    let mut columns = recognized.into_iter();
+    let mut out = Vec::new();
+    for (i, region) in regions.iter().enumerate() {
+        let blocks = match region.kind {
+            Kind::Margin => continue,
+            Kind::Column => columns.next().unwrap_or_default(),
+            Kind::Band => bands
+                .iter_mut()
+                .find(|(j, _)| *j == i)
+                .map(|(_, v)| std::mem::take(v))
+                .unwrap_or_default(),
+        };
+        out.extend(
+            layout::reading_order(&blocks)
+                .into_iter()
+                .map(|k| blocks[k].clone()),
+        );
+    }
+    out.extend(strays);
+    out
 }
 
 /// Writes `<out>.tmp` next to `out`, then renames it into place.

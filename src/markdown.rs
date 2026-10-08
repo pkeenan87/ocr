@@ -47,6 +47,8 @@ pub struct PageResult {
     pub bates: Option<String>,
     /// Whether the page was re-recognized column by column.
     pub column_split: bool,
+    /// Whether the page looks like a deposition transcript (flagged only; OCR is unchanged).
+    pub transcript: bool,
     /// Number of `S`-to-`$` currency corrections made.
     pub currency_fixes: usize,
     /// Set when OCR failed; the body is then empty.
@@ -92,13 +94,27 @@ fn block_texts(b: &Block) -> Vec<String> {
 
 /// Markdown body for one Vision page and its Bates number, if any.
 pub fn render_blocks(blocks: &[Block]) -> (String, Option<String>) {
+    render(blocks, false)
+}
+
+/// Like `render_blocks`, for blocks already in reading order (region by region).
+pub fn render_ordered(blocks: &[Block]) -> (String, Option<String>) {
+    render(blocks, true)
+}
+
+fn render(blocks: &[Block], ordered: bool) -> (String, Option<String>) {
     let bates = find_bates(blocks);
     let body: Vec<Block> = blocks
         .iter()
         .filter(|b| !is_pleading_margin_number(b))
         .cloned()
         .collect();
-    let parts: Vec<String> = layout::reading_order(&body)
+    let order: Vec<usize> = if ordered {
+        (0..body.len()).collect()
+    } else {
+        layout::reading_order(&body)
+    };
+    let parts: Vec<String> = order
         .into_iter()
         .filter_map(|i| render_block(&body[i]))
         .collect();
@@ -250,19 +266,21 @@ pub fn assemble(front: Option<&FrontMatter>, pages: &[PageResult], markers: bool
             .filter(|p| p.source == Source::TextLayer && p.error.is_none());
         let flagged = pages.iter().filter(|p| p.error.is_some());
         let split = pages.iter().filter(|p| p.column_split);
+        let transcripts = pages.iter().filter(|p| p.transcript);
         let fixes: Vec<String> = pages
             .iter()
             .filter(|p| p.currency_fixes > 0)
             .map(|p| format!("{}: {}", p.number, p.currency_fixes))
             .collect();
         out.push_str(&format!(
-            "---\nsource: {}\npages: {}\nengine: {}\ngenerated: {}\ntext_layer_pages: {}\ncolumn_split_pages: {}\ncurrency_fixes: {{{}}}\nflagged_pages: {}\n---\n\n",
+            "---\nsource: {}\npages: {}\nengine: {}\ngenerated: {}\ntext_layer_pages: {}\ncolumn_split_pages: {}\ntranscript_pages: {}\ncurrency_fixes: {{{}}}\nflagged_pages: {}\n---\n\n",
             yaml_str(f.source),
             f.pages,
             yaml_str(f.engine),
             f.generated,
             number_list(layer.map(|p| p.number)),
             number_list(split.map(|p| p.number)),
+            number_list(transcripts.map(|p| p.number)),
             fixes.join(", "),
             number_list(flagged.map(|p| p.number)),
         ));
@@ -421,6 +439,7 @@ mod tests {
             },
             bates: bates.map(String::from),
             column_split: false,
+            transcript: false,
             currency_fixes: 0,
             error: error.map(String::from),
         };

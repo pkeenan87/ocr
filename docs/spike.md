@@ -292,3 +292,30 @@ For model engines this tests side-pass and assembly concurrency, not model batch
 - `bridge/Sources/OcrBridge/OcrBridge.swift`: a process-wide semaphore of 2 around every Vision request (`blocking()`); `OCR_VISION_MAX_CONCURRENT` (1-64) overrides it for measurement. `--jobs` keeps its meaning (worker threads); rendering and the rest overlap while Vision recognizes at most 2 pages at a time.
 - `src/supervisor.rs`: a non-dry-run `ocr scan` re-executes itself as a child. If the child dies from SIGSEGV, SIGBUS, SIGILL or SIGTRAP it prints `note: Apple Vision crashed (signal N); resuming from checkpoints (retry k of 3)` and runs again, resuming from the per-page checkpoints. At most 3 retries; SIGINT, SIGTERM and SIGKILL are never retried; the child's exit code is passed through. The parent handles SIGINT with a no-op handler (the child gets Ctrl-C from the terminal's process group), forwards SIGTERM/SIGHUP, and the child exits if the parent is killed. A retry keeps the crashed run's checkpoints even with `--overwrite`; in a directory scan, files that finished before the crash are redone.
 - Tests: `tests/supervisor.rs` injects crashes with `OCR_TEST_CRASH_AFTER=N` (after N checkpoints; `OCR_TEST_CRASH_ATTEMPTS`, `OCR_TEST_CRASH_SIGNAL`) and reads the in-flight peak through `OCR_TEST_VISION_STATS`.
+
+## llama-server spike (2026-10-08, Linux, PLAN §9 Phase 7a/7d-1)
+
+**Setup.** llama.cpp b11510 (`ubuntu-vulkan-x64` and `ubuntu-x64` CPU builds) on this Linux box: Ryzen 9950X, integrated Radeon (RADV RAPHAEL_MENDOCINO), 30 GB RAM, no NVIDIA. Model `PaddlePaddle/PaddleOCR-VL-1.6-GGUF` (BF16, plus mmproj). Pages were rendered through the production path (`examples/render_png`, pdfium). The request had the same shape as `model_engine::post`: image first, then text, temperature 0, `max_tokens` 4096.
+
+**Results.**
+- **Output matches the MLX output in kind.**
+  - `OCR:` on `legal.pdf` at 150 DPI found all 7 checked values exactly: case number, four amounts, Bates `SMITH000123`, and the footer.
+  - `legal_scan.pdf` gave the same text.
+  - Vulkan and CPU outputs were byte-identical.
+  - `Table Recognition:` returns OTSL (`<fcel>…<nl>`).
+  - `finish_reason` was `stop`, with no leftover template tokens.
+  - 1253 prompt tokens, 299 completion tokens.
+- **No template flag is needed.** Jinja is on by default, and llama-server maps `image_url` to its own media marker. `/health` answers in about 2 s.
+- **Speed on this machine:**
+
+  | Build | Per page | Notes |
+  |---|---|---|
+  | CPU | 7.5 s | Prompt about 320 tok/s, decode about 83 tok/s |
+  | Vulkan on the integrated GPU | 46 s | Image encoding takes 40–50 s of that |
+
+  **On integrated graphics the CPU build is about 6x faster.** 7e must prefer CPU there.
+- **`-np 2`:** both concurrent requests were correct. 1.25x faster on CPU, no gain on Vulkan.
+- **Memory:** with no `--ctx-size`, each slot gets the model's full 131072-token context, and the CPU build peaks at 4.5 GB (6.9 GB with 2 slots). `ocr` now sizes `--ctx-size` per engine x slots: **2.1 GB resident** with the CPU build.
+- **Archive layout:** everything is flat in `llama-b11510/`. `llama-server` is a small launcher with its `.so` files (symlink chains included) beside it; `ocr` adds that directory to `LD_LIBRARY_PATH`.
+- **Through `ocr` itself:** `ocr server setup --model paddleocr-vl` downloads, verifies and unpacks llama.cpp, pdfium and the GGUFs. `server start` is then ready in 3.4 s (Vulkan) or 0.8 s (CPU), and `status` and `stop` work.
+- **Not tested:** `repetition_penalty` (the loop retry), olmOCR, dots, CUDA.

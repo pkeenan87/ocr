@@ -320,10 +320,13 @@ pub fn install_weights(gguf: &Gguf) -> Result<(), CliError> {
 // ---------------------------------------------------------------- server argv
 
 /// Prompt tokens to budget per request on top of the reply (`engines::limits`), so the KV cache
-/// is sized for the work rather than the model's full trained context.
+/// is sized for the work rather than the model's full trained context (131072 tokens per slot
+/// for PaddleOCR-VL by default). Measured: PaddleOCR-VL 1253 at 150 DPI (docs/spike.md),
+/// olmOCR about 1790 at 1288 px; dots about 5035 at 200 DPI (fewer at its 100 DPI default).
 fn prompt_budget(engine: Engine) -> u32 {
     match engine {
         Engine::Olmocr => 2048,
+        Engine::PaddleocrVl => 4096,
         _ => 6144,
     }
 }
@@ -395,9 +398,9 @@ mod tests {
 
     #[test]
     fn context_is_sized_per_slot() {
-        // Paddle: 8192 retry tokens + 6144 prompt = 14336 per slot.
-        assert_eq!(ctx_size(Engine::PaddleocrVl, 1), 14336);
-        assert_eq!(ctx_size(Engine::PaddleocrVl, 2), 28672);
+        // Paddle: 8192 retry tokens + 4096 prompt = 12288 per slot.
+        assert_eq!(ctx_size(Engine::PaddleocrVl, 1), 12288);
+        assert_eq!(ctx_size(Engine::PaddleocrVl, 2), 24576);
         assert_eq!(ctx_size(Engine::Olmocr, 1), 10240);
         let args = server_args(
             Path::new("m.gguf"),

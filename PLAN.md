@@ -407,7 +407,7 @@ VRAM is then checked against the engine and quant, with the same tiers as the RA
 | **7a. Backend spike** (no Rust, on the RTX 3090 machine) | Pinned llama-server build with each GGUF. Run the four prompts (`OCR:`, `Table Recognition:`, olmOCR v4 YAML, `prompt_layout_all_en`) through llama-server's chat templates. Test `-np 2` with images. Measure VRAM and s/page per engine and quant. Compare output with the Mac's MLX output and the vLLM reference. Send olmOCR a footer-strip crop: does the Bates number come back? (It is trained to drop footers, and option (b) in §9.5 depends on this.) Settle the Vulkan device probe | `docs/spike.md` records: prompt compatibility (same output shape as MLX), whether parallel image slots work, VRAM floors, speeds. Any engine that fails is documented with its blocker |
 | ✅ **7b. Build portability** | `build.rs` and the FFI half of `vision.rs` gated on `target_os = "macos"` (types stay shared). `.cargo/config.toml` rustflags moved under `[target.aarch64-apple-darwin]`. Supervisor macOS-only. `flock` → `File::lock`. Process and memory calls → `sysinfo` / job object. `Engine::Apple` hidden off the Mac | `cargo build` and the unit tests pass on Linux (Mac-only tests gated). `cargo check --target x86_64-pc-windows-msvc` passes. Mac tests unchanged |
 | ✅ **7c. Portable document layer** (Mac comparison pending) | `Document` trait over `document_info`, `text_layer`, `render_gray`, `render_png_fit`. pdfium + `image`/`tiff` implementation, including multi-page TIFF and rotation | On the non-table fixtures, `regions.rs` makes the same column and band decisions as on the Mac (renders need not be byte-identical). Table pages differ by design: there are no Vision table masks |
-| **7d-1. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`, under the same key so Mac checkpoints stay valid. Setup downloads with `curl` and verifies the sha256 of: the pinned llama.cpp archive (plus cudart for CUDA), pdfium, and the GGUF weights pinned by HF revision. Minimal GPU probe to pick the archive, with an `OCR_LLAMA_VARIANT` override. `-c` per engine from `Limits` x slots | Start, stop, status and restart pass with the fake server on Linux. A real paddleocr-vl server starts on this machine (Vulkan or CPU) |
+| ✅ **7d-1. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`, under the same key so Mac checkpoints stay valid. Setup downloads with `curl` and verifies the sha256 of: the pinned llama.cpp archive (plus cudart for CUDA), pdfium, and the GGUF weights pinned by HF revision. Minimal GPU probe to pick the archive, with an `OCR_LLAMA_VARIANT` override. `-c` per engine from `Limits` x slots | Start, stop, status and restart pass with the fake server on Linux. A real paddleocr-vl server starts on this machine (Vulkan or CPU) |
 | **7d-2. Engine layer off the Mac** | A non-Mac `side_pass` (bitmap regions, no blocks). `find_bates` runs on the model's output. Paddle's table-crop branch is off. Failed pages are flagged with no fallback text. The olmOCR footer-strip request (§9.5) | `paddleocr-vl`, `olmocr` and `dots-ocr` each scan `three_pages.pdf` on the Linux GPU machine, with Bates numbers in the page markers |
 | **7e. GPU gate** | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
 | **7f. Windows** | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
@@ -484,3 +484,26 @@ The options as they were put:
     
     Off the Mac it also compares pixels with pypdfium2's render (mean difference < 2) and checks the HEIC refusal. New fixtures are in `tests/fixtures/`. Linux: 133 tests pass, clippy is clean, and `scripts/xcheck.sh` is clean.
   - **Acceptance still open:** `examples/region_report` prints render sizes and the regions found without table masks for 14 fixtures. The Linux output is in `docs/region-report-linux.txt`. Run it on the Mac and diff the two to compare column and band decisions.
+
+- 2026-10-08, **7d-1 built; the llama-server half of 7a ran on this machine.** Results are in docs/spike.md, "llama-server spike". Decisions made in the implementation:
+  - **Downloads:**
+    - Shell out to `curl -fL --retry 3 -C -` and unpack with `tar -xf`. Both ship with current Linux and Windows 10+. This keeps TLS out of the binary, so `ureq` stays localhost-only.
+    - Every file is checked against a pinned sha256 before use: release digests for llama.cpp and pdfium, Hugging Face LFS oids pinned by revision for the GGUFs. A `<file>.sha256` stamp skips re-hashing next time.
+  - **Layout under `<state>`:**
+    - `downloads/` for the archives.
+    - `llama.cpp/<build>-<variant>/` for the unpacked builds.
+    - `models/<owner>/<repo>/` for the GGUFs.
+    - `pdfium/` for the pdfium library.
+  - **CUDA variants:** the cudart archive is always downloaded and unpacked into the same folder as `llama-server`. On Linux that folder goes on `LD_LIBRARY_PATH`.
+  - **Variant probe:**
+    - `OCR_LLAMA_VARIANT` wins if set.
+    - An `nvidia-smi` CUDA version of 13 or more picks cuda13; below that, cuda12.
+    - Otherwise any Vulkan ICD picks vulkan, otherwise cpu.
+    - **7e must refine this.** On integrated graphics the CPU build was 6x faster than Vulkan. A stale `nvidia_icd.json` with no driver also counts as "Vulkan present".
+  - **Server arguments:** `--model`, `--mmproj`, `--host 127.0.0.1`, `--port`, `--parallel 1`, `--ctx-size`, plus `--n-gpu-layers 999` unless on the CPU build. `--ctx-size` is (retry `max_tokens` + prompt budget) x slots, which brought CPU memory from 4.5 GB to 2.1 GB. `server.json` records `slots`.
+  - **Config and checkpoints:** `[runtime]` gains `llama_cpp` and `llama_variant`. Checkpoints record `llama.cpp b11510 <variant>` under the existing `mlx_vlm` key. Mac configs and checkpoints are unchanged.
+  - **Off the Mac:** only versions with GGUF builds are offered (paddle 1.6 and 1.5; dots.ocr). PaddleOCR-VL has a single precision, listed as bf16.
+  - **Not in 7d-1:**
+    - The VRAM check (7e).
+    - `ocr scan` itself: the side-pass still calls Vision (7d-2).
+    - Timeouts. `engines::limits` timeouts come from Apple Silicon rates, and the CPU/iGPU path will need longer ones; `OCR_REQUEST_TIMEOUT_SECS` overrides them meanwhile.

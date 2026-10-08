@@ -312,4 +312,24 @@ For model engines this tests side-pass and assembly concurrency, not model batch
 
 **Measured** (`eval/anchor_eval.py`, scored with `eval/score.py`: exact `N text` lines of `transcript4up`; tune = seeds 0-2, accept = seeds 10-12, run once).
 
-REAL_TABLE_PLACEHOLDER
+Exact `N text` lines, `transcript4up` family (`eval/anchor_eval.py`, scored with `eval/score.py`):
+
+| Engine | Before (seeds 10-12) | Held-out, seeds 40-42 (run once, thresholds frozen) | Seeds 10-12 (run once, then retuned: no longer held out) | Tune seeds |
+|---|---|---|---|---|
+| dots-ocr | 68% | **99.9%** (699/700) | not run | 0-2 offline replay of earlier whole-sheet output: 42.4% to 99.8% |
+| Apple | 38% | **97.4%** (682/700) | 98.1% (883/900) | 0-2: 97.1% |
+| olmOCR | 30% | **99.9%** (699/700) | not run | n/a |
+| PaddleOCR-VL | 25% | **94.9%** (664/700), **misses the 95% target** | 92.0% (828/900), engine coverage threshold 0.8 | 0-2: 95.4%; 3-9: 94.0% to 95.2% |
+
+Sheets unverified (fallback rate): 0 of 7 on seeds 40-42 for every engine. On seeds 10-12 Paddle had 1 unverified sheet of 9 (a mini-page where the model repeated and invented lines); with the final engine-coverage threshold such pages are anchored.
+
+**Tuning (seeds 0-9 only).** Paddle crop DPI, seeds 0-2: 150: 90.4%; 175: 93.5%; 200: 95.4%; 225: 90.2% (one seed failed); 250: 75.8%; 300: 84.9%. At high DPI Paddle drops or repeats lines. Transcript crops therefore render at no less than 200 DPI (`TRANSCRIPT_CROP_DPI`). Engine-side coverage threshold, Paddle seeds 3-9: 0.8: 94.0%; 0.5: 95.2%. A region needs 80% of its Vision words but only 50% of its engine words matched, because a model that repeats or invents lines leaves extra engine words that align to nothing while the lines it did read are still placed reliably. Dots and olmOCR were not re-tuned.
+
+**Paddle misses 95% on held-out seeds 40-42 (94.9%).** The remaining misses are the model's, not the numbering's: it drops whole lines, repeats a line three times, invents extra Q lines, or reads `Q.` as another letter. The engine's words are kept as produced, so those lines cannot become exact. Of the 36 inexact lines, a loose check finds the text elsewhere on the page for 23 (usually because the model dropped or duplicated a line, shifting the following lines, and the text repeats in the transcript), and the text wrong or missing for 13.
+
+**Notes.**
+- The stderr transcript hints ("drops line numbers ... use --model paddleocr-vl") are left unchanged: a test asserts them, and they are now stale for the line numbers (not for Apple's `Q.`/`A.` misreads).
+- A `Page N` header is added from Vision's reading when the engine put several mini-pages on one sheet; for a single-region page it is only kept if the engine wrote one.
+- Dots and olmOCR read the whole sheet; their regions may come out in any order (all orders of up to 4 regions are tried) and the output is always in `Page N` order.
+- `examples/anchor_replay.rs` re-anchors saved engine output offline; `eval/anchor_diag.py` classifies misses.
+

@@ -171,3 +171,46 @@ The checks are exact matches for the case number, all four dollar amounts and th
    - A normal page generates 150–800 tokens, 1–4 s in total.
    - A runaway to 4096 tokens takes about 19 s.
    - **Timeout:** 45 s per request, derived as 2 × (prefill + 4096/218).
+
+## olmOCR and dots engine spike (2026-10-07)
+
+**Setup.** Server: `ocr server setup` and `ocr server start` in a temp state dir on a free port (mlx-vlm 0.7.6, `--max-num-seqs 1`), one server at a time. Images come from the production render path (`examples/render_png`, which now takes `[crop|-] [max_side] [rotation]`); crop rects come from the production plan (`examples/crop_plan`, the same `region_specs` the engines use). Script: `spike/olmdots_spike.py`. Fixtures: `legal_scan`, `two_column`, `narrow_unequal_seed2` (with `expected.json`), `transcript_full`, `four_up`, and the new image-only `legal_scan_rot90.png`.
+
+**Load caveat.** `pgrep -fl "ocr scan|mlx_vlm"` was empty before each run. Other users' desktop apps were running (load average 1.1 to 3.7 across the session, with no process above 6% CPU), so the rates below are for a nearly idle machine; a busy machine would be slower.
+
+### Render path: max-side and rotation
+
+`render_png` gained `max_side` and `rotation` in the Swift bridge and `vision::render_png_fit` (`render_png` keeps its signature and path, so Paddle and Apple are untouched).
+- `max_side` ignores the DPI and sizes the **crop**, if any, to exactly that many pixels on its longest side. A PDF is scaled to the target while it is rendered (no DPI derived in Rust, no downscale of a 2200 px page); a raster input skips the `11 x dpi` cap; a final exact resample guards the +-1 px that an integral crop rect leaves. Measured: `legal_scan` 995x1288, `two_column` crop 622x1288.
+- `rotation` is counter-clockwise (0, 90, 180, 270), checked by looking at the PNG: the top of the page moves to the left for 90.
+- Rotation semantics, from `allenai/olmocr@8ef7f8085aeea5a7b857f2ff4a032f3a8f0fcfa2`, `olmocr/pipeline.py`: `process_page` sets `cumulative_rotation = (cumulative_rotation + rotation_correction) % 360` when `is_rotation_valid` is false, and `build_page_query` turns the freshly rendered image with PIL `Image.transpose(ROTATE_90 | ROTATE_180 | ROTATE_270)`. PIL's `ROTATE_90` is a counter-clockwise quarter turn, although the front-matter schema says "degree of clockwise rotation needed". The code is what counts, and the real model agrees: `legal_scan_rot90.png` (the page turned 90 degrees clockwise) comes back `is_rotation_valid: False`, `rotation_correction: 90`, and after the counter-clockwise turn the text is exact.
+
+### olmOCR
+
+Prompt `build_no_anchoring_v4_yaml_prompt()`, text part first, max_tokens 8000 as upstream (the engine uses 4096 and 8000 on retry, see below).
+
+| Fixture (1288 px longest side) | Result | Prompt tokens | Generated | Server time |
+|---|---|---|---|---|
+| legal_scan, full page | case no., 4 amounts exact; footer and Bates dropped, as in Phase 0 | 1786 | 394 | 15.7 s |
+| two_column, full page | 30/30 lines, 29/29 in order | 1786 | 365 | 14.9 s |
+| two_column, 3 Phase 2b crops | 30/30, 29/29 in order | 360 / 1326 / 1694 | 37 / 202 / 187 | 21.8 s total |
+| narrow_unequal_seed2, full page | 42/42 lines, 41/41 in order | 1786 | 1048 | 32.3 s |
+| narrow_unequal_seed2, 2 crops | 42/42, 41/41 in order | 1280 / 866 | 653 / 427 | 34.0 s total |
+| transcript_full | Q./A. right, **line numbers dropped: 0/25 exact** | 1786 | 297 | 13.2 s |
+| four_up | **100/100 exact** | 1786 | 1359 | 40.3 s |
+
+**Plan decision (rule: use full page, unless crops bring line recall to at least 95% where full page is below 95%).** Full page is at 100% on both `two_column` and `narrow_unequal_seed2`, so the rule keeps the full page. Crops stay as the first answer to a loop only.
+
+**Transcripts.** olmOCR scores 100/125 (80%) on the two transcript fixtures, below 95%, and 0/25 on the full-size page because it drops the margin line numbers. The stderr transcript hint therefore also points olmOCR users to `--model paddleocr-vl` (the engine's `transcript_hint`).
+
+**Rates** (server log "Request completed", 13 requests): prefill 321 to 329 tok/s on image prompts (247 tok/s on the smallest crop, 55 tok/s on the 27-token probe, which is not a rate); decode 39.3 to 40.1 tok/s. The first request after the server started took 20.1 s for 397 tokens, about 4 s more than the same request later. Image cost is a constant 1786 prompt tokens for a 995x1288 page.
+- A normal page generates 300 to 1400 tokens (13 to 40 s); `max_tokens` is 4096, because the densest fixtures stay under 1400 tokens, with 8000 on a `length` retry (olmOCR's own pipeline limit).
+- Timeout = 2 x (prefill + max_tokens / decode) = 2 x (5.5 + 4096 / 39.5) = **218 s, catalog 220 s**; retry at 8000 tokens: 2 x (5.5 + 8000 / 39.5) = 416 s, **catalog 420 s**. Both live in `engines::limits`, with Paddle's values (4096 / 8192 / 45 s) moved there unchanged.
+
+### Engine decisions in the implementation
+
+- **Loop detector and tables.** The Paddle detector (a 10 to 120 character unit repeated 6 times) fires on a long HTML table with similar rows, so tables are cut out before it runs; a runaway table still ends as a `length` reply. Negative test: an 80-row table of identical rows is not flagged.
+- **`length`** retries once with 8000 tokens, then the page falls back to Apple and is flagged (Paddle's behaviour); **loop** goes to the crop plan if there is one, else retries once with `repetition_penalty 1.15`, then falls back.
+- **Empty output** (generic, all engines): the request is retried once; a page whose requests are all empty falls back to Apple and is flagged.
+- **Rotation.** One retry on the turned full page; the crop plan is skipped on a turned page. If the page is still invalid after the turn, the text is kept and the page flagged.
+- **Known limit.** olmOCR drops the footer, and the Apple side-pass cannot read a sideways page, so a rotated page gets no Bates number in its marker (the real rotated-fixture test checks the five body tokens only).

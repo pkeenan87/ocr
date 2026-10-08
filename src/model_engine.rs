@@ -1,5 +1,7 @@
-//! PaddleOCR-VL scan engine (PLAN §4.2, §4.3, §5): request planning from the Apple side-pass,
-//! the HTTP client, retries, fallback and ordered assembly.
+//! Model-server scan engines (PLAN §4.2, §4.3, §5): request planning from the Apple side-pass,
+//! the HTTP client, retries, fallback and ordered assembly. What differs per engine (prompts,
+//! message order, image sizing, output parser, retry ladder) sits behind `ScanEngine`: PaddleOCR-VL
+//! is here, olmOCR in `olmocr.rs`, dots in `dots.rs`.
 //!
 //! Model requests go to a server started with `--max-num-seqs 1`. A producer pool runs the
 //! Apple side-pass and renders the images of upcoming pages while consumers (one per `--jobs`)
@@ -13,7 +15,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::Context;
 
-use crate::cli::perf_cores;
+use crate::cli::{Engine, perf_cores};
+use crate::engines::{self, Limits};
 use crate::markdown::{self, FrontMatter, PageResult};
 use crate::otsl;
 use crate::pipeline::{self, FileReport, Settings, SidePass};
@@ -21,11 +24,8 @@ use crate::regions::{Kind, Region};
 use crate::server::{self, ServerInfo};
 use crate::vision::{self, Block, DocKind};
 
-/// Per-request timeout: 2 x (prefill + 4096 tokens / 218 tok/s), docs/spike.md.
-pub const DEFAULT_TIMEOUT_SECS: u64 = 45;
-const MAX_TOKENS: u32 = 4096;
-const RETRY_MAX_TOKENS: u32 = 8192;
-const LOOP_PENALTY: f64 = 1.15;
+/// `repetition_penalty` of a loop retry (never used for dots: it corrupts the JSON).
+pub(crate) const LOOP_PENALTY: f64 = 1.15;
 const BACKOFF_SECS: [f64; 3] = [0.5, 1.0, 2.0];
 /// Pages the producers may run ahead of the consumers.
 const LOOKAHEAD: usize = 4;
@@ -42,16 +42,102 @@ const MIN_UNIT_VARIETY: usize = 4;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Prompt {
+    /// PaddleOCR-VL full page or crop.
     Ocr,
+    /// PaddleOCR-VL table crop.
     Table,
+    /// olmOCR `build_no_anchoring_v4_yaml_prompt()`.
+    Olmocr,
+    /// dots `prompt_layout_all_en`.
+    DotsLayout,
+    /// dots `prompt_ocr`.
+    DotsOcr,
 }
 
 impl Prompt {
-    fn text(self) -> &'static str {
+    pub(crate) fn text(self) -> &'static str {
         match self {
             Self::Ocr => "OCR:",
             Self::Table => "Table Recognition:",
+            Self::Olmocr => crate::olmocr::PROMPT,
+            Self::DotsLayout => crate::dots::PROMPT_LAYOUT,
+            Self::DotsOcr => crate::dots::PROMPT_OCR,
         }
+    }
+
+    /// Short name for verbose plans.
+    fn label(self) -> &'static str {
+        match self {
+            Self::Ocr => "OCR:",
+            Self::Table => "Table Recognition:",
+            Self::Olmocr => "olmocr",
+            Self::DotsLayout => "dots layout",
+            Self::DotsOcr => "dots ocr",
+        }
+    }
+}
+
+/// What differs between the model engines.
+pub trait ScanEngine: Sync {
+    fn engine(&self) -> Engine;
+    /// The prompt of a whole-page (or whole-crop) request.
+    fn page_prompt(&self) -> Prompt;
+    /// `Some(n)`: every image sent, crops included, is exactly `n` px on its longest side
+    /// (rendered from the source, not derived from a DPI). `None`: render at `--dpi`.
+    fn max_side(&self) -> Option<u32> {
+        None
+    }
+    /// Whether the prompt comes before the image in the message (olmOCR, as upstream).
+    fn text_first(&self) -> bool {
+        false
+    }
+    /// Whether to point transcript pages at `--model paddleocr-vl` (docs/spike.md: this
+    /// engine scores below 95% on transcripts).
+    fn transcript_hint(&self) -> bool {
+        false
+    }
+    /// The request plan of a page and whether it is a column split.
+    fn plan(&self, side: &SidePass) -> (Vec<Spec>, bool);
+    /// Runs the plan with the engine's retry ladder. `Fail::Failed` means: use Apple's text.
+    fn run(&self, ctx: &Ctx, path: &Path, prep: &Prepared, s: &Settings) -> Result<Output, Fail>;
+}
+
+struct Paddle;
+
+impl ScanEngine for Paddle {
+    fn engine(&self) -> Engine {
+        Engine::PaddleocrVl
+    }
+
+    fn page_prompt(&self) -> Prompt {
+        Prompt::Ocr
+    }
+
+    fn plan(&self, side: &SidePass) -> (Vec<Spec>, bool) {
+        choose_plan(side)
+    }
+
+    fn run(&self, ctx: &Ctx, path: &Path, prep: &Prepared, s: &Settings) -> Result<Output, Fail> {
+        let planned = prep.planned.as_ref().map_err(|e| Fail::Failed(e.clone()))?;
+        match run_planned(ctx, planned, prep.alt.is_some()) {
+            Err(Fail::Degenerate) => {
+                let specs = prep.alt.as_deref().unwrap_or_default();
+                let crops =
+                    render_specs(path, prep.index, s.dpi, specs, self).map_err(Fail::Failed)?;
+                run_planned(ctx, &crops, false)
+            }
+            other => other,
+        }
+    }
+}
+
+/// The engine behind `engine`; `None` for Apple.
+pub fn scan_engine(engine: Engine) -> Option<&'static dyn ScanEngine> {
+    match engine {
+        Engine::PaddleocrVl => Some(&Paddle),
+        Engine::Olmocr => Some(&crate::olmocr::Olmocr),
+        Engine::DotsOcr => Some(&crate::dots::Dots),
+        Engine::Apple => None,
     }
 }
 
@@ -253,7 +339,10 @@ pub fn clean_ocr(text: &str) -> String {
 /// Markdown for one reply, whether it converted a table, and whether it needs a human look.
 fn convert(prompt: Prompt, text: &str) -> (String, bool, bool) {
     match prompt {
-        Prompt::Ocr => (clean_ocr(text), false, false),
+        // The other engines' prompts never reach this converter (they parse their own replies).
+        Prompt::Ocr | Prompt::Olmocr | Prompt::DotsLayout | Prompt::DotsOcr => {
+            (clean_ocr(text), false, false)
+        }
         Prompt::Table => match otsl::otsl_to_gfm(text) {
             Ok(table) => (table, true, false),
             Err(_) => (format!("```\n{}\n```", text.trim()), false, true),
@@ -281,22 +370,39 @@ enum PostErr {
     Bad(String),
 }
 
-struct Reply {
-    text: String,
-    finish: String,
+pub(crate) struct Reply {
+    pub(crate) text: String,
+    pub(crate) finish: String,
 }
 
 /// A request with its image already rendered.
-struct Planned {
-    prompt: Prompt,
-    url: String,
+#[derive(Clone)]
+pub(crate) struct Planned {
+    pub(crate) prompt: Prompt,
+    pub(crate) url: String,
+    text_first: bool,
+}
+
+impl Planned {
+    /// A request from PNG bytes.
+    pub(crate) fn new(prompt: Prompt, png: &[u8], text_first: bool) -> Self {
+        Self {
+            prompt,
+            url: format!("data:image/png;base64,{}", server::base64(png)),
+            text_first,
+        }
+    }
 }
 
 /// State shared by every consumer for the whole run.
 pub struct Ctx {
     port: u16,
     repo: String,
+    /// The engine's request timeouts (`OCR_REQUEST_TIMEOUT_SECS` overrides both).
     timeout: Duration,
+    retry_timeout: Duration,
+    pub(crate) lim: Limits,
+    pub spec: &'static dyn ScanEngine,
     /// Restart generation and the server we currently talk to.
     state: Mutex<(u64, ServerInfo)>,
     stopped: AtomicBool,
@@ -305,17 +411,24 @@ pub struct Ctx {
 }
 
 impl Ctx {
-    pub fn new(info: ServerInfo, mlx_vlm: &str) -> Self {
-        let secs = std::env::var("OCR_REQUEST_TIMEOUT_SECS")
+    pub fn new(spec: &'static dyn ScanEngine, info: ServerInfo, mlx_vlm: &str) -> Self {
+        let lim = engines::limits(spec.engine());
+        let over: Option<u64> = std::env::var("OCR_REQUEST_TIMEOUT_SECS")
             .ok()
             .and_then(|v| v.parse().ok())
-            .filter(|s| *s > 0)
-            .unwrap_or(DEFAULT_TIMEOUT_SECS);
+            .filter(|s| *s > 0);
         Self {
             port: info.port,
-            engine: format!("paddleocr-vl ({}, mlx-vlm {mlx_vlm})", info.repo),
+            engine: format!(
+                "{} ({}, mlx-vlm {mlx_vlm})",
+                spec.engine().name(),
+                info.repo
+            ),
             repo: info.repo.clone(),
-            timeout: Duration::from_secs(secs),
+            timeout: Duration::from_secs(over.unwrap_or(lim.timeout_secs)),
+            retry_timeout: Duration::from_secs(over.unwrap_or(lim.retry_timeout_secs)),
+            lim,
+            spec,
             state: Mutex::new((0, info)),
             stopped: AtomicBool::new(false),
         }
@@ -325,7 +438,7 @@ impl Ctx {
         self.state.lock().unwrap().0
     }
 
-    fn is_stopped(&self) -> bool {
+    pub(crate) fn is_stopped(&self) -> bool {
         self.stopped.load(Ordering::SeqCst)
     }
 
@@ -356,14 +469,18 @@ impl Ctx {
     }
 
     fn post(&self, req: &Planned, max_tokens: u32, penalty: Option<f64>) -> Result<Reply, PostErr> {
+        let mut content = vec![
+            serde_json::json!({"type": "image_url", "image_url": {"url": req.url}}),
+            serde_json::json!({"type": "text", "text": req.prompt.text()}),
+        ];
+        if req.text_first {
+            content.reverse();
+        }
         let mut body = serde_json::json!({
             "model": self.repo,
             "temperature": 0,
             "max_tokens": max_tokens,
-            "messages": [{"role": "user", "content": [
-                {"type": "image_url", "image_url": {"url": req.url}},
-                {"type": "text", "text": req.prompt.text()},
-            ]}],
+            "messages": [{"role": "user", "content": content}],
         });
         if let Some(p) = penalty {
             body["repetition_penalty"] = p.into();
@@ -380,7 +497,12 @@ impl Ctx {
             }
             other => PostErr::Conn(other.to_string()),
         };
-        let mut resp = server::agent(self.timeout)
+        let timeout = if max_tokens > self.lim.max_tokens {
+            self.retry_timeout
+        } else {
+            self.timeout
+        };
+        let mut resp = server::agent(timeout)
             .post(format!(
                 "http://127.0.0.1:{}/v1/chat/completions",
                 self.port
@@ -411,7 +533,12 @@ impl Ctx {
 
     /// One request with the transport-level retries: restart and retry once on timeout, three
     /// tries on 5xx, one restart on a lost connection.
-    fn send(&self, req: &Planned, max_tokens: u32, penalty: Option<f64>) -> Result<Reply, Fail> {
+    pub(crate) fn send(
+        &self,
+        req: &Planned,
+        max_tokens: u32,
+        penalty: Option<f64>,
+    ) -> Result<Reply, Fail> {
         let (mut timeouts, mut errors, mut lost) = (0, 0, 0);
         loop {
             if self.is_stopped() {
@@ -457,9 +584,15 @@ impl Ctx {
     /// degenerate reply is reported so the caller can switch to crops; otherwise it retries
     /// once (8192 tokens after truncation, a repetition penalty after a loop).
     fn exec(&self, req: &Planned, crop_alt: bool) -> Result<String, Fail> {
-        let (mut max_tokens, mut penalty, mut retried) = (MAX_TOKENS, None, false);
+        let (mut max_tokens, mut penalty, mut retried) = (self.lim.max_tokens, None, false);
+        let mut empty_retried = false;
         loop {
             let reply = self.send(req, max_tokens, penalty)?;
+            // Empty output: retry once; a page that stays empty falls back (`run_planned`).
+            if reply.text.trim().is_empty() && reply.finish != "length" && !empty_retried {
+                empty_retried = true;
+                continue;
+            }
             let truncated = reply.finish == "length";
             let looped = req.prompt == Prompt::Ocr && has_repetition_loop(&reply.text);
             if !truncated && !looped {
@@ -478,7 +611,7 @@ impl Ctx {
             }
             retried = true;
             if truncated {
-                max_tokens = RETRY_MAX_TOKENS;
+                max_tokens = self.lim.retry_max_tokens;
             } else {
                 penalty = Some(LOOP_PENALTY);
             }
@@ -486,10 +619,10 @@ impl Ctx {
     }
 }
 
-struct Output {
-    body: String,
-    table: bool,
-    flagged: bool,
+pub struct Output {
+    pub(crate) body: String,
+    pub(crate) table: bool,
+    pub(crate) flagged: bool,
 }
 
 fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fail> {
@@ -509,20 +642,23 @@ fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fa
         }
     }
     out.body = parts.join("\n\n");
+    if out.body.trim().is_empty() {
+        return Err(Fail::Failed("empty model output".into()));
+    }
     Ok(out)
 }
 
 // ------------------------------------------------------------- page pipeline
 
 /// A page ready for the consumers.
-struct Prepared {
-    index: usize,
+pub struct Prepared {
+    pub(crate) index: usize,
     bates: Option<String>,
     transcript: bool,
     column_split: bool,
-    planned: Result<Vec<Planned>, String>,
+    pub(crate) planned: Result<Vec<Planned>, String>,
     /// Region crops to try if the single full-page request loops or is cut off.
-    alt: Option<Vec<Spec>>,
+    pub(crate) alt: Option<Vec<Spec>>,
 }
 
 enum Work {
@@ -530,38 +666,40 @@ enum Work {
     Model(Prepared),
 }
 
-fn render_specs(
+/// Renders the images of `specs` the way `spec` wants them (`--dpi`, or an exact longest side).
+pub(crate) fn render_specs(
     path: &Path,
     index: usize,
     dpi: u32,
     specs: &[Spec],
+    spec: &dyn ScanEngine,
 ) -> Result<Vec<Planned>, String> {
     specs
         .iter()
         .map(|(prompt, crop)| {
-            vision::render_png(path, index, dpi, *crop)
-                .map(|png| Planned {
-                    prompt: *prompt,
-                    url: format!("data:image/png;base64,{}", server::base64(&png)),
-                })
+            vision::render_png_fit(path, index, dpi, *crop, spec.max_side(), 0)
+                .map(|png| Planned::new(*prompt, &png, spec.text_first()))
                 .map_err(|e| format!("{e:#}"))
         })
         .collect()
 }
 
 /// Producer step: text layer, Apple side-pass, request plan and rendered images.
-fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings) -> Work {
+fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) -> Work {
     if let Some(page) = pipeline::text_layer_page(path, kind, index, s) {
         return Work::Done(page);
     }
-    let full: Vec<Spec> = vec![(Prompt::Ocr, None)];
+    let engine = ctx.spec;
+    let prompt = engine.page_prompt();
+    let full: Vec<Spec> = vec![(prompt, None)];
     let (specs, split, alt, bates, transcript) =
         match pipeline::side_pass(path, index, s.dpi, &s.options) {
             Ok(side) => {
-                let (specs, split) = choose_plan(&side);
+                let (specs, split) = engine.plan(&side);
                 let alt = (specs == full && !side.transcript)
                     .then(|| region_specs(&side))
-                    .flatten();
+                    .flatten()
+                    .map(|v| v.into_iter().map(|(_, crop)| (prompt, crop)).collect());
                 (
                     specs,
                     split,
@@ -573,7 +711,7 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings) -> Work {
             Err(_) => (full, false, None, None, false),
         };
     if s.verbose && !s.quiet {
-        let kinds: Vec<&str> = specs.iter().map(|(p, _)| p.text()).collect();
+        let kinds: Vec<&str> = specs.iter().map(|(p, _)| p.label()).collect();
         let alt = alt.as_ref().map_or(0, Vec::len);
         eprintln!(
             "page {}: plan {kinds:?}{}{}",
@@ -591,27 +729,15 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings) -> Work {
         bates,
         transcript,
         column_split: split,
-        planned: render_specs(path, index, s.dpi, &specs),
+        planned: render_specs(path, index, s.dpi, &specs, engine),
         alt,
     })
-}
-
-fn recognize(path: &Path, prep: &Prepared, s: &Settings, ctx: &Ctx) -> Result<Output, Fail> {
-    let planned = prep.planned.as_ref().map_err(|e| Fail::Failed(e.clone()))?;
-    match run_planned(ctx, planned, prep.alt.is_some()) {
-        Err(Fail::Degenerate) => {
-            let specs = prep.alt.as_deref().unwrap_or_default();
-            let crops = render_specs(path, prep.index, s.dpi, specs).map_err(Fail::Failed)?;
-            run_planned(ctx, &crops, false)
-        }
-        other => other,
-    }
 }
 
 fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageResult, Fail> {
     let number = prep.index + 1;
     let started = Instant::now();
-    let result = match recognize(path, &prep, s, ctx) {
+    let result = match ctx.spec.run(ctx, path, &prep, s) {
         Ok(out) => PageResult {
             body: out.body,
             bates: prep.bates.clone(),
@@ -697,6 +823,19 @@ pub fn run_file(
     };
     let md = markdown::assemble(s.front_matter.then_some(&front), &results, s.page_markers);
     pipeline::write_atomic(&item.output, &md)?;
+    let transcripts: Vec<String> = results
+        .iter()
+        .filter(|r| r.transcript)
+        .map(|r| r.number.to_string())
+        .collect();
+    if ctx.spec.transcript_hint() && !transcripts.is_empty() {
+        eprintln!(
+            "note: {} looks like a deposition transcript (pages {}); {} drops line numbers on transcripts — use --model paddleocr-vl",
+            item.input.display(),
+            transcripts.join(", "),
+            ctx.spec.engine().name()
+        );
+    }
     if !s.quiet {
         eprintln!(
             "{} -> {} ({} pages, {:.1}s)",
@@ -740,7 +879,7 @@ fn process_pages(
                 while !ctx.is_stopped() {
                     let slot = next.fetch_add(1, Ordering::Relaxed);
                     let Some(&index) = pages.get(slot) else { break };
-                    if tx.send((slot, prepare(path, kind, index, s))).is_err() {
+                    if tx.send((slot, prepare(path, kind, index, s, ctx))).is_err() {
                         break;
                     }
                 }

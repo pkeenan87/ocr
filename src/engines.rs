@@ -50,6 +50,38 @@ pub fn repo(engine: Engine, version: Option<&str>, quant: Quant) -> Option<&'sta
     })
 }
 
+/// Per-request limits of a model engine. `timeout_secs` is 2 x (prefill + `max_tokens` / decode
+/// rate) from the measured rates in docs/spike.md; the retry limits are for the larger
+/// `retry_max_tokens` request after a truncated reply.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Limits {
+    pub max_tokens: u32,
+    pub retry_max_tokens: u32,
+    pub timeout_secs: u64,
+    pub retry_timeout_secs: u64,
+}
+
+/// Request limits per engine (docs/spike.md): PaddleOCR-VL prefill 990 tok/s and decode
+/// 218 tok/s; olmOCR prefill 323 tok/s (about 1790 prompt tokens, 5.5 s) and decode 39.5 tok/s,
+/// so 2 x (5.5 + 4096 / 39.5) = 218 s and 2 x (5.5 + 8000 / 39.5) = 416 s.
+pub fn limits(engine: Engine) -> Limits {
+    match engine {
+        Engine::Olmocr => Limits {
+            max_tokens: 4096,
+            // olmOCR's own pipeline uses 8000.
+            retry_max_tokens: 8000,
+            timeout_secs: 220,
+            retry_timeout_secs: 420,
+        },
+        _ => Limits {
+            max_tokens: 4096,
+            retry_max_tokens: 8192,
+            timeout_secs: 45,
+            retry_timeout_secs: 45,
+        },
+    }
+}
+
 /// Quants published for an engine/version, for error messages.
 pub fn quants(engine: Engine, version: Option<&str>) -> Vec<&'static str> {
     [Quant::Q4, Quant::Q8, Quant::Bf16]

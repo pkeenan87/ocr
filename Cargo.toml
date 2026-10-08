@@ -12,6 +12,7 @@ libc = "0.2.190"
 regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
+tl = "0.7.8"
 toml = "1.1.6"
 ureq = { version = "3", default-features = false }
 

@@ -106,7 +106,11 @@ private func bitmapContext(width: Int, height: Int) throws -> CGContext {
     return ctx
 }
 
-private func renderPDFPage(path: String, index: Int, dpi: Double) throws -> CGImage {
+/// `targetSide`, if set, replaces `dpi`: the page is scaled so the longest side of `crop` (a
+/// normalized [x, y, w, h], or the whole page) comes out at that many pixels.
+private func renderPDFPage(
+    path: String, index: Int, dpi: Double, targetSide: Double? = nil, crop: [Double]? = nil
+) throws -> CGImage {
     guard let doc = CGPDFDocument(URL(fileURLWithPath: path) as CFURL) else {
         throw BridgeError(description: "cannot open PDF")
     }
@@ -117,7 +121,12 @@ private func renderPDFPage(path: String, index: Int, dpi: Double) throws -> CGIm
     let rotated = page.rotationAngle % 180 != 0
     let (pw, ph) = rotated ? (box.height, box.width) : (box.width, box.height)
     guard pw > 0, ph > 0 else { throw BridgeError(description: "empty page box") }
-    let scale = min(dpi / 72.0, maxSide / max(pw, ph))
+    var scale = dpi / 72.0
+    if let side = targetSide {
+        let (cw, ch) = crop.map { ($0[2] * pw, $0[3] * ph) } ?? (pw, ph)
+        scale = side / max(cw, ch, 1e-6)
+    }
+    scale = min(scale, maxSide / max(pw, ph))
     let w = max(1, Int((pw * scale).rounded()))
     let h = max(1, Int((ph * scale).rounded()))
     let ctx = try bitmapContext(width: w, height: h)
@@ -129,7 +138,7 @@ private func renderPDFPage(path: String, index: Int, dpi: Double) throws -> CGIm
     return image
 }
 
-private func loadImage(path: String, index: Int, dpi: Double) throws -> CGImage {
+private func loadImage(path: String, index: Int, dpi: Double, fitToSide: Bool = false) throws -> CGImage {
     guard let src = CGImageSourceCreateWithURL(URL(fileURLWithPath: path) as CFURL, nil) else {
         throw BridgeError(description: "cannot open image")
     }
@@ -138,7 +147,7 @@ private func loadImage(path: String, index: Int, dpi: Double) throws -> CGImage 
     else { throw BridgeError(description: "image frame \(index + 1) out of range") }
     let longest = Double(max(image.width, image.height))
     let target = 11.0 * dpi
-    guard longest > target else { return image }
+    guard !fitToSide, longest > target else { return image }
     let scale = target / longest
     let w = max(1, Int((Double(image.width) * scale).rounded()))
     let h = max(1, Int((Double(image.height) * scale).rounded()))
@@ -343,26 +352,64 @@ public func ocr_bridge_render_gray(
     }
 }
 
+/// Resamples to `side` pixels on the longest side, exactly (drawn into an exactly sized context).
+private func fitLongestSide(_ image: CGImage, side: Int) throws -> CGImage {
+    let longest = max(image.width, image.height)
+    if longest == side { return image }
+    let scale = Double(side) / Double(longest)
+    let w = image.width >= image.height ? side : max(1, Int((Double(image.width) * scale).rounded()))
+    let h = image.height > image.width ? side : max(1, Int((Double(image.height) * scale).rounded()))
+    let ctx = try bitmapContext(width: w, height: h)
+    ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+    guard let out = ctx.makeImage() else { throw BridgeError(description: "resize failed") }
+    return out
+}
+
+/// Rotates counter-clockwise by `degrees` (0, 90, 180 or 270): PIL's `Image.transpose(ROTATE_*)`,
+/// which is what olmOCR's pipeline applies for a `rotation_correction`.
+private func rotateCounterClockwise(_ image: CGImage, degrees: Int) throws -> CGImage {
+    let turns = ((degrees % 360) + 360) % 360 / 90
+    if turns == 0 { return image }
+    let w = image.width, h = image.height
+    let (ow, oh) = turns % 2 == 1 ? (h, w) : (w, h)
+    let ctx = try bitmapContext(width: ow, height: oh)
+    ctx.translateBy(x: CGFloat(ow) / 2, y: CGFloat(oh) / 2)
+    // Positive angles turn counter-clockwise in the bitmap's y-up space.
+    ctx.rotate(by: CGFloat(turns) * .pi / 2)
+    ctx.draw(image, in: CGRect(x: -CGFloat(w) / 2, y: -CGFloat(h) / 2, width: CGFloat(w), height: CGFloat(h)))
+    guard let out = ctx.makeImage() else { throw BridgeError(description: "rotate failed") }
+    return out
+}
+
 /// Renders a page exactly as `recognize_page` does, optionally cropped to a normalized
 /// top-left-origin rect [x, y, w, h], and encodes it as PNG for model engines.
+/// `maxSideArg` > 0 ignores `dpi` and sizes the result (the crop, if any) to exactly that many
+/// pixels on its longest side; `rotation` (0/90/180/270) then turns it counter-clockwise.
 /// Release with ocr_bridge_free_bytes. Null on failure.
 @_cdecl("ocr_bridge_render_png")
 public func ocr_bridge_render_png(
     _ path: UnsafePointer<CChar>, _ pageIndex: Int32, _ dpi: Int32,
-    _ crop: UnsafePointer<Double>?, _ outLen: UnsafeMutablePointer<Int>?
+    _ crop: UnsafePointer<Double>?, _ maxSideArg: Int32, _ rotation: Int32,
+    _ outLen: UnsafeMutablePointer<Int>?
 ) -> UnsafeMutablePointer<UInt8>? {
     outLen?.pointee = 0
     let p = String(cString: path)
+    let cropRect = crop.map { [$0[0], $0[1], $0[2], $0[3]] }
+    let side = maxSideArg > 0 ? Int(maxSideArg) : nil
     do {
         var image = isPDF(p)
-            ? try renderPDFPage(path: p, index: Int(pageIndex), dpi: Double(dpi))
-            : try loadImage(path: p, index: Int(pageIndex), dpi: Double(dpi))
-        if let c = crop {
+            ? try renderPDFPage(
+                path: p, index: Int(pageIndex), dpi: Double(dpi), targetSide: side.map(Double.init),
+                crop: cropRect)
+            : try loadImage(path: p, index: Int(pageIndex), dpi: Double(dpi), fitToSide: side != nil)
+        if let c = cropRect {
             let w = Double(image.width), h = Double(image.height)
             let rect = CGRect(x: c[0] * w, y: c[1] * h, width: c[2] * w, height: c[3] * h).integral
             guard let cropped = image.cropping(to: rect) else { return nil }
             image = cropped
         }
+        if let side { image = try fitLongestSide(image, side: side) }
+        image = try rotateCounterClockwise(image, degrees: Int(rotation))
         let data = NSMutableData()
         guard let dest = CGImageDestinationCreateWithData(data, "public.png" as CFString, 1, nil) else {
             return nil

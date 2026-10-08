@@ -172,7 +172,7 @@ fn model_gate(args: &ScanArgs) -> Result<ServerInfo, CliError> {
             info.engine, info.repo
         )));
     }
-    if args.model != Engine::PaddleocrVl {
+    if args.model == Engine::DotsOcr {
         return Err(CliError::Server(format!(
             "{name} scanning is not implemented yet"
         )));
@@ -202,7 +202,13 @@ fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliEr
     let mlx = Config::load()?
         .and_then(|c| c.runtime)
         .map_or_else(|| MLX_VLM_PIN.to_string(), |r| r.mlx_vlm);
-    let ctx = model_engine::Ctx::new(info, &mlx);
+    let spec = model_engine::scan_engine(args.model).expect("model engines have a scan engine");
+    if args.model == Engine::Olmocr && args.dpi.is_some() && !args.quiet {
+        eprintln!(
+            "note: --dpi is ignored for olmocr; images are always 1288 px on the longest side"
+        );
+    }
+    let ctx = model_engine::Ctx::new(spec, info, &mlx);
     let settings = settings(args);
     let mut problems = Vec::new();
     for item in &plan.items {

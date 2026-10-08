@@ -33,6 +33,8 @@ unsafe extern "C" {
         page_index: i32,
         dpi: i32,
         crop: *const f64,
+        max_side: i32,
+        rotation: i32,
         out_len: *mut usize,
     ) -> *mut u8;
 }
@@ -240,6 +242,20 @@ pub fn render_png(
     dpi: u32,
     crop: Option<[f64; 4]>,
 ) -> Result<Vec<u8>> {
+    render_png_fit(path, page_index, dpi, crop, None, 0)
+}
+
+/// Like `render_png`, with the model engines' image sizing. `max_side` ignores `dpi` and makes
+/// the image (the crop, if any) exactly that many pixels on its longest side. `rotation`
+/// (0, 90, 180 or 270) then turns it counter-clockwise, as PIL's `Image.transpose(ROTATE_*)`.
+pub fn render_png_fit(
+    path: &Path,
+    page_index: usize,
+    dpi: u32,
+    crop: Option<[f64; 4]>,
+    max_side: Option<u32>,
+    rotation: u32,
+) -> Result<Vec<u8>> {
     let c_path = cstr(&path.to_string_lossy())?;
     let mut len = 0usize;
     let ptr = unsafe {
@@ -248,6 +264,8 @@ pub fn render_png(
             page_index as i32,
             dpi as i32,
             crop.as_ref().map_or(std::ptr::null(), |c| c.as_ptr()),
+            max_side.unwrap_or(0) as i32,
+            rotation as i32,
             &mut len,
         )
     };

@@ -304,6 +304,31 @@ fn looping_full_page_is_retried_with_region_crops() {
 }
 
 #[test]
+fn empty_output_is_retried_once() {
+    let e = Env::new(&["transcript_full.pdf"]);
+    e.serve(&[("FAKE_MODE", "empty"), ("FAKE_FAIL_FIRST", "1")]);
+    e.scan("transcript_full.pdf", &[], &[]).success();
+    assert_eq!(e.requests().len(), 2);
+    assert!(
+        e.markdown("transcript_full.pdf")
+            .contains("fake ocr text 1700x2200")
+    );
+}
+
+#[test]
+fn persistent_empty_output_falls_back_and_flags() {
+    let e = Env::new(&["transcript_full.pdf"]);
+    e.serve(&[("FAKE_MODE", "empty")]);
+    e.scan("transcript_full.pdf", &[], &[])
+        .code(1)
+        .stderr(predicate::str::contains("empty model output"));
+    let md = e.markdown("transcript_full.pdf");
+    assert!(md.contains("fallback_pages: [1]\n"), "{md}");
+    assert!(md.contains("flagged_pages: [1]\n"), "{md}");
+    assert_eq!(e.requests().len(), 2, "one try and one retry");
+}
+
+#[test]
 fn truncation_is_retried_with_8192_tokens() {
     let e = Env::new(&["transcript_full.pdf"]);
     e.serve(&[("FAKE_MODE", "length"), ("FAKE_FAIL_FIRST", "1")]);

@@ -355,14 +355,17 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
             }
         }
     }
+    let cleaned = s.legal_cleanup.then(|| markdown::strip_running(&results));
     let front = FrontMatter {
         source: &e.b.name,
         pages: e.b.doc_pages,
         engine: &backend.engine(),
         generated: chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string(),
         model: backend.model_ids().is_some(),
+        legal_cleanup: cleaned.as_ref().map(|c| c.1),
     };
-    let md = markdown::assemble(s.front_matter.then_some(&front), &results, s.page_markers);
+    let pages = cleaned.as_ref().map_or(&results, |c| &c.0);
+    let md = markdown::assemble(s.front_matter.then_some(&front), pages, s.page_markers);
     pipeline::write_atomic(&e.b.output, &md).map_err(|err| (id, format!("{err:#}")))?;
 
     let failed: Vec<usize> = results

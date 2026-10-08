@@ -191,6 +191,7 @@ fn settings(args: &ScanArgs) -> Settings {
         page_markers: args.page_markers(),
         front_matter: !args.no_front_matter,
         currency_fix: !args.no_currency_fix,
+        legal_cleanup: args.legal_cleanup,
         quiet: args.quiet,
         verbose: args.verbose,
         options: Options::default(),

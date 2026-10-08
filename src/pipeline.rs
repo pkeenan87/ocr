@@ -39,6 +39,8 @@ pub struct Settings {
     pub page_markers: bool,
     pub front_matter: bool,
     pub currency_fix: bool,
+    /// `--legal-cleanup`: strip running headers and footers at assembly.
+    pub legal_cleanup: bool,
     pub quiet: bool,
     pub verbose: bool,
     pub options: Options,

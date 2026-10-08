@@ -229,7 +229,7 @@ pub struct ScanArgs {
     /// layout handling, so margin numbers come out inline, tables are flattened and Bates is lost)
     #[arg(long, value_enum)]
     pub use_text_layer: Option<TextLayer>,
-    /// Strip pleading line numbers and running headers
+    /// Strip running headers and footers repeated across pages (opt-in)
     #[arg(long)]
     pub legal_cleanup: bool,
     /// Render resolution, 72-600 (default 200)

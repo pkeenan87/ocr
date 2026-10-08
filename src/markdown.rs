@@ -1,5 +1,6 @@
 //! Vision blocks to Markdown, plus page and file assembly (PLAN §5.6, §6).
 
+use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -71,6 +72,8 @@ pub struct FrontMatter<'a> {
     pub generated: String,
     /// Model engine: adds `table_pages` and `fallback_pages` and has no `currency_fixes`.
     pub model: bool,
+    /// `--legal-cleanup` was given: the number of lines it stripped.
+    pub legal_cleanup: Option<usize>,
 }
 
 /// Pleading margin line numbers (1-28) are dropped by default: Vision reads them only partially
@@ -226,6 +229,191 @@ pub fn render_text_layer(text: &str) -> String {
     out
 }
 
+/// Lines at the top and bottom of a page that count as running-header candidates.
+const ZONE_LINES: usize = 3;
+/// A running header or footer must be on at least this many pages...
+const RUNNING_MIN_PAGES: usize = 3;
+
+/// Key for comparing header and footer lines across pages: whitespace collapsed, digit runs
+/// replaced by `#`, lowercase, surrounding Markdown (`#` headings, `*`/`_` emphasis) removed.
+/// `None` for lines that are never candidates: table rows, page markers, Bates numbers, and
+/// lines with nothing left after normalizing.
+fn running_key(line: &str) -> Option<String> {
+    static DIGITS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+").unwrap());
+    let t = line.trim();
+    if t.starts_with('|') || t.starts_with("<!--") || BATES.is_match(t) {
+        return None;
+    }
+    let t = t.trim_start_matches('#');
+    let t = t.trim_matches(|c: char| c.is_whitespace() || c == '*' || c == '_');
+    let t = t.split_whitespace().collect::<Vec<_>>().join(" ");
+    let t = DIGITS.replace_all(&t, "#").to_lowercase();
+    (!t.is_empty()).then_some(t)
+}
+
+/// Longer lines than this may differ by OCR noise: one character in every `FUZZY_CHARS`.
+const FUZZY_MIN_LEN: usize = 20;
+const FUZZY_CHARS: usize = 20;
+
+fn edit_distance(a: &str, b: &str) -> usize {
+    let (a, b): (Vec<char>, Vec<char>) = (a.chars().collect(), b.chars().collect());
+    let mut prev: Vec<usize> = (0..=b.len()).collect();
+    for (i, ca) in a.iter().enumerate() {
+        let mut cur = vec![i + 1];
+        for (j, cb) in b.iter().enumerate() {
+            cur.push(
+                (prev[j] + usize::from(ca != cb))
+                    .min(prev[j + 1] + 1)
+                    .min(cur[j] + 1),
+            );
+        }
+        prev = cur;
+    }
+    prev[b.len()]
+}
+
+/// Maps each key to a representative: long keys that differ by OCR noise (`Assel` for `Asset`)
+/// share one, so a header read slightly differently on some pages still counts as one header.
+fn canonical(keys: impl Iterator<Item = String>) -> HashMap<String, String> {
+    let mut keys: Vec<String> = keys.collect();
+    keys.sort();
+    keys.dedup();
+    let mut reps: Vec<String> = Vec::new();
+    let mut map = HashMap::new();
+    for k in keys {
+        let near = |r: &String| {
+            let len = k.chars().count().min(r.chars().count());
+            len >= FUZZY_MIN_LEN && edit_distance(&k, r) <= len / FUZZY_CHARS
+        };
+        let rep = match reps.iter().find(|r| near(r)) {
+            Some(r) => r.clone(),
+            None => {
+                reps.push(k.clone());
+                k.clone()
+            }
+        };
+        map.insert(k, rep);
+    }
+    map
+}
+
+/// Indices (into `lines`) of the first and last `ZONE_LINES` non-empty lines.
+fn zones(lines: &[&str]) -> (Vec<usize>, Vec<usize>) {
+    let nonempty: Vec<usize> = (0..lines.len())
+        .filter(|&i| !lines[i].trim().is_empty())
+        .collect();
+    let top = nonempty.iter().take(ZONE_LINES).copied().collect();
+    let bottom = nonempty
+        .iter()
+        .skip(nonempty.len().saturating_sub(ZONE_LINES))
+        .copied()
+        .collect();
+    (top, bottom)
+}
+
+/// `--legal-cleanup`: removes running headers and footers, returning the cleaned pages and the
+/// number of lines stripped. Works on the deserialized records, so checkpoints are unaffected.
+///
+/// A normalized line in the top (or bottom) three lines of at least half of the pages, and at
+/// least three pages, is a running header (footer) and is removed from that zone on every page.
+/// Transcript pages and failed pages neither count nor change. Documents of one or two pages
+/// are returned as they are.
+pub fn strip_running(pages: &[PageResult]) -> (Vec<PageResult>, usize) {
+    let eligible = |p: &PageResult| !p.transcript && p.error.is_none();
+    let total = pages.iter().filter(|p| eligible(p)).count();
+    if pages.len() <= 2 || total < RUNNING_MIN_PAGES {
+        return (pages.to_vec(), 0);
+    }
+    // Keys of the top and bottom zones of every eligible page, then their canonical forms.
+    let zone_keys: Vec<(Vec<String>, Vec<String>)> = pages
+        .iter()
+        .filter(|p| eligible(p))
+        .map(|p| {
+            let lines: Vec<&str> = p.body.lines().collect();
+            let (top, bottom) = zones(&lines);
+            let keys = |z: Vec<usize>| {
+                z.into_iter()
+                    .filter_map(|i| running_key(lines[i]))
+                    .collect()
+            };
+            (keys(top), keys(bottom))
+        })
+        .collect();
+    let canon = canonical(
+        zone_keys
+            .iter()
+            .flat_map(|(t, b)| t.iter().chain(b))
+            .cloned(),
+    );
+    let mut top_count: HashMap<String, usize> = HashMap::new();
+    let mut bottom_count: HashMap<String, usize> = HashMap::new();
+    for (top, bottom) in &zone_keys {
+        for (keys, count) in [(top, &mut top_count), (bottom, &mut bottom_count)] {
+            let reps: HashSet<&String> = keys.iter().map(|k| &canon[k]).collect();
+            for r in reps {
+                *count.entry(r.clone()).or_default() += 1;
+            }
+        }
+    }
+    let running = |count: HashMap<String, usize>| -> HashSet<String> {
+        count
+            .into_iter()
+            .filter(|(_, n)| *n >= RUNNING_MIN_PAGES && n * 2 >= total)
+            .map(|(k, _)| k)
+            .collect()
+    };
+    let (headers, footers) = (running(top_count), running(bottom_count));
+    if headers.is_empty() && footers.is_empty() {
+        return (pages.to_vec(), 0);
+    }
+    let mut stripped = 0;
+    let out = pages
+        .iter()
+        .map(|p| {
+            if !eligible(p) {
+                return p.clone();
+            }
+            let lines: Vec<&str> = p.body.lines().collect();
+            let (top, bottom) = zones(&lines);
+            let mut drop = vec![false; lines.len()];
+            for (zone, set) in [(top, &headers), (bottom, &footers)] {
+                for i in zone {
+                    if running_key(lines[i]).is_some_and(|k| set.contains(&canon[&k])) {
+                        drop[i] = true;
+                    }
+                }
+            }
+            let n = drop.iter().filter(|d| **d).count();
+            if n == 0 {
+                return p.clone();
+            }
+            stripped += n;
+            // Drop the blank lines that followed a removed line, so no gap is left behind.
+            let mut kept: Vec<&str> = Vec::new();
+            let mut skip_blank = false;
+            for (i, line) in lines.iter().enumerate() {
+                if drop[i] {
+                    skip_blank = true;
+                } else if line.trim().is_empty() {
+                    if !skip_blank {
+                        kept.push(line);
+                    }
+                } else {
+                    skip_blank = false;
+                    kept.push(line);
+                }
+            }
+            while kept.last().is_some_and(|l| l.trim().is_empty()) {
+                kept.pop();
+            }
+            let mut q = p.clone();
+            q.body = kept.join("\n");
+            q
+        })
+        .collect();
+    (out, stripped)
+}
+
 fn page_text(p: &PageResult, markers: bool) -> String {
     if let Some(err) = &p.error {
         let err = err.replace(['\n', '\r'], " ").replace("--", "- -");
@@ -296,6 +484,9 @@ pub fn assemble(front: Option<&FrontMatter>, pages: &[PageResult], markers: bool
                 .map(|p| format!("{}: {}", p.number, p.currency_fixes))
                 .collect();
             head.push_str(&format!("currency_fixes: {{{}}}\n", fixes.join(", ")));
+        }
+        if let Some(n) = f.legal_cleanup {
+            head.push_str(&format!("legal_cleanup: {{stripped_lines: {n}}}\n"));
         }
         head.push_str(&format!(
             "flagged_pages: {}\n---\n\n",
@@ -481,11 +672,202 @@ mod tests {
             engine: "apple (Vision RecognizeDocuments)",
             generated: "t".into(),
             model: false,
+            legal_cleanup: None,
         };
         let md = assemble(Some(&front), &pages, true);
         assert!(md.starts_with(
             "---\nsource: a.pdf\npages: 2\nengine: apple (Vision RecognizeDocuments)\n"
         ));
         assert!(md.contains("flagged_pages: [2]\n---\n\n<!-- page 1"));
+    }
+
+    fn body_page(n: usize, body: &str) -> PageResult {
+        PageResult {
+            number: n,
+            source: Source::Vision,
+            body: body.into(),
+            bates: None,
+            column_split: false,
+            transcript: false,
+            currency_fixes: 0,
+            table: false,
+            fallback: false,
+            flagged: false,
+            error: None,
+        }
+    }
+
+    fn bodies(pages: &[PageResult]) -> Vec<&str> {
+        pages.iter().map(|p| p.body.as_str()).collect()
+    }
+
+    /// Text that differs between pages even after digits are normalized.
+    const WORDS: [&str; 6] = ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot"];
+
+    /// Five pages with a header, a footer `foot(i)` and unique body text.
+    fn five(foot: impl Fn(usize) -> String) -> Vec<PageResult> {
+        (1..=5)
+            .map(|i| {
+                body_page(
+                    i,
+                    &format!(
+                        "CONFIDENTIAL - Agreement\n\nBody one {w}.\n\nBody two {w}.\n\n{}",
+                        foot(i),
+                        w = WORDS[i]
+                    ),
+                )
+            })
+            .collect()
+    }
+
+    #[test]
+    fn running_header_and_footer_on_every_page_are_stripped() {
+        let pages = five(|i| format!("Page {i}"));
+        let (out, n) = strip_running(&pages);
+        assert_eq!(n, 10);
+        assert_eq!(out[2].body, "Body one delta.\n\nBody two delta.");
+    }
+
+    #[test]
+    fn digits_are_normalized() {
+        let pages = five(|i| format!("Page {i} of 9"));
+        let (out, n) = strip_running(&pages);
+        assert_eq!(n, 10);
+        assert!(!out[0].body.contains("Page"));
+        // Whitespace, case and heading marks do not matter either.
+        let mut pages = five(|i| format!("Page {i} of 9"));
+        pages[1].body = pages[1]
+            .body
+            .replace("CONFIDENTIAL - Agreement", "## confidential  -  AGREEMENT");
+        assert_eq!(strip_running(&pages).1, 10);
+    }
+
+    #[test]
+    fn header_misread_on_some_pages_still_counts() {
+        let mut pages = five(|i| format!("Page {i}"));
+        pages[0].body = pages[0].body.replace("Agreement", "Agreemenl");
+        pages[3].body = pages[3].body.replace("Agreement", "Agreemenl");
+        let (out, n) = strip_running(&pages);
+        assert_eq!(n, 10);
+        assert!(!out[0].body.contains("CONFIDENTIAL"));
+        // Short lines must match exactly.
+        let pages: Vec<PageResult> = ["Page A", "Page A", "Page B", "Page C", "Page D"]
+            .iter()
+            .enumerate()
+            .map(|(i, f)| {
+                body_page(
+                    i + 1,
+                    &format!("{w}\n\n{w} 2\n\n{w} 3\n\n{w} 4\n\n{f}", w = WORDS[i]),
+                )
+            })
+            .collect();
+        assert_eq!(strip_running(&pages).1, 0);
+    }
+
+    #[test]
+    fn line_on_two_of_five_pages_is_kept() {
+        let mut pages: Vec<PageResult> = (1..=5)
+            .map(|i| {
+                body_page(
+                    i,
+                    &format!("Unique {w}\n\nMiddle {w}\n\nEnd {w}", w = WORDS[i]),
+                )
+            })
+            .collect();
+        for p in &mut pages[..2] {
+            p.body = format!("Draft notice\n\n{}", p.body);
+        }
+        let (out, n) = strip_running(&pages);
+        assert_eq!(n, 0);
+        assert_eq!(bodies(&out), bodies(&pages));
+    }
+
+    #[test]
+    fn fewer_than_three_pages_is_untouched() {
+        let pages = five(|i| format!("Page {i}"));
+        for k in [1, 2] {
+            let (out, n) = strip_running(&pages[..k]);
+            assert_eq!(n, 0);
+            assert_eq!(bodies(&out), bodies(&pages[..k]));
+        }
+    }
+
+    #[test]
+    fn transcript_pages_are_untouched_and_do_not_count() {
+        let mut pages = five(|i| format!("Page {i}"));
+        for p in &mut pages {
+            p.transcript = true;
+        }
+        let (out, n) = strip_running(&pages);
+        assert_eq!(n, 0);
+        assert_eq!(bodies(&out), bodies(&pages));
+        // Mixed: the transcript page keeps its page number, the others lose theirs.
+        pages[0].transcript = true;
+        for p in &mut pages[1..] {
+            p.transcript = false;
+        }
+        let (out, _) = strip_running(&pages);
+        assert_eq!(out[0].body, pages[0].body);
+        assert!(!out[4].body.contains("Page 5"));
+    }
+
+    #[test]
+    fn table_rows_are_never_stripped() {
+        let pages: Vec<PageResult> = (1..=5)
+            .map(|i| {
+                body_page(
+                    i,
+                    &format!(
+                        "| Item | Cost |\n| --- | --- |\n\nText {w}\n\n| Total | $ {i} |",
+                        w = WORDS[i]
+                    ),
+                )
+            })
+            .collect();
+        let (out, n) = strip_running(&pages);
+        assert_eq!(n, 0);
+        assert_eq!(bodies(&out), bodies(&pages));
+    }
+
+    #[test]
+    fn identical_line_in_the_middle_of_a_page_is_kept() {
+        let mut pages = five(|i| format!("Page {i}"));
+        let mid = "a\n\nb\n\nCONFIDENTIAL - Agreement\n\nc\n\nd\n\ne\n\nf\n\nPage 3";
+        pages[2].body = format!("CONFIDENTIAL - Agreement\n\n{mid}");
+        let (out, _) = strip_running(&pages);
+        assert_eq!(
+            out[2].body,
+            "a\n\nb\n\nCONFIDENTIAL - Agreement\n\nc\n\nd\n\ne\n\nf"
+        );
+    }
+
+    #[test]
+    fn bates_and_failed_pages_are_left_alone() {
+        let mut pages: Vec<PageResult> = (1..=5)
+            .map(|i| {
+                body_page(
+                    i,
+                    &format!("Body {w}\n\nMore {w}\n\nABC00012{i}", w = WORDS[i]),
+                )
+            })
+            .collect();
+        pages[4].error = Some("boom".into());
+        let (out, n) = strip_running(&pages);
+        assert_eq!(n, 0);
+        assert_eq!(bodies(&out), bodies(&pages));
+    }
+
+    #[test]
+    fn front_matter_reports_stripped_lines() {
+        let front = FrontMatter {
+            source: "a.pdf",
+            pages: 5,
+            engine: "e",
+            generated: "t".into(),
+            model: false,
+            legal_cleanup: Some(10),
+        };
+        let md = assemble(Some(&front), &five(|i| format!("Page {i}")), true);
+        assert!(md.contains("legal_cleanup: {stripped_lines: 10}\nflagged_pages: []\n"));
     }
 }

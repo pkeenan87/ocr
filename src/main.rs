@@ -14,7 +14,24 @@ use ocr::server::{self, ServerInfo};
 use ocr::supervisor;
 use ocr::vision::Options;
 
+/// Windows consoles default to a legacy code page; switch the output to UTF-8 so `⚠` and `—`
+/// print as written.
+#[cfg(windows)]
+fn utf8_console() {
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn SetConsoleOutputCP(code_page: u32) -> i32;
+    }
+    const CP_UTF8: u32 = 65001;
+    // SAFETY: plain Win32 call with no pointers; failure (no console) is harmless.
+    unsafe {
+        SetConsoleOutputCP(CP_UTF8);
+    }
+}
+
 fn main() -> ExitCode {
+    #[cfg(windows)]
+    utf8_console();
     let cli = Cli::parse();
     #[cfg(target_os = "macos")]
     {

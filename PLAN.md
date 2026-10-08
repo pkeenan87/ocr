@@ -410,7 +410,7 @@ VRAM is then checked against the engine and quant, with the same tiers as the RA
 | ✅ **7d-1. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`, under the same key so Mac checkpoints stay valid. Setup downloads with `curl` and verifies the sha256 of: the pinned llama.cpp archive (plus cudart for CUDA), pdfium, and the GGUF weights pinned by HF revision. Minimal GPU probe to pick the archive, with an `OCR_LLAMA_VARIANT` override. `-c` per engine from `Limits` x slots | Start, stop, status and restart pass with the fake server on Linux. A real paddleocr-vl server starts on this machine (Vulkan or CPU) |
 | ✅ **7d-2. Engine layer off the Mac** (dots and the GPU run pending) | A non-Mac `side_pass` (bitmap regions, no blocks). `find_bates` runs on the model's output. Paddle's table-crop branch is off. Failed pages are flagged with no fallback text. The olmOCR footer-strip request (§9.5) | `paddleocr-vl`, `olmocr` and `dots-ocr` each scan `three_pages.pdf` on the Linux GPU machine, with Bates numbers in the page markers |
 | ✅ **7e. GPU gate** (CUDA path untested until the 3090) | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
-| **7f. Windows** | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
+| **7f. Windows** (code and CI written; CI not yet run) | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
 | **7g. Eval and docs** | Run the eval set (seeds 10–12) on Linux; compare with the Mac and vLLM numbers. README: Linux/Windows requirements, speeds, VRAM table | CER within an agreed margin of the Mac numbers per engine |
 
 ### 9.5 Decisions
@@ -543,3 +543,18 @@ The options as they were put:
   - **Known limit:** a Bates number centred under the footer is missed.
   - Details are in docs/spike.md, "olmOCR footer strip and Bates corners".
   - **Not run yet:** dots-ocr. It keeps Page-footer text, so the text search should find Bates numbers, but this is unverified.
+
+- 2026-10-08, **7f, first part.** This machine can't run Windows code: no Wine and no MinGW. The Windows tests therefore run in GitHub Actions (`.github/workflows/ci.yml`). It runs `fmt`, `clippy -D warnings` and `cargo test` on `ubuntu-latest` and `windows-latest`, each with pinned, checksum-verified pdfium. macOS stays manual: it needs macOS 26 for Vision.
+  - **Code fixes from a Windows audit:**
+    - Atomic renames retry for about 250 ms on `PermissionDenied`, for when antivirus or the search indexer holds the target (`checkpoint::replace_file`, used by every atomic write and by downloads).
+    - `curl`/`tar` are taken from System32 first, because a GNU `tar` from Git or MSYS on `PATH` can't unpack zips.
+    - Stop is `taskkill /T /F`, which kills the process tree, falling back to TerminateProcess.
+    - `is_ours` is case-insensitive and falls back to the process name when Windows hides the command line.
+    - The console is switched to UTF-8 (`SetConsoleOutputCP(65001)`), so `⚠` and `—` print correctly.
+  - **Test changes:**
+    - `tests/fake_server.cmd` wraps the fake server on Windows; `.gitattributes` keeps its CRLF line endings.
+    - `fake_alive` checks the port instead of parsing `ps` output.
+    - The foreign-pid test uses `ping -n 60` on Windows.
+    - `tests/cli.rs` compares paths with `\` normalised to `/`.
+  - **Windows coverage** comes from `tests/cli.rs`, `tests/server.rs`, `tests/document.rs` and the unit tests. The engine tests that use the fake server need Vision and stay macOS-only.
+  - **Done when** (unchanged): the CI is green, and a scan runs on a Windows machine with an NVIDIA GPU.

@@ -15,6 +15,30 @@ fn setup_err(msg: impl Into<String>) -> CliError {
     CliError::Setup(msg.into())
 }
 
+/// `curl` or `tar`. On Windows the copies in System32 (Windows 10 1803 and later) are preferred:
+/// a GNU `tar` from Git or MSYS earlier on `PATH` cannot unpack the llama.cpp zips.
+fn tool(name: &str) -> Command {
+    if cfg!(windows) {
+        let root = std::env::var_os("SystemRoot").unwrap_or_else(|| "C:\\Windows".into());
+        let exe = Path::new(&root)
+            .join("System32")
+            .join(format!("{name}.exe"));
+        if exe.is_file() {
+            return Command::new(exe);
+        }
+    }
+    Command::new(name)
+}
+
+/// What to install when `curl` or `tar` is missing.
+fn tool_hint() -> &'static str {
+    if cfg!(windows) {
+        "they ship with Windows 10 version 1803 and later"
+    } else {
+        "install it with your package manager"
+    }
+}
+
 /// Lower-case hex sha256 of a file.
 pub fn sha256_file(path: &Path) -> std::io::Result<String> {
     let mut file = File::open(path)?;
@@ -61,14 +85,15 @@ pub fn download(url: &str, dest: &Path, sha256: &str, label: &str) -> Result<(),
     part.push(".part");
     let part = PathBuf::from(part);
     println!("downloading {label}");
-    let status = Command::new("curl")
+    let status = tool("curl")
         .args(["-fL", "--retry", "3", "--progress-bar", "-C", "-", "-o"])
         .arg(&part)
         .arg(url)
         .status()
         .map_err(|e| {
             setup_err(format!(
-                "error: cannot run curl ({e}); curl is needed to download models"
+                "error: cannot run curl ({e}); curl is needed to download models ({})",
+                tool_hint()
             ))
         })?;
     if !status.success() {
@@ -83,7 +108,7 @@ pub fn download(url: &str, dest: &Path, sha256: &str, label: &str) -> Result<(),
             "error: {label} failed its checksum (expected {sha256}, got {got}); deleted, re-run setup"
         )));
     }
-    fs::rename(&part, dest).map_err(anyhow::Error::from)?;
+    crate::checkpoint::replace_file(&part, dest).map_err(anyhow::Error::from)?;
     fs::write(stamp_path(dest), sha256).map_err(anyhow::Error::from)?;
     Ok(())
 }
@@ -91,13 +116,13 @@ pub fn download(url: &str, dest: &Path, sha256: &str, label: &str) -> Result<(),
 /// Unpacks a .tar.gz, .tgz or .zip archive into `dir` (created if needed).
 pub fn extract(archive: &Path, dir: &Path) -> Result<(), CliError> {
     fs::create_dir_all(dir).map_err(anyhow::Error::from)?;
-    let status = Command::new("tar")
+    let status = tool("tar")
         .arg("-xf")
         .arg(archive)
         .arg("-C")
         .arg(dir)
         .status()
-        .map_err(|e| setup_err(format!("error: cannot run tar ({e})")))?;
+        .map_err(|e| setup_err(format!("error: cannot run tar ({e}; {})", tool_hint())))?;
     if status.success() {
         Ok(())
     } else {

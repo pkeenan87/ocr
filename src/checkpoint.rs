@@ -131,7 +131,27 @@ pub fn write_file(path: &Path, bytes: &[u8]) -> Result<()> {
     tmp.push(".tmp");
     let tmp = PathBuf::from(tmp);
     fs::write(&tmp, bytes).with_context(|| format!("cannot write {}", tmp.display()))?;
-    fs::rename(&tmp, path).with_context(|| format!("cannot write {}", path.display()))
+    replace_file(&tmp, path).with_context(|| format!("cannot write {}", path.display()))
+}
+
+/// `fs::rename` onto a possibly existing file. On Windows an antivirus scanner or the search
+/// indexer can hold the target open for a moment, so a refused rename is retried for about a
+/// quarter of a second.
+pub fn replace_file(from: &Path, to: &Path) -> std::io::Result<()> {
+    let mut tries = 0;
+    loop {
+        match fs::rename(from, to) {
+            Err(e)
+                if cfg!(windows)
+                    && e.kind() == std::io::ErrorKind::PermissionDenied
+                    && tries < 5 =>
+            {
+                tries += 1;
+                std::thread::sleep(std::time::Duration::from_millis(50));
+            }
+            other => return other,
+        }
+    }
 }
 
 pub fn write_manifest(dir: &Path, manifest: &Manifest) -> Result<()> {

@@ -360,7 +360,8 @@ pub(crate) fn write_atomic(out: &Path, contents: &str) -> Result<()> {
     let mut tmp = out.as_os_str().to_owned();
     tmp.push(".tmp");
     fs::write(&tmp, contents).with_context(|| format!("cannot write {}", out.display()))?;
-    fs::rename(&tmp, out).with_context(|| format!("cannot write {}", out.display()))
+    crate::checkpoint::replace_file(Path::new(&tmp), out)
+        .with_context(|| format!("cannot write {}", out.display()))
 }
 
 /// A crop can make Vision call a column's first line a title while also returning it inside

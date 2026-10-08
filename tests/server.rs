@@ -9,7 +9,11 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use tempfile::{TempDir, tempdir};
 
+/// The fake server; on Windows a `.cmd` wrapper, since a `.py` cannot be run directly.
+#[cfg(not(windows))]
 const FAKE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fake_server.py");
+#[cfg(windows)]
+const FAKE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fake_server.cmd");
 
 fn free_port() -> u16 {
     TcpListener::bind("127.0.0.1:0")
@@ -79,15 +83,14 @@ impl Env {
     }
 }
 
-/// True if a process whose command line has `--port N` and the fake server script is alive.
+/// True if something still accepts connections on the fake server's port (works on every
+/// platform, unlike scanning `ps` output).
 fn fake_alive(port: u16) -> bool {
-    let out = Proc::new("ps")
-        .args(["-ax", "-o", "command="])
-        .output()
-        .unwrap();
-    String::from_utf8_lossy(&out.stdout)
-        .lines()
-        .any(|l| l.contains("fake_server.py") && l.contains(&format!("--port {port}")))
+    std::net::TcpStream::connect_timeout(
+        &([127, 0, 0, 1], port).into(),
+        std::time::Duration::from_millis(500),
+    )
+    .is_ok()
 }
 
 #[test]
@@ -325,11 +328,17 @@ fn stale_dead_pid_is_cleaned_up() {
 fn stale_foreign_live_pid_is_never_killed() {
     for sub in ["status", "stop"] {
         let e = Env::new();
-        let mut other = Proc::new("sleep")
-            .arg("60")
-            .stdout(Stdio::null())
-            .spawn()
-            .unwrap();
+        // A long-lived process that is not ours (`sleep` does not exist on Windows).
+        let mut other = if cfg!(windows) {
+            let mut p = Proc::new("ping");
+            p.args(["-n", "60", "127.0.0.1"]);
+            p
+        } else {
+            let mut p = Proc::new("sleep");
+            p.arg("60");
+            p
+        };
+        let mut other = other.stdout(Stdio::null()).spawn().unwrap();
         stale_json(&e, other.id());
         e.cmd()
             .args(["server", sub])

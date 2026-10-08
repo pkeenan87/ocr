@@ -403,26 +403,43 @@ fn pid_alive(pid: u32) -> bool {
     process(pid, |_| ()).is_some()
 }
 
-/// Windows has no SIGTERM for a console-less child; llama-server is a single process, so stop
-/// it with TerminateProcess.
+/// Windows has no SIGTERM for a console-less child, so the server is stopped outright.
 #[cfg(windows)]
 fn terminate(pid: u32) {
     force_kill(pid);
 }
 
+/// Kills the server and anything it started (`taskkill /T`; a `.cmd` wrapper runs its program
+/// as a child), falling back to TerminateProcess on the server alone.
 #[cfg(windows)]
 fn force_kill(pid: u32) {
-    process(pid, |p| p.kill());
+    let tree = Command::new("taskkill")
+        .args(["/PID", &pid.to_string(), "/T", "/F"])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success());
+    if !tree {
+        process(pid, |p| p.kill());
+    }
 }
 
+/// The process's command line, or, if Windows won't show it, its executable name (which
+/// `is_ours` then matches without the port).
 #[cfg(windows)]
 fn process_command(pid: u32) -> Option<String> {
     let cmd = process(pid, |p| {
-        p.cmd()
+        let line = p
+            .cmd()
             .iter()
             .map(|a| a.to_string_lossy().into_owned())
             .collect::<Vec<_>>()
-            .join(" ")
+            .join(" ");
+        if line.is_empty() {
+            p.name().to_string_lossy().into_owned()
+        } else {
+            line
+        }
     })?;
     (!cmd.is_empty()).then_some(cmd)
 }
@@ -439,8 +456,17 @@ fn is_ours(info: &ServerInfo) -> bool {
     else {
         return false;
     };
-    process_command(info.pid)
-        .is_some_and(|c| c.contains(prog) && c.contains(&format!("--port {}", info.port)))
+    let port = format!("--port {}", info.port);
+    process_command(info.pid).is_some_and(|c| {
+        if cfg!(windows) {
+            // Case-insensitive file system; a bare executable name (no command line) is
+            // accepted without the port.
+            let (c, prog) = (c.to_lowercase(), prog.to_lowercase());
+            c.contains(&prog) && (c.contains(&port) || !c.contains(' '))
+        } else {
+            c.contains(prog) && c.contains(&port)
+        }
+    })
 }
 
 /// The verified running server, if any. A stale `server.json` is removed.

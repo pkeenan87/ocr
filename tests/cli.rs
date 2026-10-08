@@ -12,6 +12,11 @@ const WARNING: &str = if cfg!(target_os = "macos") {
     "ocr is not set up yet. Run `ocr server setup --model paddleocr-vl` first."
 };
 
+/// Command output with Windows path separators shown as `/`, for comparing paths.
+fn slashes(out: &[u8]) -> String {
+    String::from_utf8_lossy(out).replace('\\', "/")
+}
+
 struct Env {
     config: TempDir,
     state: TempDir,
@@ -54,8 +59,8 @@ impl Env {
         fs::write(p, bytes).unwrap();
     }
 
-    /// Runs a successful dry-run scan and returns stdout. Off macOS the default engine
-    /// (paddleocr-vl) must be set up first.
+    /// Runs a successful dry-run scan and returns stdout, with Windows `\` separators shown as
+    /// `/`. Off macOS the default engine (paddleocr-vl) must be set up first.
     fn dry_run(&self, args: &[&str]) -> String {
         if cfg!(not(target_os = "macos")) {
             self.setup();
@@ -66,7 +71,7 @@ impl Env {
             .args(args)
             .assert()
             .success();
-        String::from_utf8_lossy(&a.get_output().stdout).into_owned()
+        slashes(&a.get_output().stdout)
     }
 }
 
@@ -450,15 +455,17 @@ fn directory_skips_existing_outputs() {
     e.file("d/a.pdf", PDF);
     e.file("d/b.pdf", PDF);
     e.file("d/ocr-output/a.md", b"done");
-    e.cmd()
+    let a = e
+        .cmd()
         .args(["scan", "--dry-run", "--input-dir", "d"])
         .assert()
         .success()
-        .stdout(
-            predicate::str::contains("b.md")
-                .and(predicate::str::contains("-> d/ocr-output/a.md").not()),
-        )
         .stderr(predicate::str::contains("skipped 1 file(s)"));
+    let out = slashes(&a.get_output().stdout);
+    assert!(
+        out.contains("b.md") && !out.contains("-> d/ocr-output/a.md"),
+        "{out}"
+    );
     let out = e.dry_run(&["--input-dir", "d", "--overwrite"]);
     assert!(out.contains("-> d/ocr-output/a.md"), "{out}");
 }

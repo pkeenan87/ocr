@@ -259,8 +259,60 @@ private func decodeOptions(_ optionsJSON: UnsafePointer<CChar>?) -> Options {
         .flatMap { try? JSONDecoder().decode(Options.self, from: Data(String(cString: $0).utf8)) } ?? Options()
 }
 
-/// Runs async work to completion on the calling (non-Swift-executor) thread.
+/// Caps concurrent Vision text requests process-wide. Several requests starting at once crash
+/// Apple's TextRecognition (EXC_BAD_ACCESS/SIGSEGV in libobjc objc_retain under TextRecognition,
+/// 0.03-0.81 s after launch; docs/spike.md). A first-use gate and warm-up did not help; a cap of
+/// 2 did (0 crashes in 100 launches vs about 5%), and the user chose it. The `ocr scan`
+/// supervisor retries from checkpoints as a safety net. `OCR_VISION_MAX_CONCURRENT` (1-64)
+/// overrides the cap for measurement.
+private let visionLimit: Int = {
+    let v = ProcessInfo.processInfo.environment["OCR_VISION_MAX_CONCURRENT"].flatMap { Int($0) }
+    return v.map { min(max($0, 1), 64) } ?? 2
+}()
+private let visionSlots = DispatchSemaphore(value: visionLimit)
+
+/// Highest number of requests seen in flight at once (for tests: ocr_bridge_max_concurrent).
+private final class ConcurrencyStats: @unchecked Sendable {
+    private let lock = NSLock()
+    private var current = 0
+    private(set) var peak = 0
+
+    func enter() {
+        lock.lock()
+        current += 1
+        peak = max(peak, current)
+        lock.unlock()
+    }
+
+    func leave() {
+        lock.lock()
+        current -= 1
+        lock.unlock()
+    }
+
+    func read() -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return peak
+    }
+}
+
+private let visionStats = ConcurrencyStats()
+
+@_cdecl("ocr_bridge_max_concurrent")
+public func ocr_bridge_max_concurrent() -> Int32 {
+    Int32(visionStats.read())
+}
+
+/// Runs async work to completion on the calling (non-Swift-executor) thread. Every Vision text
+/// request (recognize_document, recognize_page) goes through here, hence through the cap.
 private func blocking(_ work: @escaping @Sendable () async -> PageOut) -> UnsafeMutablePointer<CChar>? {
+    visionSlots.wait()
+    visionStats.enter()
+    defer {
+        visionStats.leave()
+        visionSlots.signal()
+    }
     let box = ResultBox()
     let done = DispatchSemaphore(value: 0)
     Task.detached {

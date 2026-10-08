@@ -235,7 +235,7 @@ pub struct ScanArgs {
     /// Render resolution, 72-600 (default 200; paddleocr-vl 150; dots-ocr 100)
     #[arg(long, value_name = "N", value_parser = clap::value_parser!(u32).range(72..=600))]
     pub dpi: Option<u32>,
-    /// Total pages in flight across the whole run
+    /// Total pages in flight across the whole run (Apple Vision itself recognizes at most 2 at a time)
     #[arg(long, visible_alias = "parallel", value_name = "N", value_parser = parse_jobs)]
     pub jobs: Option<usize>,
     #[arg(long, conflicts_with = "verbose")]

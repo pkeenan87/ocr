@@ -6,9 +6,13 @@ pub mod config;
 pub mod dots;
 pub mod engines;
 pub mod error;
+#[cfg(not(target_os = "macos"))]
+pub mod fetch;
 pub mod htmltable;
 pub mod input;
 pub mod layout;
+#[cfg(not(target_os = "macos"))]
+pub mod llama;
 pub mod markdown;
 pub mod model_engine;
 pub mod olmocr;

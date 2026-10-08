@@ -416,13 +416,17 @@ pub struct Ctx {
     mlx_vlm: String,
 }
 
-/// `--max-num-seqs` of the server, from its recorded argv (1 if absent).
+/// Requests the server runs at once: its recorded `slots` (llama-server), else `--max-num-seqs`
+/// from its recorded argv (mlx-vlm), else 1.
 pub fn max_num_seqs(info: &ServerInfo) -> usize {
-    info.argv
-        .iter()
-        .position(|a| a == "--max-num-seqs")
-        .and_then(|i| info.argv.get(i + 1))
-        .and_then(|v| v.parse().ok())
+    info.slots
+        .or_else(|| {
+            info.argv
+                .iter()
+                .position(|a| a == "--max-num-seqs")
+                .and_then(|i| info.argv.get(i + 1))
+                .and_then(|v| v.parse().ok())
+        })
         .filter(|n| *n > 0)
         .unwrap_or(1)
 }
@@ -493,9 +497,14 @@ impl Ctx {
         Self {
             port: info.port,
             engine: format!(
-                "{} ({}, mlx-vlm {mlx_vlm})",
+                "{} ({}, {})",
                 spec.engine().name(),
-                info.repo
+                info.repo,
+                if mlx_vlm.starts_with("llama.cpp") {
+                    mlx_vlm.to_string()
+                } else {
+                    format!("mlx-vlm {mlx_vlm}")
+                }
             ),
             repo: info.repo.clone(),
             timeout: Duration::from_secs(over.unwrap_or(lim.timeout_secs)),

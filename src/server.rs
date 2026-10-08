@@ -32,6 +32,10 @@ pub struct ServerInfo {
     pub argv: Vec<String>,
     #[serde(default)]
     pub env: Vec<(String, String)>,
+    /// Requests the server runs at once (llama-server `--parallel`). Absent in mlx-vlm
+    /// `server.json` files, which carry it as `--max-num-seqs` in `argv`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slots: Option<usize>,
     pub started_at: String,
 }
 
@@ -126,6 +130,7 @@ fn ensure_venv(uv: &Path, venv: &Path) -> Result<Runtime, CliError> {
     Ok(Runtime {
         python: py,
         mlx_vlm: mlx,
+        ..Default::default()
     })
 }
 
@@ -136,12 +141,6 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
         return Ok(());
     }
     let fake = std::env::var_os("OCR_FAKE_INSTALL").is_some_and(|v| v == "1");
-    if cfg!(not(target_os = "macos")) && !fake {
-        return Err(CliError::Setup(
-            "error: model servers are not supported on this platform yet (PLAN §9, Phase 7d)"
-                .into(),
-        ));
-    }
 
     // Resolve and check everything up front so nothing is downloaded for a doomed request.
     let mut plan = Vec::new();
@@ -157,17 +156,27 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
                 engines::quants(engine, version).join(", ")
             ))
         })?;
-        if !fake {
+        // Off macOS the model lives in GPU memory; 7e checks VRAM instead.
+        if !fake && cfg!(target_os = "macos") {
             check_ram(engine, quant, args.force)?;
         }
         plan.push((engine, version, quant, repo));
     }
 
-    let runtime = if fake {
+    let runtime = if fake && cfg!(target_os = "macos") {
         Runtime {
             python: "fake".into(),
             mlx_vlm: MLX_VLM_PIN.into(),
+            ..Default::default()
         }
+    } else if fake {
+        Runtime {
+            llama_cpp: Some(engines::LLAMA_BUILD.into()),
+            llama_variant: Some("cpu".into()),
+            ..Default::default()
+        }
+    } else if cfg!(not(target_os = "macos")) {
+        install_llama_runtime()?
     } else {
         let uv = find_uv().ok_or_else(|| {
             CliError::Setup(format!(
@@ -180,12 +189,17 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
     cfg.runtime = Some(runtime);
 
     for (engine, version, quant, repo) in plan {
-        if !fake {
+        if !fake && cfg!(target_os = "macos") {
             println!("downloading {repo}");
             run_checked(
                 Command::new(venv_dir()?.join("bin/hf")).args(["download", repo]),
                 "hf download",
             )?;
+        }
+        #[cfg(not(target_os = "macos"))]
+        if !fake {
+            let gguf = engines::gguf(engine, version, quant).expect("resolved above");
+            crate::llama::install_weights(&gguf)?;
         }
         cfg.engines.insert(
             engine.name().into(),
@@ -200,6 +214,30 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
         println!("{} ready ({repo})", engine.name());
     }
     Ok(())
+}
+
+/// Off macOS: picks the llama.cpp build for this machine's GPU, installs it and pdfium.
+#[cfg(not(target_os = "macos"))]
+fn install_llama_runtime() -> Result<Runtime, CliError> {
+    use crate::llama;
+    let (variant, why) = llama::detect_variant()?;
+    println!(
+        "llama.cpp {} ({} build: {why})",
+        llama::LLAMA_BUILD,
+        variant.name()
+    );
+    llama::install(variant)?;
+    llama::install_pdfium()?;
+    Ok(Runtime {
+        llama_cpp: Some(llama::LLAMA_BUILD.into()),
+        llama_variant: Some(variant.name().into()),
+        ..Default::default()
+    })
+}
+
+#[cfg(target_os = "macos")]
+fn install_llama_runtime() -> Result<Runtime, CliError> {
+    unreachable!("macOS runs mlx-vlm")
 }
 
 fn check_ram(engine: Engine, quant: Quant, force: bool) -> Result<(), CliError> {
@@ -505,6 +543,10 @@ fn weights_missing(tail: &str) -> bool {
         || t.contains("offline mode")
         || t.contains("hf_hub_offline")
         || t.contains("cannot find the requested files in the local cache")
+        // llama-server
+        || t.contains("failed to load model")
+        || t.contains("error loading model")
+        || t.contains("failed to open gguf")
 }
 
 /// Spawns the server described by `template` (pid and started_at are replaced) and waits for readiness.
@@ -617,6 +659,88 @@ fn server_program(venv: &Path) -> String {
     })
 }
 
+type ServerCommand = (Vec<String>, Vec<(String, String)>, Option<usize>);
+
+/// mlx-vlm's server argv and env (macOS).
+fn mlx_command(engine: &str, repo: &str, port: u16) -> Result<ServerCommand, CliError> {
+    let program = server_program(&venv_dir()?);
+    if std::env::var_os("OCR_SERVER_CMD").is_none() && !Path::new(&program).exists() {
+        return Err(CliError::Setup(format!(
+            "error: model runtime missing. Run `ocr server setup --model {engine}`."
+        )));
+    }
+    let argv = vec![
+        program,
+        "--host".into(),
+        "127.0.0.1".into(),
+        "--port".into(),
+        port.to_string(),
+        "--model".into(),
+        repo.into(),
+        "--max-num-seqs".into(),
+        "1".into(),
+    ];
+    Ok((argv, vec![("HF_HUB_OFFLINE".into(), "1".into())], None))
+}
+
+/// llama-server's argv and env off macOS, from the build and weights setup installed. One slot,
+/// as on the Mac. On Linux the server's own directory goes on `LD_LIBRARY_PATH`, for the CUDA
+/// runtime libraries unpacked beside it.
+#[cfg(not(target_os = "macos"))]
+fn llama_command(
+    engine: Engine,
+    version: Option<&str>,
+    quant: Quant,
+    port: u16,
+) -> Result<ServerCommand, CliError> {
+    use crate::llama::{self, Variant};
+    let n = engine.name();
+    let missing = || {
+        CliError::Setup(format!(
+            "error: model runtime missing. Run `ocr server setup --model {n}`."
+        ))
+    };
+    let variant = Config::load()?
+        .and_then(|c| c.runtime)
+        .and_then(|r| r.llama_variant)
+        .and_then(|v| Variant::parse(&v))
+        .ok_or_else(missing)?;
+    let gguf = engines::gguf(engine, version, quant).ok_or_else(missing)?;
+    let model = llama::model_path(&gguf, gguf.model.name)?;
+    let mmproj = llama::model_path(&gguf, gguf.mmproj.name)?;
+    let fake = std::env::var("OCR_SERVER_CMD").ok();
+    if fake.is_none() && !(model.is_file() && mmproj.is_file()) {
+        return Err(CliError::Setup(format!(
+            "error: weights missing — re-run `ocr server setup --model {n}`"
+        )));
+    }
+    let program = match fake {
+        Some(p) => PathBuf::from(p),
+        None => llama::server_binary(variant).ok_or_else(missing)?,
+    };
+    let slots = 1;
+    let mut argv = vec![program.to_string_lossy().into_owned()];
+    argv.extend(llama::server_args(
+        &model, &mmproj, port, engine, slots, variant,
+    ));
+    let mut env = Vec::new();
+    if cfg!(target_os = "linux")
+        && let Some(dir) = program.parent()
+    {
+        let mut path = dir.to_string_lossy().into_owned();
+        if let Ok(old) = std::env::var("LD_LIBRARY_PATH") {
+            path = format!("{path}:{old}");
+        }
+        env.push(("LD_LIBRARY_PATH".into(), path));
+    }
+    Ok((argv, env, Some(slots)))
+}
+
+#[cfg(target_os = "macos")]
+fn llama_command(_: Engine, _: Option<&str>, _: Quant, _: u16) -> Result<ServerCommand, CliError> {
+    unreachable!("macOS runs mlx-vlm")
+}
+
 /// Resolves the version/quant/repo to serve, defaulting to what setup recorded.
 pub fn resolve_model(
     engine: Engine,
@@ -686,13 +810,11 @@ pub fn start(args: &StartArgs, engine: Engine) -> Result<(), CliError> {
         )));
     }
 
-    let venv = venv_dir()?;
-    let program = server_program(&venv);
-    if std::env::var_os("OCR_SERVER_CMD").is_none() && !Path::new(&program).exists() {
-        return Err(CliError::Setup(format!(
-            "error: model runtime missing. Run `ocr server setup --model {n}`."
-        )));
-    }
+    let (argv, env, slots) = if cfg!(target_os = "macos") {
+        mlx_command(n, repo, args.port)?
+    } else {
+        llama_command(engine, version.as_deref(), quant, args.port)?
+    };
     let template = ServerInfo {
         pid: 0,
         engine: n.into(),
@@ -700,18 +822,9 @@ pub fn start(args: &StartArgs, engine: Engine) -> Result<(), CliError> {
         quant: quant.name().into(),
         repo: repo.into(),
         port: args.port,
-        argv: vec![
-            program,
-            "--host".into(),
-            "127.0.0.1".into(),
-            "--port".into(),
-            args.port.to_string(),
-            "--model".into(),
-            repo.into(),
-            "--max-num-seqs".into(),
-            "1".into(),
-        ],
-        env: vec![("HF_HUB_OFFLINE".into(), "1".into())],
+        argv,
+        env,
+        slots,
         started_at: String::new(),
     };
     println!("starting {n} ({repo}) on port {}", args.port);
@@ -756,6 +869,29 @@ pub fn stop() -> Result<(), CliError> {
     Ok(())
 }
 
+/// Resident memory of the server off macOS (Linux `/proc`, Windows via `sysinfo`). GPU memory
+/// is not included.
+#[cfg(not(target_os = "macos"))]
+fn footprint(pid: u32) -> Option<String> {
+    #[cfg(windows)]
+    let kib = process(pid, |p| p.memory() / 1024)?;
+    #[cfg(not(windows))]
+    let kib: u64 = fs::read_to_string(format!("/proc/{pid}/status"))
+        .ok()?
+        .lines()
+        .find_map(|l| l.strip_prefix("VmRSS:"))?
+        .trim()
+        .trim_end_matches("kB")
+        .trim()
+        .parse()
+        .ok()?;
+    Some(format!(
+        "{:.1} GB resident (CPU memory)",
+        kib as f64 / (1 << 20) as f64
+    ))
+}
+
+#[cfg(target_os = "macos")]
 fn footprint(pid: u32) -> Option<String> {
     let out = Command::new("vmmap")
         .args(["--summary", &pid.to_string()])
@@ -805,7 +941,11 @@ pub fn status() -> Result<(), CliError> {
     };
     println!("health:  {health}");
     if let Some(fp) = footprint(info.pid) {
-        println!("memory:  {fp} physical footprint");
+        if cfg!(target_os = "macos") {
+            println!("memory:  {fp} physical footprint");
+        } else {
+            println!("memory:  {fp}");
+        }
     }
     Ok(())
 }

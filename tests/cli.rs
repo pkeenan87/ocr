@@ -380,13 +380,19 @@ fn invalid_model_version_exits_2() {
     let e = Env::new();
     e.file("a.pdf", PDF);
     e.setup();
+    let apple = cfg!(target_os = "macos");
+    // Off macOS only the releases with GGUF builds are offered (PLAN §9.3).
+    let (paddle, dots) = if apple {
+        ("1.6, 1.5, 1.0", "dots.mocr, dots.ocr")
+    } else {
+        ("1.6, 1.5", "dots.ocr")
+    };
     let cases = [
-        ("paddleocr-vl", "2.0", "1.6, 1.5, 1.0"),
-        ("dots-ocr", "x", "dots.mocr, dots.ocr"),
+        ("paddleocr-vl", "2.0", paddle),
+        ("dots-ocr", "x", dots),
         ("olmocr", "1", "no selectable"),
         ("apple", "1", "no selectable"),
     ];
-    let apple = cfg!(target_os = "macos");
     for (model, ver, expect) in cases.into_iter().filter(|c| apple || c.0 != "apple") {
         e.cmd()
             .args([

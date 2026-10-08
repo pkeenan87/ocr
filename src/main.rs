@@ -241,7 +241,15 @@ fn settings(args: &ScanArgs) -> Settings {
 fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliError> {
     let mlx = Config::load()?
         .and_then(|c| c.runtime)
-        .map_or_else(|| MLX_VLM_PIN.to_string(), |r| r.mlx_vlm);
+        .map(|r| r.id())
+        .filter(|id| !id.is_empty())
+        .unwrap_or_else(|| {
+            if cfg!(target_os = "macos") {
+                MLX_VLM_PIN.to_string()
+            } else {
+                format!("llama.cpp {}", ocr::engines::LLAMA_BUILD)
+            }
+        });
     let spec = model_engine::scan_engine(args.model).expect("model engines have a scan engine");
     if args.model == Engine::Olmocr && args.dpi.is_some() && !args.quiet {
         eprintln!(

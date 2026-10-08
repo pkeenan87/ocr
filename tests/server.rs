@@ -95,17 +95,32 @@ fn setup_writes_config_with_version_quant_repo() {
     let e = Env::new();
     e.setup(&["paddleocr-vl", "dots-ocr"]);
     let toml = fs::read_to_string(e.config.path().join("config.toml")).unwrap();
+    // macOS serves MLX weights through mlx-vlm; elsewhere GGUF builds through llama.cpp.
+    let platform = if cfg!(target_os = "macos") {
+        [
+            "repo = \"PaddlePaddle/PaddleOCR-VL-1.6\"",
+            "version = \"dots.mocr\"",
+            "repo = \"mlx-community/dots.mocr-8bit\"",
+            "mlx_vlm = \"0.7.6\"",
+        ]
+    } else {
+        [
+            "repo = \"PaddlePaddle/PaddleOCR-VL-1.6-GGUF\"",
+            "version = \"dots.ocr\"",
+            "repo = \"ggml-org/dots.ocr-GGUF\"",
+            "llama_cpp = \"b11510\"",
+        ]
+    };
     for needle in [
         "[engines.paddleocr-vl]",
         "version = \"1.6\"",
         "quant = \"bf16\"",
-        "repo = \"PaddlePaddle/PaddleOCR-VL-1.6\"",
         "[engines.dots-ocr]",
-        "version = \"dots.mocr\"",
-        "repo = \"mlx-community/dots.mocr-8bit\"",
         "[runtime]",
-        "mlx_vlm = \"0.7.6\"",
-    ] {
+    ]
+    .into_iter()
+    .chain(platform)
+    {
         assert!(toml.contains(needle), "missing {needle} in\n{toml}");
     }
     // Idempotent.
@@ -115,13 +130,18 @@ fn setup_writes_config_with_version_quant_repo() {
         fs::read_to_string(e.config.path().join("config.toml")).unwrap()
     );
     // Explicit version and quant.
+    let (quant, repo) = if cfg!(target_os = "macos") {
+        ("4bit", "mlx-community/PaddleOCR-VL-1.5-4bit")
+    } else {
+        ("bf16", "PaddlePaddle/PaddleOCR-VL-1.5-GGUF")
+    };
     e.cmd()
         .args(["server", "setup", "--model", "paddleocr-vl"])
-        .args(["--model-version", "1.5", "--quant", "4bit"])
+        .args(["--model-version", "1.5", "--quant", quant])
         .assert()
         .success();
     let toml = fs::read_to_string(e.config.path().join("config.toml")).unwrap();
-    assert!(toml.contains("repo = \"mlx-community/PaddleOCR-VL-1.5-4bit\""));
+    assert!(toml.contains(&format!("repo = \"{repo}\"")));
 }
 
 #[test]
@@ -133,7 +153,12 @@ fn start_status_stop() {
         .stdout(predicate::str::contains("ready"));
     let j = e.server_json();
     assert_eq!(j["engine"], "paddleocr-vl");
-    assert_eq!(j["repo"], "PaddlePaddle/PaddleOCR-VL-1.6");
+    let repo = if cfg!(target_os = "macos") {
+        "PaddlePaddle/PaddleOCR-VL-1.6"
+    } else {
+        "PaddlePaddle/PaddleOCR-VL-1.6-GGUF"
+    };
+    assert_eq!(j["repo"], repo);
     assert_eq!(j["port"], e.port);
     assert!(j["argv"].as_array().unwrap().len() >= 9);
     e.cmd()

@@ -65,12 +65,15 @@ impl Engine {
         }
     }
 
-    /// Valid `--model-version` values, newest (default) first.
+    /// Valid `--model-version` values, default first. Off macOS only the releases with a GGUF
+    /// build are offered, and dots defaults to `dots.ocr` (PLAN §9.5).
     pub fn versions(self) -> &'static [&'static str] {
         match self {
             Self::Apple | Self::Olmocr => &[],
-            Self::PaddleocrVl => &["1.6", "1.5", "1.0"],
-            Self::DotsOcr => &["dots.mocr", "dots.ocr"],
+            Self::PaddleocrVl if cfg!(target_os = "macos") => &["1.6", "1.5", "1.0"],
+            Self::PaddleocrVl => &["1.6", "1.5"],
+            Self::DotsOcr if cfg!(target_os = "macos") => &["dots.mocr", "dots.ocr"],
+            Self::DotsOcr => &["dots.ocr"],
         }
     }
 
@@ -333,7 +336,21 @@ mod tests {
         assert_eq!(Engine::Olmocr.resolve_version(None).unwrap(), None);
         assert!(Engine::Olmocr.resolve_version(Some("1")).is_err());
         let e = Engine::PaddleocrVl.resolve_version(Some("2")).unwrap_err();
-        assert!(e.to_string().contains("1.6, 1.5, 1.0"));
+        let listed = if cfg!(target_os = "macos") {
+            "1.6, 1.5, 1.0"
+        } else {
+            "1.6, 1.5"
+        };
+        assert!(e.to_string().contains(listed));
+        let dots = Engine::DotsOcr.resolve_version(None).unwrap();
+        assert_eq!(
+            dots,
+            Some(if cfg!(target_os = "macos") {
+                "dots.mocr"
+            } else {
+                "dots.ocr"
+            })
+        );
     }
 
     #[test]

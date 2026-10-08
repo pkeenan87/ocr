@@ -96,6 +96,9 @@ impl Progress {
     }
 
     pub fn finish(&self) {
+        for (_, bar) in self.files.lock().unwrap().drain() {
+            bar.finish_and_clear();
+        }
         self.overall.finish_and_clear();
     }
 }

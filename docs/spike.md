@@ -266,5 +266,6 @@ Checkpointing and assembly from disk cost nothing measurable in time and about 1
 |---|---|---|---|
 | olmocr (8-bit) | 47.0 s | 46.9 s | identical apart from `generated:` |
 | dots-ocr (dots.mocr 8-bit) | 108.0 s | 108.0 s | identical apart from `generated:` |
+| paddleocr-vl (1.6 bf16) | 14.3 s | 14.3 s | identical apart from `generated:` |
 
 For model engines this tests side-pass and assembly concurrency, not model batching: requests are capped at the server's `--max-num-seqs` (1), so `--jobs 8` makes the same one-at-a-time requests as `--jobs 1` and prints the cap note.

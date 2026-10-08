@@ -39,7 +39,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pdfium"
           curl -fsSL "$PDFIUM_URL/${{ matrix.pdfium }}" -o "$RUNNER_TEMP/pdfium.tgz"
           echo "${{ matrix.pdfium_sha256 }}  $RUNNER_TEMP/pdfium.tgz" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/pdfium.tgz" -C "$RUNNER_TEMP/pdfium"
+          # Relative paths: Git Bash's GNU tar reads `D:\...` as a remote host.
+          cd "$RUNNER_TEMP" && tar -xzf pdfium.tgz -C pdfium
           echo "OCR_PDFIUM_LIB=$RUNNER_TEMP/pdfium/${{ matrix.pdfium_lib }}" >> "$GITHUB_ENV"
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings

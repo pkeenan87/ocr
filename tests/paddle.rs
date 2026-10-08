@@ -192,6 +192,99 @@ fn transcript_is_one_full_page_request() {
     );
 }
 
+/// The mini-pages of `transcript4up_seed0.expected.txt` (sheet 1 of an eval transcript4up
+/// document): a `Page N` header and the physical lines, each as `N text`.
+fn seed0_pages() -> Vec<(String, Vec<String>)> {
+    let text =
+        fs::read_to_string(Path::new(FIXTURES).join("transcript4up_seed0.expected.txt")).unwrap();
+    let mut pages: Vec<(String, Vec<String>)> = Vec::new();
+    for line in text.lines().filter(|l| !l.is_empty()) {
+        if line.starts_with("Page ") {
+            pages.push((line.to_string(), Vec::new()));
+        } else {
+            let body = line.split_once(' ').unwrap().1.trim().to_string();
+            pages.last_mut().unwrap().1.push(body);
+        }
+    }
+    pages
+}
+
+#[test]
+fn merged_wraps_and_sequential_numbers_come_out_with_geometry_numbering() {
+    let e = Env::new(&["transcript4up_seed0.pdf"]);
+    let pages = seed0_pages();
+    assert_eq!(pages.len(), 4);
+    // What the models do: join every wrapped continuation onto the line above and number the
+    // result 1, 2, 3 ... sequentially.
+    let mut merged = 0;
+    let replies: Vec<String> = pages
+        .iter()
+        .map(|(head, lines)| {
+            let mut out: Vec<String> = Vec::new();
+            for l in lines {
+                match out.last_mut() {
+                    Some(prev) if !prev.ends_with(['.', '?', '!']) => {
+                        prev.push(' ');
+                        prev.push_str(l);
+                        merged += 1;
+                    }
+                    _ => out.push(l.clone()),
+                }
+            }
+            let numbered: Vec<String> = out
+                .iter()
+                .enumerate()
+                .map(|(i, l)| format!("{} {l}", i + 1))
+                .collect();
+            format!("{head}\n{}", numbered.join("\n"))
+        })
+        .collect();
+    assert!(
+        merged >= 10,
+        "the fixture should have wrapped lines: {merged}"
+    );
+    let replies_path = e.path("replies.json");
+    fs::write(&replies_path, serde_json::to_string(&replies).unwrap()).unwrap();
+    e.serve(&[("FAKE_REPLIES", replies_path.to_str().unwrap())]);
+    e.scan("transcript4up_seed0.pdf", &["--pages", "1"], &[])
+        .success();
+    let md = e.markdown("transcript4up_seed0.pdf");
+    assert!(md.contains("transcript_pages: [1]\n"), "{md}");
+    assert!(
+        md.contains("line_numbers: {anchored: [1], unverified: []}\n"),
+        "{md}"
+    );
+    // One request per mini-page: quadrant crops, not the 1275x1650 sheet.
+    let reqs = e.requests();
+    assert_eq!(prompts(&reqs), ["OCR:"; 4], "{reqs:?}");
+    assert!(
+        reqs.iter().all(|r| r["w"].as_u64() < Some(1275)),
+        "{reqs:?}"
+    );
+    // The engine's words carry the geometry's numbers: every physical line is exact.
+    let body = md.split_once("<!-- page 1 -->\n").unwrap().1;
+    let got: Vec<&str> = body.lines().filter(|l| !l.is_empty()).collect();
+    let want =
+        fs::read_to_string(Path::new(FIXTURES).join("transcript4up_seed0.expected.txt")).unwrap();
+    let want: Vec<&str> = want.lines().filter(|l| !l.is_empty()).collect();
+    assert_eq!(got, want);
+}
+
+#[test]
+fn text_that_does_not_match_the_page_is_kept_and_marked_unverified() {
+    let e = Env::new(&["transcript4up_seed0.pdf"]);
+    e.serve(&[]);
+    e.scan("transcript4up_seed0.pdf", &["--pages", "1"], &[])
+        .success();
+    let md = e.markdown("transcript4up_seed0.pdf");
+    assert!(
+        md.contains("line_numbers: {anchored: [], unverified: [1]}\n"),
+        "{md}"
+    );
+    // The engine's text is kept, never replaced.
+    assert!(md.contains("fake ocr text"), "{md}");
+}
+
 #[test]
 fn dpi_override_changes_the_render() {
     let e = Env::new(&["transcript_full.pdf"]);

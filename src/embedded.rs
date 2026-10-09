@@ -42,7 +42,8 @@ fn embedded_words(text: &str, vision: &std::collections::HashSet<String>) -> Vec
         let w = raw[i];
         if let (Some(stem), Some(next)) = (w.strip_suffix('-'), raw.get(i + 1)) {
             let joined = format!("{stem}{next}");
-            if !stem.is_empty() && vision.contains(&norm(&joined)) {
+            // A word broken at a hyphen (`agree-` `ment`), not a dash (`--` `well,`).
+            if stem.ends_with(char::is_alphanumeric) && vision.contains(&norm(&joined)) {
                 out.push(joined);
                 i += 2;
                 continue;
@@ -56,8 +57,20 @@ fn embedded_words(text: &str, vision: &std::collections::HashSet<String>) -> Vec
 
 /// Whether `a` can be an OCR misreading of `b`: at most a third of the characters differ (and
 /// at least one may). `perfonn`/`perform` and `$3,000`/`$8,000` are; `thirty`/`sixty` is not.
-fn misreading(a: &str, b: &str) -> bool {
+///
+/// `strict` (columns and transcripts, whose alignment is less certain): words of one or two
+/// characters change only between look-alike characters of the same length. One edit is most
+/// of such a word, so a misaligned line number `7` would become `6`, and `of` would become `o`.
+/// On ordinary pages the alignment is reliable, and a misread `9` for `¶` or `•` for a footnote
+/// `6` is fixed.
+fn misreading(a: &str, b: &str, strict: bool) -> bool {
     let (a, b): (Vec<char>, Vec<char>) = (a.chars().collect(), b.chars().collect());
+    if strict && a.len().min(b.len()) <= 2 {
+        return a.len() == b.len()
+            && a.iter()
+                .zip(&b)
+                .all(|(x, y)| x == y || look_alike(*x) == look_alike(*y));
+    }
     let mut prev: Vec<usize> = (0..=b.len()).collect();
     for (i, ca) in a.iter().enumerate() {
         let mut cur = vec![i + 1; b.len() + 1];
@@ -69,6 +82,39 @@ fn misreading(a: &str, b: &str) -> bool {
         prev = cur;
     }
     prev[b.len()] <= (a.len().max(b.len()) / 3).max(1)
+}
+
+/// Whether every character of `a` occurs in `b`, in order, counting curly and straight quotes,
+/// and dashes and hyphens, as the same.
+fn subsequence(a: &str, b: &str) -> bool {
+    let loose = |c: char| match c {
+        '\u{2018}' | '\u{2019}' | '`' => '\'',
+        '\u{201c}' | '\u{201d}' => '"',
+        '\u{2013}' | '\u{2014}' | '\u{2212}' => '-',
+        c => c,
+    };
+    let mut rest = b.chars().map(loose);
+    a.chars().map(loose).all(|c| rest.any(|d| d == c))
+}
+
+/// Characters OCR confuses with one another, as one representative each.
+fn look_alike(c: char) -> char {
+    match c {
+        'l' | 'I' | '1' | '|' | 'i' | '!' => 'l',
+        'O' | '0' | 'o' | 'Q' | '\u{41e}' | '\u{43e}' => 'o',
+        'S' | '5' | '$' | 's' => 's',
+        'B' | '8' => 'b',
+        'Z' | '2' => 'z',
+        '\u{410}' => 'A',
+        '\u{430}' => 'a',
+        '\u{415}' => 'E',
+        '\u{435}' => 'e',
+        '\u{443}' => 'y',
+        '\u{440}' => 'p',
+        '\u{441}' => 'c',
+        '\u{445}' => 'x',
+        c => c,
+    }
 }
 
 /// Pairs `(i, j)` of a longest common subsequence of `a` and `b` (compared normalized).
@@ -122,7 +168,7 @@ struct Proposal {
 /// row order) against the embedded text found in the block's box. Segment boundaries and word
 /// counts outside differing runs are kept, so structure survives.
 pub fn correct(segments: &mut [String], embedded: &str) -> Outcome {
-    match propose(segments, embedded) {
+    match propose(segments, embedded, false) {
         Some(p) => {
             segments.clone_from_slice(&p.segments);
             Outcome {
@@ -143,6 +189,7 @@ fn fix_run(
     vr: std::ops::Range<usize>,
     er: std::ops::Range<usize>,
     leading: bool,
+    strict: bool,
 ) -> usize {
     let squash = |a: &[String]| a.iter().map(|w| norm(w)).collect::<String>();
     let vision: Vec<String> = vr.clone().map(|x| words[x].1.clone()).collect();
@@ -158,8 +205,13 @@ fn fix_run(
     };
     // The same characters split differently (`No.3:26-cv-04417` / `No. 3:26-cv-04417`).
     for n in 1..=er.len() {
+        // Split differently: the same letters and digits, and nothing Vision read is lost, though
+        // punctuation it missed may come back (`14lawsuit` / `14 lawsuit`, `units essentially,` /
+        // `units—essentially,`; not `--14` / `14`). Word for word, symbols may change (`$$` /
+        // `§§`, `LL.C,` / `LLC,`).
         if let Some(e) = pick(n)
             && squash(e) == squash(&vision)
+            && (n == vision.len() || subsequence(&vision.concat(), &e.concat()))
             && e != vision.as_slice()
         {
             out[vr.start] = e.join(" ");
@@ -173,7 +225,7 @@ fn fix_run(
     let mut n = 0;
     if let Some(e) = pick(vision.len()) {
         for (d, x) in vr.enumerate() {
-            if out[x] != e[d] && misreading(&words[x].1, &e[d]) {
+            if out[x] != e[d] && misreading(&words[x].1, &e[d], strict) {
                 out[x] = e[d].clone();
                 n += 1;
             }
@@ -182,7 +234,7 @@ fn fix_run(
     n
 }
 
-fn propose(segments: &[String], embedded: &str) -> Option<Proposal> {
+fn propose(segments: &[String], embedded: &str, strict: bool) -> Option<Proposal> {
     let words: Vec<(usize, String)> = segments
         .iter()
         .enumerate()
@@ -212,7 +264,14 @@ fn propose(segments: &[String], embedded: &str) -> Option<Proposal> {
     let mut fixed = 0;
     for &(i, j) in &pairs {
         if out[i] != emb[j] {
-            out[i] = emb[j].clone();
+            // Vision glued punctuation to the word (`--14`, `Document#:`) that the embedded text
+            // has as a neighbouring word: keep it, split the embedded way.
+            let glued = (0..=1usize)
+                .flat_map(|a| (0..=1usize).map(move |b| (a, b)))
+                .filter(|&(a, b)| (a, b) != (0, 0) && j >= a && j + b < emb.len())
+                .map(|(a, b)| &emb[j - a..=j + b])
+                .find(|w| w.concat() == out[i]);
+            out[i] = glued.map_or_else(|| emb[j].clone(), |w| w.join(" "));
             fixed += 1;
         }
     }
@@ -237,7 +296,7 @@ fn propose(segments: &[String], embedded: &str) -> Option<Proposal> {
         if vr.is_empty() || er.is_empty() || vr.len() > MAX_GAP || !one_segment {
             continue;
         }
-        fixed += fix_run(&mut out, &words, &emb, vr, er, leading);
+        fixed += fix_run(&mut out, &words, &emb, vr, er, leading, strict);
     }
     let mut segments = segments.to_vec();
     for (s, seg) in segments.iter_mut().enumerate() {
@@ -306,7 +365,7 @@ pub struct PageOutcome {
 
 /// Corrects every block against `texts`, the embedded text of each block's box (same order),
 /// when the page as a whole agrees with its embedded text; otherwise changes nothing.
-pub fn correct_blocks(blocks: &mut [Block], texts: &[String]) -> PageOutcome {
+pub fn correct_blocks(blocks: &mut [Block], texts: &[String], strict: bool) -> PageOutcome {
     let mut o = PageOutcome::default();
     let (mut pairs, mut words, mut covered) = (0, 0, 0);
     let mut proposals = Vec::new();
@@ -318,7 +377,7 @@ pub fn correct_blocks(blocks: &mut [Block], texts: &[String]) -> PageOutcome {
         }
         o.blocks += 1;
         words += n;
-        match propose(&segs, t) {
+        match propose(&segs, t, strict) {
             Some(p) => {
                 pairs += p.pairs;
                 covered += p.covered;
@@ -365,6 +424,92 @@ mod tests {
         let mut segs: Vec<String> = vision.iter().map(|s| s.to_string()).collect();
         let o = correct(&mut segs, embedded);
         (segs, o)
+    }
+
+    #[test]
+    fn short_words_change_only_between_look_alikes() {
+        for (a, b) in [
+            ("l", "I"),
+            ("|", "I"),
+            ("0", "O"),
+            ("\u{410}", "A"),
+            ("lt", "It"),
+        ] {
+            assert!(misreading(a, b, true), "{a} -> {b}");
+        }
+        // Misalignments in transcript tables: a line number, a page number, a short word.
+        for (a, b) in [
+            ("7", "6"),
+            ("30", "3"),
+            ("of", "o"),
+            ("an", "on"),
+            ("12", "13"),
+        ] {
+            assert!(!misreading(a, b, true), "{a} -> {b}");
+            // Ordinary pages keep the allowance: their alignment is reliable.
+            assert!(misreading(a, b, false), "{a} -> {b}");
+        }
+        // Longer words keep the one-in-three allowance.
+        assert!(misreading("$3,000", "$8,000", true));
+        assert!(misreading("perfonn", "perform", true));
+    }
+
+    #[test]
+    fn punctuation_is_swapped_one_for_one_only() {
+        let (s, o) = fix(
+            &["under 15 U.S.C. $$ 77t(b) and 77v(a) of the Act"],
+            "under 15 U.S.C. §§ 77t(b) and 77v(a) of the Act",
+        );
+        assert!(o.applied);
+        assert_eq!(s[0], "under 15 U.S.C. §§ 77t(b) and 77v(a) of the Act");
+        let (s, _) = fix(
+            &["they threatened -- | did you say criminal charges were filed"],
+            "they threatened -- did you say criminal charges were filed",
+        );
+        assert_eq!(
+            s[0],
+            "they threatened -- | did you say criminal charges were filed"
+        );
+        // Re-split only with the same characters: a dash glued to a line number is kept.
+        let (s, _) = fix(
+            &["you're talking --14 lawsuit and Document#: 24 Filed"],
+            "you're talking --\n14 lawsuit and Document #: 24 Filed",
+        );
+        assert!(s[0].contains("Document #:"), "{}", s[0]);
+        assert!(s[0].contains("--"), "{}", s[0]);
+        // Punctuation Vision missed comes back.
+        let (s, _) = fix(
+            &["assemble modular units essentially, separate structures on site"],
+            "assemble modular units—essentially, separate structures on site",
+        );
+        assert!(s[0].contains("units—essentially,"), "{}", s[0]);
+        // A quote style or dash differs: still the same text.
+        let (s, _) = fix(
+            &["the plaintiff' s position during the Relevant Period-first stage"],
+            "the plaintiff’s position during the Relevant Period—first stage",
+        );
+        assert!(
+            s[0].contains("plaintiff’s") && s[0].contains("Period—first"),
+            "{}",
+            s[0]
+        );
+    }
+
+    #[test]
+    fn a_dash_is_not_a_broken_word() {
+        // `--` before `well,` once joined into `-well,` (a dash read as a line-end hyphen).
+        let line = "16 Q That probably would be -- well, may be a better";
+        for vision in [line, "16 Q That probably would be - well, may be a better"] {
+            let (s, _) = fix(&[vision], &format!("{line}\n17 question"));
+            assert!(!s[0].contains(" -well"), "{}", s[0]);
+        }
+        // A real line-end hyphen still joins.
+        let (s, o) = fix(
+            &["the settlement agreement was signed"],
+            "the settle-\nment agreement was signed",
+        );
+        assert!(o.applied);
+        assert_eq!(s[0], "the settlement agreement was signed");
     }
 
     #[test]
@@ -463,7 +608,7 @@ mod tests {
             "The parties agree to the terms below and sign this agreement.".to_string(),
             "Completely different hidden words that have nothing to do with it at all.".to_string(),
         ];
-        let o = correct_blocks(&mut blocks, &texts);
+        let o = correct_blocks(&mut blocks, &texts, false);
         assert!(!o.applied && o.agreement < PAGE_MIN_AGREEMENT, "{o:?}");
         assert_eq!(
             blocks[1].text.as_deref(),
@@ -473,7 +618,7 @@ mod tests {
             texts[0].clone(),
             "Payment of $8,000 is due on signing by wire transfer to the account.".to_string(),
         ];
-        let o = correct_blocks(&mut blocks, &texts);
+        let o = correct_blocks(&mut blocks, &texts, false);
         assert!(o.applied, "{o:?}");
         assert_eq!(o.fixed, 1);
         assert_eq!(

@@ -677,3 +677,31 @@ All of these are the safe direction: a sentence that does not agree is not quote
 So 3.6% is an upper bound.
 
 **False alarms:** paddleocr-vl's are mostly a scanner stamp that Vision garbles (45 on one filing), and `¶` read as `"1`, `9|` or `11` (34). The `¶` look-alikes are now matched in the second reading. The number must still be equal. Apple's page-level false alarms come from `missing_text` between two Apple readings, whose line coverage differs.
+
+## Embedded-text correction on column-split and transcript pages (2026-10-09)
+
+`--use-text-layer auto` now also corrects column-split and transcript pages. On a transcript, the mini-pages' Vision lines are corrected before their numbers are re-anchored. Getting this right took five fixes, each found on the public filings or the fixtures:
+
+1. **Exact character selection.**
+   - **The problem:** PDFKit's `selection(for: rect)` selects like a mouse drag, from the first character to the last in text order. On a 2-up or 4-up transcript, or two columns, a box takes in the neighbouring column's lines (`itigation`, `hat`). The transcript locator's mini-page rectangles are also rough: "page 9" spanned 72% of a 4-up sheet.
+   - **Now:** for column-split and transcript pages, the bridge takes exactly the characters whose centre lies in the box, spaced by their positions (`geometric`). `characterBounds(at:)` counts characters differently from `page.string`, so a one-character selection's bounds are used.
+   - **Ordinary pages** keep PDFKit's selection. Their alignment was already measured, and footnote superscripts fall outside a block's geometric box.
+2. **A dash is not a broken word.** `embedded_words` joined `--` with the next word as if it were a line-end hyphen, which made `-- -well`. This also happened on master: 6 words on one deposition.
+3. **Short words on these pages change only between look-alikes** (`l`/`I`/`|`, `O`/`0`, Cyrillic `А`/`A`). Misalignment in transcript tables had turned line number `7` into `6`, `Page 30` into `Page 3`, and `of` into `o`.
+4. **Re-splits keep what Vision read.** A re-split must keep all of Vision's characters, though punctuation it missed may come back: `14lawsuit` / `14 lawsuit`, and `units essentially,` / `units—essentially,`, but not `--14` / `14`. An aligned word glued to punctuation keeps it (`Document#:` / `Document #:`).
+5. **Invisible OCR layers are not corrections.** The two filings with bad text layers (the 1985 note and the handwritten dealer form) draw all their text in render mode 3. A new bridge call counts text-showing operators by render mode. A page that is mostly invisible text is not corrected.
+
+**Measured on the 20 public filings** (Apple, default), against master:
+
+| | Master | Now |
+|---|---|---|
+| Column-split and transcript pages corrected | 0 | 25 (167 words) |
+| Ordinary pages corrected | 109 (1,350 words) | 103 (1,313 words) |
+| Transcript pages whose numbers cannot be re-anchored | 27 | 27 |
+| Pages in `azure_pages` / values verified | 58 / 618 | 57 / 619 |
+
+The six fewer ordinary pages are on the two OCR-layer filings. Their layer was sometimes better than Vision (`agreed`, `Illinois`) and sometimes worse (`provislons`), so it is no longer applied as if it were exact.
+
+**Fixtures:**
+- The 4-up transcript fixture goes from 741 to 743 of 745 expected words, with all line numbers still anchored. The fixes are `guality` → `quality` and `$68, 973.00` → `$68,973.00`.
+- A new fixture, `spike/fixtures/ocr_layer.pdf` (`spike/make_ocr_layer.py`), lays an invisible misspelled layer over a scanned image. Without the check the output takes `qction` and `Cqurt`; with it, nothing changes.

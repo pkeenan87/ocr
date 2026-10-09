@@ -403,8 +403,14 @@ pub fn text_in_regions(
     _path: &Path,
     _page_index: usize,
     _regions: &[[f64; 4]],
+    _geometric: bool,
 ) -> Result<Vec<String>> {
     anyhow::bail!("text by region needs Apple Vision layout (macOS)")
+}
+
+/// Only used to decide Apple's embedded-text correction, which needs macOS.
+pub fn invisible_text_share(_path: &Path, _page_index: usize) -> Result<f64> {
+    anyhow::bail!("invisible-text detection needs PDFKit (macOS)")
 }
 
 pub fn text_layer(path: &Path, page_index: usize) -> Result<String> {

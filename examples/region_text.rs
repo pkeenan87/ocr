@@ -6,7 +6,9 @@ fn main() {
     let page =
         ocr::vision::recognize_page(path, index, 150, &ocr::vision::Options::default()).unwrap();
     let boxes: Vec<[f64; 4]> = page.blocks.iter().map(|b| b.bbox).collect();
-    let texts = ocr::vision::text_in_regions(path, index, &boxes).unwrap();
+    let texts =
+        ocr::vision::text_in_regions(path, index, &boxes, std::env::var_os("GEOMETRIC").is_some())
+            .unwrap();
     for (b, t) in page.blocks.iter().zip(texts) {
         let v = b.text.clone().unwrap_or_else(|| format!("<{}>", b.kind));
         println!(

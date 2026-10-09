@@ -442,7 +442,8 @@ struct RegionsOut: Encodable {
 /// inverse of the render transform. Images and failures give `ok: false`.
 @_cdecl("ocr_bridge_text_in_regions")
 public func ocr_bridge_text_in_regions(
-    _ path: UnsafePointer<CChar>, _ pageIndex: Int32, _ regionsJSON: UnsafePointer<CChar>
+    _ path: UnsafePointer<CChar>, _ pageIndex: Int32, _ regionsJSON: UnsafePointer<CChar>,
+    _ geometric: Int32
 ) -> UnsafeMutablePointer<CChar>? {
     let p = String(cString: path)
     guard isPDF(p) else { return json(RegionsOut(ok: false, error: "not a PDF")) }
@@ -461,17 +462,126 @@ public func ocr_bridge_text_in_regions(
     // The render maps page space to a pw x ph display rect (origin bottom-left); invert it.
     let toDisplay = ref.getDrawingTransform(.cropBox, rect: CGRect(x: 0, y: 0, width: pw, height: ph), rotate: 0, preserveAspectRatio: true)
     let toPage = toDisplay.inverted()
+    if geometric == 0 {
+        var texts: [String] = []
+        for r in regions where r.count == 4 {
+            let display = CGRect(x: r[0] * pw, y: (1 - r[1] - r[3]) * ph, width: r[2] * pw, height: r[3] * ph)
+            texts.append(page.selection(for: display.applying(toPage))?.string ?? "")
+        }
+        return json(RegionsOut(ok: true, texts: texts))
+    }
+    // `geometric`: each character's box, once per page. A region's text is the characters whose centre lies
+    // inside it, in text order. PDFKit's `selection(for:)` selects like a mouse drag, from the
+    // first character to the last in text order, which on a 2- or 4-up transcript or a
+    // two-column page takes in the neighbouring column's lines. Spaces and line breaks come from
+    // the characters' positions, since many PDFs place words apart without a space character.
+    // (`characterBounds(at:)` counts characters differently from `page.string`; a one-character
+    // selection's bounds are the character's own.)
+    let chars = Array((page.string ?? "").utf16)
+    let bounds: [CGRect?] = (0..<chars.count).map { i in
+        guard let b = page.selection(for: NSRange(location: i, length: 1))?.bounds(for: page),
+              !b.isEmpty, !b.isNull else { return nil }
+        return b
+    }
     var texts: [String] = []
     for r in regions where r.count == 4 {
         let display = CGRect(x: r[0] * pw, y: (1 - r[1] - r[3]) * ph, width: r[2] * pw, height: r[3] * ph)
-        let rect = display.applying(toPage)
-        texts.append(page.selection(for: rect)?.string ?? "")
+        let rect = display.applying(toPage).standardized
+        var out: [UInt16] = []
+        var last: CGRect? = nil
+        var spaced = false
+        for (i, c) in chars.enumerated() {
+            let space = c == 0x20 || c == 0x0A || c == 0x0D || c == 0x09
+            guard let b = bounds[i] else { continue }
+            if space {
+                if last != nil, rect.contains(CGPoint(x: b.midX, y: b.midY)) { spaced = true }
+                continue
+            }
+            guard rect.contains(CGPoint(x: b.midX, y: b.midY)) else { continue }
+            if let l = last {
+                let h = max(min(l.height, b.height), 1)
+                let sameLine = abs(l.midY - b.midY) < h * 0.6
+                if !sameLine {
+                    out.append(0x0A)
+                } else if spaced || b.minX - l.maxX > h * 0.25 || b.minX < l.minX {
+                    out.append(0x20)
+                }
+            }
+            out.append(c)
+            last = b
+            spaced = false
+        }
+        texts.append(String(utf16CodeUnits: out, count: out.count))
     }
     return json(RegionsOut(ok: true, texts: texts))
 }
 
 /// Renders a page exactly as `recognize_page` does and returns it as 8-bit DeviceGray, one byte
 /// per pixel, row 0 at the top. Release with ocr_bridge_free_bytes. Null on failure.
+struct InvisibleOut: Encodable {
+    var ok: Bool
+    var error: String? = nil
+    /// Text-showing operators drawn visibly, and with render mode 3 (invisible).
+    var shown: Int = 0
+    var invisible: Int = 0
+}
+
+/// Text state while scanning a content stream: the render mode, saved and restored with the
+/// graphics state.
+private final class TextModes {
+    var mode = 0
+    var saved: [Int] = []
+    var shown = 0
+    var invisible = 0
+    func show() { if mode == 3 { invisible += 1 } else { shown += 1 } }
+}
+
+/// How much of a page's text is drawn invisibly (render mode 3), as OCR tools lay a text layer
+/// over a scan. Such text is another OCR's reading, not the document's own characters. Form
+/// XObjects are not entered.
+@_cdecl("ocr_bridge_invisible_text")
+public func ocr_bridge_invisible_text(_ path: UnsafePointer<CChar>, _ pageIndex: Int32) -> UnsafeMutablePointer<CChar>? {
+    let p = String(cString: path)
+    guard isPDF(p), let doc = CGPDFDocument(URL(fileURLWithPath: p) as CFURL),
+          let page = doc.page(at: Int(pageIndex) + 1) else {
+        return json(InvisibleOut(ok: false, error: "page \(Int(pageIndex) + 1) not found"))
+    }
+    let state = TextModes()
+    guard let table = CGPDFOperatorTableCreate() else {
+        return json(InvisibleOut(ok: false, error: "no operator table"))
+    }
+    // The callbacks get the scanner's info pointer: `state`.
+    CGPDFOperatorTableSetCallback(table, "Tr") { s, info in
+        var m: CGPDFInteger = 0
+        if CGPDFScannerPopInteger(s, &m), let info {
+            Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue().mode = Int(m)
+        }
+    }
+    CGPDFOperatorTableSetCallback(table, "q") { _, info in
+        guard let info else { return }
+        let t = Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue()
+        t.saved.append(t.mode)
+    }
+    CGPDFOperatorTableSetCallback(table, "Q") { _, info in
+        guard let info else { return }
+        let t = Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue()
+        t.mode = t.saved.popLast() ?? 0
+    }
+    for op in ["Tj", "TJ", "'", "\""] {
+        CGPDFOperatorTableSetCallback(table, op) { _, info in
+            guard let info else { return }
+            Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue().show()
+        }
+    }
+    let stream = CGPDFContentStreamCreateWithPage(page)
+    let scanner = CGPDFScannerCreate(stream, table, Unmanaged.passUnretained(state).toOpaque())
+    CGPDFScannerScan(scanner)
+    CGPDFScannerRelease(scanner)
+    CGPDFContentStreamRelease(stream)
+    CGPDFOperatorTableRelease(table)
+    return json(InvisibleOut(ok: true, shown: state.shown, invisible: state.invisible))
+}
+
 @_cdecl("ocr_bridge_render_gray")
 public func ocr_bridge_render_gray(
     _ path: UnsafePointer<CChar>, _ pageIndex: Int32, _ dpi: Int32,

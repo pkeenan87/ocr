@@ -168,18 +168,24 @@ pub(crate) fn vision_page(path: &Path, index: usize, s: &Settings) -> PageResult
     match recognize_with_columns(path, index, s.dpi, &s.options) {
         Ok(mut page) => {
             // Exact characters from the embedded text where the page agrees with it. Column
-            // pages and transcripts keep Vision's text for now.
-            if s.text_layer == TextLayer::Auto && !page.split && !page.transcript {
-                let boxes: Vec<[f64; 4]> = page
-                    .blocks
-                    .iter()
-                    .map(|b| embedded::padded(b.bbox))
-                    .collect();
-                if let Ok(texts) = vision::text_in_regions(path, index, &boxes) {
-                    let o = embedded::correct_blocks(&mut page.blocks, &texts);
-                    result.embedded_fixes = o.applied.then_some(o.fixed);
+            // pages carry page coordinates like any other. A transcript's text comes from its
+            // mini-pages' Vision lines, so those lines are corrected (line numbers are
+            // re-anchored from their geometry afterwards, which correction does not move).
+            // The blocks are corrected on transcripts too: they are the body when the lines
+            // cannot be re-anchored.
+            let (mut block_fixes, mut line_fixes) = (None, None);
+            // Text drawn invisibly over a scan is another OCR's reading (a 1985 note's old layer
+            // turned `action` into `qction`), not the document's characters: never a correction.
+            let ocr_layer = || vision::invisible_text_share(path, index).is_ok_and(|v| v > 0.5);
+            if s.text_layer == TextLayer::Auto && !ocr_layer() {
+                // Columns and multi-up transcripts need the characters inside each box exactly.
+                let exact = page.split || page.transcript;
+                block_fixes = correct_page_blocks(path, index, &mut page.blocks, exact);
+                if page.transcript && !page.mini.is_empty() {
+                    line_fixes = correct_transcript_lines(path, index, &mut page.mini);
                 }
             }
+            result.embedded_fixes = block_fixes;
             let (body, bates) = if page.split {
                 markdown::render_ordered(&page.blocks)
             } else {
@@ -195,6 +201,7 @@ pub(crate) fn vision_page(path: &Path, index: usize, s: &Settings) -> PageResult
                 result.line_numbers = Some(applied.is_some());
                 if let Some(a) = applied {
                     body = a.body;
+                    result.embedded_fixes = line_fixes;
                 }
             }
             (result.body, result.currency_fixes) = if s.currency_fix {
@@ -206,6 +213,43 @@ pub(crate) fn vision_page(path: &Path, index: usize, s: &Settings) -> PageResult
         Err(e) => result.error = Some(format!("{e:#}")),
     }
     result
+}
+
+/// Corrects a page's blocks against the embedded text in each block's box; the number of
+/// words changed when the page agreed with its embedded text.
+fn correct_page_blocks(
+    path: &Path,
+    index: usize,
+    blocks: &mut [Block],
+    geometric: bool,
+) -> Option<usize> {
+    let boxes: Vec<[f64; 4]> = blocks.iter().map(|b| embedded::padded(b.bbox)).collect();
+    let texts = vision::text_in_regions(path, index, &boxes, geometric).ok()?;
+    let o = embedded::correct_blocks(blocks, &texts, geometric);
+    o.applied.then_some(o.fixed)
+}
+
+/// The same for a transcript's Vision lines, all mini-pages as one page: one line is one block.
+fn correct_transcript_lines(path: &Path, index: usize, mini: &mut [MiniPage]) -> Option<usize> {
+    let mut blocks: Vec<Block> = mini
+        .iter()
+        .flat_map(|m| &m.lines)
+        .map(|l| Block {
+            kind: "paragraph".into(),
+            bbox: l.bbox,
+            text: Some(l.text.clone()),
+            items: None,
+            rows: None,
+        })
+        .collect();
+    let fixed = correct_page_blocks(path, index, &mut blocks, true)?;
+    let mut corrected = blocks.into_iter();
+    for line in mini.iter_mut().flat_map(|m| m.lines.iter_mut()) {
+        if let Some(text) = corrected.next().and_then(|b| b.text) {
+            line.text = text;
+        }
+    }
+    Some(fixed)
 }
 
 /// Layout of one recognized page.

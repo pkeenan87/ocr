@@ -372,6 +372,30 @@ fn four_up_transcript_is_flagged() {
 }
 
 #[test]
+fn columns_and_transcripts_take_the_embedded_characters() {
+    // Two columns, read crop by crop: corrected like any page.
+    let e = Env::new(&["two_column.pdf", "transcript4up_seed0.pdf", "ocr_layer.pdf"]);
+    let (md, _) = e.scan("two_column.pdf", &[]);
+    assert!(md.contains("column_split_pages: [1]"), "{md}");
+    assert!(md.contains("embedded_text_fixes: {1: "), "{md}");
+    // A 4-up transcript: the Vision lines are corrected before their numbers are re-anchored,
+    // and the numbers still come from the page geometry.
+    let (md, _) = e.scan("transcript4up_seed0.pdf", &[]);
+    assert!(
+        md.contains("line_numbers: {anchored: [1, 2, 3], unverified: []}"),
+        "{md}"
+    );
+    assert!(md.contains("embedded_text_fixes: {1: "), "{md}");
+    assert!(!md.contains("guality"), "{md}");
+    assert!(md.contains("$68,973.00"), "{md}");
+    // Text drawn invisibly over a scan is another OCR's reading (`qction`): never taken.
+    let (md, _) = e.scan("ocr_layer.pdf", &[]);
+    assert!(md.contains("embedded_text_fixes: {}"), "{md}");
+    assert!(!md.contains("qction") && !md.contains("Cqurt"), "{md}");
+    assert!(md.contains("cause of action"), "{md}");
+}
+
+#[test]
 fn full_page_transcript_lines_are_numbered_by_geometry() {
     let e = Env::new(&["transcript_full.pdf"]);
     let (md, _) = e.scan("transcript_full.pdf", &NEVER);

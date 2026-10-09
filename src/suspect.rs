@@ -40,6 +40,17 @@ const GARBLED_SHARE: f64 = 0.5;
 const MISREAD_SHARE: f64 = 0.04;
 /// ...and at least this many.
 const MISREAD_MIN: usize = 6;
+/// Words with case flipping inside them (`MAeLoN`, `WeST`, `SMiTH`): handwriting and fax noise in
+/// capitals, which the lowercase word checks skip. Brand names (`DocuSign`, `iPhone`, `McDonald`)
+/// do not count.
+const MIXED_CASE_MIN: usize = 3;
+/// Common Spanish, French and Portuguese function words. A page where they are this share of the
+/// words is not English, and the English word checks are skipped.
+const FOREIGN_WORDS: &[&str] = &[
+    "de", "la", "el", "los", "las", "que", "y", "en", "del", "por", "para", "con", "una", "les",
+    "des", "et", "du", "est", "une", "dans", "pour", "não", "uma", "com", "os", "da", "do",
+];
+const FOREIGN_SHARE: f64 = 0.12;
 /// Lines of mostly symbols (rotated sidebars, speckle read as text) on one page.
 const JUNK_MIN_LINES: usize = 3;
 /// A run of this many words appearing twice on a page is a duplicated passage: a paragraph,
@@ -70,6 +81,18 @@ static DICTIONARY: LazyLock<HashSet<String>> = LazyLock::new(|| {
     set
 });
 
+/// A word with a lowercase letter between capitals or an accented capital inside it.
+static MIXED_CASE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"\b\p{Lu}+\p{Ll}+\p{Lu}+\w*|\b\p{Lu}*\p{Ll}\p{Lu}{2,}\w*|\b[A-Z]+[À-ÖØ-Þ][A-ZÀ-ÖØ-Þ]*\b",
+    )
+    .unwrap()
+});
+/// Capitalised segments (`DocuSign`, `McDonald`, `LinkedIn`), a lowercase lead (`iPhone`), or an
+/// acronym plural (`LLCs`), or a capitalised Mc-name (`McKINSEY`): ordinary names, not misreads.
+static NAME_SHAPE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?:(?:Mc|Mac|O'|D')?(?:[A-Z][a-z]+)+(?:'s)?|[a-z]{1,2}[A-Z][a-z]+|[A-Z]{2,}s|[A-Z][a-z]?[A-Z][a-z]+|(?:Mc|Mac)[A-Z]{2,})$").unwrap()
+});
 static TOKEN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[A-Za-z0-9][A-Za-z0-9'’]*").unwrap());
 /// URLs, e-mail addresses and file names: never words.
 static URL: LazyLock<Regex> = LazyLock::new(|| {
@@ -138,6 +161,26 @@ fn text_lines(body: &str) -> impl Iterator<Item = String> + '_ {
         .map(|l| l.replace('|', " "))
 }
 
+fn mixed_case_words(body: &str) -> usize {
+    MIXED_CASE
+        .find_iter(body)
+        .filter(|m| !NAME_SHAPE.is_match(m.as_str()))
+        .count()
+}
+
+/// Whether the page is mostly in another language (the word list is English).
+fn foreign(body: &str) -> bool {
+    let words: Vec<String> = TOKEN
+        .find_iter(body)
+        .map(|m| m.as_str().to_lowercase())
+        .collect();
+    let hits = words
+        .iter()
+        .filter(|w| FOREIGN_WORDS.contains(&w.as_str()))
+        .count();
+    words.len() >= 20 && hits as f64 >= FOREIGN_SHARE * words.len() as f64
+}
+
 /// Gibberish: a window of words mostly unknown (`garbled`), or many scattered unknown words on
 /// the page (`misreads`).
 fn word_checks(body: &str, reasons: &mut Vec<&'static str>) {
@@ -198,7 +241,14 @@ fn junk_lines(body: &str) -> usize {
 /// Whether a passage of `SHINGLE` words, mostly prose, occurs twice on the page. On transcript
 /// pages line numbers (one or two digits) are left out, so a renumbered repeat still matches.
 fn duplicated(body: &str, transcript: bool) -> bool {
-    let words: Vec<String> = text_lines(body)
+    // Table rows repeat legitimately (`| N/A | $0.00 | Not applicable |`); prose read as a table
+    // is caught by `pleading_table` / `transcript_table` instead.
+    let prose_lines = body
+        .lines()
+        .filter(|l| !l.trim_start().starts_with('|'))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let words: Vec<String> = text_lines(&prose_lines)
         .flat_map(|l| {
             TOKEN
                 .find_iter(&l)
@@ -266,6 +316,20 @@ fn pleading_table(rows: &[Vec<String>]) -> bool {
         && rising * 4 >= (numbers.len() - 1) * 3
 }
 
+/// A cell holding a transcript line: a line number then text, or a `Q.`/`A.` marker.
+static TRANSCRIPT_CELL: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?:[1-9]|1\d|2[0-5])\s+\S|(?:^|\s)[QA]\.?\s+\S").unwrap());
+
+/// Whether a table holds transcript lines (testimony read as a table), as opposed to a real
+/// table on a transcript page such as an exhibit list.
+fn transcript_lines_in(rows: &[Vec<String>]) -> bool {
+    rows.iter()
+        .flatten()
+        .filter(|c| TRANSCRIPT_CELL.is_match(c))
+        .count()
+        >= 2
+}
+
 /// `Page N` headers of a multi-up transcript that do not rise down the page.
 fn pages_out_of_order(body: &str) -> bool {
     let numbers: Vec<u32> = body.lines().filter_map(anchor::header_number).collect();
@@ -279,7 +343,12 @@ pub fn check(page: &PageResult) -> Vec<&'static str> {
         return reasons;
     }
     let body = &page.body;
-    word_checks(body, &mut reasons);
+    if !foreign(body) {
+        word_checks(body, &mut reasons);
+    }
+    if mixed_case_words(body) >= MIXED_CASE_MIN {
+        reasons.push("mixed_case");
+    }
     if junk_lines(body) >= JUNK_MIN_LINES {
         reasons.push("junk_lines");
     }
@@ -291,33 +360,44 @@ pub fn check(page: &PageResult) -> Vec<&'static str> {
         reasons.push("pleading_table");
     }
     if page.transcript {
-        if !tables.is_empty() {
+        if tables.iter().any(|t| transcript_lines_in(t)) {
             reasons.push("transcript_table");
         }
         if pages_out_of_order(body) {
             reasons.push("page_order");
         }
-        if page.line_numbers == Some(false) {
-            reasons.push("line_numbers_unverified");
-        }
+        // Unverified line numbers are not a defect of the text: they keep their own front-matter
+        // list (`line_numbers.unverified`) and verify hint, and do not change the exit code.
     }
     reasons
 }
 
-/// Assembly step for every engine: restores `¶`/`§` in OCR'd pages (unless `symbols` is off),
-/// then records why each page looks wrong. Works on the records, so checkpoints are unaffected.
-pub fn review(pages: &[PageResult], symbols: bool) -> Vec<PageResult> {
-    pages
+/// Assembly step for every engine: restores `¶`/`§` in Apple Vision text (unless `symbols` is
+/// off; with a model engine only on pages that fell back to Apple, since the models read the
+/// symbols themselves), then records why each page looks wrong. Returns the pages and every
+/// symbol rewrite as `(page, before, after)`. Works on the records, so checkpoints are unaffected.
+pub fn review(
+    pages: &[PageResult],
+    symbols: bool,
+    model: bool,
+) -> (Vec<PageResult>, Vec<(usize, String, String)>) {
+    let mut rewrites = Vec::new();
+    let pages = pages
         .iter()
         .map(|p| {
             let mut q = p.clone();
-            if symbols && q.source == Source::Vision && q.error.is_none() {
-                (q.body, q.symbol_fixes) = markdown::fix_legal_symbols(&q.body);
+            if symbols && q.source == Source::Vision && q.error.is_none() && (!model || q.fallback)
+            {
+                let (body, changes) = markdown::fix_legal_symbols(&q.body);
+                q.body = body;
+                q.symbol_fixes = changes.len();
+                rewrites.extend(changes.into_iter().map(|(a, b)| (q.number, a, b)));
             }
             q.suspect = check(&q);
             q
         })
-        .collect()
+        .collect();
+    (pages, rewrites)
 }
 
 #[cfg(test)]
@@ -373,7 +453,9 @@ mod tests {
     #[test]
     fn golden_outputs_are_not_suspect() {
         for name in ["legal", "legal_scan", "two_column", "three_pages"] {
-            let md = std::fs::read_to_string(format!("tests/golden/{name}.md")).unwrap();
+            let md = std::fs::read_to_string(format!("tests/golden/{name}.md"))
+                .unwrap()
+                .replace("\r\n", "\n");
             let body = md.splitn(3, "---\n").nth(2).unwrap();
             for part in body.split("<!-- page ").skip(1) {
                 assert_eq!(check(&page(part)), Vec::<&str>::new(), "{name}: {part}");
@@ -444,19 +526,43 @@ mod tests {
     }
 
     #[test]
+    fn mixed_case_noise_is_flagged_but_brand_names_are_not() {
+        let noise = "Name: MAeLoN ALLENS COOPER\nBAKER WeST, TF. SMiTH and CÜILD HAS";
+        assert_eq!(check(&page(noise)), ["mixed_case"]);
+        let names = "DocuSign, LinkedIn, McDonald's, iPhone, eBay, LLCs, PDFs, JPMorgan, \
+                     BlackRock, PricewaterhouseCoopers, McKINSEY and MacArthur all signed.";
+        assert_eq!(check(&page(names)), Vec::<&str>::new());
+        assert_eq!(mixed_case_words(names), 0);
+        assert_eq!(mixed_case_words(noise), 4);
+    }
+
+    #[test]
+    fn non_english_pages_skip_the_word_checks() {
+        let es = "El demandante presentó la solicitud de reconsideración ante el tribunal \
+                  para que se revise la decisión del juez en el caso de los acusados y \
+                  que se ordene la suspensión de los procedimientos.";
+        assert_eq!(check(&page(es)), Vec::<&str>::new());
+    }
+
+    #[test]
     fn transcript_checks() {
         let mut p =
             page("Page 45\n1 Q. Where were you?\n\nPage 47\n1 A. At home.\n\nPage 46\n1 Q. When?");
         p.transcript = true;
         assert_eq!(check(&p), ["page_order"]);
         p.body = "Page 45\n1 Q. Where were you?\n\nPage 46\n1 A. At home.".into();
+        // Unverified line numbers keep their own hint and front-matter list; not a suspect page.
         p.line_numbers = Some(false);
-        assert_eq!(check(&p), ["line_numbers_unverified"]);
+        assert_eq!(check(&p), Vec::<&str>::new());
         p.line_numbers = Some(true);
         p.body =
             "| 1 Q. Where were you? | 1 Q. When? |\n| --- | --- |\n| 2 A. Home. | 2 A. Noon. |"
                 .into();
         assert_eq!(check(&p), ["transcript_table"]);
+        // A real table on a transcript page (an exhibit list) is not testimony read as a table.
+        p.body =
+            "| Exhibit | Description |\n| --- | --- |\n| 12 | Lease |\n| 13 | Invoice |".into();
+        assert_eq!(check(&p), Vec::<&str>::new());
     }
 
     #[test]
@@ -466,7 +572,7 @@ mod tests {
             p.source = Source::TextLayer;
             p
         }];
-        let out = review(&pages, true);
+        let (out, _) = review(&pages, true, false);
         assert_eq!(
             (out[0].body.as_str(), out[0].symbol_fixes),
             ("(Compl. ¶ 60.)", 1)
@@ -475,6 +581,20 @@ mod tests {
             (out[1].body.as_str(), out[1].symbol_fixes),
             ("(Compl. 9 60.)", 0)
         );
-        assert_eq!(review(&pages, false)[0].symbol_fixes, 0);
+        assert_eq!(review(&pages, false, false).0[0].symbol_fixes, 0);
+    }
+
+    #[test]
+    fn model_pages_keep_their_symbols_unless_they_fell_back_to_apple() {
+        let mut fallback = page("(Compl. 9 60.)");
+        fallback.fallback = true;
+        let pages = vec![page("(Compl. 9 60.)"), fallback];
+        let (out, rewrites) = review(&pages, true, true);
+        assert_eq!(out[0].body, "(Compl. 9 60.)");
+        assert_eq!(out[1].body, "(Compl. ¶ 60.)");
+        assert_eq!(
+            rewrites,
+            [(1, "Compl. 9 6".to_string(), "Compl. ¶ 6".to_string())]
+        );
     }
 }

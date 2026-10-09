@@ -1,3 +1,5 @@
 *.cmd text eol=crlf
 # Verbatim upstream prompts: byte-for-byte comparisons must see LF on every platform.
 spike/upstream/** -text
+# Goldens are compared as text with LF line endings on every platform.
+tests/golden/** text eol=lf

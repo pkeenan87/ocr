@@ -39,52 +39,81 @@ pub fn fix_currency(text: &str) -> (String, usize) {
 const PARA_CITE: &str = r"(?:Id\.|id\.|Compl\.|Complaint|FAC|SAC|TAC|Decl\.|Aff\.|Answer|Ans\.|Countercl\.|Pet\.|Stip\.|SUF|SUMF|SOF)";
 
 /// Vision never outputs `¶` (0 of 48 on the public court filings): it reads `9`, `99` or `T`.
-/// Only rewritten after a citation form and before the paragraph number, where the misread is
-/// unambiguous.
+/// Only rewritten after a citation form and before the paragraph number on the same line, where
+/// the misread is unambiguous (a pleading margin number after a line break never matches).
 static PILCROW: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(&format!(
-        r"\b(?P<cite>{PARA_CITE})\s+(?P<sym>99\s|9\s|TT\s?|T\s?)(?P<num>\d)"
+        r"\b(?P<cite>{PARA_CITE})[ \t]+(?P<sym>99[ \t]|9[ \t]|TT[ \t]?|T[ \t]?)(?P<num>\d)"
     ))
     .unwrap()
 });
 
-/// `§` read as `$` or `S` after a code citation (`28 U.S.C. $ 1441`, `U.S.C. S1367`).
+/// `§` read as `$` or `S` after a code citation (`28 U.S.C. $ 1441`, `U.S.C. S1367`). The whole
+/// number is captured so that an amount (`$75,000`, `$50.00`) is left alone.
 static SECTION_AFTER_CODE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?P<code>U\.\s?S\.\s?C\.(?:\s?A\.)?|C\.\s?F\.\s?R\.)\s*(?P<sym>\$\$|SS|\$|S)\s*(?P<num>\d)")
-        .unwrap()
+    Regex::new(
+        r"(?P<code>U\.\s?S\.\s?C\.(?:\s?A\.)?|C\.\s?F\.\s?R\.)\s*(?P<sym>\$\$|SS|\$|S)\s*(?P<num>\d[\d,]*(?:\.\d+)?)",
+    )
+    .unwrap()
 });
 
-/// `§` read as `$` or `S` directly before a section number with a subsection (`$1441(b)`); a
-/// money amount is never followed by `(b)`.
+/// A thousands group (`75,000`) or cents (`50.00`): money, not a section.
+static MONEY_NUMBER: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\d,\d{3}|^\d+\.\d{2}$").unwrap());
+
+/// `§` read as `S` or `$` directly before a section number with a subsection. `S1983(a)` needs
+/// one subsection; `$` needs two (`$1983(a)(1)`), because `$150(a)` is an amount with a list
+/// marker and `$1441(b)` looks exactly like it.
 static SECTION_WITH_SUBSECTION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?m)(?:^|[\s(\[])(?P<sym>\$|S)(?P<num>\d{2,5}\([a-z0-9]{1,4}\))").unwrap()
+    Regex::new(
+        r"(?m)(?:^|[\s(\[])(?:S(?P<s>\d{2,5}\([a-z]{1,4}\))|\$(?P<d>\d{2,5}\([a-z]{1,4}\)\([a-z0-9]{1,4}\)))",
+    )
+    .unwrap()
 });
 
-/// Restores `¶` and `§` in legal citations where Vision misreads them, and returns the new text
-/// with the number of replacements. Only shapes that cannot be anything else are rewritten.
-pub fn fix_legal_symbols(text: &str) -> (String, usize) {
-    let mut n = 0;
+/// Restores `¶` and `§` in legal citations where Vision misreads them. Returns the new text and
+/// each rewrite as `(before, after)`. Only shapes that cannot be anything else are rewritten.
+pub fn fix_legal_symbols(text: &str) -> (String, Vec<(String, String)>) {
+    let mut changes = Vec::new();
     let text = PILCROW.replace_all(text, |c: &regex::Captures| {
-        n += 1;
         let mark = if c["sym"].starts_with("99") || c["sym"].starts_with("TT") {
             "¶¶"
         } else {
             "¶"
         };
-        format!("{} {mark} {}", &c["cite"], &c["num"])
+        let after = format!("{} {mark} {}", &c["cite"], &c["num"]);
+        changes.push((c[0].to_string(), after.clone()));
+        after
     });
-    let text = SECTION_AFTER_CODE.replace_all(&text, |c: &regex::Captures| {
-        n += 1;
+    let hay: &str = &text;
+    let text = SECTION_AFTER_CODE.replace_all(hay, |c: &regex::Captures| {
+        let num = &c["num"];
+        // `240.10b-5` continues with a letter: a C.F.R. section, not cents.
+        let continues = hay[c.get(0).unwrap().end()..]
+            .chars()
+            .next()
+            .is_some_and(char::is_alphanumeric);
+        let money = num.contains(',') || (c["sym"].starts_with('$') && !continues);
+        if money && MONEY_NUMBER.is_match(num) {
+            return c[0].to_string();
+        }
         let mark = if c["sym"].len() == 2 { "§§" } else { "§" };
-        format!("{} {mark} {}", &c["code"], &c["num"])
+        let after = format!("{} {mark} {num}", &c["code"]);
+        changes.push((c[0].to_string(), after.clone()));
+        after
     });
     let text = SECTION_WITH_SUBSECTION.replace_all(&text, |c: &regex::Captures| {
-        n += 1;
         let whole = &c[0];
-        let lead = &whole[..whole.len() - c["sym"].len() - c["num"].len()];
-        format!("{lead}§{}", &c["num"])
+        let num = c.name("s").or_else(|| c.name("d")).unwrap().as_str();
+        let lead = &whole[..whole.len() - num.len() - 1];
+        let after = format!("{lead}§{num}");
+        changes.push((
+            whole.trim_start().to_string(),
+            after.trim_start().to_string(),
+        ));
+        after
     });
-    (text.into_owned(), n)
+    (text.into_owned(), changes)
 }
 
 /// Where a page's text came from.
@@ -721,10 +750,12 @@ mod tests {
             ("28 U.S.C. $1441(b)", "28 U.S.C. § 1441(b)"),
             ("28 U.S.C. S1367", "28 U.S.C. § 1367"),
             ("28 U.S.C. SS 1331, 1332", "28 U.S.C. §§ 1331, 1332"),
-            ("under $1441(b) and", "under §1441(b) and"),
+            ("40 C.F.R. $ 240.10b-5", "40 C.F.R. § 240.10b-5"),
+            ("under $1983(a)(1) and", "under §1983(a)(1) and"),
             ("(S1983(a))", "(§1983(a))"),
         ] {
-            assert_eq!(fix_legal_symbols(bad), (good.to_string(), 1), "{bad}");
+            let (text, changes) = fix_legal_symbols(bad);
+            assert_eq!((text.as_str(), changes.len()), (good, 1), "{bad}");
         }
         for keep in [
             "Id. at 9.",
@@ -736,8 +767,19 @@ mod tests {
             "28 U.S.C. § 1441(b)",
             "See Id. 9",
             "Section S2.1",
+            // Amounts: a list marker or footnote after money, and money after a code cite.
+            "Fees: $150(a), $200(b)",
+            "$500(1)",
+            "$100(12)",
+            "U.S.C. $75,000",
+            "C.F.R. $50.00 fee",
+            // `$1441(b)` is indistinguishable from `$150(a)`; only the code-cite form is fixed.
+            "under $1441(b) and",
+            // A pleading margin number after a line break is not a paragraph cite.
+            "the facts (Compl.\n9 15 days later",
         ] {
-            assert_eq!(fix_legal_symbols(keep), (keep.to_string(), 0), "{keep}");
+            let (text, changes) = fix_legal_symbols(keep);
+            assert_eq!((text.as_str(), changes.len()), (keep, 0), "{keep}");
         }
     }
 

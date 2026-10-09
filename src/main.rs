@@ -298,18 +298,23 @@ fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliEr
     }
     let ctx = model_engine::Ctx::new(spec, info, &mlx, settings.jobs);
     let report = run::run(&plan.items, &ctx, &settings, args.input_dir.is_some());
-    finish(plan, report, true)
+    finish(plan, report, true, !args.no_front_matter)
 }
 
 /// Runs the apple pipeline over every planned file; failed pages or files make the run partial.
 fn run_apple(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
     let settings = settings(args);
     let report = run::run(&plan.items, &Apple, &settings, args.input_dir.is_some());
-    finish(plan, report, false)
+    finish(plan, report, false, !args.no_front_matter)
 }
 
 /// Exit status of a finished run.
-fn finish(plan: &Plan, report: run::RunReport, model: bool) -> Result<(), CliError> {
+fn finish(
+    plan: &Plan,
+    report: run::RunReport,
+    model: bool,
+    front_matter: bool,
+) -> Result<(), CliError> {
     if let Some(msg) = report.stopped {
         return Err(CliError::Server(format!("{msg}; re-run to resume")));
     }
@@ -348,10 +353,15 @@ fn finish(plan: &Plan, report: run::RunReport, model: bool) -> Result<(), CliErr
             problems.push((
                 o.id,
                 format!(
-                    "{input}: {} of {} pages look wrong (pages {:?}); see suspect_pages in the front matter and check them against the PDF",
+                    "{input}: {} of {} pages look wrong (pages {:?}); {}check them against the PDF",
                     o.suspect.len(),
                     o.pages,
-                    o.suspect
+                    o.suspect,
+                    if front_matter {
+                        "see suspect_pages in the front matter and "
+                    } else {
+                        ""
+                    }
                 ),
             ));
         }

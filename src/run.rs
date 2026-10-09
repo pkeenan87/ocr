@@ -372,7 +372,19 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         }
     }
     let cleaned = s.legal_cleanup.then(|| markdown::strip_running(&results));
-    let reviewed = suspect::review(cleaned.as_ref().map_or(&results, |c| &c.0), s.symbol_fix);
+    let (reviewed, rewrites) = suspect::review(
+        cleaned.as_ref().map_or(&results, |c| &c.0),
+        s.symbol_fix,
+        backend.model_ids().is_some(),
+    );
+    if s.verbose && !s.quiet {
+        for (page, before, after) in &rewrites {
+            eprintln!(
+                "{}: page {page}: symbol fix {before:?} -> {after:?}",
+                e.b.name
+            );
+        }
+    }
     let front = FrontMatter {
         source: &e.b.name,
         pages: e.b.doc_pages,

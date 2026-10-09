@@ -445,12 +445,21 @@ fn heldout_seeds_are_read_in_order() {
             .success()
             .then_some(())
             .expect("heldout.py failed");
-        e.cmd()
+        let scan = e
+            .cmd()
             .args(["scan", "--input-dir"])
             .arg(&dir)
             .args(["--quiet", "--use-text-layer", "never"])
-            .assert()
-            .success();
+            .assert();
+        // This test measures reading order. The degraded scans legitimately merge words
+        // (`thenotice`), which suspect_pages reports with exit 1; no page may fail outright.
+        let out = scan.get_output();
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            out.status.success()
+                || (out.status.code() == Some(1) && !stderr.contains("failed OCR")),
+            "{stderr}"
+        );
         for entry in fs::read_dir(&dir).unwrap().flatten() {
             let name = entry.file_name().to_string_lossy().into_owned();
             let Some(family) = name.strip_suffix(".expected.json") else {

@@ -400,6 +400,35 @@ fn embedded_keys(text: &str) -> HashSet<String> {
 }
 
 /// The fields of one page's Markdown, before any status is decided.
+/// The words that continue the text after a line: those of the next line with text, at most one
+/// blank line further, past pleading line numbers (`26`, `26 |`), which may stand on lines of
+/// their own.
+fn next_words<'a>(lines: &[&'a str]) -> impl Iterator<Item = &'a str> {
+    let number = |w: &str| w.len() <= 2 && w.chars().all(|c| c.is_ascii_digit());
+    let mut blank = 0;
+    let mut found = None;
+    for l in lines {
+        let mut words = l.split_whitespace().peekable();
+        if words.next_if(|w| number(w)).is_some() {
+            words.next_if_eq(&"|");
+        }
+        if words.peek().is_some() {
+            found = Some(words);
+            break;
+        }
+        if l.trim().is_empty() {
+            blank += 1;
+            if blank > 1 {
+                break;
+            }
+        } else {
+            // A line number alone starts a new line: the blank count starts again.
+            blank = 0;
+        }
+    }
+    found.into_iter().flatten()
+}
+
 fn extract(body: &str) -> Vec<Field> {
     let mut out = Vec::new();
     let lines: Vec<&str> = body.lines().collect();
@@ -425,16 +454,8 @@ fn extract(body: &str) -> Vec<Field> {
         for m in AMOUNT.find_iter(line) {
             let mut t = m.as_str().trim_end_matches([',', '.']).to_string();
             // `$45` at the end of a line and `million` starting the next one (past a blank line
-            // and a pleading line number): one amount.
-            let next = lines[i + 1..]
-                .iter()
-                .take(2)
-                .find(|l| !l.trim().is_empty())
-                .and_then(|l| {
-                    let mut words = l.split_whitespace().peekable();
-                    words.next_if(|w| w.len() <= 2 && w.chars().all(|c| c.is_ascii_digit()));
-                    words.next()
-                });
+            // and a pleading line number, on the line or a line of its own): one amount.
+            let next = next_words(&lines[i + 1..]).next();
             if let Some(w) = next.map(|w| w.trim_end_matches(|c: char| !c.is_alphanumeric()))
                 && line[m.end()..].trim().is_empty()
                 && !t.ends_with(|c: char| c.is_alphabetic())
@@ -1264,6 +1285,11 @@ mod tests {
         // Not across a whole paragraph, and not from the middle of the next line.
         assert_eq!(extract("for $400\n\n\nmillion")[0].text, "$400");
         assert_eq!(extract("for $400\nthe million")[0].text, "$400");
+        // A pleading line number on a line of its own, or before a `|`.
+        let f = extract("securities laws for $45\n\n16\n\nmillion.");
+        assert_eq!(f[0].text, "$45 million");
+        assert_eq!(extract("for $45\n\n16 | million.")[0].text, "$45 million");
+        assert_eq!(extract("for $45\n\n16\n\n\nmillion.")[0].text, "$45");
     }
 
     fn read(text: &str) -> Line {

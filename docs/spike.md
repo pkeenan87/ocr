@@ -731,3 +731,25 @@ The embedded-text correction already skips pages whose text is drawn invisibly. 
 3. compare by value;
 4. state only agreed values, and quote only agreed sentences;
 5. report both readings of any disagreement, and never pick one.
+
+## Fixes from the Azure residual-risk measurement (2026-10-09)
+
+The work-machine measurement ([azure-verify-eval-results.md](azure-verify-eval-results.md), macOS 27) found one value relied on that was really wrong, and four weaknesses. Fixed here:
+
+1. **An amount and its scale word across a line break.** `ocr` already joins `$45` / `million`, but only past one blank line and a pleading number on the same line. On macOS 26 the same page is joined (`$45 million`), so the macOS 27 layout differs; its Markdown is not on this machine yet. The likeliest cause, a line number on a line of its own, is now handled: the join skips line numbers on their own lines (`26`, `26 |`), still at most one blank line between text lines. **To confirm with the macOS 27 bundle.**
+2. **A page-end hyphen joined to the footer** (`nonCOMPLAINT`). `ocr` keeps them apart; the joining was in the scoring script. The script now joins a broken word only when the next line starts in lower case, and the skill says a word broken at the foot of a page continues on the next page.
+3. **An OCR layer drawn transparent.** ctr-marital-settlement (an iPhone scan, "Created with Scanner Pro") draws its old OCR text in render mode 0 with fill alpha 0, so `ocr_text_layer` missed it and verify trusted 9 values from it. The bridge now also counts text drawn with `ca 0` (and render mode 7) as invisible. New fixture: `spike/fixtures/ocr_layer_alpha.pdf`.
+4. **The scoring script was loose** (`eval/azure_verify_eval.py`): it now requires `$ % § ¶` to match (`¶ 60` is not `160`, nor `§ 5` `§§ 1301`), reads U+FFFE as a line-end hyphen, and removes pleading line numbers by position instead of skipping every 1-2 digit token, which hid `¶` misreads.
+5. **The skill** says to compare citations with their sign: a `¶` missing or different in either reading is a disagreement. And to compare an amount with its scale word.
+
+**Public filings, `--verify-fields all` (macOS 26):**
+
+| | Before | Now |
+|---|---|---|
+| Values verified free | 499 | 490 |
+| `azure_pages` | 94 | 109 |
+| Pages detected as an OCR layer | 2 filings | 3 filings (+15 pages) |
+
+The 9 values and 15 pages are the marital settlement, now sent to Azure instead of trusted.
+
+**Not fixed:** a docket that PDFKit gives as `5-16-cv-` / `1128` is graded against `5-16-cv-1128`, so `ocr`'s `5-16-cv1128` (letters and digits the same) is a `check`. That is a false alarm, the safe direction.

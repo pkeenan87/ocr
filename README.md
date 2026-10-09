@@ -187,7 +187,7 @@ Notes on the options:
   - A page is corrected only when at least 90% of its words agree with the embedded text, so a hidden layer that does not match the printed page (another draft, a bad scanner OCR layer) changes nothing.
   - A differing word is replaced only when it looks like a misread of the embedded word: at most a third of its characters differ. `thirty` never becomes `sixty`.
   - **Text in the layer that Vision did not see on the page is never inserted.** This covers words under a drawn redaction box, white or invisible text, and neighbouring text caught by a box.
-  - **Text drawn invisibly (render mode 3) is never a correction.** That is how OCR tools lay a text layer over a scan. Such text is another OCR's reading, not the document's characters (a 1985 note's layer reads `qction`).
+  - **Text drawn invisibly (render mode 3, or fully transparent) is never a correction.** That is how OCR tools lay a text layer over a scan. Such text is another OCR's reading, not the document's characters (a 1985 note's layer reads `qction`).
   - **Column-split pages and transcripts are corrected too**, with stricter rules:
     - each box takes exactly the characters inside it, rather than PDFKit's drag-like selection, which takes in the neighbouring column's lines;
     - words of one or two characters change only between look-alike characters, so a misaligned line number `7` never becomes `6`.
@@ -329,7 +329,7 @@ An example (abridged):
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
 - **Values:** amounts include a scale word (`$33.5 million` has the value 33500000), also when the word starts the next line, and a `K`/`M`/`B` suffix (`$1.5B`). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
 - **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.
-- **`ocr_text_layer`:** the page's embedded text is drawn invisibly over a scan (text render mode 3). That is how OCR tools add a text layer, so the text is another OCR's reading, not the document's own characters.
+- **`ocr_text_layer`:** the page's embedded text is drawn invisibly over a scan (text render mode 3, or fully transparent as iOS scanner apps draw it). That is how OCR tools add a text layer, so the text is another OCR's reading, not the document's own characters.
   - **Values:** agreement with it verifies nothing. A disagreement still turns a value into `check`.
   - **Text agreement:** `text_agreement` is `compared_with: ocr_text_layer`, `independent: false`.
   - **Second reading:** the page never gets `second_reading: embedded_text`.

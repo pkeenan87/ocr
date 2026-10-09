@@ -85,7 +85,8 @@ For every `check` or `unchecked` field on a page that was re-read, find the same
 - amounts in cents, so `$3,000` is not `$3,000,000`;
 - dates as YYYY-MM-DD;
 - docket and Bates numbers as their letters and digits;
-- citations by section number.
+- citations by section or paragraph number **and their sign**: `¶ 60` and `160` are different values, and so are `§ 5` and `§§ 1301`. Both readers tested misread `¶` as `1`, `9` or nothing, each in its own way, so a citation whose sign is missing or different in either reading is a disagreement, never a match;
+- an amount with its scale word, which may be on the next line or past a footer (`$45` / `million`): compare the whole amount.
 
 Then:
 - **Same value:** confirmed by two independent readings. You may state it as fact, with its page.
@@ -98,6 +99,7 @@ Then:
 
 - **State or compute only with values that are `verified`, or confirmed in step 4.** Always give the page, and the Bates number if there is one.
 - **Quote word for word only agreed sentences.** A sentence agrees when it is not in its page's `text_agreement.unagreed` and `text_agreement.independent` is true. A sentence that the second reading in step 3 has word for word also agrees. Otherwise paraphrase, and say the exact wording is unconfirmed.
+- **A word broken at the foot of a page** (`non-`) continues on the next page, past the footer and header (`voting shares`). Never join it to the footer (`nonCOMPLAINT`).
 - **`missing_text` in `page_check`:** the OCR lacks whole lines that another reading has (`text_agreement.missing_lines`). Never say a page does not mention something from its OCR alone. Use the second reading's text, or check the PDF.
 - **`ocr_text_layer: true`:** the page is a scan carrying an older OCR's invisible text layer. That layer counts as one more reading, not as the document's own characters, so agreement with it confirms nothing. Treat the page as a scan.
 - **`check` and `unchecked` values that step 4 did not confirm are unconfirmed.** Never present them as fact.

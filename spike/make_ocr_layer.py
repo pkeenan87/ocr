@@ -2,6 +2,9 @@
 OCR text layer over it (render mode 3) whose words are misread (`qction`, `Cqurt`), as old OCR
 tools leave them. Embedded-text correction must not take those characters.
 
+Also writes spike/fixtures/ocr_layer_alpha.pdf, the same with the layer drawn in render mode 0
+but fully transparent (fill alpha 0), as iOS scanner apps write it.
+
 usage: spike/.venv/bin/python -I spike/make_ocr_layer.py
 """
 import io
@@ -29,16 +32,19 @@ for i, line in enumerate(LINES):
 buf = io.BytesIO()
 img.save(buf, format="PNG")
 
-out = os.path.join(os.path.dirname(__file__), "fixtures", "ocr_layer.pdf")
-c = canvas.Canvas(out, pagesize=letter)
-c.drawImage(ImageReader(io.BytesIO(buf.getvalue())), 0, 0, width=letter[0], height=letter[1])
-t = c.beginText()
-t.setTextRenderMode(3)
-t.setFont("Times-Roman", 14.4)
-for i, line in enumerate(OCR):
-    t.setTextOrigin(72, letter[1] - (300 + i * 80 + 30) * 72 / dpi)
-    t.textLine(line)
-c.drawText(t)
-c.showPage()
-c.save()
-print(out)
+for name, alpha in [("ocr_layer.pdf", False), ("ocr_layer_alpha.pdf", True)]:
+    out = os.path.join(os.path.dirname(__file__), "fixtures", name)
+    c = canvas.Canvas(out, pagesize=letter)
+    c.drawImage(ImageReader(io.BytesIO(buf.getvalue())), 0, 0, width=letter[0], height=letter[1])
+    if alpha:
+        c.setFillAlpha(0)
+    t = c.beginText()
+    t.setTextRenderMode(0 if alpha else 3)
+    t.setFont("Times-Roman", 14.4)
+    for i, line in enumerate(OCR):
+        t.setTextOrigin(72, letter[1] - (300 + i * 80 + 30) * 72 / dpi)
+        t.textLine(line)
+    c.drawText(t)
+    c.showPage()
+    c.save()
+    print(out)

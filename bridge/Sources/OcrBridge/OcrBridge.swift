@@ -64,7 +64,7 @@ struct PageOut: Encodable {
 struct InfoOut: Encodable {
     var ok: Bool
     var error: String? = nil
-    var kind: String = ""
+    var kind: String? = nil
     var pages: Int = 0
 }
 

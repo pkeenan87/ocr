@@ -152,6 +152,8 @@ Usage (`ocr scan --help`):
     --no-currency-fix          Keep `S` where Vision misread `$` in amounts such as S22,375.50
     --no-symbol-fix            Keep Vision's readings of `¶` and `§` in citations (`Compl. 9 60`)
     --no-front-matter          Omit the YAML header
+    --verify-json              Also write <stem>.verify.json: values to double-check, and pages for a second reader
+    --verify-fields <MODE>     flagged (default) or all: which unconfirmed values need a second reading
     --use-text-layer <MODE>    auto, never, always (default: never)
     --legal-cleanup            Strip running headers and footers repeated across pages (opt-in)
     --dpi <N>                  Render resolution, 72-600 (default 150; dots-ocr 100)
@@ -259,6 +261,72 @@ Front matter fields (`--no-front-matter` omits the header):
 Words are checked against an English word list with legal terms added ([data/words-en.txt](data/words-en.txt), built by `scripts/make_wordlist.py`). Only lowercase words of four or more letters are checked, so names, citations, numbers and identifiers never count. Pages mostly in Spanish, French or Portuguese skip the word checks. Transcript pages whose line numbers could not be re-anchored are not suspect: they are listed in `line_numbers.unverified` with their own hint. On simulated misreads, a page is flagged as `misreads` reliably when about 8% of its words are misread, sometimes at 4%, and not at 1-2%; clean synthetic legal text has at most 1% non-words. The checks cannot see a wrong but plausible word or number (`8,000` read as `3,000`), a dropped sentence, or text in the wrong order that is still readable. An empty `suspect_pages` is not proof that a page is right.
 
 Every page starts with a marker, `<!-- page 42 -->`, or with the Bates number when one is found at the bottom of the page: `<!-- page 3 · Bates ABC0000123 -->`. A page that failed outright appears as `<!-- page N: OCR failed: ... -->`. Page numbers are 1-based and always match the source document, also with `--pages`. When a model fails on a page (timeout, runaway repetition, empty or truncated output) it is retried and then falls back to Apple Vision text; that page is listed in `fallback_pages` and `flagged_pages`.
+
+## Values to double-check (`--verify-json`)
+
+`--verify-json` writes `<stem>.verify.json` next to the Markdown. It lists the values a reader must not get wrong, each with a status, and the pages a second reader should look at. It is built so that a tool can send only those pages to a paid OCR service such as Azure Document Intelligence (`azure_pages` uses its `pages` syntax), and so that an LLM can quote only confirmed values. The Markdown and the exit code are unchanged.
+
+    ocr scan --input-file contract.pdf --verify-json                       # flagged fields only
+    ocr scan --input-file contract.pdf --verify-json --verify-fields all   # every unconfirmed field
+
+An example (abridged):
+
+```json
+{
+  "source": "contract.pdf",
+  "markdown": "contract.md",
+  "engine": "apple (Vision RecognizeDocuments)",
+  "verify_fields": "flagged",
+  "azure_pages": "3,7-9",
+  "summary": {"fields": 212, "verified": 180, "check": 9, "unchecked": 23,
+              "pages_to_check": 4, "embedded_text_pages": 2},
+  "pages": [
+    {"page": 7, "bates": "ABC000107", "page_check": ["misreads"], "embedded_text": false,
+     "second_reading": "azure",
+     "fields": [
+       {"kind": "amount", "text": "$48,250.00", "value": 48250.0, "line": 12,
+        "status": "check", "why": ["suspect_page"]}
+     ]}
+  ]
+}
+```
+
+- **Fields:** `amount`, `date` (with `value` as YYYY-MM-DD), `docket` (federal shapes such as `3:26-cv-04417`), `bates`, `citation` (with `§` or `¶`) and `percent`. Each field has the exact text as it appears in the Markdown, its page, and its line within the page.
+- **`verified`:** the same value appears in the page's embedded PDF text, a second, independent reading. Born-digital filings are mostly verified for free.
+- **`check`:** something speaks against the value. `why` says what:
+  - `suspect_page`: the page is in `suspect_pages`, or it failed.
+  - `not_in_embedded_text`: the page has embedded text and the value is not in it.
+  - `invalid_date`: an impossible date, such as `02/30` or `0Q`.
+  - `malformed_amount`: broken digit grouping, such as `$4825,0.00`.
+  - `differs_from_usual_docket`: one digit off the docket number the document repeats.
+  - `bates_out_of_sequence`: the Bates number breaks the page sequence.
+  - `unconfirmed`: with `--verify-fields all`, nothing confirmed the value.
+- **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
+- **Values:** amounts include a scale word (`$33.5 million` has the value 33500000). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
+- **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.
+- **`page_check`:** the suspect reasons, or `failed: …`, when the whole page needs a second reading.
+- **`second_reading`:** how to get the page's second reading, if it needs one.
+  - `embedded_text`: a suspect page whose values all match the PDF's own text; read that text instead, at no cost.
+  - `azure`: any other page that needs a second reading.
+- **`azure_pages`:** the `azure` pages. It is empty when nothing needs a paid second reading.
+
+Measured on the 20 public court filings (230 pages, Apple engine, eval/PUBLIC_SET.md):
+
+| | `flagged` (default) | `all` |
+|---|---|---|
+| Pages in `azure_pages` | 61 (27%) | 88 (38%) |
+| E-filed filings (139 pages) | 18 | 18 |
+| Partly e-filed filings (32 pages) | 9 | 12 |
+| Scanned filings, no embedded text (59 pages) | 34 | 58 |
+| Values `verified` free against the embedded text | 576 of 846 (68%) | 576 of 846 |
+| Suspect pages answered by the embedded text instead | 40 | 40 |
+
+Real misreads it caught:
+- impossible dates (`04/02/2908` for 2008, `81/17/1995`, `02/03/0Q`);
+- docket numbers one character off (`3:85-CV-01720-SLMR`);
+- `§ 1988` and `§ 77q` read as `$1988` and `$ 77`, which do not match the embedded text.
+
+The embedded text of a scanned PDF may itself be an old OCR layer. A match is still two independent readings that agree. A wrong value that both readings share, or one on a page with no embedded text in `flagged` mode, is not caught.
 
 ## Which engine?
 

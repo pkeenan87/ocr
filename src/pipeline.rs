@@ -44,6 +44,8 @@ pub struct Settings {
     pub symbol_fix: bool,
     /// `--legal-cleanup`: strip running headers and footers at assembly.
     pub legal_cleanup: bool,
+    /// `--verify-json` with its `--verify-fields` mode.
+    pub verify: Option<crate::verify::VerifyFields>,
     pub quiet: bool,
     pub verbose: bool,
     pub options: Options,

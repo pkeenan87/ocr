@@ -207,17 +207,25 @@ Every real crash happened within 0.81 s of launch. Log: `spike/out/cap4_crash_te
 
 ## Follow-ups, prioritized
 
-1. ~~Apple column split firing on single-column real filings~~ Fixed 2026-10-08: split pages on the public set 119 -> 71, the rest true columns (docs/spike.md, "Column split false positives on real filings"). The public set has not been re-judged yet.
-2. Paddle pleading-table margin column (full-width crop pulls margin numbers in; crop to the ruled box).
-3. Pilcrow and section-sign misreads (Apple).
-4. Paddle repetition below the loop-detector threshold on real pages (4% of pages).
-5. Apple Bates 88.6% on pleadings.
-6. Apple `flagged_pages` never set on bad pages; consider wiring the judge's signals or a heuristic.
-7. Pleading margin-number inconsistency across engines.
-8. olmOCR rotated-page Bates gap.
-9. A text-layer path with layout handling.
-10. The flaky `tests/resume.rs::model_directory_output_does_not_depend_on_jobs`, which failed once at server start.
-11. Report the Vision crash to Apple via Feedback Assistant, attaching `spike/repro_init_race.sh`.
+Queued next, in this order (decided 2026-10-09):
+
+1. **Text-layer path with layout handling, then on by default for clean born-digital pages.** Strip margin line numbers, keep the Bates number in the marker, and keep tables from Vision's table boxes. Use the embedded text only after a fast Apple pass agrees with it (catches hidden layers that do not match the page). Pages that disagree go through normal OCR. Goal: exact text, with no OCR errors and no Azure cost, on e-filed documents.
+2. **Free local second reader for pages without embedded text.** Run Vision's older `VNRecognizeTextRequest` (no new dependencies; Tesseract only as an optional extra if it measures better). Values both readers agree on become `verified` in `--verify-json`; only disagreements go to `azure_pages`. OCRmyPDF was considered and rejected: it adds Python, Tesseract and Ghostscript (AGPL), and adds no detection `ocr` lacks.
+3. **Whole-text agreement.** Extend the second reader to compare every word, not just extracted values. Give each page an agreement score, and count a quote as `verified` only when both readers produced it word for word. This catches a dropped "not" in prose.
+4. **Missing-text check.** Compare how much text each reader found per page (words and lines), and flag large gaps. Agreement on what was read says nothing about a skipped line or paragraph.
+5. **Arithmetic checks.** Where a page shows line items and a total (invoices, damages tables, settlement schedules), check that they add up, and flag rows whose amounts do not. This catches right-number-wrong-row errors from split or merged table rows.
+
+Then:
+
+6. ~~Apple column split firing on single-column real filings~~ Fixed 2026-10-08: split pages on the public set 119 -> 71, the rest true columns (docs/spike.md, "Column split false positives on real filings"). Jev re-judge 2026-10-09: Apple poor pages 48% -> 46%.
+7. ~~Apple `flagged_pages` never set; pilcrow and section-sign misreads~~ PR 2 (merged 2026-10-09): `suspect_pages` (83% precision, 65% recall against Jev) and a safe ¶/§ repair (9 correct, 0 wrong on born-digital text layers).
+8. Paddle pleading-table margin column (full-width crop pulls margin numbers in; crop to the ruled box).
+9. Paddle repetition below the loop-detector threshold on real pages (4% of pages).
+10. Apple Bates 88.6% on pleadings.
+11. Pleading margin-number inconsistency across engines.
+12. olmOCR rotated-page Bates gap.
+13. The flaky `tests/resume.rs::model_directory_output_does_not_depend_on_jobs`, which failed once at server start.
+14. Report the Vision crash to Apple via Feedback Assistant, attaching `spike/repro_init_race.sh`.
 
 ## Pending on other machines
 

@@ -53,6 +53,15 @@ Long scans write per-page checkpoints. If a run is interrupted, running the same
 | 2 | Setup or usage error, such as an engine that isn't installed | Read the message; usually `ocr server setup` is needed |
 | 3 | Model server not running or crashed | `ocr server start --model <engine>`, then re-run the same command to resume |
 
+## Values that must be right (amounts, dates, docket and Bates numbers, citations)
+
+When the user will rely on figures, dates, docket numbers or citations, scan with `--verify-json`. Use `--verify-fields all` when nothing may be missed, for example amounts in a settlement or deadlines. Then read `<stem>.verify.json`:
+
+- **Quote or compute only with values that are `verified`**, or that a second reader has confirmed. Always give the page, and the Bates number if there is one.
+- **Treat `check` values as unconfirmed.** Never present them as fact. If a second OCR service is available (for example an Azure Document Intelligence tool), send it only the pages the question needs, taken from `azure_pages` or from the pages of the relevant fields. Use its reading where the two disagree, and say that you did.
+- **`unchecked` means nobody confirmed the value.** Say so if the value matters.
+- **Never fill a gap from memory or by inference.** If a value cannot be confirmed, say that it needs checking against page N of the PDF.
+
 ## Reading the output
 
 Each `.md` file starts with YAML front matter. Then every page begins with a marker: `<!-- page 12 -->`, or `<!-- page 12 · Bates ABC0000123 -->` when a Bates number was found. Cite pages and Bates numbers from these markers.

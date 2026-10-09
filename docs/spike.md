@@ -433,3 +433,42 @@ Every remaining Margin on the public set was rendered and holds only line number
 | eval `production` seed 10, pages 1–4 (bottom right, Helvetica) | `ACME0000001`–`ACME0000004`, all correct |
 
 **Cost:** about 52 s a page against about 40 s without the corners, on the CPU build. On a GPU each corner should take about a second. A page with no Bates number pays for both corners.
+
+## `--verify-json` on the public filings (2026-10-09)
+
+This run measures the values-to-check report on the 20 public court filings (230 pages, Apple engine, 150 DPI): `--verify-json`, in both `--verify-fields` modes.
+
+| | flagged | all |
+|---|---|---|
+| Fields extracted | 846 | 846 |
+| verified (match the embedded PDF text) | 576 | 576 |
+| check | 120 | 270 |
+| unchecked | 150 | 0 |
+| Pages in `azure_pages` | 61 of 230 | 88 of 230 |
+| Of which: e-filed / partial / scanned | 18 / 9 / 34 | 18 / 12 / 58 |
+| Suspect pages answered by embedded text | 40 | 40 |
+
+**Reasons in flagged mode:**
+
+| Reason | Count |
+|---|---|
+| `matches_embedded_text` | 576 |
+| `suspect_page` | 98 |
+| `not_in_embedded_text` | 39 |
+| `invalid_date` | 8 |
+| `differs_from_usual_docket` | 2 |
+
+**Real misreads caught:**
+- `04/02/2908`, `04/02/2808` and `04/02/2208` for `04/02/2008`;
+- `81/17/1995` and `02/03/0Q`;
+- `3:85-CV-01720-SLMR` and `3:08-cv-09901-MAHP`;
+- `$1988`, `$ 1301`, `$ 77` and `$ 78`, which are `§` citations read as dollar signs.
+
+**First-run fixes:**
+- **Scaled amounts.** `$33.5 million` was called malformed, and its value would have read as 33.5. Amounts now take a scale word.
+- **Suspect pages no longer override a match with the embedded text.** Before this fix, 47 of 139 e-filed pages went to Azure.
+- **A pleading line number before `March 2023` was read as a day-first date.** Day-first dates at the start of a line are skipped.
+
+The first run sent 105 pages to Azure (46%) and verified 440 values; the table shows the result after the fixes.
+
+**Scanned pages are the remaining Azure load.** A free local second reader is queued next to address it (docs/overnight-report.md, follow-ups).

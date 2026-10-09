@@ -54,3 +54,7 @@ It reports:
 - sentences that independent readers agreed on but the embedded text lacks.
 
 The embedded text is not perfect ground truth (old scans carry bad OCR layers), so read the listed examples before trusting a number. Results are in docs/spike.md, "Verification eval".
+
+### With Azure on the flagged pages
+
+`eval/azure_verify_eval.py` simulates the skill's workflow (rely on `verified`, confirm the rest with Azure on `azure_pages`, send what is left to a person) on the committed Mac runs in `eval/verify_bundle/` and raw Azure responses, and grades it against the embedded text. It needs no Mac. The work-machine steps are in `docs/azure-verify-eval.md`.

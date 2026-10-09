@@ -1,0 +1,854 @@
+{
+ "source": "cmpl-irhythm.pdf",
+ "markdown": "cmpl-irhythm.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:55:12Z",
+ "verify_fields": "flagged",
+ "azure_pages": "6,9",
+ "summary": {
+  "fields": 48,
+  "verified": 0,
+  "check": 4,
+  "unchecked": 44,
+  "pages_to_check": 2,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 37,
+    "agreed_spans": 36,
+    "agreed_words": 0.913,
+    "unagreed": [
+     {
+      "line": 71,
+      "text": "commercialization of device-based technology used to monitor the hearts of millions of people across the United States.",
+      "missing": [
+       "people"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 31,
+    "agreed_spans": 27,
+    "agreed_words": 0.713,
+    "unagreed": [
+     {
+      "line": 11,
+      "text": "company’s cloud-based data analytic software to help physicians monitor patients and diagnose arrhythmias.1 On average, the iRhythm monitoring device captures approximately 1.5 million heartbeats over a two-week period.",
+      "missing": [
+       "arrhythmias.1"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "collected nearly 3 billion hours of heartbeat data.2",
+      "missing": [
+       "data.2"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "experienced a cybersecurity incident (the “Data Breach” or “Breach”), in which someone exfiltrated sensitive information, including its patients’ Protected Health Information (“PHI”),3",
+      "missing": [
+       "(“PHI”),3"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "to obtain relief for the harms that he and others affected by the Breach have suffered, and to ensure that iRhythm adopts and implements the procedures necessary to prevent another breach like this from occurring in the future.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 3,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 15, 2026",
+     "value": "2026-06-15",
+     "line": 17,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 37,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1320d",
+     "line": 41,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 160.103",
+     "line": 47,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 27,
+    "agreed_spans": 26,
+    "agreed_words": 0.956,
+    "unagreed": [
+     {
+      "line": 17,
+      "text": "and failing to provide Plaintiff and Class Members with prompt and meaningful notice regarding the Data Breach.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 3,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 30,
+    "agreed_spans": 28,
+    "agreed_words": 0.945,
+    "unagreed": [
+     {
+      "line": 37,
+      "text": "III. JURISDICTION AND VENUE",
+      "missing": [
+       "III."
+      ]
+     },
+     {
+      "line": 57,
+      "text": "patients’ Private Information in the District, and iRhythm has caused harm to Plaintiff and Class",
+      "missing": [
+       "patients’"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 3,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1332(d)(2)",
+     "line": 41,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$5 million",
+     "value": 5000000.0,
+     "line": 41,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1391",
+     "line": 53,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 22,
+    "agreed_words": 0.875,
+    "unagreed": [
+     {
+      "line": 27,
+      "text": "privacy of their information would be maintained.4",
+      "missing": [
+       "maintained.4"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "22. As a result of collecting and storing the Private Information of Plaintiff and Class",
+      "missing": [
+       "result"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "4 Privacy Policy, IRHYTHM TECHNOLOGIES, INC., https://www.irhythmtech.com/us/en/who-we-",
+      "missing": [
+       "4",
+       "https://www.irhythmtech.com/us/en/who-we-"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "are/trust-center/privacy (last visited June 23, 2026).",
+      "missing": [
+       "are/trust-center/privacy"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 8, 2026",
+     "value": "2026-06-08",
+     "line": 41,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 47,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 27,
+    "agreed_spans": 20,
+    "agreed_words": 0.736,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "third-party-hosted business applications, and that on June 9, 2026, the company received communications from a threat actor claiming to have obtained sensitive information.5",
+      "missing": [
+       "information.5"
+      ]
+     },
+     {
+      "line": 28,
+      "text": "15 volume of data exfiltrated.6",
+      "missing": [
+       "15",
+       "exfiltrated.6"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "iRhythm Holdings maintains a comprehensive cybersecurity and information security program designed to protect company systems, data, and operations.",
+      "missing": [
+       "systems,",
+       "operations."
+      ]
+     },
+     {
+      "line": 42,
+      "text": "Our teams continuously monitor t threat landscape and implement safeguards aligned with indus",
+      "missing": [
+       "teams",
+       "continuously",
+       "monitor",
+       "t",
+       "landscape",
+       "implement",
+       "safeguards",
+       "aligned",
+       "with",
+       "indus"
+      ]
+     },
+     {
+      "line": 44,
+      "text": "onsistent with these security protocols, we recently identified ybersecurity incident and promptly activated our incident respons",
+      "missing": [
+       "with",
+       "these",
+       "respons"
+      ]
+     },
+     {
+      "line": 46,
+      "text": "5 https://www.sec.gov/ix?doc=/Archives/edgar/data/0001388658/000138865826000055/irtc-",
+      "missing": [
+       "5",
+       "https://www.sec.gov/ix?doc=/Archives/edgar/data/0001388658/000138865826000055/irtc-"
+      ]
+     },
+     {
+      "line": 48,
+      "text": "20260610.htm",
+      "missing": [
+       "20260610.htm"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "mean landscapo and mpitemseou satoguard algenod yrit nadisny"
+    ],
+    "missing_words": 8
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 9, 2026",
+     "value": "2026-06-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 24,
+    "agreed_spans": 21,
+    "agreed_words": 0.788,
+    "unagreed": [
+     {
+      "line": 15,
+      "text": "As we actively investigate, we will notify individuals affected by this incident in accordance with applicable law and take steps as needed to protect and remediate the impact to them.",
+      "missing": [
+       "affected"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "We remain focused on safeguarding our systems and data as we continue to respond to this incident.7",
+      "missing": [
+       "incident.7"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "iRhythm’s patients with pertinent information about the Breach, including, but not limited to, 15 information concerning what kinds of Private Information were stolen, and how much Private",
+      "missing": [
+       "15"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 3,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 25,
+    "agreed_spans": 20,
+    "agreed_words": 0.63,
+    "unagreed": [
+     {
+      "line": 13,
+      "text": "affected by it has required Plaintiff to spend time and money taking additional steps (beyond those that have been necessitated by the Breach itself) to protect himself from the harmful effects of the Breach.",
+      "missing": [
+       "from"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "33. Notably, the Breach came days after iRhythm announced that it had agreed to settle",
+      "missing": [
+       "33.",
+       "Notably,"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "34. The timing of iRhythm’s SEC disclosure, coupled with the company’s failure to",
+      "missing": [
+       "timing"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "sensitive to securities litigation at the time, rather than by any desire to ensure that those affected 14 by the Breach could take steps to mitigate the harm caused by the exposure of their Private",
+      "missing": [
+       "14"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "36. The Private Information that Defendant allowed to be exposed in the Data Breach",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$45 million",
+     "value": 45000000.0,
+     "line": 17,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$45 Million",
+     "value": 45000000.0,
+     "line": 43,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 47,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 36,
+    "agreed_spans": 31,
+    "agreed_words": 0.871,
+    "unagreed": [
+     {
+      "line": 17,
+      "text": "39. HIPAA requires covered entities to protect against reasonably anticipated threats",
+      "missing": [
+       "39."
+      ]
+     },
+     {
+      "line": 21,
+      "text": "Safeguards must include physical, technical, and administrative components.9",
+      "missing": [
+       "components.9"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "and in no case later than 60 days following discovery of the breach.”10",
+      "missing": [
+       "breach.”10"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "available at: https://www.hipaajournal.com/what-is-considered-protected-health-information-",
+      "missing": [
+       "https://www.hipaajournal.com/what-is-considered-protected-health-information-"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "under-hipaa/ (last visited June 23, 2026).",
+      "missing": [
+       "under-hipaa/"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 1301",
+     "line": 25,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 164.400-414",
+     "line": 33,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.306(a)(1)",
+     "line": 47,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 53,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 59,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 13,
+    "agreed_spans": 9,
+    "agreed_words": 0.476,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "b. Failing to implement technical policies and procedures for electronic information systems that maintain electronic protected health information to allow access only to those persons or software programs that have been granted access rights in violation of 45 C.F.R. §164.312(a)(1);",
+      "missing": [
+       "b.",
+       "software"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "e. Failing to protect against any reasonably-anticipated threats or hazards to the security or integrity of electronic protected health information in violation of 45 C.F.R. §164.306(a)(2);",
+      "missing": [
+       "e."
+      ]
+     },
+     {
+      "line": 12,
+      "text": "g. Failing to ensure compliance with HIPAA security standard rules by their workforce in violation of 45 C.F.R. §164.306(a)(4);",
+      "missing": [
+       "ensure"
+      ]
+     },
+     {
+      "line": 14,
+      "text": "i. Failing to effectively train all members of their workforce (including independent contractors) on the policies and procedures with respect to protected health information as necessary and appropriate for the members of their workforce to carry out their functions and to maintain security of protected health information in violation of 45 C.F.R. §164.530(b) and 45 C.F.R. §164.308(a)(5); and",
+      "missing": [
+       "respect"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 3,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.312(a)(1)",
+     "line": 7,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.308(a)(1)",
+     "line": 8,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.308(a)(6)(ii)",
+     "line": 9,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.306(a)(2)",
+     "line": 10,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.306(a)(3)",
+     "line": 11,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.306(a)(4)",
+     "line": 12,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.502",
+     "line": 13,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.530(b)",
+     "line": 14,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§164.308(a)(5)",
+     "line": 14,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1053 @@
+{
+ "source": "depo-uber-oconnor.pdf",
+ "markdown": "depo-uber-oconnor.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:54:16Z",
+ "verify_fields": "flagged",
+ "azure_pages": "",
+ "summary": {
+  "fields": 17,
+  "verified": 15,
+  "check": 0,
+  "unchecked": 2,
+  "pages_to_check": 0,
+  "embedded_text_pages": 12,
+  "agreed_spans": 1215,
+  "unagreed_spans": 72
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 2,
+    "agreed_spans": 2,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "13-cv-03826-EMC",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 15,
+    "agreed_spans": 11,
+    "agreed_words": 0.731,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "Douglas O Connor, et al. v.",
+      "missing": [
+       "O",
+       "Connor,"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "O'BRIEN &LEVINE",
+      "missing": [
+       "O'BRIEN",
+       "&LEVINE"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "Court Reporting Services",
+      "missing": [
+       "Court",
+       "Reporting",
+       "Services"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "Making Your Case",
+      "missing": [
+       "Making",
+       "Your",
+       "Case"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "13-cv-03826-EMC",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 69,
+    "agreed_spans": 45,
+    "agreed_words": 0.575,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas asmior, e-Sy-03826-EMC Document313-5 Filed07/23/15 Page3 of 15",
+      "missing": [
+       "asmior,",
+       "e-Sy-03826-EMC"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "NORTHERN DISTRICT OF CALIFORNIA",
+      "missing": []
+     },
+     {
+      "line": 17,
+      "text": "1 APPRARANCES OF COUNSEL",
+      "missing": [
+       "APPRARANCES"
+      ]
+     },
+     {
+      "line": 18,
+      "text": "2 POR PLAINTIPPS:",
+      "missing": [
+       "POR",
+       "PLAINTIPPS:"
+      ]
+     },
+     {
+      "line": 24,
+      "text": "LICHTEN & LISS-RIORDAS, P.C.",
+      "missing": [
+       "LISS-RIORDAS,"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "BY: SHANNON LISS-RIORDAII, ATTORNEX AT LAW",
+      "missing": [
+       "LISS-RIORDAII,",
+       "ATTORNEX"
+      ]
+     },
+     {
+      "line": 36,
+      "text": "PLAINTIPFS,",
+      "missing": [
+       "PLAINTIPFS,"
+      ]
+     },
+     {
+      "line": 44,
+      "text": "v.",
+      "missing": []
+     },
+     {
+      "line": 48,
+      "text": "UBERTECHNOLOGIES, INC.,",
+      "missing": [
+       "UBERTECHNOLOGIES,"
+      ]
+     },
+     {
+      "line": 66,
+      "text": "DEFENDANT.",
+      "missing": []
+     },
+     {
+      "line": 74,
+      "text": "11 POR DEPENDANT:",
+      "missing": [
+       "POR",
+       "DEPENDANT:"
+      ]
+     },
+     {
+      "line": 80,
+      "text": "DEPOSITION OF MICHAEL COLEMAN NEDNESDAZ, JULX 9, 2014",
+      "missing": [
+       "NEDNESDAZ,",
+       "JULX"
+      ]
+     },
+     {
+      "line": 94,
+      "text": "BY: ROBERT JON HENDRICKS, ATTORNEX AT LAW",
+      "missing": [
+       "ATTORNEX"
+      ]
+     },
+     {
+      "line": 98,
+      "text": "Spear Strect Tower",
+      "missing": [
+       "Strect"
+      ]
+     },
+     {
+      "line": 112,
+      "text": "BX: CXNTHIA F. DAMMANA, CSR NO. 10610 22",
+      "missing": [
+       "BX:",
+       "CXNTHIA",
+       "DAMMANA,"
+      ]
+     },
+     {
+      "line": 118,
+      "text": "MATT AIKIN",
+      "missing": [
+       "AIKIN"
+      ]
+     },
+     {
+      "line": 132,
+      "text": "2 WEDNESDAX, JULY 9, 2014",
+      "missing": [
+       "WEDNESDAX,"
+      ]
+     },
+     {
+      "line": 159,
+      "text": "12 A.M., WEDNEDAX, JULY 9, 2014, before Cynthia F.",
+      "missing": [
+       "WEDNEDAX,"
+      ]
+     },
+     {
+      "line": 178,
+      "text": "122฿",
+      "missing": [
+       "122฿"
+      ]
+     },
+     {
+      "line": 218,
+      "text": "-о00-",
+      "missing": [
+       "-о00-"
+      ]
+     },
+     {
+      "line": 220,
+      "text": "# QUESTIONS WITNESS INSTRUCTED NOI IO ANSWER:",
+      "missing": [
+       "QUESTIONS",
+       "NOI",
+       "IO"
+      ]
+     },
+     {
+      "line": 262,
+      "text": "7,22",
+      "missing": [
+       "7,22"
+      ]
+     },
+     {
+      "line": 280,
+      "text": "O'Brien & Levin",
+      "missing": [
+       "Levin"
+      ]
+     },
+     {
+      "line": 282,
+      "text": "388.825.3376 - mail@court-reporting.cor",
+      "missing": [
+       "388.825.3376",
+       "mail@court-reporting.cor"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "13-03826-EMC",
+     "line": 40,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 106,
+    "agreed_spans": 93,
+    "agreed_words": 0.876,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas &asmor, 3-Sl-03826-EMC Document313-5 Filed07/23/15 Page4 of 15",
+      "missing": [
+       "&asmor,",
+       "3-Sl-03826-EMC"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Nunber",
+      "missing": [
+       "Nunber"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Pago",
+      "missing": [
+       "Pago"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "\"How to Be : Star Uber Driver\"",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "voe- рroвeacaczon рacкос = s/ pages",
+      "missing": [
+       "voe-",
+       "рroвeacaczon",
+       "рacкос",
+       "s/"
+      ]
+     },
+     {
+      "line": 89,
+      "text": "7 Matt Atkin, who we --",
+      "missing": []
+     },
+     {
+      "line": 91,
+      "text": "MS. LISS-RIORDAN: Matt Atkin?",
+      "missing": []
+     },
+     {
+      "line": 113,
+      "text": "14 the designation, we'll allow that, but that -- T'1l",
+      "missing": [
+       "T'1l"
+      ]
+     },
+     {
+      "line": 129,
+      "text": "-00o-",
+      "missing": [
+       "-00o-"
+      ]
+     },
+     {
+      "line": 159,
+      "text": "-00o-",
+      "missing": [
+       "-00o-"
+      ]
+     },
+     {
+      "line": 161,
+      "text": "MR. HENDRICKS: Counsel, before we get 8 going, let me do a little bit of housekeeping, first",
+      "missing": []
+     },
+     {
+      "line": 179,
+      "text": "15 objections. Having said that, as Llook at this",
+      "missing": [
+       "Llook"
+      ]
+     },
+     {
+      "line": 248,
+      "text": "O'Brien & Levinc",
+      "missing": [
+       "Levinc"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v.",
+     "14 Exhibit 5 Uber presentation packet - 47 pages 269"
+    ],
+    "missing_words": 13
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 116,
+    "agreed_spans": 110,
+    "agreed_words": 0.945,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page5 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "He -- the question's been --",
+      "missing": []
+     },
+     {
+      "line": 34,
+      "text": "MS. LISS-RIORDAN: I'm not stating testimony.",
+      "missing": []
+     },
+     {
+      "line": 52,
+      "text": "MR. HENDRICKS: I really can. Misstates the",
+      "missing": []
+     },
+     {
+      "line": 229,
+      "text": "website. These are essentially some functional --",
+      "missing": []
+     },
+     {
+      "line": 233,
+      "text": "what we consider functional requirements to use the",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 112,
+    "agreed_spans": 107,
+    "agreed_words": 0.958,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page6 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "12 A. They --",
+      "missing": []
+     },
+     {
+      "line": 32,
+      "text": "13 MR. HENDRICKS: Again, as framed, the",
+      "missing": []
+     },
+     {
+      "line": 147,
+      "text": "documentation, such as driver's license. They do --",
+      "missing": []
+     },
+     {
+      "line": 151,
+      "text": "16 they typically come into the office.",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 110,
+    "agreed_spans": 109,
+    "agreed_words": 0.988,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page7 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 101,
+    "agreed_spans": 98,
+    "agreed_words": 0.965,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page8 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 80,
+      "text": "8 deactivated from the system or not. Whether they --",
+      "missing": []
+     },
+     {
+      "line": 82,
+      "text": "9 whether the partner -- if we decide not to",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [
+    "transcript_table",
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 112,
+    "agreed_spans": 110,
+    "agreed_words": 0.982,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page9 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "11 MR. HENDRICKS: Again --",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 111,
+    "agreed_spans": 106,
+    "agreed_words": 0.95,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7se302,-Cx:03826-EMC Document313-5 Filed07/23/15 Page10 of 15",
+      "missing": [
+       "S7se302,-Cx:03826-EMC"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "aus wel.",
+      "missing": [
+       "aus",
+       "wel."
+      ]
+     },
+     {
+      "line": 73,
+      "text": "So--MR. HENDRICKS: We'll have to MS. LISS-RIORDAN: I don't want to get into",
+      "missing": []
+     },
+     {
+      "line": 156,
+      "text": "16 it's possible that prices may go up and of course --",
+      "missing": [
+       "course"
+      ]
+     },
+     {
+      "line": 158,
+      "text": "and down based on demand.",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [
+    "transcript_table",
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 116,
+    "agreed_spans": 113,
+    "agreed_words": 0.968,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7se302,-Cx:03826-EMC Document313-5 Filed07/23/15 Page11 of 15",
+      "missing": [
+       "S7se302,-Cx:03826-EMC"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "MR. HENDRICKS: I'm having a hard time --",
+      "missing": []
+     },
+     {
+      "line": 89,
+      "text": "13 and I know counsel has made the point of me asking",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 108,
+    "agreed_spans": 106,
+    "agreed_words": 0.987,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7S0302,-CX:03826-EMC Document313-5 Filed07/23/15 Page12 of 15",
+      "missing": [
+       "S7S0302,-CX:03826-EMC"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "fully. I don't --",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 107,
+    "agreed_spans": 105,
+    "agreed_words": 0.972,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7se302,-Cx:03826-EMC Document313-5 Filed07/23/15 Page13 of 15",
+      "missing": [
+       "S7se302,-Cx:03826-EMC"
+      ]
+     },
+     {
+      "line": 76,
+      "text": "2 or off duty or, as you put it, online or offline, з right?",
+      "missing": [
+       "з"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 104,
+    "agreed_spans": 102,
+    "agreed_words": 0.978,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7se302,-Cx:03826-EMC Document313-5 Filed07/23/15 Page14 of 15",
+      "missing": [
+       "S7se302,-Cx:03826-EMC"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "19 Q. Andif a driver falls below whatever that",
+      "missing": [
+       "Andif"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Douglas O'Connor, et al. v."
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 15,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 17,
+    "agreed_spans": 15,
+    "agreed_words": 0.942,
+    "unagreed": [
+     {
+      "line": 23,
+      "text": "IN WITNESS WHEREOF, I have hereunto set my",
+      "missing": [
+       "WHEREOF,"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "# Gpsttafiomauna",
+      "missing": [
+       "Gpsttafiomauna"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "13-cv-03826-EMC",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  }
+ ]
+}

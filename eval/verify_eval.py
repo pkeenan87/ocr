@@ -2,7 +2,8 @@
 
 usage:
     spike/.venv/bin/python -I eval/verify_eval.py --engine apple --out eval/out/verify [--skip-run]
-        [--set eval/public_set.json] [--pdfs eval/out/public/pdfs] [--use-real-config]
+        [--verify-fields flagged|all] [--set eval/public_set.json] [--pdfs eval/out/public/pdfs]
+        [--use-real-config]
 
 On every page with embedded text, the PDF's own text is the reference. Three scans per document:
 - `truth`: `--verify-json` as a user runs it; values are graded by the embedded text.
@@ -56,12 +57,13 @@ def run_all(a, docs):
         env["OCR_CONFIG_DIR"] = os.path.join(ROOT, "eval/out/state/config")
         env["OCR_STATE_DIR"] = os.path.join(ROOT, "eval/out/state/state")
     blind = dict(env, OCR_VERIFY_IGNORE_EMBEDDED="1")
+    mode = ["--verify-fields", a.verify_fields]
     for kind, engine, extra, e in [
-        ("truth", a.engine, [], env),
-        ("blind", a.engine, [], blind),
+        ("truth", a.engine, mode, env),
+        ("blind", a.engine, mode, blind),
         ("layer", "apple", ["--use-text-layer", "always"], env),
     ]:
-        out = os.path.join(a.out, a.engine, kind)
+        out = os.path.join(a.run, kind)
         os.makedirs(out, exist_ok=True)
         for d in docs:
             print(f"{kind}: {d['id']}", file=sys.stderr)
@@ -70,7 +72,7 @@ def run_all(a, docs):
 
 
 def load(a, kind, doc):
-    with open(os.path.join(a.out, a.engine, kind, doc + ".verify.json")) as f:
+    with open(os.path.join(a.run, kind, doc + ".verify.json")) as f:
         return json.load(f)
 
 
@@ -102,9 +104,12 @@ def main():
     p.add_argument("--set", default=os.path.join(ROOT, "eval/public_set.json"))
     p.add_argument("--pdfs", default=os.path.join(ROOT, "eval/out/public/pdfs"))
     p.add_argument("--ocr", default=os.path.join(ROOT, "target/release/ocr"))
+    p.add_argument("--verify-fields", choices=["flagged", "all"], default="flagged")
     p.add_argument("--skip-run", action="store_true")
     p.add_argument("--use-real-config", action="store_true")
     a = p.parse_args()
+    # Flagged runs keep the old path, so earlier results stay where they were.
+    a.run = os.path.join(a.out, a.engine + ("" if a.verify_fields == "flagged" else "-all"))
     with open(a.set) as f:
         docs = json.load(f)["documents"]
     if not a.skip_run:
@@ -120,7 +125,7 @@ def main():
         c["azure_pages"] += truth["summary"]["pages_to_check"]
         c["verified"] += truth["summary"]["verified"]
         c["fields"] += truth["summary"]["fields"]
-        md = pages_md(os.path.join(a.out, a.engine, "truth", doc + ".md"))
+        md = pages_md(os.path.join(a.run, "truth", doc + ".md"))
         pdf = pdfium.PdfDocument(os.path.join(a.pdfs, doc + ".pdf"))
         lp = {p["page"]: p for p in layer["pages"]}
         for pt, pb in zip(truth["pages"], blind["pages"]):
@@ -174,7 +179,7 @@ def main():
     prec = c["field_hits"] / max(1, c["field_ocr"])
     rec = c["field_hits"] / max(1, c["field_ref"])
     f1 = 2 * prec * rec / max(1e-9, prec + rec)
-    print(f"# verify eval: {a.engine}\n")
+    print(f"# verify eval: {a.engine}, --verify-fields {a.verify_fields}\n")
     print(f"- pages {c['pages']}, graded (embedded text) {c['graded_pages']}")
     print(f"- truth run: values verified {c['verified']} of {c['fields']}; "
           f"pages to Azure {c['azure_pages']}")
@@ -195,7 +200,7 @@ def main():
         print(f"\n{k} ({len(ex)}):")
         for e in ex[:15]:
             print("   ", e)
-    with open(os.path.join(a.out, a.engine, "summary.json"), "w") as f:
+    with open(os.path.join(a.run, "summary.json"), "w") as f:
         json.dump(dict(c), f, indent=1)
 
 

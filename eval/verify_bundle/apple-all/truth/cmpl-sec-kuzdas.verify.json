@@ -1,0 +1,1395 @@
+{
+ "source": "cmpl-sec-kuzdas.pdf",
+ "markdown": "cmpl-sec-kuzdas.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:46:59Z",
+ "verify_fields": "all",
+ "azure_pages": "",
+ "summary": {
+  "fields": 87,
+  "verified": 87,
+  "check": 0,
+  "unchecked": 0,
+  "pages_to_check": 0,
+  "embedded_text_pages": 0,
+  "agreed_spans": 441,
+  "unagreed_spans": 39
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 36,
+    "agreed_spans": 33,
+    "agreed_words": 0.957,
+    "unagreed": [
+     {
+      "line": 18,
+      "text": "liami, FL 3313",
+      "missing": [
+       "liami,",
+       "3313"
+      ]
+     },
+     {
+      "line": 20,
+      "text": "Telephone: (305) 982-630",
+      "missing": [
+       "982-630"
+      ]
+     },
+     {
+      "line": 44,
+      "text": "anJOHN ROWLAND,",
+      "missing": [
+       "anJOHN"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$65 million",
+     "value": 65000000.0,
+     "line": 72,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 32,
+    "agreed_spans": 30,
+    "agreed_words": 0.916,
+    "unagreed": [
+     {
+      "line": 73,
+      "text": "Defendants, however, recognized at the time of their misrepresentations 24 that they could not commence production of modular units until the Patterson MegaFactory,",
+      "missing": []
+     },
+     {
+      "line": 84,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 33,
+    "agreed_spans": 31,
+    "agreed_words": 0.93,
+    "unagreed": [
+     {
+      "line": 83,
+      "text": "acts, transactions, practices, and courses of business that form the basis for the violations 27 alleged in this Complaint occurred in this District.",
+      "missing": []
+     },
+     {
+      "line": 87,
+      "text": "COMPLAIN:",
+      "missing": [
+       "COMPLAIN:"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 77q(a)",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 78j(b)",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 240.10b-5",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 77t(b)",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 78u(d)",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 77v(a)",
+     "line": 79,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 78aa(a)",
+     "line": 79,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 35,
+    "agreed_spans": 30,
+    "agreed_words": 0.878,
+    "unagreed": [
+     {
+      "line": 61,
+      "text": "22HQ.",
+      "missing": [
+       "22HQ."
+      ]
+     },
+     {
+      "line": 65,
+      "text": "Rowland was co-",
+      "missing": [
+       "co-"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "24 founder and President of S2A Modular and the Investment LLCs.",
+      "missing": [
+       "founder"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "Kuzdas owned equal controlling shares in MGM HQ, which controls S2A Modular and 26 which served as manager to the Investment LLCs.",
+      "missing": []
+     },
+     {
+      "line": 74,
+      "text": "COMPLAINT SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "50%",
+     "line": 49,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 33,
+    "agreed_spans": 32,
+    "agreed_words": 0.986,
+    "unagreed": [
+     {
+      "line": 91,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "50.1%",
+     "line": 39,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 26,
+    "agreed_spans": 25,
+    "agreed_words": 0.984,
+    "unagreed": [
+     {
+      "line": 85,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$65 million",
+     "value": 65000000.0,
+     "line": 35,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "80%",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "90%",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 35,
+    "agreed_spans": 31,
+    "agreed_words": 0.886,
+    "unagreed": [
+     {
+      "line": 44,
+      "text": "15 AND WILL NOT BE REGISTERED UNDER THE SECURITIES ACT OF 1933(.1\"",
+      "missing": [
+       "1933(.1\""
+      ]
+     },
+     {
+      "line": 56,
+      "text": "as practicable.\"Defendants repcated this during several online meetings with investors. For",
+      "missing": [
+       "practicable.\"Defendants",
+       "repcated"
+      ]
+     },
+     {
+      "line": 90,
+      "text": "28 | they signed a subscription agreement and received membership interests in the form of non-",
+      "missing": [
+       "non-"
+      ]
+     },
+     {
+      "line": 92,
+      "text": "COMPLAIN:",
+      "missing": [
+       "COMPLAIN:"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "100%",
+     "line": 50,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "October 11, 2022",
+     "value": "2022-10-11",
+     "line": 58,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "50%",
+     "line": 74,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "50%",
+     "line": 76,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 33,
+    "agreed_spans": 30,
+    "agreed_words": 0.949,
+    "unagreed": [
+     {
+      "line": 63,
+      "text": "B. Pre-Roll-Up, Defendants Made Material Misrepresentations Whil",
+      "missing": [
+       "Whil"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "oliciting Investments from Retail Investor",
+      "missing": [
+       "oliciting"
+      ]
+     },
+     {
+      "line": 97,
+      "text": "SEC : KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 30,
+    "agreed_spans": 29,
+    "agreed_words": 0.987,
+    "unagreed": [
+     {
+      "line": 79,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$4 million",
+     "value": 4000000.0,
+     "line": 43,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$20,000,000",
+     "value": 20000000.0,
+     "line": 43,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 24, 2022",
+     "value": "2022-05-24",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1 million",
+     "value": 1000000.0,
+     "line": 73,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 33,
+    "agreed_spans": 30,
+    "agreed_words": 0.895,
+    "unagreed": [
+     {
+      "line": 21,
+      "text": "\"cach one of the factories that we build, they have their own LLC, it’s their own investor",
+      "missing": [
+       "\"cach"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "group. So you’re welcome to invest in multiple factories, but cach factory [has] a lowest",
+      "missing": [
+       "cach"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$10 million",
+     "value": 10000000.0,
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$10 million",
+     "value": 10000000.0,
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$200,000",
+     "value": 200000.0,
+     "line": 27,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 5, 2022",
+     "value": "2022-04-05",
+     "line": 39,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$20 million",
+     "value": 20000000.0,
+     "line": 79,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 29,
+    "agreed_spans": 27,
+    "agreed_words": 0.887,
+    "unagreed": [
+     {
+      "line": 67,
+      "text": "“Texas [w]e probably got about 500 units that we need to build.” He then told investors 24 in a July 2023 webinar that “we’ve got 155 units in Prescott, Arizona that we have to have",
+      "missing": []
+     },
+     {
+      "line": 83,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$8 million",
+     "value": 8000000.0,
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 24, 2022",
+     "value": "2022-05-24",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "November 2, 2023",
+     "value": "2023-11-02",
+     "line": 71,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 31,
+    "agreed_spans": 29,
+    "agreed_words": 0.914,
+    "unagreed": [
+     {
+      "line": 33,
+      "text": "Defendants, despite making claims for 11 years that they had hundreds of contracts, did not obtain this certificate until January 17,",
+      "missing": []
+     },
+     {
+      "line": 91,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 5, 2022",
+     "value": "2022-04-05",
+     "line": 67,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$400 million",
+     "value": 400000000.0,
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 24, 2022",
+     "value": "2022-05-24",
+     "line": 77,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$400 million",
+     "value": 400000000.0,
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$400 million",
+     "value": 400000000.0,
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 29,
+    "agreed_spans": 27,
+    "agreed_words": 0.943,
+    "unagreed": [
+     {
+      "line": 45,
+      "text": "| Investment LLC (Issuer) | Year Capital First Raised | Amount Raised Through February 2023 |",
+      "missing": []
+     },
+     {
+      "line": 83,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 6, 2022",
+     "value": "2022-07-06",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "August 16, 2022",
+     "value": "2022-08-16",
+     "line": 21,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1.5B",
+     "value": 1500000000.0,
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$14,676,541",
+     "value": 14676541.0,
+     "line": 47,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$15,240,000",
+     "value": 15240000.0,
+     "line": 48,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$7,230,000",
+     "value": 7230000.0,
+     "line": 49,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$14,415,000",
+     "value": 14415000.0,
+     "line": 50,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$7,600,000",
+     "value": 7600000.0,
+     "line": 51,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$59 million",
+     "value": 59000000.0,
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$59 million",
+     "value": 59000000.0,
+     "line": 73,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 34,
+    "agreed_spans": 29,
+    "agreed_words": 0.864,
+    "unagreed": [
+     {
+      "line": 72,
+      "text": ". Post-Roll-Up, Defendants Made Additional Material Misrepresentation",
+      "missing": [
+       "Misrepresentation"
+      ]
+     },
+     {
+      "line": 74,
+      "text": "oncerning Institutional Deman",
+      "missing": [
+       "oncerning",
+       "Deman"
+      ]
+     },
+     {
+      "line": 80,
+      "text": "online shareholder meeting on July 26, 2023, Kuzdas prepared a script, read by the 26 company’s Chief Revenue Officer, telling investors that “we’ve had institutions knocking on",
+      "missing": []
+     },
+     {
+      "line": 88,
+      "text": "OMPLAIN",
+      "missing": [
+       "OMPLAIN"
+      ]
+     },
+     {
+      "line": 90,
+      "text": "EC V. KUZDAS ET",
+      "missing": [
+       "EC"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$5,065,000",
+     "value": 5065000.0,
+     "line": 35,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 77b(a)(1)",
+     "line": 62,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 78c(a)(10)",
+     "line": 66,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 26, 2023",
+     "value": "2023-07-26",
+     "line": 80,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$110 million",
+     "value": 110000000.0,
+     "line": 86,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 15,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 31,
+    "agreed_spans": 28,
+    "agreed_words": 0.844,
+    "unagreed": [
+     {
+      "line": 49,
+      "text": "in the same meeting, Kuzdas declared that this foreign government had “signed a[] [letter of 14 intent] and now they’re going to contract on $6.4 million of construction.",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "years regarding imminent institutional investment, they knew that such institutional 18 investment was not, in fact, “at the doorstep.” Instead, Defendants purposefully",
+      "missing": []
+     },
+     {
+      "line": 93,
+      "text": "SEC V. KUZDAS ET AL.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-07616",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/23/26",
+     "value": "2026-07-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 24, 2024",
+     "value": "2024-04-24",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$3 billion",
+     "value": 3000000000.0,
+     "line": 15,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "October 3, 2024",
+     "value": "2024-10-03",
+     "line": 19,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 22, 2025",
+     "value": "2025-01-22",
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$60 million",
+     "value": 60000000.0,
+     "line": 37,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$250 million",
+     "value": 250000000.0,
+     "line": 37,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$6.4 million",
+     "value": 6400000.0,
+     "line": 49,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "August 28, 2024",
+     "value": "2024-08-28",
+     "line": 67,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  }
+ ]
+}

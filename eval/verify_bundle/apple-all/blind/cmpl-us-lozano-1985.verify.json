@@ -1,0 +1,5784 @@
+{
+ "source": "cmpl-us-lozano-1985.pdf",
+ "markdown": "cmpl-us-lozano-1985.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:49:54Z",
+ "verify_fields": "all",
+ "azure_pages": "1-13",
+ "summary": {
+  "fields": 74,
+  "verified": 0,
+  "check": 74,
+  "unchecked": 0,
+  "pages_to_check": 13,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 35,
+    "agreed_spans": 25,
+    "agreed_words": 0.839,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "PATRICK S. BUPARA",
+      "missing": [
+       "PATRICK"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "ESTHER Z. HIRSH",
+      "missing": [
+       "HIRSH"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "San Francisco, CA",
+      "missing": [
+       "CA"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "ORIEMAL FILED",
+      "missing": [
+       "ORIEMAL"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "FEB 241985",
+      "missing": [
+       "241985"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "DISTRICT:VURT",
+      "missing": [
+       "DISTRICT:VURT"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "TRICT C: GALIFORN/",
+      "missing": [
+       "TRICT",
+       "C:",
+       "GALIFORN/"
+      ]
+     },
+     {
+      "line": 46,
+      "text": "# 085 2780 M",
+      "missing": [
+       "085",
+       "2780",
+       "M"
+      ]
+     },
+     {
+      "line": 52,
+      "text": "(Government Collection -",
+      "missing": [
+       "Collection"
+      ]
+     },
+     {
+      "line": 56,
+      "text": "Student Loan Case)",
+      "missing": [
+       "Student"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-cv-01720-SLM",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1345",
+     "line": 64,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 29, 1972",
+     "value": "1972-09-29",
+     "line": 68,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "March 30, 1973",
+     "value": "1973-03-30",
+     "line": 68,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 12, 1973",
+     "value": "1973-09-12",
+     "line": 70,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "February 14, 1974",
+     "value": "1974-02-14",
+     "line": 70,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 23 1975",
+     "value": "1975-01-23",
+     "line": 70,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "August 27, 1975",
+     "value": "1975-08-27",
+     "line": 70,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 18, 1975",
+     "value": "1975-12-18",
+     "line": 70,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 31, 1975",
+     "value": "1975-12-31",
+     "line": 70,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 31, 1975",
+     "value": "1975-12-31",
+     "line": 70,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 18,
+    "agreed_spans": 17,
+    "agreed_words": 0.941,
+    "unagreed": [
+     {
+      "line": 31,
+      "text": "There remains due and owing on said notes the total sum",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-cv-01720-SLM",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 1, 1976",
+     "value": "1976-09-01",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 31, 1976",
+     "value": "1976-12-31",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,500.00",
+     "value": 1500.0,
+     "line": 7,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,000.00",
+     "value": 1000.0,
+     "line": 7,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,500.00",
+     "value": 1500.0,
+     "line": 7,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,000.00",
+     "value": 1000.0,
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$2,000.00",
+     "value": 2000.0,
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,000.00",
+     "value": 1000.0,
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$250.00",
+     "value": 250.0,
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,000.00",
+     "value": 1000.0,
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$250.00",
+     "value": 250.0,
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$250.00",
+     "value": 250.0,
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$250.00",
+     "value": 250.0,
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 19, 1980",
+     "value": "1980-05-19",
+     "line": 27,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$12,867.56",
+     "value": 12867.56,
+     "line": 33,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 16,
+    "agreed_spans": 12,
+    "agreed_words": 0.936,
+    "unagreed": [
+     {
+      "line": 17,
+      "text": "Esther b",
+      "missing": [
+       "b"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "BYESTHER",
+      "missing": [
+       "BYESTHER"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "rm OBD-1g",
+      "missing": [
+       "rm",
+       "OBD-1g"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "8.76 DO",
+      "missing": [
+       "8.76",
+       "DO"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-cv-01720-SLM",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$12,867.56",
+     "value": 12867.56,
+     "line": 5,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "February 21, 1985",
+     "value": "1985-02-21",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "7%",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1961(b)",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "February 21, 1985",
+     "value": "1985-02-21",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 71,
+    "agreed_spans": 24,
+    "agreed_words": 0.08,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "DEPARTMENT OF MRAL.THE FOUCATION, AND MELPARE OFFICE OF EDUCATION WASHINGTOM.",
+      "missing": [
+       "MRAL.THE",
+       "FOUCATION,",
+       "WASHINGTOM."
+      ]
+     },
+     {
+      "line": 9,
+      "text": "O.C.29292 PROMISSORY NOTE",
+      "missing": [
+       "O.C.29292"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "TSYATE",
+      "missing": [
+       "TSYATE"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "herernafter called the \"maker,\".",
+      "missing": [
+       "herernafter"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "promise to par 1o",
+      "missing": []
+     },
+     {
+      "line": 25,
+      "text": "- ,herernalter called ihe \"'lender,\" localed al\"'",
+      "missing": [
+       ",herernalter"
+      ]
+     },
+     {
+      "line": 28,
+      "text": "_ which has been",
+      "missing": []
+     },
+     {
+      "line": 30,
+      "text": "advanced to me, together with simple interest at the rate of",
+      "missing": []
+     },
+     {
+      "line": 32,
+      "text": "percent per annum on the outstanding balance of such som and asthorized late chaiges.",
+      "missing": [
+       "annum",
+       "asthorized",
+       "late",
+       "chaiges."
+      ]
+     },
+     {
+      "line": 34,
+      "text": "all reasonable altorney's fees, and other costs and charges necessary for the collection of any amount not paid when due.",
+      "missing": [
+       "altorney's",
+       "paid"
+      ]
+     },
+     {
+      "line": 34,
+      "text": "from the borrower ady portion of the interest whuch is payable by lhe U.S. Gorernment.",
+      "missing": [
+       "from",
+       "ady",
+       "whuch",
+       "Gorernment."
+      ]
+     },
+     {
+      "line": 36,
+      "text": "The lender will not collect or allempt to collect",
+      "missing": []
+     },
+     {
+      "line": 38,
+      "text": "The maker further understands and aglees, and it is understood belween the parlies that:",
+      "missing": [
+       "aglees,",
+       "understood",
+       "belween"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "I. Pursuant to an agreement with the U.S. Commissioner of Education, hereinafter called the \"Comnissioner,\" the lender has applied for federal Loan Insurance under Tulle IV, Part B of the Higher Education Act of 1965, as amended, hereinalter called the \"Act,\" on all sums advanced pursuant to this note.",
+      "missing": [
+       "agreement",
+       "Tulle"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "Such terms of this note as are subject to interpretation shall be construed in the light of Federal Regulations pertaining to such Act, a Copy of which is on file with the lender.",
+      "missing": []
+     },
+     {
+      "line": 42,
+      "text": "Il. Repayment of Principal, fogether with interest thereon, shall be rade over a period commeacing",
+      "missing": [
+       "fogether"
+      ]
+     },
+     {
+      "line": 44,
+      "text": ",months alter the date on which the maker ceases to",
+      "missing": [
+       ",months"
+      ]
+     },
+     {
+      "line": 46,
+      "text": "carry, al an unstitufion determined to be eligible for that purpose under the Act and Regulations pertarning thereto, bereinafter called an \"eligible institution,\" at least one-balf lhe normal full-tume academic work load, as delermined by such institution, and lexcept whes paragraph IVI?) .m.",
+      "missing": [
+       "unstitufion",
+       "pertarning",
+       "bereinafter",
+       "one-balf",
+       "normal",
+       "full-tume",
+       "whes",
+       ".m."
+      ]
+     },
+     {
+      "line": 50,
+      "text": "after such dale but in no event over a period in excess of 15 years from the data nt - of repayment period but at the option of the lende",
+      "missing": [
+       "after",
+       "dale",
+       "15",
+       "from",
+       "data",
+       "nt"
+      ]
+     },
+     {
+      "line": 52,
+      "text": "to and become a part of the principal amount of tr",
+      "missing": [
+       "tr"
+      ]
+     },
+     {
+      "line": 58,
+      "text": "with : Either (1) a rapayment schedule to be pio",
+      "missing": [
+       "rapayment",
+       "pio"
+      ]
+     },
+     {
+      "line": 64,
+      "text": "(2) the terms of a separate instrument which shai",
+      "missing": [
+       "instrument",
+       "shai"
+      ]
+     },
+     {
+      "line": 68,
+      "text": ") the period prior to lhe commencenent ent of the repayment period, be added",
+      "missing": [
+       "commencenent",
+       "ent"
+      ]
+     },
+     {
+      "line": 70,
+      "text": "idic installnents in accordance",
+      "missing": [
+       "installnents"
+      ]
+     },
+     {
+      "line": 72,
+      "text": "hade a part of this note: or o commencenent of the reoayment",
+      "missing": [
+       "commencenent"
+      ]
+     },
+     {
+      "line": 76,
+      "text": "- required to pay to the Conmissioner",
+      "missing": [
+       "Conmissioner"
+      ]
+     },
+     {
+      "line": 78,
+      "text": ".....uiums note. Payments covering the period of time extending from the date of execution of this note 1o",
+      "missing": [
+       ".....uiums",
+       "from"
+      ]
+     },
+     {
+      "line": 80,
+      "text": "in order to orovide insurance coverare for ihe orinc",
+      "missing": [
+       "order",
+       "orovide",
+       "coverare",
+       "orinc"
+      ]
+     },
+     {
+      "line": 82,
+      "text": "the comnencement of ihe repaymént period (estumated in accordance with unstractons issued by the Commissioner) stall be due and payable innediately.",
+      "missing": [
+       "comnencement",
+       "(estumated",
+       "unstractons",
+       "stall"
+      ]
+     },
+     {
+      "line": 84,
+      "text": "IV. This note is sobject also to the following conditions:",
+      "missing": [
+       "sobject"
+      ]
+     },
+     {
+      "line": 86,
+      "text": "(I) The maber may at hisoption and withaud penaltd prepay all ofany pad af the proncipal glus ine accroed isterest at ang time.",
+      "missing": [
+       "maber",
+       "hisoption",
+       "withaud",
+       "penaltd",
+       "prepay",
+       "ofany",
+       "pad",
+       "proncipal",
+       "glus",
+       "accroed",
+       "isterest",
+       "ang"
+      ]
+     },
+     {
+      "line": 88,
+      "text": "(2) Installments of priacigal need not be pard during sufy period (A) düring which the maker is carrying, al an eligible institution, & full-tiae acaderic work load.",
+      "missing": [
+       "priacigal",
+       "sufy",
+       "düring",
+       "full-tiae",
+       "acaderic"
+      ]
+     },
+     {
+      "line": 90,
+      "text": "(9) aot in excess of three years during which the maker is ?",
+      "missing": [
+       "aot"
+      ]
+     },
+     {
+      "line": 90,
+      "text": "nember of the Arped Forces of the United States, (C) not in excess of three years during which the naker seives as a voluateer under the Peace Corps Act or(D) not iniexcess of thiee years during which the maker serves as a volunteer under Title VIll of the Econonic Opportenily Act of 1964;",
+      "missing": [
+       "seives",
+       "voluateer",
+       "or(D)",
+       "VIll",
+       "Econonic",
+       "Opportenily",
+       "1964;"
+      ]
+     },
+     {
+      "line": 90,
+      "text": "and such perrod in (A), (B);",
+      "missing": [
+       "perrod"
+      ]
+     },
+     {
+      "line": 90,
+      "text": "(C), or (D) shall not be iaclided in deteiiaing the period during which repayment must be completed.",
+      "missing": [
+       "iaclided",
+       "deteiiaing",
+       "must",
+       "completed."
+      ]
+     },
+     {
+      "line": 92,
+      "text": "•113",
+      "missing": [
+       "•113"
+      ]
+     },
+     {
+      "line": 94,
+      "text": "(3) Notwithstanding the minimum repayment peried sel Tarth in paragriph il;",
+      "missing": [
+       "peried",
+       "Tarth",
+       "paragriph"
+      ]
+     },
+     {
+      "line": 94,
+      "text": "installmedd payments shall be made at an ansual rate of not less than the dillerence belteen lhe combined annual rate of repaynent on all other noles of the naker which are insered under the Act and $360.",
+      "missing": [
+       "installmedd",
+       "dillerence",
+       "belteen",
+       "combined",
+       "annual",
+       "repaynent",
+       "noles",
+       "insered",
+       "$360."
+      ]
+     },
+     {
+      "line": 95,
+      "text": "(4) In the event of a failore to make any payment when due hereunder, the entire unpard indebledness including interesl due and accrued thereon shall at the optien of the lender or any other holder of this note become inmediately due and payable.",
+      "missing": [
+       "failore",
+       "optien"
+      ]
+     },
+     {
+      "line": 96,
+      "text": "(5) In the event of the maker's death or fotal and peraasent disaoility the ungaid indebtedness dereunder shall be canceled.",
+      "missing": [
+       "maker's",
+       "peraasent",
+       "disaoility",
+       "ungaid",
+       "indebtedness",
+       "dereunder"
+      ]
+     },
+     {
+      "line": 97,
+      "text": "(6) The maker shall inform the lender or any other holder of this nole of any change or changes in his address of his status as at least a half-tine student.",
+      "missing": [
+       "(6)"
+      ]
+     },
+     {
+      "line": 105,
+      "text": "8t 3t",
+      "missing": [
+       "8t"
+      ]
+     },
+     {
+      "line": 115,
+      "text": "CAVEAT This nore sholl be execuled without security and wishout andorsecent, encepl ther, if the moker is o minor ond this note mould nas, under",
+      "missing": [
+       "nore",
+       "sholl",
+       "execuled",
+       "without",
+       "wishout",
+       "andorsecent,",
+       "encepl",
+       "ther,",
+       "ond",
+       "nas,"
+      ]
+     },
+     {
+      "line": 117,
+      "text": "State Low, create a binding abligation, endorsement moy be required.",
+      "missing": [
+       "create",
+       "abligation,",
+       "endorsement"
+      ]
+     },
+     {
+      "line": 119,
+      "text": "The lander shell supply a copy of shis note to the moker.",
+      "missing": [
+       "lander",
+       "supply",
+       "shis"
+      ]
+     },
+     {
+      "line": 121,
+      "text": "DE FORM \"164,/.",
+      "missing": [
+       "DE",
+       "FORM",
+       "\"164,/."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "the leims of a separate instrumen: which sha",
+     "idic insta lments in accordance",
+     "ln orcer to provide insurance coverase tor ihe orino",
+     "(1) The maker may at hisoplich and wittout penslty peper all orany pas af ihe poncipat alas ine accrued interest at any time.",
+     "Opportenity Acl of 1954; and such period in (Al, (8),(C), or (0) shall net be iscluded in deleimining tthe period dering which repaysest aust be compieted.",
+     "о ee deee e tede d d brt poles dr tae aeke wnich drt iaserto under the Act ano 3500",
+     "This note shall be executed withou! security and withoul endorsament, except that, if the moker is a minor and this nole mould nol, unde.",
+     "State Low, creoie a binding obligation, endorsament moy be requined. Th",
+     "OE FOR! 1164, 1/."
+    ],
+    "missing_words": 128
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-cv-01720-SLM",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$360",
+     "value": 360.0,
+     "line": 94,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "9/29/72",
+     "value": "1972-09-29",
+     "line": 109,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 59,
+    "agreed_spans": 16,
+    "agreed_words": 0.032,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "Page 5 of 18",
+      "missing": [
+       "18"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "FEDERAL INSURED STUDENT LOAN PROGRAM (Public Lom 89-329, IV.B) CITY",
+      "missing": [
+       "CITY"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "DEPARTMENT OF MEAL.TH.",
+      "missing": [
+       "DEPARTMENT"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "HINOTOR, 0.e00e",
+      "missing": [
+       "HINOTOR,",
+       "0.e00e"
+      ]
+     },
+     {
+      "line": 31,
+      "text": ". Rereinalter calted Ihe \"maker.\"\" promise to par to",
+      "missing": [
+       "Rereinalter"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "..hereinatter called the \"lender,\" localed at\"",
+      "missing": []
+     },
+     {
+      "line": 35,
+      "text": "• lhe sum of$ 1,000.00",
+      "missing": []
+     },
+     {
+      "line": 37,
+      "text": "advanced to me, logether with simple interest at the rate of",
+      "missing": [
+       "me,",
+       "simple"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "- percest per annum on the outstanding balance of such sum and authorized late chaiges.",
+      "missing": [
+       "authorized",
+       "chaiges."
+      ]
+     },
+     {
+      "line": 41,
+      "text": "all reasonable attorney's fees, and olber costs and charges necessary for the collection of any anount not paid when due.",
+      "missing": [
+       "attorney's",
+       "olber",
+       "necessary"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "The lender will net collect or altempt to collect from the borrower any portion of the interes!",
+      "missing": [
+       "net",
+       "altempt"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "which is payable by the U.S. Government.",
+      "missing": []
+     },
+     {
+      "line": 43,
+      "text": "The maker further underslands and agrees, and if is understood belween the parties that:",
+      "missing": [
+       "agrees,",
+       "parties"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "I. Pursuant to an apreement with the U.S. Commissioner of Education, hereinatter called the \"Commissioner,\" the lender has applied for Federal Loan Insurance under Title IV, Part B of the Higher Education Aet of 1965, as amended, bereinalter callled the \"Act,\" on all sums adranced pursuant to this note.",
+      "missing": [
+       "apreement",
+       "applied",
+       "bereinalter",
+       "callled"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "Such terms of this sole as are subject to interpretation shall be construed in.",
+      "missing": [
+       "terms",
+       "sole"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "the light of Federal Regulations pertaining to such Act, a copy of which is on file with the lender.",
+      "missing": [
+       "file"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "II. Repayment of Principal, together with interest thereon, shall be made over a period commencing",
+      "missing": [
+       "together"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "months after the date on which the naker ceases to",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "carry, at an institution delernined to be eligible for that purpose under the Act and Regulations pertaining therelo, hereinaller called an \"eligible institution,\" at least one-half the nommal full-time academic work lead,as delermined by such institotion, and (except when paraglaph IV(2) applies) ending nol less than five nor more than ten years after such date but in no event over a perrod in excess of 15 years from the dale of execution of this note.",
+      "missing": [
+       "delernined",
+       "one-half",
+       "lead,as",
+       "paraglaph",
+       "IV(2)",
+       "nol",
+       "five",
+       "nor",
+       "more",
+       "but"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "Interest sball accrue during the period prior to the conmencenent",
+      "missing": [
+       "conmencenent"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "овтерзунсяи pemoo but datne optton orine lenoet aeco not oe pato duringatnat pertose guco accivco iterest saatt, ditne conmenccuea ousne ecpsyment perioo, be dooed lo and become a part of the principal amount of the loan.",
+      "missing": [
+       "овтерзунсяи",
+       "pemoo",
+       "but",
+       "datne",
+       "optton",
+       "orine",
+       "lenoet",
+       "aeco",
+       "duringatnat",
+       "pertose",
+       "guco",
+       "accivco",
+       "saatt,",
+       "ditne",
+       "conmenccuea",
+       "ecpsyment"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "Repayment of principal, fogether with interest thereos, shall be made in periodie installments in accordance with: Either (1) a racaynent schedule to be plovided by the lender prior to the conmencenent of the repaynent period which will be nade a part of this acte: or",
+      "missing": [
+       "fogether",
+       "periodie",
+       "plovided",
+       "conmencenent",
+       "repaynent",
+       "nade"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "(2) the terms of a separale instrument which shall be subject to the leins of this note and which the dorrower agrees to execule prior lo sonmencement of the repayment period.",
+      "missing": [
+       "terms",
+       "separale",
+       "instrument",
+       "leins",
+       "dorrower",
+       "agrees",
+       "execule",
+       "sonmencement"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "III. The maker agrees to pay.",
+      "missing": [
+       "agrees"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "the lender in addition to interest and principal due ae alount equal to the preriums that the lender is requrred to pay to the Commissioner in order to provide insurance covelage for the principal anount of this note.",
+      "missing": [
+       "addition",
+       "alount",
+       "equal",
+       "preriums",
+       "requrred",
+       "order"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Payments covering the period of time extending fron the date of execution of this note to the conmencement of the repayment period (estimated in accordance with instructions issued by lhe Commissicner) shall be due and payable innediately.",
+      "missing": [
+       "covering",
+       "fron",
+       "(estimated"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "IV. This note is subject also to the tollowing conditions:",
+      "missing": [
+       "also",
+       "tollowing"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "(3 The msker may at his option and without peraly regay all or sry patt of ihe puncipal plus une acued interest at any tume.",
+      "missing": [
+       "msker",
+       "peraly",
+       "regay",
+       "sry",
+       "patt",
+       "puncipal",
+       "une",
+       "acued"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "(2) Instaliments of principal need not be paid duting any peried (Al during which the maker is calying, at an eligible institulion, a full-time acadenic work load.",
+      "missing": [
+       "duting",
+       "calying,",
+       "institulion,",
+       "acadenic"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "(9) not in excess of three years during which the maker is, a member of.the Armed Foices of the United States, (C) not in excess of three years during which the maker serves as a volunteer under the Peace Corps Actor (D) notugjexcess of three years during which the maker serves as a volunteer under Tille VIll of the Economic Dpportuhity Act of 1964;",
+      "missing": [
+       "notugjexcess",
+       "Economic",
+       "Dpportuhity",
+       "1964;"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "and such peried in (4), (B),(C), pD) shall nal be included in deteionigg the perid dering which repamment most be completed.",
+      "missing": [
+       "(B),(C),",
+       "pD)",
+       "nal",
+       "included",
+       "deteionigg",
+       "perid",
+       "dering",
+       "repamment",
+       "most",
+       "completed."
+      ]
+     },
+     {
+      "line": 67,
+      "text": "() Motmihotading is muniean repeynent benod ser eort an pilapdteh i, iatulet periaents shalt De made at an anvat rale of ml les thar ihe dillerence",
+      "missing": [
+       "Motmihotading",
+       "muniean",
+       "repeynent",
+       "benod",
+       "ser",
+       "eort",
+       "pilapdteh",
+       "iatulet",
+       "periaents",
+       "shalt",
+       "anvat",
+       "rale",
+       "ml",
+       "les",
+       "thar",
+       "dillerence"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "between the conbined annual rate of regaymeal on all other notes of the maker which are insured under the Act and $360.",
+      "missing": [
+       "between",
+       "conbined",
+       "annual",
+       "regaymeal"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "(4) In the event of a failure lo make any paysent when due hereunder, the entire unpaid indebledness including interest due and accrued thereon shall at the option of the lender or any other holder of this acle become inmedfately due and payable.",
+      "missing": [
+       "paysent",
+       "acle",
+       "inmedfately"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "(S) In the event of the maker's death or lotal and permanent disability the unpaid indebledness hereunder shall be canceled.",
+      "missing": [
+       "(S)"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "(6) The maker shall infora the leader or an ether holder of this noté of any change or chanpes in his adtress or his slatus as at leasl a haltime stdent.",
+      "missing": [
+       "infora",
+       "leader",
+       "ether",
+       "noté",
+       "change",
+       "chanpes",
+       "adtress",
+       "leasl",
+       "haltime",
+       "stdent."
+      ]
+     },
+     {
+      "line": 79,
+      "text": "Iadrua",
+      "missing": [
+       "Iadrua"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "Др(32",
+      "missing": [
+       "Др(32"
+      ]
+     },
+     {
+      "line": 89,
+      "text": "554 5. 25k",
+      "missing": [
+       "25k"
+      ]
+     },
+     {
+      "line": 95,
+      "text": "This nore sholl bé execuled withoul security and withoul endorsement, except thot, if the maker is o minor and this note mould not, under State Low, create o binding obligation, endorsement may be required.",
+      "missing": [
+       "bé",
+       "withoul",
+       "security",
+       "endorsement,",
+       "thot,",
+       "create",
+       "endorsement",
+       "required."
+      ]
+     },
+     {
+      "line": 97,
+      "text": "CAVEATI",
+      "missing": [
+       "CAVEATI"
+      ]
+     },
+     {
+      "line": 99,
+      "text": "The lender sholl supply a copy of this note to the maker.",
+      "missing": []
+     },
+     {
+      "line": 101,
+      "text": "DE FORK 1164, 3/69",
+      "missing": [
+       "FORK",
+       "3/69"
+      ]
+     }
+    ],
+    "missing_lines": [
+     ". „Aerernaller calted lhe \"maker.\"\" promise lo par to",
+     "• Ihe sum or$ 1,000.00",
+     "овltрeynen petpo bur autne opttbn brane lender neconot de pato durngatnst peros docn accrvco iterest snatt, detne conmencehen ousne ispayment perioo, be dooed",
+     "testhe teimis bad separate instrüaeat waleh snatl oe suojecato tne telas de taus soic ano waich tne dorlower agrces to exccute priorto cosmencement of the fepaymen",
+     "ea ta e pei te, r0 shalnolde ialue in deeening ine serlo deing which repaymenl must be completes.",
+     "(3) Motmitstading ise miamn tepayrest genies set fora ia paragual líf pestallaeod payaents sball be mese al ae aosal rate of not less ihae lte differeace",
+     "(6) The aster sball infore the lesder or ame ather holter af this coé ef any chage or changes in his assiess er his slatus as al least a ball-tume siodeal.",
+     "DE FORM 1164, 3/ES"
+    ],
+    "missing_words": 138
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-cv-01720-SLM",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$ 1,000.00",
+     "value": 1000.0,
+     "line": 35,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$360",
+     "value": 360.0,
+     "line": 69,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "3/30/73",
+     "value": "1973-03-30",
+     "line": 91,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 59,
+    "agreed_spans": 13,
+    "agreed_words": 0.048,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "Document1 Filed 02122/85 Page6 06679",
+      "missing": [
+       "Document1",
+       "02122/85",
+       "Page6",
+       "06679"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "DEPARTMENT OF MEAL.",
+      "missing": [
+       "MEAL."
+      ]
+     },
+     {
+      "line": 5,
+      "text": "TH, EDUCATIOM, AND WELFARE OFFICE OF EDUCATION WASMINGTON. O.C. 20202",
+      "missing": [
+       "TH,",
+       "EDUCATIOM,",
+       "OFFICE",
+       "WASMINGTON.",
+       "O.C.",
+       "20202"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "FEDERAL INSURED STUDENT LOAN PROGRAM (Public Law 89-329, IV-B)",
+      "missing": [
+       "Law"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "CITY",
+      "missing": [
+       "CITY"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "STATE",
+      "missing": [
+       "STATE"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "• hereinalter called the \"maker,\"\" promise to par to",
+      "missing": [
+       "par"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "• hereinafter called the 'lender,\" localed al'",
+      "missing": []
+     },
+     {
+      "line": 28,
+      "text": ". the sumos1,500.00 which has been",
+      "missing": [
+       "sumos1,500.00"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "advanced to ae, logether with simple interest at the rate of",
+      "missing": [
+       "ae,",
+       "rate"
+      ]
+     },
+     {
+      "line": 34,
+      "text": "percest per annum on the outstandiog balance of such sum and authorized late charges,",
+      "missing": [
+       "per",
+       "outstandiog",
+       "authorized"
+      ]
+     },
+     {
+      "line": 36,
+      "text": "The lender will not collect or altempt to collec!",
+      "missing": [
+       "altempt"
+      ]
+     },
+     {
+      "line": 38,
+      "text": "Iton the borromer any portion of the-interest whuch is payable by the U.S. Government.",
+      "missing": [
+       "Iton"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "The maker further understands and agtees, ándot isundersioed telween the partres that",
+      "missing": [
+       "agtees,",
+       "ándot",
+       "isundersioed",
+       "telween",
+       "partres"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "I. Pursuint to an agreement with the U.S. Commissioner of-Education, hereinafter called the \"Conmissioner,\" the lender has applied for Federal Loan Insurance under Tille IV, Part B of the Higher Education Act of 1965, as amended, Mereinalter called the \"Act,\" on all suns advanced pursuant lo this note.",
+      "missing": [
+       "Pursuint",
+       "applied",
+       "Mereinalter",
+       "suns"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "Such terms of this note as ale subyect to interpretation shall be construed, in the light of Federal Regulations pertaining to such Act, a copy of which is on file with ihe lender.",
+      "missing": [
+       "construed,",
+       "pertaining"
+      ]
+     },
+     {
+      "line": 44,
+      "text": "I. Repayment of Principal, fogether with interest thereon, shall be made over a period conmenciag",
+      "missing": [
+       "fogether",
+       "conmenciag"
+      ]
+     },
+     {
+      "line": 46,
+      "text": "_ months alter the date on which the maker ceases to",
+      "missing": [
+       "months",
+       "alter"
+      ]
+     },
+     {
+      "line": 48,
+      "text": "carry, at an institution determined lo be eligible for that purpose under the Act and Regulations pertaining therelo, hereimafter callled an \"eligible institution,",
+      "missing": [
+       "pertaining",
+       "therelo,",
+       "hereimafter",
+       "callled"
+      ]
+     },
+     {
+      "line": 50,
+      "text": "\" at least one.",
+      "missing": []
+     },
+     {
+      "line": 52,
+      "text": "half the nommal full-time academic work load, as delermined by such institution, and (except when paragraph IV(2) applies) ending not less than frve nor more than ten years after such date but in no event over a perrod in excess of 15 years trom the date of execution of this note.",
+      "missing": [
+       "delermined",
+       "(except",
+       "frve",
+       "nor",
+       "after"
+      ]
+     },
+     {
+      "line": 52,
+      "text": "Interest shall acciue during the period prior to the conmencement of repaynent period but at the option of the lendes need not be pard during that period.",
+      "missing": [
+       "acciue",
+       "conmencement",
+       "pard"
+      ]
+     },
+     {
+      "line": 52,
+      "text": "Such accrued interest shall, at the conmencement of the repaynent period, be added to and decone a part of the principal amount of the loan.",
+      "missing": [
+       "conmencement"
+      ]
+     },
+     {
+      "line": 52,
+      "text": "Repayrent of principal, logether with interest thereon, shall be made in periodic instailments in accordance with: Either (I) a repayment schedule to be provided by the lender prior to the conmencement of the repayment peried which will be made a part of this note: or",
+      "missing": [
+       "Repayrent",
+       "instailments",
+       "Either",
+       "conmencement",
+       "peried"
+      ]
+     },
+     {
+      "line": 54,
+      "text": "(2) the terms of a separale instrument which shall be subject to the leims of this note and which the borrower agrees to execute prior to commencenent of the repayment period.",
+      "missing": [
+       "agrees"
+      ]
+     },
+     {
+      "line": 56,
+      "text": "III. The maker agiees to pay.",
+      "missing": []
+     },
+     {
+      "line": 56,
+      "text": "the lender in adfition to interest and principal due an amount equal to the premiuns that the lender is requrred to pay to the Commissioner",
+      "missing": [
+       "adfition",
+       "requrred"
+      ]
+     },
+     {
+      "line": 58,
+      "text": "in order to provide insurance coverage for the principal'amount of this note.",
+      "missing": [
+       "order"
+      ]
+     },
+     {
+      "line": 58,
+      "text": "Paynents covering the period of tine extending fiom the date of execution of this note to the comnencement of the repayment perrod (estunated in accordance with iastructions issued by the Commissioner) shall be due and payable inmediately.",
+      "missing": [
+       "fiom",
+       "comnencement",
+       "(estunated",
+       "iastructions",
+       "inmediately."
+      ]
+     },
+     {
+      "line": 60,
+      "text": "IV. This note is subyett atso to the tollawung conagur ioamsti",
+      "missing": [
+       "subyett",
+       "atso",
+       "tollawung",
+       "conagur",
+       "ioamsti"
+      ]
+     },
+     {
+      "line": 62,
+      "text": "' re mae n a ai opaia an mie penai prae l r ae or re eicioa plue ne sesed itres a any ime.",
+      "missing": [
+       "re",
+       "mae",
+       "n",
+       "ai",
+       "opaia",
+       "mie",
+       "penai",
+       "prae",
+       "l",
+       "r",
+       "ae",
+       "eicioa",
+       "plue",
+       "ne",
+       "sesed",
+       "itres",
+       "ime."
+      ]
+     },
+     {
+      "line": 64,
+      "text": "(2) Instaliments of priscipal need not be paid during any period (A) during which Ihe maker is carrying, at an eligible institelien, a fulf-time academic work load,",
+      "missing": [
+       "institelien,",
+       "fulf-time"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "(3) not in excess of three years during which the maker is a meiber of the Arned Forces of the United Stales, (C) not in excess of three years during which the maker serves as a volunteer under the Peace Corps Act or (D) not in excess of three years during which the maker serves as a volunteer under Title VIll of the Economic Opportunity Act of 1964;",
+      "missing": [
+       "meiber",
+       "Stales,"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "and such period in (A), (B), (C), or (D) shall nol be included in determiaing the period during which repayment must be completed ) Motwithstanding the minimum repayment period set forth if paiagraph 1l, installment payments shall be made at an annual rate of not less than the differenc",
+      "missing": [
+       "nol",
+       "included",
+       "determiaing",
+       "must",
+       "completed",
+       "Motwithstanding",
+       "minimum",
+       "set",
+       "forth",
+       "if",
+       "paiagraph",
+       "1l,",
+       "installment",
+       "payments",
+       "annual",
+       "rate",
+       "differenc"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "elween the combined annual rate of repayment on all other notés of the naker which are insured under the Act and $36",
+      "missing": [
+       "elween",
+       "combined",
+       "annual",
+       "rate",
+       "notés",
+       "are",
+       "$36"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "(4) In the event of a lailure to nake any payment when due hereunder, the entire unpaid indedledness including interest due and accrued thereon shall at the option of the lender or any other holder of this note become inmediately due and payable",
+      "missing": [
+       "indedledness",
+       "inmediately"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "(S) In the event of the maker's death or fotaf and permanent disability the unpard indebloness hereunder shall be canceled.",
+      "missing": [
+       "(S)",
+       "death",
+       "fotaf",
+       "permanent",
+       "indebloness"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "(6) The aaker shall infora the lender of am other holder of this nole of any change of changes in his addiess of his status as at least a halt-tume student.",
+      "missing": [
+       "aaker",
+       "infora",
+       "am",
+       "halt-tume"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "SIGMATURE",
+      "missing": [
+       "SIGMATURE"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "lindimi",
+      "missing": [
+       "lindimi"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "SIGHATURE",
+      "missing": [
+       "SIGHATURE"
+      ]
+     },
+     {
+      "line": 81,
+      "text": "ADDRESS",
+      "missing": [
+       "ADDRESS"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "ADDRESS",
+      "missing": [
+       "ADDRESS"
+      ]
+     },
+     {
+      "line": 93,
+      "text": "This note shall bé execuled withoul security and without andorsement, except thar, if the maker is o minor and this note mould nol, under Stete Low, (1ao1e a binding obligetion, endarsament noy be required.",
+      "missing": [
+       "bé",
+       "execuled",
+       "withoul",
+       "security",
+       "without",
+       "andorsement,",
+       "except",
+       "thar,",
+       "if",
+       "o",
+       "minor",
+       "mould",
+       "nol,",
+       "Stete",
+       "(1ao1e",
+       "obligetion,",
+       "endarsament"
+      ]
+     },
+     {
+      "line": 97,
+      "text": "Tie Landerdall supply a copr, of this nere to rhe moter.",
+      "missing": [
+       "Tie",
+       "Landerdall",
+       "supply",
+       "copr,",
+       "nere",
+       "rhe",
+       "moter."
+      ]
+     },
+     {
+      "line": 99,
+      "text": "OE FORM 1164, 3/69",
+      "missing": [
+       "1164,",
+       "3/69"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "DEPARTMENT OF HEALTM, EDUCATION, ANO WELFARE",
+     "\"hereinalter called lhe \"maker,\". promise In pay 1o",
+     "The raaker further understands and aglees, and.ot is understocd belween the parties that",
+     "IW. This note is subyect also to fhe follawing conditons.",
+     "() The naker may at his oplion and wrthout penally prepay all or any part of the priscipal plus ine accrued interest at any time.",
+     "Stota Low Craote a binding obligotion, andorstnent noy ba recticen.d"
+    ],
+    "missing_words": 71
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-cv-01720-SLM",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$36",
+     "value": 36.0,
+     "line": 67,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "9/12/73",
+     "value": "1973-09-12",
+     "line": 87,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 71,
+    "agreed_spans": 26,
+    "agreed_words": 0.168,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 3:85-CV-01720-SLRR PRIASUAV4F851 Filed 02/22/85 Page (.0l 1D",
+      "missing": [
+       "3:85-CV-01720-SLRR",
+       "PRIASUAV4F851",
+       "(.0l"
+      ]
+     },
+     {
+      "line": 7,
+      "text": ", heremalter called the \"Makor, promise to aay to",
+      "missing": [
+       "heremalter",
+       "\"Makor,",
+       "aay"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "Creishton University. hereinafter called the \"Lendar, located at Umpha, Nebr.",
+      "missing": [
+       "hereinafter",
+       "\"Lendar,",
+       "located",
+       "Umpha,",
+       "Nebr."
+      ]
+     },
+     {
+      "line": 13,
+      "text": "whuch has bean advaneed to",
+      "missing": [
+       "whuch",
+       "advaneed"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "ne, together with simple interest at the rate of",
+      "missing": [
+       "together"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "percent per annum on she outstending balance of such sum",
+      "missing": [
+       "balance"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "sno asmorizeo iste enarges, dis fessoroe attornty s ters, and other costs and chafges necessary for the collection of any amount not paid when due.",
+      "missing": [
+       "sno",
+       "asmorizeo",
+       "iste",
+       "enarges,",
+       "dis",
+       "fessoroe",
+       "attornty",
+       "ters,",
+       "chafges"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "The Lender will not collect or attempt to collect from the borrower any portion of the interest which is payable by the U.S. Government.",
+      "missing": [
+       "Government."
+      ]
+     },
+     {
+      "line": 23,
+      "text": "The moker further underalords and egrees, ord it is understood belwees the parties fhat",
+      "missing": [
+       "further",
+       "underalords",
+       "egrees,",
+       "ord",
+       "belwees",
+       "parties",
+       "fhat"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Lesder hos opplied for federal",
+      "missing": [
+       "Lesder",
+       "federal"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "equeonent",
+      "missing": [
+       "equeonent"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "with the U.",
+      "missing": [
+       "U."
+      ]
+     },
+     {
+      "line": 35,
+      "text": "L.Puriuakt lo gn",
+      "missing": [
+       "L.Puriuakt",
+       "lo",
+       "gn"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "rereimofter colled the \"Adt\".",
+      "missing": [
+       "rereimofter",
+       "\"Adt\"."
+      ]
+     },
+     {
+      "line": 39,
+      "text": "Title IV, Port 8 of the",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "Aera ets male ore tube te interpeedian sholl be cosatred in she lighi dl fedarel regelations perteining to sed orto coprmich aioncte",
+      "missing": [
+       "Aera",
+       "ets",
+       "tube",
+       "interpeedian",
+       "cosatred",
+       "lighi",
+       "fedarel",
+       "regelations",
+       "perteining",
+       "sed",
+       "orto",
+       "coprmich",
+       "aioncte"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "on all surta adranced",
+      "missing": [
+       "surta",
+       "adranced"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "that period.",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "•Perod mistilli",
+      "missing": [
+       "•Perod",
+       "mistilli"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "ar the sritaipol dirowl",
+      "missing": [
+       "ar",
+       "sritaipol",
+       "dirowl"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "s lerde phiette tof tonneee and et ith he borrt!?",
+      "missing": [
+       "lerde",
+       "phiette",
+       "tof",
+       "tonneee",
+       "et",
+       "ith",
+       "borrt!?"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "parase intrnent wiich shall a at",
+      "missing": [
+       "parase",
+       "intrnent",
+       "wiich"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "ogrees to execute prior 1",
+      "missing": [
+       "execute"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "rest period.",
+      "missing": [
+       "rest"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "Either",
+      "missing": [
+       "Either"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "OPOT",
+      "missing": [
+       "OPOT"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "IV. This sote is subinst to the follemina coaditions:",
+      "missing": [
+       "sote",
+       "subinst",
+       "follemina",
+       "coaditions:"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "(1) Tha Maker may ot his option and witheat peroity prepay oll or any port ef the prinsipal plas the ascrued inereit of ony time.",
+      "missing": [
+       "ot",
+       "witheat",
+       "peroity",
+       "prepay",
+       "oll",
+       "prinsipal",
+       "plas",
+       "ascrued",
+       "ony",
+       "time."
+      ]
+     },
+     {
+      "line": 69,
+      "text": "(2it molmbed. fp iei pal ardis trett ee fore doeinaid dihe yperlad feduir dhe rmed forcel ofraei gniled Salea, le lnotin exeat l",
+      "missing": [
+       "(2it",
+       "molmbed.",
+       "fp",
+       "iei",
+       "pal",
+       "ardis",
+       "trett",
+       "ee",
+       "fore",
+       "doeinaid",
+       "dihe",
+       "yperlad",
+       "feduir",
+       "dhe",
+       "rmed",
+       "forcel",
+       "ofraei",
+       "gniled",
+       "Salea,",
+       "le",
+       "lnotin",
+       "exeat"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "notineet odd tole yete dei nhe Pioce e pa eioo o",
+      "missing": [
+       "notineet",
+       "odd",
+       "tole",
+       "yete",
+       "dei",
+       "Pioce",
+       "pa",
+       "eioo"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "conoal Osporlaite dtar heand Cued period la Di eor oohall",
+      "missing": [
+       "conoal",
+       "Osporlaite",
+       "dtar",
+       "heand",
+       "Cued",
+       "la",
+       "eor",
+       "oohall"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "brres os o solaler",
+      "missing": [
+       "brres",
+       "solaler"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "whih ihe Moler seiveso",
+      "missing": [
+       "whih",
+       "Moler",
+       "seiveso"
+      ]
+     },
+     {
+      "line": 81,
+      "text": "TEI dr1e",
+      "missing": [
+       "TEI",
+       "dr1e"
+      ]
+     },
+     {
+      "line": 83,
+      "text": "vi isberwem wor vc torpiter",
+      "missing": [
+       "vi",
+       "isberwem",
+       "wor",
+       "vc",
+       "torpiter"
+      ]
+     },
+     {
+      "line": 85,
+      "text": "diferencs3), Ner mihe eding 2 rariaietneppranan alfdet foth ofthe liph l, latlire ts prerly hel be mahet deael tr afd is les hen the",
+      "missing": [
+       "diferencs3),",
+       "Ner",
+       "mihe",
+       "eding",
+       "rariaietneppranan",
+       "alfdet",
+       "foth",
+       "ofthe",
+       "liph",
+       "latlire",
+       "ts",
+       "prerly",
+       "mahet",
+       "deael",
+       "tr",
+       "afd",
+       "les",
+       "hen"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "phiheofthe lenofodrete fate lyeoinen nhee beze herundero the dutiond peid indebedness inluding interet due and oeersed tharao",
+      "missing": [
+       "phiheofthe",
+       "lenofodrete",
+       "fate",
+       "lyeoinen",
+       "nhee",
+       "herundero",
+       "peid",
+       "indebedness",
+       "inluding",
+       "interet",
+       "oeersed",
+       "tharao"
+      ]
+     },
+     {
+      "line": 89,
+      "text": "holl at she option of the lenser or any otte",
+      "missing": [
+       "holl",
+       "lenser",
+       "otte"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "(5) In the poent of the Malari death oe toral and perreonent dlisablity the unpold indebredness sholl be concalled.",
+      "missing": [
+       "poent",
+       "Malari",
+       "toral",
+       "perreonent",
+       "dlisablity",
+       "unpold",
+       "concalled."
+      ]
+     },
+     {
+      "line": 92,
+      "text": "(6) The Hoker shall inform the lorder of uny olher holder of this rale of ary change or changes in his addiess or hie atatur of of least a haiftime",
+      "missing": [
+       "lorder",
+       "uny",
+       "rale",
+       "addiess",
+       "hie",
+       "atatur",
+       "least"
+      ]
+     },
+     {
+      "line": 98,
+      "text": "ogpros thos he will negoriole repoynent of this nole es cullined in Parograpis Il abone.nat later lhon 120 doya prior to the comsvence.",
+      "missing": [
+       "ogpros",
+       "thos",
+       "negoriole",
+       "repoynent",
+       "cullined",
+       "abone.nat",
+       "lhon",
+       "doya",
+       "comsvence."
+      ]
+     },
+     {
+      "line": 100,
+      "text": "nest of the rozoart peried",
+      "missing": [
+       "nest",
+       "rozoart"
+      ]
+     },
+     {
+      "line": 118,
+      "text": "1%.e",
+      "missing": [
+       "1%.e"
+      ]
+     },
+     {
+      "line": 120,
+      "text": "reaayment priud roflect the actuat rate of intorest naid by the borrowee during the",
+      "missing": [
+       "reaayment",
+       "priud",
+       "roflect",
+       "naid",
+       "borrowee"
+      ]
+     },
+     {
+      "line": 136,
+      "text": "OFFICE CCPY",
+      "missing": [
+       "CCPY"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Whith has bean advanced to",
+     "The moker furthe: inderslards end ogrees, ond it is understood berwees the pories feal",
+     "h.rurivaar o on cortenen",
+     "Title IV, Porr 8 of ihe Migher Educotion",
+     "cintter colled hai at",
+     "aeis f this male os ore sulinet to interprerarian ghall be cosstroad in she light df teieral regelarons pertoining to sal ddto copyoleich tonk",
+     "met peritlpcrese istumen\" wird hel l t",
+     "e lerder tha tee ht cit neke and ofith he boreet peried wtdhmell te pridt to coan efeiet di ge Tapey",
+     "I. Tais aose is subiect to the tollewina ccnditions",
+     "(1) Tea Moker may at his option and withoat pezalty prepuy ofi or any port e sha principal pias the oscrurd inereit of onr tine",
+     "citerencs berloer ihe cemoned role of ropmenno aidnet frth ofghedpk intlie ti preby h dl bn made uarel ie aode h t",
+     "il at heoeithteenetduree mare",
+     "eryeroinen nhe beze he iundetotele dutiond poid indebsedieas insiuding inferat due and secrsed thare",
+     "(3) In the enent of tha Makars death oe torol and perreanent disobility the unpoid indebredness sholl be concelled.",
+     "nent of the repoyient perioo",
+     "PERMANENT ADORESS 303IOLINCOlN. Btral",
+     "AVEAT-THIS NOTE SHALL BE EXECUTED WITHOUT SECURITY AND WITHOUT ENDORSEMENT EXCEPT THAT, IF THE MAKER I",
+     "A MINOR AND THIS NOTE WOULD NOT.",
+     "•BINDING OBLIGATION, ENDORSEMENT MAY BE R"
+    ],
+    "missing_words": 214
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-CV-01720-SLRR",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "25%",
+     "line": 114,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "1%",
+     "line": 118,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "2/14/74",
+     "value": "1974-02-14",
+     "line": 130,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 69,
+    "agreed_spans": 8,
+    "agreed_words": 0.063,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "ncUchAL",
+      "missing": [
+       "ncUchAL"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "ChvUnA",
+      "missing": [
+       "ChvUnA"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "(Pagaaal",
+      "missing": [
+       "(Pagaaal"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "# Case 3:85-CV-01720-SLM PasoneNb Filed 02/22/85",
+      "missing": [
+       "3:85-CV-01720-SLM",
+       "PasoneNb"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "LOZANI JR",
+      "missing": [
+       "LOZANI"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "ANOREW",
+      "missing": [
+       "ANOREW"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "., hereinafter called theMiSti,\" promise to pay tc",
+      "missing": [
+       "theMiSti,\""
+      ]
+     },
+     {
+      "line": 15,
+      "text": "Creighron University. hervinafter called the \"Lender,\" located at Omaha, Nebr. thesumofs.2,000.00",
+      "missing": [
+       "Creighron",
+       "hervinafter",
+       "located",
+       "thesumofs.2,000.00"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "which has been advenced fu",
+      "missing": [
+       "been",
+       "advenced",
+       "fu"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "me. together with simple interest at the rate of",
+      "missing": [
+       "together",
+       "simple"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "—percent por annum on the outstanding bolaneo of such sum",
+      "missing": [
+       "—percent",
+       "por",
+       "such"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "and authorized lato chargen, all ressonable attorney's feas, and othtr cofts and charges necessary for the collection of ary amount not paid when due.",
+      "missing": [
+       "authorized",
+       "lato",
+       "chargen,",
+       "ressonable",
+       "attorney's",
+       "feas,",
+       "othtr",
+       "cofts",
+       "necessary",
+       "collection",
+       "ary"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "The Lender will not colfect or attempt to collect from the borrowor any portion of the intarest which is payable by the U.S. Government.",
+      "missing": [
+       "colfect",
+       "borrowor",
+       "intarest",
+       "is",
+       "payable",
+       "Government."
+      ]
+     },
+     {
+      "line": 27,
+      "text": "The roker further undersonds and ogrees, and la la undersicod batneen the porties thot:",
+      "missing": [
+       "roker",
+       "undersonds",
+       "la",
+       "undersicod",
+       "batneen",
+       "thot:"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Such tarnu of thie nole os ore aubject to wih the lender",
+      "missing": [
+       "Such",
+       "tarnu",
+       "thie",
+       "ore",
+       "aubject",
+       "wih"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "date on which",
+      "missing": []
+     },
+     {
+      "line": 33,
+      "text": "Moker aligible in",
+      "missing": [
+       "aligible"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "Pen Potegroph tv c",
+      "missing": [
+       "Pen",
+       "Potegroph",
+       "tv",
+       "c"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "colled on",
+      "missing": [
+       "colled"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "erwanens pcteinin",
+      "missing": [
+       "erwanens",
+       "pcteinin"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "this nole For thoo but",
+      "missing": [
+       "thoo",
+       "but"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "retirs",
+      "missing": [
+       "retirs"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "3915",
+      "missing": [
+       "3915"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "e odded to on",
+      "missing": [
+       "odded"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "of principal regethar",
+      "missing": [
+       "principal",
+       "regethar"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "ubiect to fre raims of this note and whick the barromar",
+      "missing": [
+       "ubiect",
+       "fre",
+       "raims",
+       "whick",
+       "barromar"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "o axecute pelor te comnencemant of the repay",
+      "missing": [
+       "axecute",
+       "comnencemant"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "IIl. The Moter ogrees s pay the leader in oddition onnisioner isaroir1o",
+      "missing": [
+       "IIl.",
+       "Moter",
+       "leader",
+       "oddition",
+       "onnisioner",
+       "isaroir1o"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "ordine for ite pricielaie do",
+      "missing": [
+       "ordine",
+       "pricielaie",
+       "do"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "за anounl eodlto ite preniam frot the banderd reeues topa",
+      "missing": [
+       "за",
+       "anounl",
+       "eodlto",
+       "preniam",
+       "frot",
+       "banderd",
+       "reeues",
+       "topa"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "h nodetoepe Coreneneneofrae errth peiiedemoled in ordantinturensssted oye commiine ollbe der on",
+      "missing": [
+       "h",
+       "nodetoepe",
+       "Coreneneneofrae",
+       "errth",
+       "peiiedemoled",
+       "ordantinturensssted",
+       "oye",
+       "commiine",
+       "ollbe",
+       "der"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "ol thi nere roynenis corerine te",
+      "missing": [
+       "thi",
+       "nere",
+       "roynenis",
+       "corerine"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "в слосоВиУ 9",
+      "missing": [
+       "в",
+       "слосоВиУ",
+       "9"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "IV. Thie nete ie subject so the tollowing conditicas",
+      "missing": [
+       "Thie",
+       "nete",
+       "subject",
+       "tollowing",
+       "conditicas"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "(1) Tha Maker eay ot his optios ard witheut prnoity prepoy oll or any part of the principal dlus the ascrued insarat of ary lime.",
+      "missing": [
+       "Tha",
+       "eay",
+       "optios",
+       "ard",
+       "witheut",
+       "prnoity",
+       "prepoy",
+       "oll",
+       "principal",
+       "dlus",
+       "ascrued",
+       "insarat",
+       "ary",
+       "lime."
+      ]
+     },
+     {
+      "line": 75,
+      "text": "Hmier matr ihe \"Peone C-agas At, ae TD net il tetea al",
+      "missing": [
+       "Hmier",
+       "matr",
+       "ihe",
+       "\"Peone",
+       "C-agas",
+       "ae",
+       "TD",
+       "net",
+       "il",
+       "tetea",
+       "al"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "iestiturion, a ful!",
+      "missing": [
+       "iestiturion,",
+       "ful!"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "mane (Cl) nat in ucen of",
+      "missing": [
+       "(Cl)",
+       "nat",
+       "ucen"
+      ]
+     },
+     {
+      "line": 81,
+      "text": "which repoyrest must be completed.",
+      "missing": [
+       "repoyrest",
+       "must"
+      ]
+     },
+     {
+      "line": 83,
+      "text": "rimun cepayment pariod ses forth in Poragraph Il, inatoliness payrentı thall be nade of anneol rote of nat less than",
+      "missing": [
+       "rimun",
+       "cepayment",
+       "pariod",
+       "Poragraph",
+       "Il,",
+       "inatoliness",
+       "nade",
+       "anneol",
+       "nat"
+      ]
+     },
+     {
+      "line": 85,
+      "text": "o wilhdondiro the",
+      "missing": [
+       "wilhdondiro"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "•iemo Deimeen the casineo fdie of lepiynen on oll elhet soles of ihe Moler whch ore mswes or the cammismontr undar the An ond",
+      "missing": [
+       "•iemo",
+       "Deimeen",
+       "casineo",
+       "fdie",
+       "lepiynen",
+       "oll",
+       "elhet",
+       "soles",
+       "ihe",
+       "Moler",
+       "whch",
+       "ore",
+       "mswes",
+       "cammismontr"
+      ]
+     },
+     {
+      "line": 89,
+      "text": "Whall an thei apetheofla el eofile to nate elder ornet aore bdue nherenedrotelr dueandpard indeedness including inferent dee and neerued therson",
+      "missing": [
+       "Whall",
+       "thei",
+       "apetheofla",
+       "el",
+       "eofile",
+       "elder",
+       "ornet",
+       "aore",
+       "bdue",
+       "nherenedrotelr",
+       "dueandpard",
+       "indeedness",
+       "including",
+       "inferent",
+       "neerued",
+       "therson"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "(5) In the erent of the Moker's deoth or fstel and parnonent ilictility the unpold indebtednes shail be sancalled.",
+      "missing": [
+       "erent",
+       "fstel",
+       "parnonent",
+       "ilictility",
+       "indebtednes",
+       "shail",
+       "sancalled."
+      ]
+     },
+     {
+      "line": 92,
+      "text": "(6) The Maker thall inform the leader or ony other holdler of this note of ony change or changes in his eodiess of his status os of leost a holftine",
+      "missing": [
+       "(6)",
+       "leader",
+       "holdler",
+       "changes",
+       "eodiess",
+       "status",
+       "leost",
+       "holftine"
+      ]
+     },
+     {
+      "line": 94,
+      "text": "student.",
+      "missing": [
+       "student."
+      ]
+     },
+     {
+      "line": 96,
+      "text": "o that he will cogotiale repayment of this note os oullined in Paragraph Il abore, sot loter than 120 doys prioe to the cormance-",
+      "missing": [
+       "cogotiale",
+       "oullined",
+       "Il",
+       "sot",
+       "loter",
+       "doys",
+       "prioe",
+       "cormance-"
+      ]
+     },
+     {
+      "line": 98,
+      "text": "nant ef the repeyment parise",
+      "missing": [
+       "nant",
+       "ef",
+       "repeyment",
+       "parise"
+      ]
+     },
+     {
+      "line": 100,
+      "text": "TRUTH IN LENDING",
+      "missing": [
+       "TRUTH"
+      ]
+     },
+     {
+      "line": 102,
+      "text": "1. AMOUNT FINANCED (AMOUNT OF LOAN LESS INSURANCE PREMIUM)_51,983.20",
+      "missing": [
+       "PREMIUM)_51,983.20"
+      ]
+     },
+     {
+      "line": 113,
+      "text": "(B) DURING REPAYMENT PERIOD",
+      "missing": []
+     },
+     {
+      "line": 115,
+      "text": "repsyment perod reftect the actusi rate of interest paid by the borrower ourting the",
+      "missing": [
+       "repsyment",
+       "perod",
+       "reftect",
+       "ourting"
+      ]
+     },
+     {
+      "line": 121,
+      "text": "CO-SIGNER--SIGNATURE.",
+      "missing": [
+       "CO-SIGNER--SIGNATURE."
+      ]
+     },
+     {
+      "line": 123,
+      "text": "(inslas",
+      "missing": [
+       "(inslas"
+      ]
+     },
+     {
+      "line": 125,
+      "text": "2444",
+      "missing": [
+       "2444"
+      ]
+     },
+     {
+      "line": 129,
+      "text": "CHECK NUMBER 023055",
+      "missing": [
+       "CHECK",
+       "023055"
+      ]
+     },
+     {
+      "line": 131,
+      "text": "St. Plazo Dinhe, Ne",
+      "missing": [
+       "Dinhe,"
+      ]
+     },
+     {
+      "line": 133,
+      "text": "axl",
+      "missing": [
+       "axl"
+      ]
+     },
+     {
+      "line": 135,
+      "text": "THIS NOTE WOULD NOT, INDER STATE LAW CREATE A",
+      "missing": [
+       "INDER"
+      ]
+     },
+     {
+      "line": 137,
+      "text": "QUIRED. THE BORROWER ACKNOWLEDGES RECEIPT OF AN EXACT COPY OF THIS NOTE.",
+      "missing": []
+     },
+     {
+      "line": 139,
+      "text": "MCREA",
+      "missing": [
+       "MCREA"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "nCUCAAL IIVOUnCU diVUcIE Lynrbwunain",
+     "Case 3:85-CV-01720-SLN PAMTON DNEV Filed 02/22/85 (Pade9F",
+     "which has boen adrenoed lc",
+     "an0 sutnorized 910 Charges, 3ll reasonable 3ftorney's fets, and other costs and charges mectssary tor the colection ot any smount not paid when due",
+     "The konder wil not soilect of attempt to collect from the borrow any portion of the interest which 1s peyeci of tn ua. wwrrneros",
+     "The moker further undervonds ond ogreri, and ie ls understcod between the porties nel:",
+     "barremers akigibie fer federol",
+     "epe ao suu ner go thal 6e us peo to mi s rm d e nane are i e o",
+     "I1l. Tar Moker ogrees so pay the Lender in",
+     "oriie for ite pricipel acpe di",
+     "guorens Peltollne tattio aereltee",
+     "and becore a pe-",
+     "IV. Thia nata le subiect to the following conditiens",
+     "() ise moser may ar his opliet eed witheul penolly prepey all or ony part of the principol plus the occrued inleresl of pry fmne",
+     "which repeynest nost be completed.",
+     "ol milhslondieg the minimun repayment period ses forth in Porograph Ii, inatolinen* payrentı tholl te node of cancol rote of rst less thaa f",
+     "ferarca bermeen the comtined rote of repaynens on oil other sotes of the Maber which are inswed br the camminioner undar the Adt and 33-",
+     "ll at the opith otrtta lesdot orete maee bol",
+     "yeroyment ateenetehereedrolee dtrand pare ledettedness insuding intereat dee and necrues thcir",
+     "ment af the rapeyleht patade that he will aegotiate repoyment of this note os ouliced in Paragraph ll abore, cot latar than 120 deya pelor so the ccmamence-",
+     "TTEMENT EOMENTEO TES DA TE OF NECERT EM PAVAE NAEPXY MEETP, TME MAORE AN RA TE E, THE PB NGP AEDANE TFE AECRMED",
+     "AVEAT-THIS NOTE SHALL BE EXECUTED WITHOUT SECURITY AND WITHOUT ENDORSEMENT EXCEPT THAT, IF THE MAKER"
+    ],
+    "missing_words": 295
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-CV-01720-SLM",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "doubtful_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "doubtful_in_second_reading"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "25%",
+     "line": 109,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 61,
+    "agreed_spans": 10,
+    "agreed_words": 0.061,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# FEDEKAL INSUKED SIUDENI LUAN PRUGKAM",
+      "missing": [
+       "FEDEKAL",
+       "INSUKED",
+       "SIUDENI",
+       "LUAN",
+       "PRUGKAM"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "Case 3:85-CV-01720-SLNRFHORNOYB$Filed 02/22/85 Page 9 of 13",
+      "missing": [
+       "3:85-CV-01720-SLNRFHORNOYB$Filed"
+      ]
+     },
+     {
+      "line": 5,
+      "text": ". hereinafter called the \"Maker,\" promise to pay 1o",
+      "missing": [
+       "1o"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "Cruightoni University. hersinatter called the \"Lender,\" locared at Omata, Nebr, the sumoftL, 000.02",
+      "missing": [
+       "Cruightoni",
+       "hersinatter",
+       "locared",
+       "Omata,",
+       "sumoftL,",
+       "000.02"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "-wnich has bean acrancod lo",
+      "missing": [
+       "-wnich",
+       "acrancod",
+       "lo"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "1 pircent per annum on the outstanding balanse of such sum",
+      "missing": [
+       "pircent",
+       "outstanding",
+       "balanse"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "mis, voosuer we simrs salgrest at ine cate ol",
+      "missing": [
+       "mis,",
+       "voosuer",
+       "we",
+       "simrs",
+       "salgrest",
+       "ine",
+       "cate",
+       "ol"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "and suthorized late charges, all reasonable attorney's feos, and other costs and charges necessary for the collection of any amount not paid when due.",
+      "missing": [
+       "suthorized",
+       "all",
+       "reasonable",
+       "attorney's",
+       "necessary"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "The Lander wiil not collect or attemor to collect from the borrowr any portion of the interest which is agvable by the US. Govermant",
+      "missing": [
+       "Lander",
+       "collect",
+       "attemor",
+       "borrowr",
+       "agvable",
+       "Govermant"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "The moier ferther undaratands ard ogrees, and a is understood betveen the parties thati",
+      "missing": [
+       "moier",
+       "ferther",
+       "undaratands",
+       "ard",
+       "ogrees,",
+       "understood",
+       "betveen",
+       "thati"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "the Lendar has oppred for federel loon",
+      "missing": [
+       "Lendar",
+       "oppred",
+       "federel",
+       "loon"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "rursuest toc",
+      "missing": [
+       "rursuest",
+       "toc"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "Lueti ere odei nala or iher Ceciai st de aued iaehetl, h oineter tled thea peo l un de adpy dlie i",
+      "missing": [
+       "Lueti",
+       "ere",
+       "odei",
+       "nala",
+       "iher",
+       "Ceciai",
+       "de",
+       "aued",
+       "iaehetl,",
+       "h",
+       "oineter",
+       "tled",
+       "thea",
+       "peo",
+       "un",
+       "adpy",
+       "dlie",
+       "i"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "ceta ol hos smn tal te maeetrinel » be sigsa ter tharte nele \"",
+      "missing": [
+       "ceta",
+       "ol",
+       "hos",
+       "smn",
+       "tal",
+       "maeetrinel",
+       "sigsa",
+       "tharte",
+       "nele"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "Hoker eligible in",
+      "missing": [
+       "Hoker",
+       "eligible"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "eing sine (9)",
+      "missing": [
+       "eing",
+       "sine"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "•i.caymanl",
+      "missing": [
+       "•i.caymanl"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "al ohiacine. fomile",
+      "missing": [
+       "al",
+       "ohiacine.",
+       "fomile"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "• oler",
+      "missing": [
+       "oler"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "oct and",
+      "missing": [
+       "oct"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "The Maker ogrees to pay",
+      "missing": [
+       "ogrees"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "seynes pinodl lese matid l acandianoe eit latreaene lued fry the comtusaen) iai be aoe all",
+      "missing": [
+       "seynes",
+       "pinodl",
+       "lese",
+       "matid",
+       "acandianoe",
+       "eit",
+       "latreaene",
+       "lued",
+       "fry",
+       "comtusaen)",
+       "iai",
+       "aoe",
+       "all"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "order te proride insarame cortroge",
+      "missing": [
+       "order",
+       "proride",
+       "insarame",
+       "cortroge"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "dhs eite ta dhe conmescemeal dftte teptynst parad (onatel i siaee",
+      "missing": [
+       "dhs",
+       "eite",
+       "ta",
+       "dhe",
+       "conmescemeal",
+       "dftte",
+       "teptynst",
+       "parad",
+       "(onatel",
+       "i",
+       "siaee"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "perpsbie Tameeiates.",
+      "missing": [
+       "perpsbie",
+       "Tameeiates."
+      ]
+     },
+     {
+      "line": 53,
+      "text": "lV. Tho nace is sabiect to the follgwim condifions:",
+      "missing": [
+       "lV.",
+       "nace",
+       "sabiect",
+       "follgwim",
+       "condifions:"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "(1) The Moter nay of his optios ond without penolty peezey cil ee any port of the principal plus the ocerued interest et cay sime.",
+      "missing": [
+       "Moter",
+       "nay",
+       "ee",
+       "principal",
+       "ocerued",
+       "sime."
+      ]
+     },
+     {
+      "line": 57,
+      "text": "2) lasolmants of principel",
+      "missing": [
+       "lasolmants",
+       "principel"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "durita nnceriod y dbir of tich the",
+      "missing": [
+       "durita",
+       "nnceriod",
+       "y",
+       "dbir",
+       "tich"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "iestituticn, o full",
+      "missing": [
+       "iestituticn,",
+       "full"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "Ecomnie Coperikaie Aut dif iPike ond Seci, peiol in tA., (Bl Cl.",
+      "missing": [
+       "Ecomnie",
+       "Coperikaie",
+       "Aut",
+       "dif",
+       "iPike",
+       "Seci,",
+       "peiol",
+       "tA.,",
+       "(Bl",
+       "Cl."
+      ]
+     },
+     {
+      "line": 65,
+      "text": "or ) .iat nof beindided fn datemeing tha peil o",
+      "missing": [
+       ".iat",
+       "nof",
+       "beindided",
+       "fn",
+       "datemeing",
+       "tha",
+       "peil"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "whish repoynent muat be eompleted.",
+      "missing": [
+       "whish",
+       "repoynent",
+       "muat",
+       "eompleted."
+      ]
+     },
+     {
+      "line": 71,
+      "text": "diforarceMiea its ondiadd miniotne nepreeron olid ter fot inlere dagt lllnalrentpredar tell bemode anrloate odo ton",
+      "missing": [
+       "diforarceMiea",
+       "its",
+       "ondiadd",
+       "miniotne",
+       "nepreeron",
+       "fot",
+       "inlere",
+       "dagt",
+       "lllnalrentpredar",
+       "tell",
+       "bemode",
+       "anrloate",
+       "odo",
+       "ton"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "stall ar the aptth arrat dtd i",
+      "missing": [
+       "stall",
+       "aptth",
+       "arrat",
+       "dtd",
+       "i"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "foilure to",
+      "missing": [
+       "foilure"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "ailuete note tlde ormint nile due erendeiaehy deaend peia indebiedness inluding imerest dee aed arerued thertn",
+      "missing": [
+       "ailuete",
+       "note",
+       "tlde",
+       "ormint",
+       "nile",
+       "erendeiaehy",
+       "deaend",
+       "peia",
+       "indebiedness",
+       "imerest",
+       "aed",
+       "arerued",
+       "thertn"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "(5) Ie the event of the Maker's deoth or tatol and Dernonent disobility the unpaid indablednan shall be cancelied.",
+      "missing": [
+       "Ie",
+       "tatol",
+       "Dernonent",
+       "disobility",
+       "indablednan",
+       "shall",
+       "cancelied."
+      ]
+     },
+     {
+      "line": 80,
+      "text": "(6) The Maker shall inforre the lender or ary other haider of lhis nole el ony charge of changes in his eddress or bis slotus os of leass o bolftimo stulore",
+      "missing": [
+       "shall",
+       "inforre",
+       "ary",
+       "haider",
+       "lhis",
+       "el",
+       "ony",
+       "eddress",
+       "slotus",
+       "stulore"
+      ]
+     },
+     {
+      "line": 82,
+      "text": "mani of lla teseyment pafiede that he wll aegeciane repapment el this nate os ontined in Perograph Il obors-not later ihaa 120 doys prier to the commeme.",
+      "missing": [
+       "lla",
+       "teseyment",
+       "pafiede",
+       "wll",
+       "aegeciane",
+       "repapment",
+       "el",
+       "nate",
+       "ontined",
+       "Perograph",
+       "obors-not",
+       "later",
+       "ihaa",
+       "prier",
+       "commeme."
+      ]
+     },
+     {
+      "line": 86,
+      "text": "1. AMOUNT FINANCED (AMOUNT OF LOAN LESS INSURANCE PREMILM) > 993.07",
+      "missing": [
+       "PREMILM)"
+      ]
+     },
+     {
+      "line": 89,
+      "text": "3. ANNUAL PERCENTAGE RATE",
+      "missing": [
+       "3.",
+       "PERCENTAGE"
+      ]
+     },
+     {
+      "line": 97,
+      "text": "• orro seo ule rotr pait or suat rat.",
+      "missing": [
+       "orro",
+       "seo",
+       "ule",
+       "rotr",
+       "pait",
+       "suat",
+       "rat."
+      ]
+     },
+     {
+      "line": 97,
+      "text": "o1a te i ogma re mteoa",
+      "missing": [
+       "o1a",
+       "i",
+       "ogma",
+       "mteoa"
+      ]
+     },
+     {
+      "line": 99,
+      "text": "to falecs a fibiar raterest swosidy, the rate shown should bo \"lfe\", even thouan",
+      "missing": [
+       "falecs",
+       "fibiar",
+       "raterest",
+       "swosidy,",
+       "shown",
+       "should",
+       "bo",
+       "\"lfe\",",
+       "even",
+       "thouan"
+      ]
+     },
+     {
+      "line": 105,
+      "text": "eaiyrntel peralo ranect the actut nate of iteres ais oy ure Borome durieg tne",
+      "missing": [
+       "eaiyrntel",
+       "peralo",
+       "ranect",
+       "actut",
+       "nate",
+       "iteres",
+       "ais",
+       "oy",
+       "ure",
+       "Borome",
+       "durieg",
+       "tne"
+      ]
+     },
+     {
+      "line": 108,
+      "text": "5. ACCELERATION OF MATURITY DATE BY PREPAYMENFC-STGIVER-- TEREST COMPUTED TO DATE OF RECEIPT OF PAYMEN",
+      "missing": [
+       "PREPAYMENFC-STGIVER--",
+       "TEREST",
+       "COMPUTED",
+       "RECEIPT",
+       "PAYMEN"
+      ]
+     },
+     {
+      "line": 110,
+      "text": "==AAкAAкакиоаитато",
+      "missing": [
+       "==AAкAAкакиоаитато"
+      ]
+     },
+     {
+      "line": 112,
+      "text": "SIGNATURE Cinieii Ligeno D",
+      "missing": [
+       "Cinieii",
+       "Ligeno",
+       "D"
+      ]
+     },
+     {
+      "line": 114,
+      "text": "PERMANENT ADDRESS 2 t41.",
+      "missing": [
+       "t41."
+      ]
+     },
+     {
+      "line": 114,
+      "text": "Sa sicl st. Flora",
+      "missing": [
+       "Sa",
+       "sicl",
+       "Flora"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "FEOFRAL INSURED STUDENT LOAN PROGRAM",
+     "Croighton University, hereisafter called the \"Lender,\" located at Omahs, Nebr. the umoftiz 000.O2_ wiich has bean adranced to",
+     "me, topcore wie silfas talerest dt the tate br",
+     "The msker farther underatands and agrees, and it is undarstood telween the parties that.",
+     "argishetern at pulporode srto et on",
+     "te moker ogreel io poy",
+     "l7. Tho nato is subiect to the falowing conditions",
+     "hich regeyment mat be esmpleted.",
+     "difererseNiensita ondiagd minoin nepreneen alid ter fetin Paredaptlealrent geedartbll be mode tannele ate ofdfles han th",
+     "wall at theeinhdrtte ofdtoiteny maeeelde eentwite bluseiendioet datndpeid indebledness inluding intereit dee and orerued thereen",
+     "(5) In the evere of the Maker's deoth or total ond permonent dlisobility the unpaid indeblednau ahall ba cancalled.",
+     "(6) The Maker sholl inform the lender ar any atiner loaider of this nole of day change or changes in his cddress or bis aletus os of leass o bolftimo",
+     "mani of ila theymeit peniedre sha he aill aegefiate repoyment ef ttis mato os ostied in Paragraph Il obore-net loter ihas 120 doys prior to the comtame.",
+     "reasymarit berld, romect the actusi rate of ieteress olid by the Boenome Surting the",
+     "INTEREST AT ANY FIME. IN THE EVENT",
+     "INTEREB EOMAUTEO TO BATE OF MECERT ON PYMENAEPAYMRE, THE MAKEA SHAG RE ENF R TEF UACCREO",
+     "PERMANENT ADDRESS _ x /L c. Ose 3icP St. PlAzA"
+    ],
+    "missing_words": 220
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-CV-01720",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "25%",
+     "line": 93,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "6/27/75",
+     "value": "1975-06-27",
+     "line": 116,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "mixed_case",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 48,
+    "agreed_spans": 14,
+    "agreed_words": 0.103,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "• FEUEKAL INSUMEU SIUUENI LUAN PRUURAM",
+      "missing": [
+       "SIUUENI",
+       "LUAN",
+       "PRUURAM"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "CREIGHTON UNIVERSITY",
+      "missing": [
+       "CREIGHTON"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "Case 3:85-cv-01720-SLM BroølsmAeYNgrE Filed 02/22/85 Page 10 of 13",
+      "missing": [
+       "BroølsmAeYNgrE"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "1, . Andrew Lozano JE•",
+      "missing": [
+       "Andrew",
+       "JE•"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "hweinele olled the\"haker, momielopiy lo",
+      "missing": [
+       "hweinele",
+       "olled",
+       "the\"haker,",
+       "momielopiy",
+       "lo"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Crmiphton University, herminatter called the \"Lender, Iocated 3f Omaha, Nebr.",
+      "missing": [
+       "Crmiphton",
+       "herminatter",
+       "3f"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "the sum of 3",
+      "missing": []
+     },
+     {
+      "line": 15,
+      "text": "which hos been advanced 1o",
+      "missing": [
+       "hos",
+       "advanced",
+       "1o"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "me. tosether with simple interest at the rate of",
+      "missing": [
+       "tosether"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "percent per snnum on the outstanding bulante of such sunt",
+      "missing": [
+       "bulante"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "and authorized late charges, all rsasasable attorney's fess, and other costs and charges necessary for the collection of any amount not paid when dua The Lander will not collect or attempt to collect from the borrowor any portion of the intaret which is payable by the U.S. Government.",
+      "missing": [
+       "authorized",
+       "rsasasable",
+       "fess,",
+       "Lander",
+       "borrowor",
+       "intaret"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "The mokar furthar undersfonds ond oorees, osd it is underuood betwees the parties shat:",
+      "missing": [
+       "mokar",
+       "undersfonds",
+       "oorees,",
+       "osd",
+       "underuood",
+       "betwees",
+       "shat:"
+      ]
+     },
+     {
+      "line": 25,
+      "text": ".d ia: nal audae dasseed ped fa toarel hea",
+      "missing": [
+       "nal",
+       "audae",
+       "dasseed",
+       "ped",
+       "fa",
+       "toarel",
+       "hea"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "AoMMl. Regaymant of intitil titvricn\" of lesal one-boif a",
+      "missing": [
+       "AoMMl.",
+       "Regaymant",
+       "intitil",
+       "titvricn\"",
+       "lesal",
+       "one-boif"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "IV. Tha note is subiect to the following condition",
+      "missing": [
+       "subiect",
+       "following",
+       "condition"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "(ll The Maker may af his optian and without penaity prapay all or ony port of the priscipol plus the oscrund interett of any time.",
+      "missing": [
+       "(ll",
+       "optian",
+       "penaity",
+       "prapay",
+       "priscipol",
+       "oscrund",
+       "interett"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "# 23222322285222",
+      "missing": [
+       "23222322285222"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "whith repeyneat muit be completed.",
+      "missing": [
+       "whith",
+       "repeyneat",
+       "muit",
+       "completed."
+      ]
+     },
+     {
+      "line": 37,
+      "text": "Tereace beincen the cembined rate of repayment",
+      "missing": [
+       "Tereace",
+       "beincen",
+       "cembined"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "1 orheinanaevee ofo falurete mokeory payneed when duekaraunder, the eatire urgaid ledebtedness inclading iaterest due and occrued thar",
+      "missing": [
+       "orheinanaevee",
+       "ofo",
+       "falurete",
+       "mokeory",
+       "payneed",
+       "duekaraunder,",
+       "eatire",
+       "urgaid",
+       "ledebtedness",
+       "inclading",
+       "iaterest",
+       "occrued",
+       "thar"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "lhn nol beame innediolty ore amd cow",
+      "missing": [
+       "lhn",
+       "nol",
+       "beame",
+       "innediolty",
+       "ore",
+       "amd",
+       "cow"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "(5) In the oneat of the Mokar's deash ar tolal and permazent sobility the ungaid indebledness sholl be conteiled.",
+      "missing": [
+       "oneat",
+       "deash",
+       "tolal",
+       "sobility",
+       "ungaid",
+       "indebledness",
+       "sholl",
+       "conteiled."
+      ]
+     },
+     {
+      "line": 44,
+      "text": "(6) The Moker stell inform the Lender ee ary other halder of thie nate of ony chaage of changes in his oddress ar his statur-os ot leost o halktime",
+      "missing": [
+       "thie",
+       "nate",
+       "chaage",
+       "changes",
+       "oddress",
+       "leost",
+       "halktime"
+      ]
+     },
+     {
+      "line": 48,
+      "text": "ment of he repaytaht pejods that he wit negaliote reprmenl of is nato os ortined ia Parogrash Il above, not loter ihon 120 dors prioe to ite conmesce-",
+      "missing": [
+       "ment",
+       "repaytaht",
+       "pejods",
+       "wit",
+       "negaliote",
+       "reprmenl",
+       "nato",
+       "ortined",
+       "Parogrash",
+       "above,",
+       "ihon",
+       "dors",
+       "prioe",
+       "conmesce-"
+      ]
+     },
+     {
+      "line": 52,
+      "text": "1. AMOUNT FINANCED (AMOUNT OF LOAN LESS INSURANCE PREMIUM)_ $246.95",
+      "missing": [
+       "$246.95"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "t rene tts edaer raterest subaidy, the rate anown should be \"s, aven thoups th",
+      "missing": [
+       "rene",
+       "tts",
+       "edaer",
+       "raterest",
+       "subaidy,",
+       "anown",
+       "should",
+       "aven",
+       "thoups",
+       "th"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "reaiysent berdd refiect the actuat rate of interes puld ty the boeinee dunla the",
+      "missing": [
+       "reaiysent",
+       "berdd",
+       "refiect",
+       "actuat",
+       "interes",
+       "puld",
+       "boeinee",
+       "dunla"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "TTEAES CONAN 0 ATE GF NECE EP ATRE MAE MERT TRE MAREA L SE ENTHE EONO RAL BANE THU ACENED",
+      "missing": [
+       "TTEAES",
+       "CONAN",
+       "0",
+       "ATE",
+       "GF",
+       "NECE",
+       "EP",
+       "ATRE",
+       "MAE",
+       "MERT",
+       "TRE",
+       "MAREA",
+       "EONO",
+       "RAL",
+       "BANE",
+       "THU",
+       "ACENED"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "21630",
+      "missing": [
+       "21630"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "045 P461. 2441/333",
+      "missing": [
+       "045",
+       "P461.",
+       "2441/333"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "DATE12/18/75.",
+      "missing": [
+       "DATE12/18/75."
+      ]
+     },
+     {
+      "line": 81,
+      "text": "BeR Se PlAxA",
+      "missing": [
+       "BeR",
+       "PlAxA"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "LANAOR AND THIS NOTE OULD NOT, UNDER STATE LAN CRATE A BONDING OESEANOAI, ENDORETAENTAEAMAERAEM",
+      "missing": [
+       "LANAOR",
+       "OULD",
+       "LAN",
+       "CRATE",
+       "BONDING",
+       "OESEANOAI,",
+       "ENDORETAENTAEAMAERAEM"
+      ]
+     },
+     {
+      "line": 93,
+      "text": "THE BORROWER ACKNOWIEDGES RECEIPT OF AN EYACT COPY OF THIS NOTE.",
+      "missing": [
+       "ACKNOWIEDGES",
+       "EYACT"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "- FEUEKAL INSUMEU SLUUENI LUAIY PAUUNAIA",
+     "_,horeinafter called the \"Maker,\" promise to pay to",
+     "_which has been adranced to",
+     "Tha makar furthar understonds ond oprges, oed it is underiood belwges the parties thot:",
+     "•CommihiMain efeetprarideierneradigee intereripeineunl dreealerrdepertad imeertendina fompda",
+     "exacuisn of this nose to the cemdcemen d da recorment pediod leltimosed ln ardoncs with instructions inued by the comminioner chal be due o",
+     "diferererD Nermihe ending eie dfpapanten eilddet frnhiafine fea l llren grenr ahol be mode t oesuthe ft afdt bou hon the",
+     "Hhall en the eitheotnie ctrofatrreto role orserrnhit more bess heioediotly datend fayd bedebtednens incleding liatarest due and sccrund thareon",
+     "(5) In the eneat of the Mokar's death or totol ard permazent disability the unpaid indebledeess shall be conceiled.",
+     "menl of fhe repartaht pejies thot he mit negoliate reporent af dia ralo os outined ia Parograah Il sdave, not loter ikan 120 ders priae to ite conmosce.",
+     "copayment aerold reflest the actual rate of interest pald ty the borromer durting the",
+     "PE BET CSMAN %G BATEEE NECEPE GP PEUGEAEPAY MENE, THE MAKEA SY RL SE ENTHE ED HG RAEBANY OF UAECANE",
+     "AVEAT-THIS NOTE SHALL BE EXECUTED WITHOUT SECURITY AND WITHOUT ENDORSEMENT EXCEPT THAT, IF THE MAKER I",
+     "MINOR AND THIS NOTE WOULD NOT, UNDER STATE LAW CREATE A BINDING OBLIGATION, ENDORSEMENT MAY BE R"
+    ],
+    "missing_words": 215
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-cv-01720-SLM",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$246.95",
+     "value": 246.95,
+     "line": 52,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "25%",
+     "line": 59,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 51,
+    "agreed_spans": 11,
+    "agreed_words": 0.061,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "PEDERAL INSURED SIUDENE LUAN PRUGRAN",
+      "missing": [
+       "INSURED",
+       "SIUDENE",
+       "LUAN",
+       "PRUGRAN"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "• Case 3:85-CV-01720-SLM Bo@ssaerNate Filed 02/22/85 Page 11 of 13",
+      "missing": [
+       "Bo@ssaerNate",
+       "02/22/85"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "-. INrematter Called the Maker, promae to pay to",
+      "missing": [
+       "INrematter",
+       "promae"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "250.00Wnich hos bear adranced to",
+      "missing": [
+       "250.00Wnich",
+       "hos",
+       "bear"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Crpighton University, hereinatrer called the \"Lender,\" located af Omiht, Nebr.",
+      "missing": [
+       "Crpighton",
+       "hereinatrer",
+       "Omiht,",
+       "Nebr."
+      ]
+     },
+     {
+      "line": 13,
+      "text": "the sum ofs",
+      "missing": [
+       "ofs"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "me locemerwm simpi itresatoe rote ou",
+      "missing": [
+       "locemerwm",
+       "simpi",
+       "itresatoe",
+       "rote"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "percent per annum on thee outitandina balance of tuch suma",
+      "missing": [
+       "percent",
+       "per",
+       "thee",
+       "outitandina",
+       "tuch",
+       "suma"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "and suthorized lste chames, all reasonable attorney's fees, and other casts and chargs necessary for the collection of any amount not paid when due The Lender will not collict or attempt to collect from the borrower any portion of the interest which is payable by the U.S. Govemment.",
+      "missing": [
+       "suthorized",
+       "lste",
+       "chames,",
+       "reasonable",
+       "casts",
+       "chargs",
+       "when",
+       "collict",
+       "attempt",
+       "collect",
+       "portion",
+       "which",
+       "payable"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "1hg aaker furiber vsderslonda and ogrees, ond ifis yndersoo baracen ie Pottiel mole",
+      "missing": [
+       "1hg",
+       "aaker",
+       "furiber",
+       "vsderslonda",
+       "ogrees,",
+       "ifis",
+       "yndersoo",
+       "baracen",
+       "ie",
+       "Pottiel",
+       "mole"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "Purasant te on ogreeaest with the u. S. Commiguioner of Cewcolion bere-eolttr colled \"",
+      "missing": [
+       "Purasant",
+       "ogreeaest",
+       "with",
+       "Commiguioner",
+       "Cewcolion",
+       "bere-eolttr",
+       "colled"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "Socbecel ofetis nelvofore bieta o nlerpralatiti ahol be contiued in the fighi of federol reguletion pertenisa to detdptslih tind",
+      "missing": [
+       "Socbecel",
+       "ofetis",
+       "nelvofore",
+       "bieta",
+       "nlerpralatiti",
+       "ahol",
+       "contiued",
+       "fighi",
+       "federol",
+       "reguletion",
+       "pertenisa",
+       "detdptslih",
+       "tind"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "sposce under Tile IV.",
+      "missing": [
+       "sposce",
+       "Tile",
+       "IV."
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Port 8 e",
+      "missing": [
+       "Port"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "with the lende:",
+      "missing": [
+       "with",
+       "lende:"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "sorrovers inelipible",
+      "missing": [
+       "sorrovers",
+       "inelipible"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "sepormens of wimipol, logatter",
+      "missing": [
+       "sepormens",
+       "wimipol,",
+       "logatter"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "IV. Thes sote is subiect to the following conditiona:",
+      "missing": [
+       "IV.",
+       "sote"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "(1) The Maker may ot his ootion ond withoit ceroily menay af or ony cort ef the mincinal clus the actrued interest of an tine",
+      "missing": [
+       "ot",
+       "ootion",
+       "menay",
+       "cort",
+       "mincinal",
+       "clus",
+       "actrued",
+       "an",
+       "tine"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "# 22612222322",
+      "missing": [
+       "22612222322"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "voluntser under Tiie VIll ef the",
+      "missing": [
+       "voluntser",
+       "Tiie",
+       "VIll"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "wrica rsposwah mos ce canpitied.",
+      "missing": [
+       "wrica",
+       "rsposwah",
+       "mos",
+       "ce",
+       "canpitied."
+      ]
+     },
+     {
+      "line": 45,
+      "text": "diferesc hor ie cadingt nieiot re rapranann dili te for ot takrutelre e aredtr hode aode u darl ae and es than nhe",
+      "missing": [
+       "diferesc",
+       "hor",
+       "ie",
+       "cadingt",
+       "nieiot",
+       "re",
+       "rapranann",
+       "dili",
+       "ot",
+       "takrutelre",
+       "aredtr",
+       "hode",
+       "darl",
+       "es",
+       "nhe"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "all of the oplion efthe Landar dreny otar halder ofrtidite becee trnadratety dutendpayableedtadness including interest due ond occrued iner.",
+      "missing": [
+       "oplion",
+       "efthe",
+       "Landar",
+       "dreny",
+       "otar",
+       "halder",
+       "ofrtidite",
+       "becee",
+       "trnadratety",
+       "dutendpayableedtadness",
+       "including",
+       "occrued",
+       "iner."
+      ]
+     },
+     {
+      "line": 49,
+      "text": "с сaroo toole to noke",
+      "missing": [
+       "с",
+       "сaroo",
+       "toole",
+       "noke"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "(5) In the arest of the Moker's deoth or totel and pernoneat isability the unpaid indebledness shail be concalled.",
+      "missing": [
+       "arest",
+       "totel",
+       "pernoneat",
+       "isability",
+       "unpaid",
+       "indebledness",
+       "shail"
+      ]
+     },
+     {
+      "line": 52,
+      "text": "(6) The Moiee shall Inferm ihe Lander or ony other bolder of this aote of any changs of chorges in his eddress or his status of of leost o haittime",
+      "missing": [
+       "(6)",
+       "Moiee",
+       "bolder",
+       "aote",
+       "changs",
+       "chorges",
+       "eddress",
+       "status",
+       "haittime"
+      ]
+     },
+     {
+      "line": 54,
+      "text": "studert.",
+      "missing": [
+       "studert."
+      ]
+     },
+     {
+      "line": 56,
+      "text": "mars of dl rape mait pepea thot ho will negotiote repoynent of this nole os culliead in Poragraph Il obore-not loler than 120 doys priot to the conmencce",
+      "missing": [
+       "mars",
+       "dl",
+       "rape",
+       "mait",
+       "pepea",
+       "thot",
+       "repoynent",
+       "culliead",
+       "Il",
+       "obore-not",
+       "loler",
+       "doys",
+       "priot",
+       "conmencce"
+      ]
+     },
+     {
+      "line": 60,
+      "text": "1. AMOUNT FINANCED (AMOUNT OF LOAN LESS INSURANCE PREMIUM) *248-48",
+      "missing": [
+       "*248-48"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "(B) DURING REPAYMEN! PERIOD",
+      "missing": [
+       "REPAYMEN!"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "rapayment ghriula rerrect the actuat rate of interast anid ay the parrawer ouring the",
+      "missing": [
+       "ghriula",
+       "rerrect",
+       "actuat",
+       "interast",
+       "anid",
+       "ay",
+       "parrawer",
+       "ouring"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "4. DELINQUENCY AND DEFAULT CHARGES:",
+      "missing": [
+       "4."
+      ]
+     },
+     {
+      "line": 79,
+      "text": "COMMISSIONER OF EDUCATION).I",
+      "missing": [
+       "EDUCATION).I"
+      ]
+     },
+     {
+      "line": 81,
+      "text": "5. ACCELERATION OF MATURITY DATE BY PREPAYMENf:O-SIGNER--",
+      "missing": [
+       "PREPAYMENf:O-SIGNER--"
+      ]
+     },
+     {
+      "line": 83,
+      "text": "HEEMEN OMPNY 0 DAE OF NECEIP OP PRAYAERALET MEA TME MRE A Y ACG PRE EN HE AEERA BUS Y AERRED",
+      "missing": [
+       "HEEMEN",
+       "OMPNY",
+       "0",
+       "DAE",
+       "NECEIP",
+       "OP",
+       "PRAYAERALET",
+       "MEA",
+       "TME",
+       "MRE",
+       "Y",
+       "ACG",
+       "PRE",
+       "EN",
+       "AEERA",
+       "BUS",
+       "AERRED"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "Caschrero",
+      "missing": [
+       "Caschrero"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "ONUn Ur350",
+      "missing": [
+       "ONUn",
+       "Ur350"
+      ]
+     },
+     {
+      "line": 97,
+      "text": "CAVEAT-THIS NOTE SHALL BE EXECUTED WITHOUT SECURITY AND WITHOUT ENDORSEMENT EXCEPT THAT, IF THE MAKER IS A MINOR AND THIS NOTE WOULD NOT, UNDER STATE LAW CREATE A BINDING OBLIGATION, ENDORSEMENT MAY BE RE QUIRED.",
+      "missing": [
+       "RE",
+       "QUIRED."
+      ]
+     },
+     {
+      "line": 97,
+      "text": "THE BORROWER ACKNOWLEDGES RECEIPT OF ANE COPCT COPY OF THIS NOTE.",
+      "missing": [
+       "ACKNOWLEDGES",
+       "ANE",
+       "COPCT"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Crnghtan University. herenatter called the \"Lender:\" located at Omubs, Nebe. the sumofs.. 250-00 ._ Wrich has boun adranced to",
+     "me looemer wim simpe misres ar toe ate ou",
+     "parcent pi annum on the outstanding balance of such sum",
+     "The aobar fumbar usderstonds ond gorees, cnd it is underdcod balucan the parties that:",
+     "nfant uniei iile iy. eri 3 of theeaes edofo",
+     ".Puriet teion opreraee wish the U, S. Ceamon ore aof 9600 chandedtailltd ne",
+     "(1) The Moker moy of his option ond withoit ceroily weney af or ony gart ef the wintinei elus he arerued interest of ant tinel",
+     "wrice rsporweh tow de cobpiticdd",
+     "diferenea horsie codinaed niaidt repaporenanndiite fort ohe delrtclre e redty he be aode uranui ae and flet thes the",
+     "all or ite option of the Lander or any otter holder of this note became inerediately due and parobl",
+     "(8) The Makne stall inferm sine Lander or ony other balder of this nota of any changd or charges in his oddress of his starus of of leost o haltrine",
+     "rapayment prault reriect the actusi rate of interest auid sy the porrower during the",
+     "MEREST COMNTCOTO DATE GR RECERT OF PAMIEMALIX MEEA ME MARA BN ANGRE ENTE A ER MNE EG AECANED"
+    ],
+    "missing_words": 200
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-CV-01720-SLM",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "25%",
+     "line": 69,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "12/31/75",
+     "value": "1975-12-31",
+     "line": 85,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 47,
+    "agreed_spans": 13,
+    "agreed_words": 0.145,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "Case 3:85-CV-01720-SLM REocssoend Filed 02/22/85 Page 12 of 13",
+      "missing": [
+       "REocssoend"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "LOZANO JEA",
+      "missing": [
+       "JEA"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "cнтeсит сино тижих rpromis toжу та",
+      "missing": [
+       "cнтeсит",
+       "сино",
+       "тижих",
+       "rpromis",
+       "toжу",
+       "та"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "Creighton University, hereinafter called the \"Lender.\" locatod at Omaha.",
+      "missing": [
+       "Creighton"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "Nebr. the sumof5250.in",
+      "missing": [
+       "sumof5250.in"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "._wixh has becn advanced to",
+      "missing": [
+       "._wixh",
+       "becn"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "... percent per ennum on the outstanding balance of such sum",
+      "missing": [
+       "outstanding"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "and authorized late charges, all reasonable attonney's fees, and other costs and charges necessary for the collection of any amount not paid when due Thi",
+      "missing": [
+       "late",
+       "reasonable",
+       "attonney's",
+       "necessary",
+       "Thi"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "Lender mill not collect or attempt ta collect from the borrower any portion of the intarest which is payable by the U.S. Goremment.",
+      "missing": [
+       "ta"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "The noker further underdonds and agreas, ond it ia undersood batmeen the parries that",
+      "missing": [
+       "noker",
+       "further",
+       "underdonds",
+       "agreas,",
+       "undersood",
+       "batmeen",
+       "parries"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "# AEEDATASREEPARZEN",
+      "missing": [
+       "AEEDATASREEPARZEN"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "trore phe dene at exeolion",
+      "missing": [
+       "trore",
+       "phe",
+       "dene",
+       "exeolion"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "nenlparaormeded1o",
+      "missing": [
+       "nenlparaormeded1o"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "ooddien te iae",
+      "missing": [
+       "ooddien",
+       "iae"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "IV. This nato is pubiect to the following comitiom:",
+      "missing": [
+       "IV.",
+       "nato",
+       "pubiect",
+       "following",
+       "comitiom:"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "(1) The Moker nay ee hle oprlan ond withoun famalty prepay oll or any pors of ihe princigal plus the accrued interest of ony tine.",
+      "missing": [
+       "ee",
+       "hle",
+       "oprlan",
+       "withoun",
+       "famalty",
+       "pors",
+       "princigal",
+       "accrued",
+       "tine."
+      ]
+     },
+     {
+      "line": 35,
+      "text": "time ocodemic vork lood.",
+      "missing": [
+       "ocodemic",
+       "vork",
+       "lood."
+      ]
+     },
+     {
+      "line": 35,
+      "text": "sreaet u der Tae",
+      "missing": [
+       "sreaet",
+       "u",
+       "der",
+       "Tae"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "be oegee ason Orietme, dr af ise ond in piit a A o ia (0) tal me to iit a dng t tin",
+      "missing": [
+       "oegee",
+       "ason",
+       "Orietme,",
+       "dr",
+       "ise",
+       "piit",
+       "(0)",
+       "tal",
+       "iit",
+       "dng",
+       "t",
+       "tin"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "vcurteer urder",
+      "missing": [
+       "vcurteer",
+       "urder"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "aiuh feowenl aul e condeled",
+      "missing": [
+       "aiuh",
+       "feowenl",
+       "aul",
+       "condeled"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "streme\" Me ihe coting o oie ad eregenisan fid iet farhi of fhe eptir lit olre si meadey ah et ber made ce de tl at oih dot le thon the",
+      "missing": [
+       "streme\"",
+       "coting",
+       "ad",
+       "eregenisan",
+       "fid",
+       "iet",
+       "farhi",
+       "fhe",
+       "eptir",
+       "lit",
+       "olre",
+       "si",
+       "meadey",
+       "ber",
+       "ce",
+       "tl",
+       "oih",
+       "dot",
+       "le"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "sal a a o ea eleoie ie ne anilae od mes nde dea ne ramnad, liy aur oanet poil bnadbiediene adlaing ieas due and eced dore.",
+      "missing": [
+       "sal",
+       "ea",
+       "eleoie",
+       "ie",
+       "ne",
+       "anilae",
+       "mes",
+       "nde",
+       "dea",
+       "ramnad,",
+       "liy",
+       "aur",
+       "oanet",
+       "poil",
+       "bnadbiediene",
+       "adlaing",
+       "ieas",
+       "eced",
+       "dore."
+      ]
+     },
+     {
+      "line": 47,
+      "text": "(5) In the erent of ihe Maker's desth or fotal ord permanees disability the unpoid indebtedrass shall bo coacolad,",
+      "missing": [
+       "erent",
+       "Maker's",
+       "desth",
+       "ord",
+       "permanees",
+       "disability",
+       "indebtedrass",
+       "bo",
+       "coacolad,"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "161 The Maker shall inlorre the lender of ory other holder of thia nate of any change or charges in his address or his atatus of ot lesul a halltiens meni sf lls rapey Meht paradin that ha will aegatiote rapoymaes of this noto os culined in Poragraph il abere.aul loter shan 120 dapa prinr ta tha commesto",
+      "missing": [
+       "161",
+       "inlorre",
+       "holder",
+       "thia",
+       "atatus",
+       "lesul",
+       "halltiens",
+       "sf",
+       "lls",
+       "rapey",
+       "Meht",
+       "paradin",
+       "ha",
+       "aegatiote",
+       "rapoymaes",
+       "culined",
+       "Poragraph",
+       "abere.aul",
+       "shan",
+       "dapa",
+       "prinr",
+       "ta",
+       "tha",
+       "commesto"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "atudent.",
+      "missing": [
+       "atudent."
+      ]
+     },
+     {
+      "line": 68,
+      "text": "_1L\"",
+      "missing": [
+       "_1L\""
+      ]
+     },
+     {
+      "line": 70,
+      "text": "reasyrant peiodd reflect the aetual rate of interet aaid by the Borrower during the",
+      "missing": [
+       "reasyrant",
+       "peiodd",
+       "interet"
+      ]
+     },
+     {
+      "line": 76,
+      "text": "5. ACCELERATION OF MATURITY DATE BY PREPAYMENGO-SIGNER-",
+      "missing": [
+       "PREPAYMENGO-SIGNER-"
+      ]
+     },
+     {
+      "line": 78,
+      "text": "-----__-AA",
+      "missing": [
+       "-----__-AA"
+      ]
+     },
+     {
+      "line": 80,
+      "text": "EMEREST COMPUTEO TG DATE OF RECEPT OF PAVMENIEPA MENPE,THE MA REASYRANE CR RURREEAS PFUAECRNED SIGNATUREK (undlsaci",
+      "missing": [
+       "EMEREST",
+       "COMPUTEO",
+       "TG",
+       "RECEPT",
+       "PAVMENIEPA",
+       "MENPE,THE",
+       "MA",
+       "REASYRANE",
+       "CR",
+       "RURREEAS",
+       "PFUAECRNED",
+       "SIGNATUREK",
+       "(undlsaci"
+      ]
+     },
+     {
+      "line": 82,
+      "text": "DATE 09/01/76P9",
+      "missing": [
+       "09/01/76P9"
+      ]
+     },
+     {
+      "line": 84,
+      "text": "cad 7",
+      "missing": [
+       "cad",
+       "7"
+      ]
+     },
+     {
+      "line": 86,
+      "text": "9/8|76",
+      "missing": [
+       "9/8|76"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "i.. hereinafser cafled the \"Maker,\" promise to pay to",
+     "The naker fartbar undaralonde and cgreal ard it is andergted betwren ste parties that",
+     "ia oddie te the pi",
+     "iv.lha file i wbrect la lhoo followan cancoliom:",
+     "(1) The Moker nay oe his option and withous pomaty prepay oll or ony pars of ihe principal plus the scrued interedt ot ony time.",
+     "Siterememe site cntng so oie od e regentsin eid et lorhi of he epti lrat lre e cerey ah es be made et pervol at eldot log han thet",
+     "all or the aptian of she ieader de any other hoider of this nste becere imnedietaly due end psyel",
+     "15% In the enem of ihe Moker's deoth or fotal ond permanecs disabilty the unpoid indebtedoen stall te concelied.",
+     "meni af l% repeymeht parada that he will aegatiata capapmees af this noto os cullined in Paragrapah ll abere.cof loter thon 120 dopa prize na lha comeratco",
+     "A MINOR AND THIS NOTE WOULD NOT",
+     "CNEAN ANE ORNO NER ACENOVLOL RECLIPT OE AN SAN COF O S SEAO O OENET NA TE RE"
+    ],
+    "missing_words": 177
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-CV-01720-SLM",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "125%",
+     "line": 64,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 51,
+    "agreed_spans": 12,
+    "agreed_words": 0.094,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "Case 3:85-CV-01720-SLMR+45HX8N#Y6TYFiled 02/22/85 Page 13 of 13",
+      "missing": [
+       "3:85-CV-01720-SLMR+45HX8N#Y6TYFiled"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "LOZANO JRa",
+      "missing": [
+       "JRa"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "_.hertinafter celled the \"\"Maker,\" procnise to pay to",
+      "missing": [
+       "_.hertinafter"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "Greighton University, Irercinatter salled ttre \"Lender,\" located at Omaha, Nebr.",
+      "missing": [
+       "Greighton",
+       "Irercinatter",
+       "ttre"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "thesum ofs250aln _which has bean advanced to",
+      "missing": [
+       "thesum",
+       "ofs250aln",
+       "has",
+       "advanced"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "me. toptther with simplt inttretat the fit o",
+      "missing": [
+       "toptther",
+       "simplt",
+       "inttretat",
+       "fit",
+       "o"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "_percent per anmtin on the owtstanorg bersnce oт suca sum",
+      "missing": [
+       "_percent",
+       "per",
+       "anmtin",
+       "on",
+       "owtstanorg",
+       "bersnce",
+       "oт",
+       "suca",
+       "sum"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "and authorized late charges, all reasonable attorney's fees, and other costs and charges neossury for the coileccion of arry amount not paid when due.",
+      "missing": [
+       "neossury",
+       "coileccion",
+       "arry",
+       "when"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "The Lender will not collect or attempt to collect from the borrower any portion of the interest which is payable by the U.S. Government.",
+      "missing": [
+       "attempt"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "The maker furthar undersiands and oprees, and it is undersiood between the parrias that:",
+      "missing": [
+       "furthar",
+       "undersiands",
+       "oprees,",
+       "undersiood",
+       "between",
+       "parrias",
+       "that:"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "1. Punuone fo en opreenent wilh se u.s",
+      "missing": [
+       "Punuone",
+       "fo",
+       "en",
+       "opreenent",
+       "wilh",
+       "se"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "Lo0o",
+      "missing": [
+       "Lo0o"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "mugnie snиті вine вy",
+      "missing": [
+       "mugnie",
+       "snиті",
+       "вine",
+       "вy"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "sudt te lendt nhis nate os are subjet to interpie",
+      "missing": [
+       "sudt",
+       "te",
+       "lendt",
+       "nhis",
+       "nate",
+       "os",
+       "are",
+       "subjet",
+       "interpie"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "1 aoe ten",
+      "missing": [
+       "aoe",
+       "ten"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "the pninagal onbunt",
+      "missing": [
+       "pninagal",
+       "onbunt"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "o esoynenl s0roovee",
+      "missing": [
+       "o",
+       "esoynenl",
+       "s0roovee"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "223ааза332",
+      "missing": [
+       "223ааза332"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "rior to connercenentei te repae",
+      "missing": [
+       "rior",
+       "connercenentei",
+       "te",
+       "repae"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "porddle ihhtdlarer",
+      "missing": [
+       "porddle",
+       "ihhtdlarer"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "IV. Tha note is subpect to tha follewing condifionsi",
+      "missing": [
+       "IV.",
+       "follewing",
+       "condifionsi"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "(1) The Maker reay of his option and withort pomalty prepay all or any port of the principal plus the ocerued inlerest of eny lime.",
+      "missing": [
+       "reay",
+       "withort",
+       "pomalty",
+       "principal",
+       "ocerued",
+       "inlerest",
+       "lime."
+      ]
+     },
+     {
+      "line": 45,
+      "text": "Siterence Mermithe ondinsed aieetre repmenton elld et fanhiafihe Mopk t titlreif prerly thal be mpde t darelo dd ald bes than ihe shall ar the aphinhofae cág folrame mroe cotter of thd ahe dene rmundera dhy dulio id pord binitbrednes indluding inerest dus and oceraed nhersan",
+      "missing": [
+       "Siterence",
+       "Mermithe",
+       "ondinsed",
+       "aieetre",
+       "repmenton",
+       "elld",
+       "fanhiafihe",
+       "Mopk",
+       "titlreif",
+       "prerly",
+       "mpde",
+       "darelo",
+       "dd",
+       "ald",
+       "bes",
+       "than",
+       "aphinhofae",
+       "cág",
+       "folrame",
+       "mroe",
+       "cotter",
+       "thd",
+       "ahe",
+       "dene",
+       "rmundera",
+       "dhy",
+       "dulio",
+       "id",
+       "pord",
+       "binitbrednes",
+       "indluding",
+       "inerest",
+       "oceraed",
+       "nhersan"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "15) In the erent of the Maker's deoth or fotal and perreanent disability the anpaid indebredress shall te corcolied.",
+      "missing": [
+       "15)",
+       "deoth",
+       "fotal",
+       "perreanent",
+       "anpaid",
+       "indebredress",
+       "te",
+       "corcolied."
+      ]
+     },
+     {
+      "line": 49,
+      "text": "(8) The Maker sholl inform the Lender or eny olher bolder of this note of ony change of chonger in his oddress or hls atotus es ot least a helftims",
+      "missing": [
+       "(8)",
+       "olher",
+       "oddress",
+       "hls",
+       "atotus",
+       "es",
+       "ot",
+       "helftims"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "Seier",
+      "missing": [
+       "Seier"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "mack of tt haymeht pegedes thet he will ngoliate repaysent of this nalte or oulined in Paragreph l!",
+      "missing": [
+       "mack",
+       "tt",
+       "haymeht",
+       "pegedes",
+       "thet",
+       "ngoliate",
+       "repaysent",
+       "nalte",
+       "oulined",
+       "Paragreph"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "abene.cot later than 120 days prior to the commince.",
+      "missing": [
+       "abene.cot",
+       "later",
+       "than",
+       "120",
+       "days",
+       "commince."
+      ]
+     },
+     {
+      "line": 57,
+      "text": "1. AMOUNT FINANCED (AMOUNT OF LOAN LESS INSURANCE PREMIUM) 5 24911",
+      "missing": [
+       "24911"
+      ]
+     },
+     {
+      "line": 58,
+      "text": "2. PREPAID FINANCE CHARGE (INSURANCE PREMUM)",
+      "missing": [
+       "PREMUM)"
+      ]
+     },
+     {
+      "line": 70,
+      "text": "eooymeent period reflect the actual raie of laterest daie by the borromee duricg ine",
+      "missing": [
+       "eooymeent",
+       "raie",
+       "laterest",
+       "daie",
+       "borromee",
+       "duricg",
+       "ine"
+      ]
+     },
+     {
+      "line": 74,
+      "text": "S. ACCELERATION OF MATURITY DATE BY PREPAYMENFO-SIGNER--INFEREST COMPUTEO TG DATE OF RECEUPT O PAYREN",
+      "missing": [
+       "S.",
+       "PREPAYMENFO-SIGNER--INFEREST",
+       "COMPUTEO",
+       "TG",
+       "RECEUPT",
+       "O",
+       "PAYREN"
+      ]
+     },
+     {
+      "line": 76,
+      "text": "ANY PART OF THE PRINCIPAL PLUS THE ACCRUED",
+      "missing": [
+       "PART",
+       "PRINCIPAL"
+      ]
+     },
+     {
+      "line": 80,
+      "text": "Andicei",
+      "missing": [
+       "Andicei"
+      ]
+     },
+     {
+      "line": 82,
+      "text": "PERMANENT ADDRESS 24kle",
+      "missing": [
+       "24kle"
+      ]
+     },
+     {
+      "line": 84,
+      "text": "fiAen",
+      "missing": [
+       "fiAen"
+      ]
+     },
+     {
+      "line": 86,
+      "text": "3id",
+      "missing": [
+       "3id"
+      ]
+     },
+     {
+      "line": 98,
+      "text": "(0/5772 4776 590",
+      "missing": [
+       "(0/5772",
+       "4776",
+       "590"
+      ]
+     },
+     {
+      "line": 100,
+      "text": "THE BORROWER ACKNOWIEOGES RECEIPT OF AN ECACT COPY OF THIS NOTE.",
+      "missing": [
+       "ACKNOWIEOGES",
+       "ECACT"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "_mich hes bean sévancou to",
+     "me. tosthr with simals intarotatterate ol",
+     "nccncnonne outsanee branca ovsuchsuml",
+     "roisury for the coileccice of erry unount not paid whon due.",
+     "Tha moker furitar understands ond ogrees, end it is undecesod betwoen the parries tnat:",
+     "()) The Maker may of his option ond without penolly prepay oll or osy port df the principel plus the ocerved iefarest of osy time",
+     "which repeynert must be complead.",
+     "SitererceNermiheendingihenieidure repaynann eled et fathiefle Mapk l tetlreet perrby thal be mode eanael d atbon n he",
+     "shall at the ape thevee ofa folure to role onder ofnet mhe den heraunderathe duendlporlindebedness ieluding inferest dus and occraed therson",
+     "gorses ihar ne will nsgolale repoynent of this nole gi culliredin Pologropl lE oboe sol lolet ha su doys chof to lse conpitd",
+     "Test of she resaymeat paried",
+     "Ne borrower whether paid ar actrurd, 2uer to ibs tsaymeni esrina.",
+     "* ae reiedis Fhigntr iaterest rubiity, the rate thoen thauld ta \"32%\", even though the",
+     "This should reflect the actual rate of interest paid by the borrower during in",
+     "INTEREST COMRUTED T DATE OF RECEIPT OF TAYMENT,",
+     "ANY PARI UF IHE PHINCIPAL PLUS THE ACCRUED",
+     "PT OF DAVAENP AYMEN, HE MAREЙ SHACHE CN EER DSE AARED",
+     "A MINOR AND THIS NOTE WOULD NOT, UNDER STATE LAW CREATE"
+    ],
+    "missing_words": 212
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:85-CV-01720-SLMR",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "differs_from_usual_docket",
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/22/85",
+     "value": "1985-02-22",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "25%",
+     "line": 64,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "1/5/77",
+     "value": "1977-01-05",
+     "line": 96,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

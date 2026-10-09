@@ -1,0 +1,691 @@
+{
+ "source": "mot-cimontubo-reply.pdf",
+ "markdown": "mot-cimontubo-reply.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:56:10Z",
+ "verify_fields": "flagged",
+ "azure_pages": "1,3-4,6",
+ "summary": {
+  "fields": 31,
+  "verified": 0,
+  "check": 15,
+  "unchecked": 16,
+  "pages_to_check": 4,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [
+    "mixed_case"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 23,
+    "agreed_spans": 18,
+    "agreed_words": 0.805,
+    "unagreed": [
+     {
+      "line": 15,
+      "text": "- against -",
+      "missing": [
+       "against"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "PETRÓLEÓS DE VENEZUELA, S.A. and",
+      "missing": [
+       "PETRÓLEÓS"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "Stuart M. Riback",
+      "missing": [
+       "Riback"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "825 Eighth Avenue, Suite 2900",
+      "missing": [
+       "Avenue,"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "TcL: (212) 981-2300",
+      "missing": [
+       "TcL:"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "20 Civ. 05382",
+     "line": 13,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 20, 2021",
+     "value": "2021-04-20",
+     "line": 29,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 9,
+    "agreed_spans": 8,
+    "agreed_words": 0.733,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "I. The Note Agreement Provides for Default Interest on all Outstanding Amounts",
+      "missing": [
+       "I."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 16,
+    "agreed_spans": 8,
+    "agreed_words": 0.333,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "Co. ofN. Am.,",
+      "missing": [
+       "ofN."
+      ]
+     },
+     {
+      "line": 11,
+      "text": "Citibank, N.A. ». Nyland (CF8), T3d,",
+      "missing": [
+       "T3d,"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "878 F.2d 620 (2d Cir.1989).. a re Gas Reclamation, Inc. Sec. Lilig",
+      "missing": [
+       "Lilig"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "41 F. Supp. 1094 (S.D.N.Y. 1990).",
+      "missing": [
+       "41"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "*: Cr.A.D. 3a 4ost?.",
+      "missing": [
+       "Cr.A.D.",
+       "3a",
+       "4ost?."
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Cen. Mar, Tns Co",
+      "missing": [
+       "Cen.",
+       "Mar,",
+       "Tns"
+      ]
+     },
+     {
+      "line": 20,
+      "text": "11 Samuel Williston & Richard A. Lord, A Treatise on the Law of Contracs § 31:1 (4th ed.9.....",
+      "missing": [
+       "11",
+       "Contracs",
+       "ed.9....."
+      ]
+     },
+     {
+      "line": 22,
+      "text": "https://www.merriam-wehster.com/dictionary/outstanding...",
+      "missing": [
+       "https://www.merriam-wehster.com/dictionary/outstanding..."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Ins. Co. of New York ». Cent. Mut. Ins. Co.,"
+    ],
+    "missing_words": 9
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-CV-05382-GBD-GWG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 31",
+     "line": 20,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 19,
+    "agreed_words": 0.732,
+    "unagreed": [
+     {
+      "line": 15,
+      "text": "The Note Agreement Provides for Default Interest on all Outstanding Amounts Immediately Following First-Missed Payment",
+      "missing": []
+     },
+     {
+      "line": 19,
+      "text": "practice in debtor-creditor arrangements.",
+      "missing": [
+       "debtor-creditor"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "The basic dictionary definition of “outstanding” is “unpaid.” See https://www.merriam-",
+      "missing": [
+       "https://www.merriam-"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "webster.com/dictionary/outstanding (definition #2).",
+      "missing": [
+       "webster.com/dictionary/outstanding"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "agreement. See 11 Samuel Williston & Richard A. Lord, A Treatise on the Law of Contracts § 31:1 (4th",
+      "missing": []
+     },
+     {
+      "line": 37,
+      "text": "ed. 1993) (“[T]echnical terms and words of art are to be given their technical meaning when used in",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "a transaction within their technical field, and by case law to the effect that when words or terms",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Amounts Immediatcly Following the First-Missed Payment"
+    ],
+    "missing_words": 6
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "March 4, 2021",
+     "value": "2021-03-04",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 2.04(a)",
+     "line": 21,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "8.50%",
+     "line": 25,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 31",
+     "line": 35,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 29,
+    "agreed_spans": 27,
+    "agreed_words": 0.974,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "Breed v. Ins.",
+      "missing": [
+       "v."
+      ]
+     },
+     {
+      "line": 37,
+      "text": "Ins. Co. of New York v. Cent.",
+      "missing": [
+       "v."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "percent",
+     "text": "8.5%",
+     "line": 5,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "percent",
+     "text": "8.5%",
+     "line": 31,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 23,
+    "agreed_spans": 14,
+    "agreed_words": 0.493,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "the Note is part of the implementa-",
+      "missing": [
+       "implementa-"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "tion of the Note Agreement.",
+      "missing": [
+       "tion"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Second, it is hardly commercially unreasonable to assess default interest on an entire debt once a debtor misses a payment.",
+      "missing": []
+     },
+     {
+      "line": 17,
+      "text": "Citibank, N.A. v. Nyland (CF8), L ta., 878 F.2d 620, 624–25 (2d Cir.1989) (“The notes provided for annual interest of four percent but, in the event of default, the rate would rise to six percent.",
+      "missing": [
+       "L",
+       "ta.,"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "“commercially unreasonable.” Id.",
+      "missing": [
+       "Id."
+      ]
+     },
+     {
+      "line": 21,
+      "text": "Notably absent from PDVSA’s papers is any explanation of why a debtor who misses a pay-",
+      "missing": [
+       "pay-"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "ment should be accorded the grace of continuing the initial interest rate rather than a default rate.",
+      "missing": [
+       "ment"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "PDVSA has failed to raise a single credible reason as to why its calculation of interest should govern over Cimontubo’s. Cimontubo’s calcula-",
+      "missing": [
+       "calcula-"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "tion of interest, however, is grounded by the express terms of the Note Agreement, as well as the expectations of the parties and commercial reasonableness.",
+      "missing": [
+       "tion"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 16,
+    "agreed_words": 0.669,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "fees and expenses through February 28, 2021 in the amount of $124,533.35, with the amount of fees",
+      "missing": [
+       "28,"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "and subsequently incurred attorneys’ fees to be added to the judgment amount;",
+      "missing": [
+       "incurred"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "and (d) post-",
+      "missing": [
+       "post-"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "judgment interest at a rate of 8.5%.",
+      "missing": []
+     },
+     {
+      "line": 37,
+      "text": "Attorneys for Plaintiff Cimontubo Tubagens e Soldadura, Lda.",
+      "missing": [
+       "Lda."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$35,720,631.43",
+     "value": 35720631.43,
+     "line": 7,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "April 2, 2021",
+     "value": "2021-04-02",
+     "line": 7,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$10,486,693.72",
+     "value": 10486693.72,
+     "line": 7,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "February 28, 2021",
+     "value": "2021-02-28",
+     "line": 9,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$124,533.35",
+     "value": 124533.35,
+     "line": 9,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "April 2, 2021",
+     "value": "2021-04-02",
+     "line": 11,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "percent",
+     "text": "8.5%",
+     "line": 15,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "April 20, 2021",
+     "value": "2021-04-20",
+     "line": 19,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  }
+ ]
+}

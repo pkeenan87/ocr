@@ -1,0 +1,489 @@
+{
+ "source": "ctr-holt-settlement.pdf",
+ "markdown": "ctr-holt-settlement.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:51:45Z",
+ "verify_fields": "all",
+ "azure_pages": "1-7",
+ "summary": {
+  "fields": 22,
+  "verified": 0,
+  "check": 22,
+  "unchecked": 0,
+  "pages_to_check": 7,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 7,
+    "agreed_spans": 7,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [
+    "garbled"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 28,
+    "agreed_spans": 22,
+    "agreed_words": 0.686,
+    "unagreed": [
+     {
+      "line": 17,
+      "text": "COMMITTEE FOR ECONOMICOPPORTUNITY,",
+      "missing": [
+       "ECONOMICOPPORTUNITY,"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Of this amount, Employer will treat $15,707.59 of the settlement proceeds as a compromise of Holt’s claim for compensation for claimed overtime.",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "Employer will issue Holt a check for the gross amount of $15,707.59, but will make the necessary payroll withholdings, based upon the withholdings applied to Holt’s last payroll check, with the exception that there will be no withholdings for Holt’s 401k plan.",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "Employer will issue Holt a W2 for this portion of the settlement proceeds.",
+      "missing": [
+       "W2"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "ol set for for that pa, mepres Alto, a the samo im o maei yet wil",
+      "missing": [
+       "ol",
+       "pa,",
+       "mepres",
+       "Alto,",
+       "samo",
+       "im",
+       "o",
+       "maei",
+       "yet",
+       "wil"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "Holt and his counsel acknowledge, agree, warrant and represent that (a) neither Employer nor any other Releasee, as defined below, have made any representation whatsoever about the taxability of the settlement proceeds;",
+      "missing": [
+       "acknowledge,",
+       "agree,",
+       "warrant"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 13,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$75,000.00",
+     "value": 75000.0,
+     "line": 29,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "August 29, 2019",
+     "value": "2019-08-29",
+     "line": 29,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$15,707.59",
+     "value": 15707.59,
+     "line": 29,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$15,707.59",
+     "value": 15707.59,
+     "line": 29,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$15,707.59",
+     "value": 15707.59,
+     "line": 29,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 23,
+    "agreed_spans": 21,
+    "agreed_words": 0.842,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "Holt understands that, by requesting this release,",
+      "missing": []
+     },
+     {
+      "line": 23,
+      "text": "Holt agrees and acknowledges that if he institutes, or causes to be instituted, maintain, or allow to be instituted on his behalf, against Employer or any of the other Releasees, any FLSA action or matter embraced by, arising out of or relating in any way to one of the claims released above, Holt shall indemnify/hold harmless Employer (and any other Releasee) from related or resulting claims, damages, judgments, interests, costs and legal expenses, including attorney’s fees.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:17-CV-00683-JHE",
+     "line": 19,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "garbled"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 29,
+    "agreed_spans": 25,
+    "agreed_words": 0.789,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "operations of Holt or Employer, its services or programs, or any of their officers, directors or employees or any of the other Releasees.",
+      "missing": []
+     },
+     {
+      "line": 7,
+      "text": "Holt shall not disclose (and by signing below, we acknowledge that we have not disclosed) the terms, contents or execution of this Agreement, except to his spouse or his tax preparer, provided they agree not to disclose its terms, contents or execution to any other person or entity, absent prior written consent of Employer, or unless required by legal process.",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "Employer's Property. Holt represents and certifies that he has none of",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "Emplo yer ori he Relono omay bol palited exder pes ai inmpay or",
+      "missing": [
+       "Emplo",
+       "yer",
+       "ori",
+       "Relono",
+       "omay",
+       "bol",
+       "palited",
+       "exder",
+       "pes",
+       "ai",
+       "inmpay"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,000.00",
+     "value": 1000.0,
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 15,
+    "agreed_spans": 15,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 18,
+    "agreed_spans": 17,
+    "agreed_words": 0.991,
+    "unagreed": [
+     {
+      "line": 15,
+      "text": "AAA",
+      "missing": [
+       "AAA"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "garbled",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 11,
+    "agreed_spans": 10,
+    "agreed_words": 0.455,
+    "unagreed": [
+     {
+      "line": 17,
+      "text": "Before me, the undersigned Notary Public, personally appeared the above signed individual, whose name is signed to the foregoing Agreement, and who is known to me, after seing ndul seworh en pat, deposed and acknowedged that, being informed of the contents of In witness whereof, the undersigned Notary Public has signed this acknowledgment on",
+      "missing": [
+       "seing",
+       "ndul",
+       "seworh",
+       "en",
+       "pat,",
+       "acknowedged"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "uch instrument, he executed the same voluntaril"
+    ],
+    "missing_words": 7
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

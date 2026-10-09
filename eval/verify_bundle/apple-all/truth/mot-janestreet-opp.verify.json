@@ -1,0 +1,1190 @@
+{
+ "source": "mot-janestreet-opp.pdf",
+ "markdown": "mot-janestreet-opp.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:47:44Z",
+ "verify_fields": "all",
+ "azure_pages": "6,10",
+ "summary": {
+  "fields": 54,
+  "verified": 48,
+  "check": 6,
+  "unchecked": 0,
+  "pages_to_check": 2,
+  "embedded_text_pages": 1,
+  "agreed_spans": 143,
+  "unagreed_spans": 50
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 14,
+    "agreed_spans": 13,
+    "agreed_words": 0.945,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:24-cv-02783-PAE Document 66",
+      "missing": [
+       "66"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-cv-02783-PAE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/18/24",
+     "value": "2024-04-18",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "24-CV-02783",
+     "line": 19,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 28,
+    "agreed_spans": 15,
+    "agreed_words": 0.635,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:24-cv-02783-PAE Document 6B",
+      "missing": [
+       "6B"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "Nebulous Descriptions Of The Alleged “Confidential” Information .",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "Or Disclosed..",
+      "missing": [
+       "Disclosed.."
+      ]
+     },
+     {
+      "line": 35,
+      "text": "Defendants’ Detailed Declarations With Concrete Evidence ..",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "LEGAL STANDARD .",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "I.",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "Plaintiff Fails to Establish Likely Success on the Merits .......",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "A.",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "B.",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "Plaintiff Cannot Establish Breach Of Contract (Counts I-II) .",
+      "missing": []
+     },
+     {
+      "line": 61,
+      "text": "C.",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "III. The Balance of the Equities Favors Defendants A TRO Serves No Public Interest IV.",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "CONCLUSION .",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-cv-02783-PAE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/18/24",
+     "value": "2024-04-18",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 36,
+    "agreed_spans": 22,
+    "agreed_words": 0.601,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:24-cv-02783-PAE Document 8B Filed 04/18/24 Page 3 of 30",
+      "missing": [
+       "8B"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "620 F. Supp. 2d 574 (S.D.N.Y. 2009) ...",
+      "missing": []
+     },
+     {
+      "line": 13,
+      "text": "2023 WL 7164304 (S.D.N.Y. Oct. 31, 2023) ..",
+      "missing": []
+     },
+     {
+      "line": 17,
+      "text": "2021 WL 2250822 (S.D.N.Y. Jan. 7, 2021) ...",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "71 F. Supp. 2d 299 (S.D.N.Y. 1999) .",
+      "missing": []
+     },
+     {
+      "line": 33,
+      "text": "559 F.3d 118 (2d Cir. 2009) .....",
+      "missing": []
+     },
+     {
+      "line": 37,
+      "text": "2020 WL 915824 (S.D.N.Y. Feb. 26, 2020) .",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "raham Cap. Mgmt., L.P. v. Bongiovann",
+      "missing": [
+       "raham",
+       "Bongiovann"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "019 WL 632287 (D. Conn.",
+      "missing": [
+       "019"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "Feb. 14, 2019",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "ewazinga Corp. v. Microsoft Corp",
+      "missing": [
+       "ewazinga"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "021 WL 1222122 (S.D.N.Y. 2021",
+      "missing": [
+       "021"
+      ]
+     },
+     {
+      "line": 85,
+      "text": ".8,22",
+      "missing": [
+       ".8,22"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "3,19",
+      "missing": [
+       "3,19"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-cv-02783-PAE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/18/24",
+     "value": "2024-04-18",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Oct. 31, 2023",
+     "value": "2023-10-31",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jan. 7, 2021",
+     "value": "2021-01-07",
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jan. 23, 2018",
+     "value": "2018-01-23",
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Feb. 26, 2020",
+     "value": "2020-02-26",
+     "line": 37,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Feb. 14, 2019",
+     "value": "2019-02-14",
+     "line": 41,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jan. 8, 2021",
+     "value": "2021-01-08",
+     "line": 45,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Aug. 29, 2013",
+     "value": "2013-08-29",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Aug. 4, 2022",
+     "value": "2022-08-04",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 38,
+    "agreed_spans": 28,
+    "agreed_words": 0.723,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:24-cv-02783-PAE Document 80",
+      "missing": [
+       "80"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "2012 WL 1580995 (S.D. Cal. May 4, 2012) ..",
+      "missing": []
+     },
+     {
+      "line": 23,
+      "text": "2022 WL 889838 (S.D.N.Y. Mar. 25, 2022)..",
+      "missing": []
+     },
+     {
+      "line": 43,
+      "text": ".22,23",
+      "missing": [
+       ".22,23"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "2010 WL 2194809 (S.D.N.Y. June 1, 2010) .",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "2022 WL 17689841 (S.D.N.Y. Dec. 15, 2022) ...",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "2020 WL 3127877 (S.D.N.Y. June 12, 2020) ....",
+      "missing": []
+     },
+     {
+      "line": 65,
+      "text": "2016 WL 608193 (W.D.N.C. Jan. 5, 2016)...",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "2021 WL 293122 (S.D.N.Y. Jan. 28, 2021) ...",
+      "missing": []
+     },
+     {
+      "line": 77,
+      "text": "2022 WL 583641 (S.D.N.Y. Feb. 25, 2022) ..",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-cv-02783-PAE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/18/24",
+     "value": "2024-04-18",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 4, 2012",
+     "value": "2012-05-04",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Mar. 25, 2022",
+     "value": "2022-03-25",
+     "line": 23,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Feb. 10, 2023",
+     "value": "2023-02-10",
+     "line": 27,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Aug. 3, 2020",
+     "value": "2020-08-03",
+     "line": 31,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 1, 2010",
+     "value": "2010-06-01",
+     "line": 49,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Dec. 15, 2022",
+     "value": "2022-12-15",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 12, 2020",
+     "value": "2020-06-12",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jan. 5, 2016",
+     "value": "2016-01-05",
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jan. 28, 2021",
+     "value": "2021-01-28",
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Nov. 30, 2023",
+     "value": "2023-11-30",
+     "line": 73,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Feb. 25, 2022",
+     "value": "2022-02-25",
+     "line": 77,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Dec. 12, 2014",
+     "value": "2014-12-12",
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 12,
+    "agreed_spans": 11,
+    "agreed_words": 0.905,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:24-cv-02783-PAE Document 66",
+      "missing": [
+       "66"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-cv-02783-PAE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/18/24",
+     "value": "2024-04-18",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 05, 2019",
+     "value": "2019-07-05",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1836",
+     "line": 15,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1839",
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 31,
+    "agreed_spans": 19,
+    "agreed_words": 0.524,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:24-CV-02783-PAE Document 60 Filed 04/28/24 Page 6 of 30",
+      "missing": [
+       "60"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "of Law in opposition to Plaintiff Jane Street Group, LLC's (\"Plaintiff\" or \"Jane Street\") Order to",
+      "missing": [
+       "LLC's"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Looking past the rhetoric, adjectives and conclusory allegations, Plaintiff's factual allega-",
+      "missing": [
+       "allega-"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "tions boil down to this: Two of Plaintiff's high performers left Jane Street to join a competitor,",
+      "missing": [
+       "tions"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "(\"Schadewald Decl.\") 1 68.",
+      "missing": [
+       "1"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Towards the end of 2023, both men asked Jane Street for career ad-",
+      "missing": [
+       "ad-"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "vancement and an increase in compensation, but Jane Street never made any meaningful commit-",
+      "missing": [
+       "vancement",
+       "commit-"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "ment. Id. 99| 61-63;",
+      "missing": [
+       "ment."
+      ]
+     },
+     {
+      "line": 31,
+      "text": "Declaration of Daniel Spottiswood (\"Spottiswood Decl.\") 19| 18-19. So De-",
+      "missing": [
+       "19|",
+       "De-"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "fendants left Jane Street and took their talent elsewhere.",
+      "missing": [
+       "fendants"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "11 29-34, Plaintiff in effect ask this Court to impose a non-",
+      "missing": [
+       "non-"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "\"Defendants address Plaintiff's requests for expedited discovery and an expedited preliminary injunction hearing through a separate letter to the Court.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-CV-02783-PAE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/28/24",
+     "value": "2024-04-28",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 19,
+    "agreed_spans": 17,
+    "agreed_words": 0.825,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:24-cv-02783-PAE Document 80",
+      "missing": [
+       "80"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "February 5 through April 17, 2024—before it finally filed its papers seeking a TRO: On February 5, Mr. Schadewald resigned from Jane Street2 and “almost immediately” Jane Street “learned that a new competitor entered and immediately began manually trading in significant volume in the India options market,” Complaint (“Compl.”) 19| 8, 152.",
+      "missing": [
+       "19|"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-cv-02783-PAE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/18/24",
+     "value": "2024-04-18",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 17, 2024",
+     "value": "2024-04-17",
+     "line": 23,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 75",
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [
+    "garbled",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 24,
+    "agreed_spans": 17,
+    "agreed_words": 0.66,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:24-cv-02783-PAE Document 6B",
+      "missing": [
+       "6B"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "Within just “days or weeks” of February 5, Plaintiff was certain: it “became apparent that a competitor [Mr. Schadewald] was executing Jane Street’s Trading Strategy … directly harming Jane Street in the competitive market.” Id. 98.",
+      "missing": [
+       "98."
+      ]
+     },
+     {
+      "line": 19,
+      "text": "based on utterly unsupported “information and belief”—that Defendants supposedly",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "speculation—",
+      "missing": [
+       "speculation—"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "3 See e.g. T.C. v. New York State Dep't of Health, 2022 WI.",
+      "missing": [
+       "WI."
+      ]
+     },
+     {
+      "line": 29,
+      "text": "17689841, at *6 (S.D.N.Y. Dec.",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "15, 2022) (“It is well established that a plaintiff's significant delay in seeking a preliminary injunction can undermine the argument that the 2i (t wit wete iraepbelbechatme i geik nha auilog 1c , Cuito 2021 T. 20507,a4 41 (k oD iN Y limy).",
+      "missing": [
+       "2i",
+       "(t",
+       "wit",
+       "wete",
+       "iraepbelbechatme",
+       "i",
+       "geik",
+       "nha",
+       "auilog",
+       "1c",
+       "Cuito",
+       "T.",
+       "20507,a4",
+       "41",
+       "(k",
+       "oD",
+       "Y",
+       "limy)."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "plaintiff will suffer irreparable harm”); Hopkins Hawley LLC v. Cuomo, 2021 WL 8200607, at *1 (S.D.N.Y. Jan. 8,",
+     "2021) (three-week delay between the allegedly harmful act and Plaintiffs filing a TRO constituted lack of immediacy)."
+    ],
+    "missing_words": 35
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-cv-02783-PAE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/18/24",
+     "value": "2024-04-18",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 139",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 3",
+     "line": 23,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Aug. 29, 2013",
+     "value": "2013-08-29",
+     "line": 27,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Dec. 15, 2022",
+     "value": "2022-12-15",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 22,
+    "agreed_spans": 20,
+    "agreed_words": 0.942,
+    "unagreed": [
+     {
+      "line": 11,
+      "text": "Plaintiff’s papers also lack evidence demonstrating that the information at issue was actu-",
+      "missing": [
+       "actu-"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "ally confidential, proprietary or protectable.",
+      "missing": [
+       "ally"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-cv-02783-PAE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/18/24",
+     "value": "2024-04-18",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 52",
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Mar. 31, 2021",
+     "value": "2021-03-31",
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 28,
+    "agreed_spans": 22,
+    "agreed_words": 0.767,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "\" Compl. | 52. But Mr. Nanney's decla-",
+      "missing": [
+       "decla-"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "ration does not even refer to these \"code-named signals.\"",
+      "missing": [
+       "ration"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "Mr. Nanney testifies that the \"Trading Strat-",
+      "missing": [
+       "Strat-"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "egy\" is comprised of \"insights and techniques\" including this \"non-exhaustive list\":",
+      "missing": [
+       "egy\""
+      ]
+     },
+     {
+      "line": 37,
+      "text": "Plaintiff' s \"allegations of \"components that provide the trade secrets' are insufficient be-",
+      "missing": [
+       "s",
+       "be-"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "cause they refer only to general categories of information that could apply to any [options] trading strategy:\" Kumaran v. Vision Fin.",
+      "missing": [
+       "cause"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:24-CV-02783-PAE",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/28/24",
+     "value": "2024-04-28",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 14",
+     "line": 17,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Dec. 6, 2022",
+     "value": "2022-12-06",
+     "line": 41,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  }
+ ]
+}

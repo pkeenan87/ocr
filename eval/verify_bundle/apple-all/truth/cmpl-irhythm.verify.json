@@ -1,0 +1,761 @@
+{
+ "source": "cmpl-irhythm.pdf",
+ "markdown": "cmpl-irhythm.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:47:02Z",
+ "verify_fields": "all",
+ "azure_pages": "",
+ "summary": {
+  "fields": 48,
+  "verified": 48,
+  "check": 0,
+  "unchecked": 0,
+  "pages_to_check": 0,
+  "embedded_text_pages": 0,
+  "agreed_spans": 263,
+  "unagreed_spans": 13
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 37,
+    "agreed_spans": 37,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 31,
+    "agreed_spans": 31,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 15, 2026",
+     "value": "2026-06-15",
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 37,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1320d",
+     "line": 41,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 160.103",
+     "line": 47,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 27,
+    "agreed_spans": 27,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 30,
+    "agreed_spans": 29,
+    "agreed_words": 0.997,
+    "unagreed": [
+     {
+      "line": 23,
+      "text": "Il.",
+      "missing": [
+       "Il."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1332(d)(2)",
+     "line": 41,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$5 million",
+     "value": 5000000.0,
+     "line": 41,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1391",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 26,
+    "agreed_spans": 24,
+    "agreed_words": 0.954,
+    "unagreed": [
+     {
+      "line": 45,
+      "text": "4 Privacy Policy, IRHYTHM TECHNOLOGIES, INC., https://www.irhythmtech.com/us/en/who-we-",
+      "missing": [
+       "https://www.irhythmtech.com/us/en/who-we-"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "are/trust-center/privacy (last visited June 23, 2026).",
+      "missing": [
+       "are/trust-center/privacy"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 8, 2026",
+     "value": "2026-06-08",
+     "line": 41,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 47,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 27,
+    "agreed_spans": 23,
+    "agreed_words": 0.892,
+    "unagreed": [
+     {
+      "line": 42,
+      "text": "Our teams continuously monitor t threat landscape and implement safeguards aligned with indus",
+      "missing": [
+       "t",
+       "indus"
+      ]
+     },
+     {
+      "line": 44,
+      "text": "onsistent with these security protocols, we recently identified ybersecurity incident and promptly activated our incident respons",
+      "missing": [
+       "onsistent",
+       "ybersecurity",
+       "respons"
+      ]
+     },
+     {
+      "line": 46,
+      "text": "5 https://www.sec.gov/ix?doc=/Archives/edgar/data/0001388658/000138865826000055/irtc-",
+      "missing": [
+       "https://www.sec.gov/ix?doc=/Archives/edgar/data/0001388658/000138865826000055/irtc-"
+      ]
+     },
+     {
+      "line": 48,
+      "text": "20260610.htm",
+      "missing": [
+       "20260610.htm"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 9, 2026",
+     "value": "2026-06-09",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 24,
+    "agreed_spans": 22,
+    "agreed_words": 0.92,
+    "unagreed": [
+     {
+      "line": 23,
+      "text": "iRhythm’s patients with pertinent information about the Breach, including, but not limited to, 15 information concerning what kinds of Private Information were stolen, and how much Private",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "https://www.irhythmtech.com/us/en/who-we-are/news-events/cybersecurity-statement(last",
+      "missing": [
+       "https://www.irhythmtech.com/us/en/who-we-are/news-events/cybersecurity-statement(last"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "visited June 23, 2026)."
+    ],
+    "missing_words": 4
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 25,
+    "agreed_spans": 23,
+    "agreed_words": 0.88,
+    "unagreed": [
+     {
+      "line": 19,
+      "text": "million.",
+      "missing": []
+     },
+     {
+      "line": 25,
+      "text": "sensitive to securities litigation at the time, rather than by any desire to ensure that those affected 14 by the Breach could take steps to mitigate the harm caused by the exposure of their Private",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$45 million",
+     "value": 45000000.0,
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$45 Million",
+     "value": 45000000.0,
+     "line": 43,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 47,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 36,
+    "agreed_spans": 34,
+    "agreed_words": 0.972,
+    "unagreed": [
+     {
+      "line": 51,
+      "text": "available at: https://www.hipaajournal.com/what-is-considered-protected-health-information-",
+      "missing": [
+       "https://www.hipaajournal.com/what-is-considered-protected-health-information-"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "under-hipaa/ (last visited June 23, 2026).",
+      "missing": [
+       "under-hipaa/"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 1301",
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 164.400-414",
+     "line": 33,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.306(a)(1)",
+     "line": 47,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 59,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 13,
+    "agreed_spans": 13,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:26-cv-06263-LB",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/23/26",
+     "value": "2026-06-23",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.312(a)(1)",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.308(a)(1)",
+     "line": 8,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.308(a)(6)(ii)",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.306(a)(2)",
+     "line": 10,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.306(a)(3)",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.306(a)(4)",
+     "line": 12,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.502",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.530(b)",
+     "line": 14,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§164.308(a)(5)",
+     "line": 14,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1186 @@
+{
+ "source": "ord-garland-dunkin.pdf",
+ "markdown": "ord-garland-dunkin.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:49:10Z",
+ "verify_fields": "all",
+ "azure_pages": "",
+ "summary": {
+  "fields": 76,
+  "verified": 76,
+  "check": 0,
+  "unchecked": 0,
+  "pages_to_check": 0,
+  "embedded_text_pages": 2,
+  "agreed_spans": 282,
+  "unagreed_spans": 26
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 26,
+    "agreed_spans": 25,
+    "agreed_words": 0.989,
+    "unagreed": [
+     {
+      "line": 83,
+      "text": "Id. 19|7-9, 14.",
+      "missing": [
+       "19|7-9,"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 47,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 47,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "23-cv-06621-SI",
+     "line": 63,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 31, 2024",
+     "value": "2024-05-31",
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 5",
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$0.50",
+     "value": 0.5,
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$2.15",
+     "value": 2.15,
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "2%",
+     "line": 83,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶¶ 8-10",
+     "line": 83,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶¶ 11-12",
+     "line": 83,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 26,
+    "agreed_spans": 23,
+    "agreed_words": 0.901,
+    "unagreed": [
+     {
+      "line": 59,
+      "text": "Plaintiffs allege that lactose intolerance and milk allergies are disabilities, and that Dunkin’ “charges customers with lactose intolerance and milk allergies an excessively high Surcharge to substitute Non-Dairy Alternatives in its drinks.” Id. 9| 15-17.",
+      "missing": []
+     },
+     {
+      "line": 61,
+      "text": "Id. 9| 18.",
+      "missing": []
+     },
+     {
+      "line": 65,
+      "text": "I.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 60",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 25,
+    "agreed_spans": 24,
+    "agreed_words": 0.998,
+    "unagreed": [
+     {
+      "line": 59,
+      "text": "I1.",
+      "missing": [
+       "I1."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 22,
+    "agreed_spans": 20,
+    "agreed_words": 0.892,
+    "unagreed": [
+     {
+      "line": 25,
+      "text": "I.",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "Compl. 35. Defendant contends that this Court lacks personal jurisdiction over it for the following reasons: \"[T]t has not engaged in any activities that would render it subject to specific jurisdiction in California.",
+      "missing": [
+       "\"[T]t"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "garbled"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 25,
+    "agreed_spans": 22,
+    "agreed_words": 0.885,
+    "unagreed": [
+     {
+      "line": 65,
+      "text": "(2) the claim must be one which arises out of or relates to the defendant’s forum-relatec autistatsa jusic3, ic.",
+      "missing": [
+       "forum-relatec",
+       "autistatsa",
+       "jusic3,",
+       "ic."
+      ]
+     },
+     {
+      "line": 65,
+      "text": "iemussi be rcsuniadiction must comport with fair play and Axiom Foods, Inc. v. Acerchem Int’l, Inc., 874 F.3d 1064, 1068 (9th Cir. 2017) (alterations and quotations omitted).",
+      "missing": [
+       "iemussi",
+       "rcsuniadiction"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "B.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 18,
+    "agreed_words": 0.807,
+    "unagreed": [
+     {
+      "line": 55,
+      "text": "¶ 2 & Ex. 1. The Franchise Disclosure Document (“FDD”) “was obtained from the website of the Wisconsin Department of Financial Institutions on March 4, 2024 Coburn Decl.",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "9| 3. Defendant asserts that the following facts are “not subject to reasonable dispute[,]” asking the Court to take judicial notice that:",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "• Dunkin’-branded restaurants are primarily owned and operated by franchises, including all of the ones located in Plaintiffs’ states of residence Hawaii, New York, Colorado, Massachusetts, and Texas.",
+      "missing": [
+       "residence"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "March 24, 2023",
+     "value": "2023-03-24",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 2",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "March 4, 2024",
+     "value": "2024-03-04",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 31, 2022",
+     "value": "2022-12-31",
+     "line": 62,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 31, 2023",
+     "value": "2023-12-31",
+     "line": 62,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "March 24, 2023",
+     "value": "2023-03-24",
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 26, 2023",
+     "value": "2023-12-26",
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 20,
+    "agreed_words": 0.945,
+    "unagreed": [
+     {
+      "line": 65,
+      "text": "¶ 22; see also id. 9.35 (“Dunkin operates over 9,500 coffee stores in the United States and over 125 in the state of California.”).",
+      "missing": [
+       "9.35"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 51,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 51,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 22",
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 16,
+    "agreed_spans": 15,
+    "agreed_words": 0.997,
+    "unagreed": [
+     {
+      "line": 65,
+      "text": "Il.",
+      "missing": [
+       "Il."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 25,
+    "agreed_spans": 23,
+    "agreed_words": 0.855,
+    "unagreed": [
+     {
+      "line": 53,
+      "text": "A.",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "As a general rule, Title III provides that \"En]o individual shall be discriminated against on the basis of disability in the full and equal enjoyment of the goods, services, facilities, privileges, advantages, or accommodations of any place of public accommodation by any person who owns, leases (or leases to), or operates a place of public accommodation.” Id. § 12182(a).",
+      "missing": [
+       "\"En]o"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 51,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 51,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 12182-12188",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12182(a)",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 51(f)",
+     "line": 59,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 12182(a)",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(1)",
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 2(a)(4)",
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 2(a)(6)",
+     "line": 71,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "bates": "WL 5835149",
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 23,
+    "agreed_spans": 20,
+    "agreed_words": 0.742,
+    "unagreed": [
+     {
+      "line": 67,
+      "text": "Among other things, the statute now states that “[a]n impairment that is episodic or in remission is a disability if it would substantially limit a major life activity when active.” Id. § 12102(4)(D).2 The Title III regulations, which went into effect in October 2016, likewise direct that, \"li]n determining whether an impairment substantially limits a major life activity, the term major shall not be interpreted strictly to create a demanding standard.” 28 C.F.R. § 36.105(c)(2)(i). The regulations go on to state that, as a rule of construction,",
+      "missing": [
+       "\"li]n"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "Accordingly, the threshold Issu of whether an impairment substantially limits a major life activity should not demand extensive analysis.",
+      "missing": [
+       "Issu"
+      ]
+     },
+     {
+      "line": 81,
+      "text": "See 42 U.S.C. § 12102(4)(E)(i).",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "bates",
+     "text": "WL 5835149",
+     "line": 0,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(2)",
+     "line": 59,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(2)",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(4)",
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(4)",
+     "line": 67,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 36.105(c)(2)(i)",
+     "line": 67,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 36.105(d)(1)",
+     "line": 73,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "6:16-CV-00385",
+     "line": 75,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 6, 2016",
+     "value": "2016-07-06",
+     "line": 75,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "16-CV-0385",
+     "line": 75,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Sept. 16, 2016",
+     "value": "2016-09-16",
+     "line": 77,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(4)",
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 24,
+    "agreed_spans": 22,
+    "agreed_words": 0.827,
+    "unagreed": [
+     {
+      "line": 55,
+      "text": "Compl. 1125-34. The complaint also states that another plaintiff (Ruby Smith, who resides in Texas) “has had medical treatment related to her lactose intolerance including, but not limited to, an emergency room visit.” Id. 9| 34.",
+      "missing": [
+       "1125-34."
+      ]
+     },
+     {
+      "line": 55,
+      "text": "Aside from these two individuals, the complaint repeats only the same generic, conclusory descriptor of each plaintiff’s condition: “As a result of [his/her] lactose intolerance, [plaintiff] is substantially impaired in several major life activities and is required to consume non-dairy milk alternatives.” See id. 19 25-34.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 49,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 49,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 40",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Oct. 1, 2020",
+     "value": "2020-10-01",
+     "line": 57,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 22,
+    "agreed_spans": 20,
+    "agreed_words": 0.92,
+    "unagreed": [
+     {
+      "line": 63,
+      "text": "In addition to the Hebert case noted above, plaintiffs rely throughout their brief on Phillips v. P.F. Chang’s China Bistro, Inc., No. 5:15- CV-00344-RMW, 2015 WL 7429497 (N.D. Cal. Nov.",
+      "missing": [
+       "5:15-",
+       "CV-00344-RMW,"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "23, 2015) (“Phillips IT\").",
+      "missing": [
+       "IT\")."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 51,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 51,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 45",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 46",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 36.105(d)(1)(vi)",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 36.105(d)(1)(ii)",
+     "line": 61,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Nov. 23, 2015",
+     "value": "2015-11-23",
+     "line": 63,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1",
+     "value": 1.0,
+     "line": 63,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 23,
+    "agreed_spans": 22,
+    "agreed_words": 0.997,
+    "unagreed": [
+     {
+      "line": 61,
+      "text": "B.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 49,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 49,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5:15-CV-00344-RMW",
+     "line": 53,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Aug. 6, 2015",
+     "value": "2015-08-06",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 21, 2024",
+     "value": "2024-06-21",
+     "line": 73,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "page_check": [
+    "pleading_table"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 9,
+    "agreed_spans": 8,
+    "agreed_words": 0.971,
+    "unagreed": [
+     {
+      "line": 18,
+      "text": "# Suran Alaton",
+      "missing": [
+       "Suran",
+       "Alaton"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 31, 2024",
+     "value": "2024-05-31",
+     "line": 12,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  }
+ ]
+}

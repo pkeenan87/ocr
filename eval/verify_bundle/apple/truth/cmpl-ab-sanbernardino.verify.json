@@ -1,0 +1,1123 @@
+{
+ "source": "cmpl-ab-sanbernardino.pdf",
+ "markdown": "cmpl-ab-sanbernardino.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:52:47Z",
+ "verify_fields": "flagged",
+ "azure_pages": "15",
+ "summary": {
+  "fields": 74,
+  "verified": 70,
+  "check": 4,
+  "unchecked": 0,
+  "pages_to_check": 1,
+  "embedded_text_pages": 1,
+  "agreed_spans": 361,
+  "unagreed_spans": 16
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [
+    "garbled",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 38,
+    "agreed_spans": 32,
+    "agreed_words": 0.757,
+    "unagreed": [
+     {
+      "line": 17,
+      "text": "Renee V.",
+      "missing": []
+     },
+     {
+      "line": 32,
+      "text": "A.B., a minor, by and through his tners o titony argoso aila,",
+      "missing": [
+       "tners",
+       "o",
+       "titony",
+       "argoso",
+       "aila,"
+      ]
+     },
+     {
+      "line": 38,
+      "text": "COUNTY OF SAN BERNARDINO, and DOES 1-10,",
+      "missing": []
+     },
+     {
+      "line": 46,
+      "text": "# FedOnlavtul Detention an Ammes1983)",
+      "missing": [
+       "FedOnlavtul",
+       "an",
+       "Ammes1983)"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "s. Rrecopaliliebili listom or Policy.",
+      "missing": [
+       "s.",
+       "Rrecopaliliebili",
+       "listom"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "6. Municipal Liability, Failure tọ Train",
+      "missing": [
+       "tọ"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "guardian ad litem, Monique Padilla, individually and as successor-in-",
+     "interest to Anthony Bray,",
+     "Federal Law Claims (42 U.S.C. § 1983)",
+     "1. Unlawful Detention and Arrest"
+    ],
+    "missing_words": 23
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 52.1",
+     "line": 67,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 19,
+    "agreed_spans": 19,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 1, 2026",
+     "value": "2026-01-01",
+     "line": 15,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 1331",
+     "line": 20,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 20,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1367(a)",
+     "line": 24,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 35,
+    "agreed_spans": 35,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1391(b)",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 9, 2026",
+     "value": "2026-01-09",
+     "line": 15,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 15, 2026",
+     "value": "2026-01-15",
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 21, 2026",
+     "value": "2026-01-21",
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "February 17, 2026",
+     "value": "2026-02-17",
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 15, 2026",
+     "value": "2026-06-15",
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 23, 2026",
+     "value": "2026-06-23",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 1, 2026",
+     "value": "2026-01-01",
+     "line": 35,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 377.30",
+     "line": 55,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 18,
+    "agreed_spans": 18,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 23,
+    "agreed_spans": 23,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 815.2",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 815.6",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 820(a)",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 1, 2026",
+     "value": "2026-01-01",
+     "line": 16,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 11, 2026",
+     "value": "2026-01-11",
+     "line": 18,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 21,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 30,
+    "agreed_spans": 28,
+    "agreed_words": 0.921,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "28. Plaintiff brings this claim for relief in his capacity as successor-",
+      "missing": [
+       "successor-"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "in-interest to DECEDENT pursuant to California Code of Civil Procedure",
+      "missing": [
+       "in-interest"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 377.30",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 1, 2026",
+     "value": "2026-01-01",
+     "line": 15,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 29,
+    "agreed_spans": 29,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 11, 2026",
+     "value": "2026-01-11",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1988",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 17,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 377.30",
+     "line": 27,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 1, 2026",
+     "value": "2026-01-01",
+     "line": 45,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 24,
+    "agreed_spans": 24,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 37,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 377.30",
+     "line": 42,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 30,
+    "agreed_spans": 29,
+    "agreed_words": 0.96,
+    "unagreed": [
+     {
+      "line": 27,
+      "text": "United States Constitution, as incorporated to the states through the 14",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1988",
+     "line": 43,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 47,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 32,
+    "agreed_spans": 32,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1988",
+     "line": 46,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 18,
+    "agreed_spans": 18,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 17,
+    "agreed_words": 0.653,
+    "unagreed": [
+     {
+      "line": 13,
+      "text": "i. Encouraging, accommodating, or facilitating a “blue code of silence,” “blue shield,” “blue wall,” “blue curtain,” “blue veil,” or simply “code of silence,” pursuant to which police officers do not report other officers’ errors, misconduct, or crimes.",
+      "missing": []
+     },
+     {
+      "line": 13,
+      "text": "and j. Maintaining a policy of inaction and an attitude of indifference towards soaring numbers of police shootings and other uses of force, including by failing to discipline, retrain, investigate, terminate, and recommend officers for criminal prosecution who participate in unjustified shootings.",
+      "missing": []
+     },
+     {
+      "line": 20,
+      "text": "i. Encouraging, accommodating, or facilitating a “blue code of silence,” “blue shield,” “blue wall,” “blue curtain,” “blue veil,” or simply “code of silence,” pursuant to which police officers do not report other officers’ errors, misconduct, or crimes.",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "j. Maintaining a policy of inaction and an attitude of indifference towards soaring numbers of police shootings and other uses of force, including by failing to discipline, retrain, investigate, terminate, and recommend officers for criminal prosecution who participate in unjustified shootings.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 15,
+    "agreed_spans": 15,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5:14-cv-01289-DMG-AGR",
+     "line": 16,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 15,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 24,
+    "agreed_spans": 21,
+    "agreed_words": 0.867,
+    "unagreed": [
+     {
+      "line": 11,
+      "text": "e. In V.R. v. County of San Bernardino, et al., case number 5:19-cv- 01023-JGB-SP, Plaintiffs argued at trial that the 2018 shooting of Juan Ramos was excessive and unreasonable.",
+      "missing": [
+       "5:19-cv-",
+       "01023-JGB-SP,"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "(Case Nos. 5:15-cv- 02515-JGB-DTB) Johnny Alcala and 14 other inmates sued the 15 COMPLAINT FOR DAMAGES |",
+      "missing": [
+       "5:15-cv-",
+       "02515-JGB-DTB)"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "e. In V.R. v. County of San Bernardino, et al., case number 5:19-cv-",
+      "missing": [
+       "5:19-cv-"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "5:26-cv-03826",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/26",
+     "value": "2026-07-10",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5-16-cv1128",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "not_in_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$33.5 million",
+     "value": 33500000.0,
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5:18-cv-2532-R-PLA",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5:15CV-01102-JGB",
+     "line": 11,
+     "status": "check",
+     "why": [
+      "not_in_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5-16-cv1128",
+     "line": 13,
+     "status": "check",
+     "why": [
+      "not_in_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$33.5 million",
+     "value": 33500000.0,
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5:15CV-01102-JGB",
+     "line": 16,
+     "status": "check",
+     "why": [
+      "not_in_embedded_text"
+     ]
+    }
+   ]
+  }
+ ]
+}

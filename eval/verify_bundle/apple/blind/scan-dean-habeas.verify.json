@@ -1,0 +1,1979 @@
+{
+ "source": "scan-dean-habeas.pdf",
+ "markdown": "scan-dean-habeas.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:58:04Z",
+ "verify_fields": "flagged",
+ "azure_pages": "1-10",
+ "summary": {
+  "fields": 23,
+  "verified": 0,
+  "check": 23,
+  "unchecked": 0,
+  "pages_to_check": 10,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 55,
+    "agreed_spans": 27,
+    "agreed_words": 0.282,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "Page 1 of.10",
+      "missing": [
+       "of.10"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "RECEIVED HARRISBURG, PA",
+      "missing": [
+       "RECEIVED",
+       "HARRISBURG,"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "4-20-0",
+      "missing": [
+       "4-20-0"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "IN THE UNITED STATEB DIBTRICT COURT",
+      "missing": [
+       "STATEB"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "MFOXSE. D'ANUHEA",
+      "missing": [
+       "MFOXSE.",
+       "D'ANUHEA"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "BOR THE MIDDLE DIBTRICT OF PENNSYIVANIA",
+      "missing": [
+       "PENNSYIVANIA"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "POR U8E IN APPLICATIONS FOR HABBAS CORPUB UNDER 28 USC $2254",
+      "missing": [
+       "U8E",
+       "APPLICATIONS",
+       "HABBAS",
+       "CORPUB",
+       "28",
+       "USC",
+       "$2254"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "(eff. 10/18/96)",
+      "missing": [
+       "(eff.",
+       "10/18/96)"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "(8022 aao) (Tacudo aene un BoCyy orOgr08",
+      "missing": [
+       "(8022",
+       "aao)",
+       "(Tacudo",
+       "aene",
+       "un",
+       "BoCyy",
+       "orOgr08"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "(aupplied by",
+      "missing": [
+       "(aupplied"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "RESPOND.",
+      "missing": [
+       "RESPOND."
+      ]
+     },
+     {
+      "line": 39,
+      "text": "ONANTON",
+      "missing": [
+       "ONANTON"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "(Name of Marden, Buperintcadent, Jailos, or authorized person having custody of petitionei)",
+      "missing": [
+       "Jailos,"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "THE DIBTRICT ATTORNEY OP THE COUNTY OF_ Lehigh",
+      "missing": [
+       "OP"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "THE ATTORNEY GENERAL OF THE BTATE OF",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "ADDITIONAL RESPONDENT",
+      "missing": [
+       "RESPONDENT"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "Prison Nunber",
+      "missing": [
+       "Prison",
+       "Nunber"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "served in the future, petitioner must {111 the",
+      "missing": [
+       "{111"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "ame oi the state where the Judgnent vas entered has a sentence",
+      "missing": []
+     },
+     {
+      "line": 79,
+      "text": "co be served in the future under a federa!",
+      "missing": [
+       "co"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "28 U.8.C.52255, In the federal court which entered the judgment.)",
+      "missing": [
+       "28",
+       "U.8.C.52255,"
+      ]
+     },
+     {
+      "line": 89,
+      "text": "PETITION POR MRIT OF HABEAS CORPUB BY & PERSON IN STATE CUSTODY",
+      "missing": [
+       "MRIT",
+       "CORPUB"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "INSTRUCTIONS - READ CAREPULLY",
+      "missing": [
+       "CAREPULLY"
+      ]
+     },
+     {
+      "line": 93,
+      "text": "1. This petition must be legibly handvritten or typewritten",
+      "missing": [
+       "handvritten",
+       "typewritten"
+      ]
+     },
+     {
+      "line": 97,
+      "text": "Any faise statement of a naterial fact in this petition or in a notion for leave to procead in forma pauperis nay serve as the basis loz prosecution and conviction for perjury.",
+      "missing": [
+       "naterial",
+       "fact",
+       "leave",
+       "loz"
+      ]
+     },
+     {
+      "line": 97,
+      "text": "A11 questions aust be anavered concisely in the proper space on the fora.",
+      "missing": [
+       "aust",
+       "fora."
+      ]
+     },
+     {
+      "line": 97,
+      "text": "Where nore I0on is needed to answer any question use reverso side of sheet.",
+      "missing": [
+       "nore",
+       "I0on",
+       "answer",
+       "reverso"
+      ]
+     },
+     {
+      "line": 99,
+      "text": "Il brieís or arguments are submitted, they should be submitted in the fora of a separate memorandum.",
+      "missing": [
+       "brieís",
+       "submitted,",
+       "submitted",
+       "fora",
+       "memorandum."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "PPEME XOX SOE IN ARZIZCAIONE NOR LAHAS CORPUR NOFE : 10 0736",
+     "Teusi naso) (zacsuido nase undh Bio yy :0qr2a0689"
+    ],
+    "missing_words": 19
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-cv-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$2254",
+     "value": 2254.0,
+     "line": 23,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "10/18/96",
+     "value": "1996-10-18",
+     "line": 25,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 43,
+    "agreed_spans": 10,
+    "agreed_words": 0.097,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "Page 2 of 10",
+      "missing": [
+       "2",
+       "10"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "3. Upon receipt of e fee of $5.00, your patition vill be filed if it is in proper order.",
+      "missing": [
+       "receipt",
+       "e"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "1. Il you do not have the entire necessary filing fae, you may request peraission to proceed in forna pauperis, in which event",
+      "missing": [
+       "Il",
+       "fae,",
+       "may",
+       "request",
+       "event"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "you must complete the forz on the pages eleven and twelve, setting forth infornation establiahing your inability to prepay the full fees and costs or give sacurity therefoi.",
+      "missing": [
+       "eleven",
+       "therefoi."
+      ]
+     },
+     {
+      "line": 11,
+      "text": "If you wish to proceed in forna pauperis, you aust submit an affidavit stating al1 your assets, and the certification on page thirteen, signed",
+      "missing": [
+       "al1",
+       "assets,",
+       "certification",
+       "thirteen,"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Discharge of debt in &",
+      "missing": [
+       "Discharge",
+       "debt"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "›y an autnorised prison ofticial.",
+      "missing": [
+       "autnorised",
+       "prison",
+       "ofticial."
+      ]
+     },
+     {
+      "line": 17,
+      "text": "ankruptay proceeding shall not include & iiling fe• (o1 associate@costndsspnses),",
+      "missing": [
+       "ankruptay",
+       "include",
+       "fe•",
+       "associate@costndsspnses),"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "Iagardless ol an assertion of",
+      "missing": [
+       "Iagardless",
+       "ol"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "5. Only judgments entered by ons court may be challenged in a single patition.",
+      "missing": [
+       "judgments",
+       "ons",
+       "may"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "Il you seat different courts either in",
+      "missing": [
+       "Il"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "to challenge judgaents entered Dy the same state or in different states,",
+      "missing": [
+       "judgaents",
+       "Dy"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "you must file separate petitions as to each court.",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "6. Your attention is directed to the fact that you zust include all grounds for relief and all facts supporting such grounds",
+      "missing": [
+       "6.",
+       "include"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "relief in the petition you file seeking reliet fron any judgment of conviction.",
+      "missing": [
+       "seeking",
+       "reliet",
+       "fron"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "7. A11 state remedies must be exhausted before filing a claim under 28 u.8.C.",
+      "missing": [
+       "A11",
+       "exhausted"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "2254, howevei, if • prisonel files such a claim",
+      "missing": [
+       "howevei,",
+       "prisonel"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "before exhausting all state remedies, the federal court has authority to deny it on its nerits.",
+      "missing": []
+     },
+     {
+      "line": 43,
+      "text": "considering a state prisoner's habeas corpus petition, gust deem a8 correct a determination of a factual issue made by a state court,",
+      "missing": [
+       "prisoner's",
+       "gust",
+       "deem",
+       "determination"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "unless the prisoner robuts",
+      "missing": [
+       "robuts"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "the presumption by",
+      "missing": [
+       "presumption"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "alcniand",
+      "missing": [
+       "alcniand"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "factual basis of the claim in state court proceedings, a federal court shall not hold an evidentiary hearing on & habeas corpus",
+      "missing": [
+       "hearing"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "claim unless the priaoner shows that:",
+      "missing": [
+       "priaoner",
+       "shows"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "(1) the clain relies on",
+      "missing": [
+       "relies"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "either a ner rule of",
+      "missing": [
+       "ner"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "constitutional lav, made retroactive to cases on collateral",
+      "missing": [
+       "retroactive"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "Ieview by the suprene court, that was previously unavailable, or a factual predicate that could not have previously baen discovered tbrough the exercise of due diligence; and",
+      "missing": [
+       "suprene",
+       "tbrough",
+       "diligence;"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "establish by clear and convincing avidence that but fox",
+      "missing": []
+     },
+     {
+      "line": 75,
+      "text": "constitutional erIoI, no reasonable fectfinder vould have found the prisoner guilty.",
+      "missing": [
+       "erIoI,",
+       "reasonable",
+       "fectfinder",
+       "vould"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "8. There is e one-year statute of limitations for filing petitions pursuant",
+      "missing": [
+       "e"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "to 28 D.8.C. 2254.",
+      "missing": [
+       "D.8.C."
+      ]
+     },
+     {
+      "line": 81,
+      "text": "9. Pederal courts must dismiss claims in a second or successive petition that vere presented in a priox petition.",
+      "missing": [
+       "dismiss",
+       "claims",
+       "vere",
+       "priox"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "›y an authorised prígon oltícial.",
+     "ankruptcy proceeding shall not includa & {iling fee (oi",
+     "associated coste and srpenses),",
+     "5. Only judguents entared by ois court day be challenged in a",
+     "2254, howovel, ií s prisonei files such a clain",
+     "considering & state piisoner's haboas",
+     "bearing on a habeas corpus",
+     "unless the prinoner ahowe that:",
+     "constitutional OIIoI, no Ieasonable Iectfinder would have found",
+     "to 26 D.B.C. 2254.",
+     "petition that were presented ín a prior petition."
+    ],
+    "missing_words": 71
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-CV-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$5.00",
+     "value": 5.0,
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 41,
+    "agreed_spans": 20,
+    "agreed_words": 0.223,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "Filed 04/19/2001 Page 3 of10",
+      "missing": [
+       "of10"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "10. Federal courte must dismisa alaims in a sacond or successive petition that vere not presented in a prior petition unless:",
+      "missing": [
+       "Federal",
+       "courte",
+       "dismisa",
+       "alaims",
+       "sacond"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "(1) the claim relies on a ne rula of constitutiornl",
+      "missing": [
+       "claim",
+       "relies",
+       "ne",
+       "rula",
+       "constitutiornl"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "nade retroactive to casos on collateral tovier by the",
+      "missing": [
+       "nade",
+       "casos",
+       "tovier"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "lan,",
+      "missing": [
+       "lan,"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "that vas previously unavailable; or",
+      "missing": [
+       "unavailable;"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "Bupreme Court,",
+      "missing": [
+       "Bupreme"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "(2) the factual pradionte for the claim",
+      "missing": [
+       "factual",
+       "pradionte",
+       "claim"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "the exercisa of âue diligence,",
+      "missing": [
+       "exercisa",
+       "âue"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "and the facts underlying the clain, if proven and viewed in light of the avidence as a wholo, vould be sufficient to establiah by clear and convincing evidence that, but for constitutional erroI, no reasonable factfinder would have found the petitioner guilty.",
+      "missing": [
+       "underlying",
+       "viewed",
+       "avidence",
+       "wholo,",
+       "erroI,"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Before such e second oi sucaessive patition nny be",
+      "missing": [
+       "e",
+       "sucaessive",
+       "nny"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "tiled in the distriot court, however, the court of appeals tor an",
+      "missing": [
+       "distriot",
+       "tor"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "the petitioner must nove",
+      "missing": [
+       "nove"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "Order authorizing the district court Potitioner'g notion for such an Crder",
+      "missing": [
+       "Potitioner'g",
+       "notion"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "must be determined by a throe judge panel of the court of appeals, which must grant or deny the motion within",
+      "missing": [
+       "determined",
+       "throe",
+       "judge"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "only if it determines that",
+      "missing": [
+       "determines"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "the petition makes a prina facie showing that it satisfias eisher",
+      "missing": [
+       "prina",
+       "satisfias"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "11. Ineffectiveness of counsel during post-trial proceedings",
+      "missing": [
+       "counsel"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "atate court shall not be grounds for relief under 28 U.8.C.",
+      "missing": [
+       "atate"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "copies must be mailed to the Clerk of the United 8tates District courti",
+      "missing": [
+       "copies",
+       "8tates",
+       "courti"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "13. Petitions which do not confora to these instructions will be returned with a notation as to the deficiency.",
+      "missing": [
+       "will"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "10. Fedaral courts must disaisa alains in a second or successive",
+     "the alaim relios on a new rulo of constitutioril",
+     "made retroactive to cases on",
+     "(2) the factuel pradicate for the clein",
+     "the axercisa of ûue diligence,",
+     "Before such a secondoI sucaeasive patition mry be",
+     "Potitioner's rotion for yuch an Crder"
+    ],
+    "missing_words": 49
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-CV-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 41,
+    "agreed_spans": 23,
+    "agreed_words": 0.475,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "Page 4 of 10",
+      "missing": []
+     },
+     {
+      "line": 9,
+      "text": "# oavletlon under attack Court Comnon pinter otigh couner of",
+      "missing": [
+       "oavletlon",
+       "Comnon",
+       "pinter",
+       "otigh",
+       "couner"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "(b) Name of ProsecutoI:_",
+      "missing": [
+       "ProsecutoI:_"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Leniggcutien conducted by Diatrint Attorsey's aftice of",
+      "missing": [
+       "Leniggcutien",
+       "conducted",
+       "Diatrint",
+       "Attorsey's",
+       "aftice"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "-June 1983~",
+      "missing": [
+       "-June",
+       "1983~"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "(b) Indictment number or nubers:",
+      "missing": [
+       "nubers:"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "_Criminal Case Humber:.",
+      "missing": [
+       "Humber:."
+      ]
+     },
+     {
+      "line": 37,
+      "text": "TeIR:_",
+      "missing": [
+       "TeIR:_"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "Bentencing Judge: Nollinburg",
+      "missing": [
+       "Nollinburg"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "3. Length of sentence: Iife",
+      "missing": [
+       "sentence:",
+       "Iife"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "4. Nature of offenso or oftenses for rhich you vere convicted:",
+      "missing": [
+       "offenso",
+       "oftenses",
+       "rhich"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "D) Guilty () (c) Nolo contendere (",
+      "missing": [
+       "D)"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "a not guilty plea to another count or indictment, give dotails:",
+      "missing": [
+       "dotails:"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "(a) Jury 12",
+      "missing": [
+       "12"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "(b) Judge only ( )",
+      "missing": [
+       "only"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "7. Did you testity at the trial?",
+      "missing": [
+       "testity"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "yes (x) N0 ()",
+      "missing": [
+       "N0"
+      ]
+     },
+     {
+      "line": 70,
+      "text": "9. It you did appeal, answer the following:",
+      "missing": [
+       "It",
+       "answer"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Prosacution conductad by District Attornay's Jttice of"
+    ],
+    "missing_words": 7
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-cv-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "garbled",
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 25,
+    "agreed_spans": 14,
+    "agreed_words": 0.25,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "Page 5 of 10",
+      "missing": []
+     },
+     {
+      "line": 7,
+      "text": "If you filed a gecond appeal or filed a petition fox certiorati in the Buprome Court, give detalls:",
+      "missing": [
+       "gecond",
+       "fox",
+       "Buprome",
+       "detalls:"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "20. other than a direct appaal fros the judgaent of conviction and sentence, have you previously filed any patitions, applications, or rotions with respect to this judgaent in any court, state ox federal?",
+      "missing": [
+       "20.",
+       "appaal",
+       "judgaent",
+       "with"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "Xes ()",
+      "missing": [
+       "Xes"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "11. If your ansver to 10 was \"ye8\", give the foll.oring infornation:",
+      "missing": [
+       "\"ye8\",",
+       "foll.oring",
+       "infornation:"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "(4) Did you receive an evidentiary hearing on your",
+      "missing": [
+       "evidentiary"
+      ]
+     },
+     {
+      "line": 28,
+      "text": "petition, application or notion?",
+      "missing": []
+     },
+     {
+      "line": 38,
+      "text": "(6) Date of Iesult:",
+      "missing": [
+       "Iesult:"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "(b) As to any second petition, application or motion give the same information:",
+      "missing": [
+       "motion"
+      ]
+     },
+     {
+      "line": 44,
+      "text": "(1) Name of court: _.",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "(3) Grounds Iaised:",
+      "missing": [
+       "Iaised:"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-CV-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 32,
+    "agreed_spans": 23,
+    "agreed_words": 0.5,
+    "unagreed": [
+     {
+      "line": 11,
+      "text": "application or notion?",
+      "missing": []
+     },
+     {
+      "line": 23,
+      "text": "(c) As to any third petition, application or motios, give fae sane information:",
+      "missing": [
+       "third",
+       "motios,",
+       "fae",
+       "information:"
+      ]
+     },
+     {
+      "line": 36,
+      "text": "Yeg ( ) No ()",
+      "missing": [
+       "Yeg"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "d) Dia you appeal to tae bighest state court having jurisdiction the result of any action taken on any petitio», applícation or motion:",
+      "missing": [
+       "Dia",
+       "tae",
+       "jurisdiction",
+       "petitio»,",
+       "applícation"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "(1) Tirst petition, otc.",
+      "missing": [
+       "Tirst",
+       "otc."
+      ]
+     },
+     {
+      "line": 45,
+      "text": "(3) Third potition, eta.",
+      "missing": [
+       "Third",
+       "eta."
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Noi1",
+      "missing": [
+       "Noi1"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "108 ( ) N0",
+      "missing": [
+       "108",
+       "N0"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "Il you did not appeal fron the adverse action on any petition, application or notion, explain briefly why you did not:",
+      "missing": [
+       "Il",
+       "fron"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "any taird petition, epplication or motion, give tho"
+    ],
+    "missing_words": 8
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-cv-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "garbled",
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 38,
+    "agreed_spans": 8,
+    "agreed_words": 0.118,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "12. Btate goncisely every ground on which you claia that you are being held unlawfully.",
+      "missing": [
+       "goncisely",
+       "claia"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "Bumnarise briafiy the facts supporting each ground.",
+      "missing": [
+       "briafiy"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "CAUTION: In order to proceed in the taderal court, you must",
+      "missing": [
+       "taderal"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "ordinarily first exhauat your state court remedies, you should",
+      "missing": [
+       "first"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "foderal",
+      "missing": [
+       "foderal"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "net thea forth in this petition ii you wish to seek",
+      "missing": [
+       "thea",
+       "ii"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "relief. If you fail to set forth ali auch grounds in lhis petition, you may be barred irom presenting then at a latez date.",
+      "missing": [
+       "ali",
+       "auch",
+       "lhis",
+       "irom",
+       "latez"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Por intornation, the following is a list of the sost",
+      "missing": [
+       "Por",
+       "intornation,",
+       "sost"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "fraquently raised grounda for reliet in habess corpus proceedings.",
+      "missing": [
+       "fraquently",
+       "habess",
+       "corpus"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "separate ground for possible reliet.",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "You may raiue any groun!: which you may have other than those listed if you have extrt.ted all you state court remedies with respect to them.",
+      "missing": [
+       "those",
+       "extrt.ted"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "However, /ou should raise da thie petition all availablo grounda (relt'iig co this conviction)",
+      "missing": [
+       "However,",
+       "availablo",
+       "(relt'iig"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "on which you base your allegations that you are",
+      "missing": [
+       "allegations"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "If you select one or more of these grounds for relieí, you must allege facts in support of the ground o. yrounds which you choose.",
+      "missing": [
+       "relieí,"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "The petition will be returned to you if you mazely check (a) through",
+      "missing": [
+       "mazely"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "(5) or any one of these grounds.",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "(a) Conviction obtained by plea of guilty which was unlawfully induced or not made voluntarily with understanding of the nature of the charge and the consaquences of the plea.",
+      "missing": []
+     },
+     {
+      "line": 32,
+      "text": "(b) Conviction obtained by use \"t coerced confession.",
+      "missing": [
+       "coerced"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "(c) Conviction obtained by use of evidence gained pursuant to an unconstitutional search and seizure, (where the state has not provided a full and fair hearing on the merits of the Fourth Amandment claim).",
+      "missing": [
+       "Amandment"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "Conviotion obtained by use of evidence obtained pursuant",
+      "missing": [
+       "Conviotion"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "to an unlawiul arrest,",
+      "missing": [
+       "unlawiul"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "and faii bearing on the merits of the Pourth Amendment claim).",
+      "missing": [
+       "faii"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "(f) Conviction obtained by the unconstitutional failure of the prosecution to disclose to the defendant evidence favorable",
+      "missing": [
+       "(f)",
+       "prosecution"
+      ]
+     },
+     {
+      "line": 44,
+      "text": "tothe defendant.",
+      "missing": [
+       "tothe"
+      ]
+     },
+     {
+      "line": 46,
+      "text": "(g) Conviction obtained by a violation of the protection againat double jeopardy.",
+      "missing": [
+       "againat"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "(h) Conviction obtained by action of a grand or petit jury which was unconstitutionally selected and impaneled.",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "ofteotive assistance of counsel.",
+      "missing": [
+       "ofteotive"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "(3) Denial of right of appeal.",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "A..Ground one: Irconstitutional confinement in allocation of living cell space provided to plaintiff that fails to meet the minimum eighth amendment standards.",
+      "missing": [
+       "A..Ground",
+       "Irconstitutional"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Bupporting PACTB (tell your story priefly vithout citing cases or 1av): The general population housing provides only 57.5 square feet of cell space to prisoners (plaintift)",
+      "missing": [
+       "Bupporting",
+       "PACTB",
+       "priefly",
+       "1av):"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-cv-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 9,
+    "agreed_words": 0.3,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "The (ACA)' Standards for Adult Correctional Institutions, vii (2d ed. 1981) mendacory r0guines (60) aya a fo at of coad1 aca 20r prp пere coe crea hat",
+      "missing": [
+       "mendacory",
+       "r0guines",
+       "aya",
+       "fo",
+       "coad1",
+       "20r",
+       "prp",
+       "пere",
+       "coe",
+       "crea",
+       "hat"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "# mendacory r0guines (60) aya a fo at of coad1 aca 20r prp пere coe crea hat",
+      "missing": [
+       "mendacory",
+       "r0guines",
+       "aya",
+       "fo",
+       "coad1",
+       "20r",
+       "prp",
+       "пere",
+       "coe",
+       "crea",
+       "hat"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "1976 requires a mínimun of (60) square feet per person in single cells in",
+      "missing": [
+       "mínimun"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "Correctional Institutions.",
+      "missing": []
+     },
+     {
+      "line": 11,
+      "text": "B. Ground two: Unconstitutional length of confinement as to time spent in cell that falls below the minimum constitutional threshold standard of the Eighth. Amendmen",
+      "missing": [
+       "spent"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Bupporting PACT8 (tell your story briefly vithout citing cases or Iaw: Plaintiff spends approximately (17) to (18) hours per day in his cell.",
+      "missing": [
+       "vithout",
+       "Iaw:"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "The standards of the (ACA) require that in general population housing, (60) square feet of cell space be provided prisoners (plaintiff) that spends more than (10) hours",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "supporting PACT8 (tell your story brietly without citing",
+      "missing": [
+       "brietly"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "(2) Feces and other waste are stranded in plaintiff's toilet which flows fron the next cell when the toilet is flushed because of inadequate plumbing.",
+      "missing": [
+       "flows"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "(2): two feet fzom tie dining tables.",
+      "missing": [
+       "fzom",
+       "tie"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "(4) The commodes are cracked and uncleanable and reeks with urine smell because of white-scale urine buildup.",
+      "missing": [
+       "commodes"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "supporting PACTB (tell your story brjefly without citing cases or",
+      "missing": [
+       "PACTB",
+       "brjefly"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "exceeds (10) hours per day. Id.. at Standard 2-4129 (Supp. 1988) Ihe (APHA) Of."
+    ],
+    "missing_words": 14
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-CV-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 29,
+    "agreed_spans": 15,
+    "agreed_words": 0.312,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "13. If any of the grounds listed in 124, B, C,",
+      "missing": []
+     },
+     {
+      "line": 16,
+      "text": "ox foderal, statu",
+      "missing": [
+       "ox",
+       "foderal,"
+      ]
+     },
+     {
+      "line": 18,
+      "text": "briefly what grounds were not so presented, and give your rersons",
+      "missing": [
+       "briefly",
+       "rersons"
+      ]
+     },
+     {
+      "line": 20,
+      "text": "for not presenting thea:",
+      "missing": [
+       "thea:"
+      ]
+     },
+     {
+      "line": 24,
+      "text": "14. Do you have any petition or appaal now pending 1u 3ny either state or federal,",
+      "missing": [
+       "appaal",
+       "now",
+       "1u",
+       "3ny",
+       "federal,"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "covit,",
+      "missing": [
+       "covit,"
+      ]
+     },
+     {
+      "line": 28,
+      "text": "as to the judguent under atttct?",
+      "missing": [
+       "under",
+       "atttct?"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "Xea ()",
+      "missing": [
+       "Xea"
+      ]
+     },
+     {
+      "line": 36,
+      "text": "15. Give the name and addreas, if known, of each attorney who represented you in the following stages of the Judgment attacked herein:",
+      "missing": [
+       "addreas,",
+       "attorney",
+       "represented"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "(c) At trial: _",
+      "missing": [
+       "trial:"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "(d) At sentencing: _",
+      "missing": [
+       "sentencing:"
+      ]
+     },
+     {
+      "line": 44,
+      "text": "(e) on appeal:",
+      "missing": []
+     },
+     {
+      "line": 46,
+      "text": "b,c,d,e,f Not Applicable",
+      "missing": [
+       "b,c,d,e,f"
+      ]
+     },
+     {
+      "line": 50,
+      "text": "procéadiog appoal iros any advoras rullag is a post-convictlox",
+      "missing": [
+       "procéadiog",
+       "appoal",
+       "iros",
+       "advoras",
+       "rullag",
+       "is",
+       "post-convictlox"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "(g) on appeal froa any adverae ruling in a post-conviction"
+    ],
+    "missing_words": 10
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-cv-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 29,
+    "agreed_spans": 18,
+    "agreed_words": 0.333,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "Page 10 of 10",
+      "missing": []
+     },
+     {
+      "line": 7,
+      "text": "16. Were you sentenced on more than one count of an indictment, oI on more than one indictment, in the sane court and at the same",
+      "missing": [
+       "Were",
+       "oI",
+       "sane"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "tine?",
+      "missing": [
+       "tine?"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "lo () Not Applicable",
+      "missing": [
+       "lo"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "17. Do you have any future sentence to serve after you conplete the sentence inposed by the judgaent under attact?",
+      "missing": [
+       "inposed",
+       "attact?"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "(b) And give date and length of sentence to be served in",
+      "missing": [
+       "length"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "(c) Have you flled, or do you",
+      "missing": [
+       "flled,"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "the judgnent which inposei the sentence to be",
+      "missing": [
+       "judgnent",
+       "inposei"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "true and c deolare under pasalty of parjury that the foxegoing is Executed on Mland 30,280(-",
+      "missing": [
+       "deolare",
+       "pasalty",
+       "parjury",
+       "foxegoing",
+       "Mland",
+       "30,280(-"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "Muckoel Wean",
+      "missing": [
+       "Muckoel",
+       "Wean"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "Sigaature of Petitioner",
+      "missing": [
+       "Sigaature"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "I declare under panalty of pezjury that the foregoing is"
+    ],
+    "missing_words": 10
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:01-cv-00689-YK-DB",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/19/2001",
+     "value": "2001-04-19",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

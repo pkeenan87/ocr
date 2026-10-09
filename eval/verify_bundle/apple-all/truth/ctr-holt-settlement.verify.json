@@ -1,0 +1,460 @@
+{
+ "source": "ctr-holt-settlement.pdf",
+ "markdown": "ctr-holt-settlement.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:48:51Z",
+ "verify_fields": "all",
+ "azure_pages": "",
+ "summary": {
+  "fields": 22,
+  "verified": 22,
+  "check": 0,
+  "unchecked": 0,
+  "pages_to_check": 0,
+  "embedded_text_pages": 3,
+  "agreed_spans": 122,
+  "unagreed_spans": 9
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 7,
+    "agreed_spans": 7,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [
+    "garbled"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 28,
+    "agreed_spans": 24,
+    "agreed_words": 0.919,
+    "unagreed": [
+     {
+      "line": 11,
+      "text": "v.",
+      "missing": []
+     },
+     {
+      "line": 17,
+      "text": "COMMITTEE FOR ECONOMICOPPORTUNITY,",
+      "missing": [
+       "ECONOMICOPPORTUNITY,"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Employer will issue Holt a W2 for this portion of the settlement proceeds.",
+      "missing": [
+       "W2"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "ol set for for that pa, mepres Alto, a the samo im o maei yet wil",
+      "missing": [
+       "ol",
+       "pa,",
+       "mepres",
+       "Alto,",
+       "samo",
+       "im",
+       "o",
+       "maei",
+       "yet",
+       "wil"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$75,000.00",
+     "value": 75000.0,
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "August 29, 2019",
+     "value": "2019-08-29",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$15,707.59",
+     "value": 15707.59,
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$15,707.59",
+     "value": 15707.59,
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$15,707.59",
+     "value": 15707.59,
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 23,
+    "agreed_spans": 22,
+    "agreed_words": 0.992,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "General Release and Wavier.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:17-CV-00683-JHE",
+     "line": 19,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "garbled"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 29,
+    "agreed_spans": 28,
+    "agreed_words": 0.974,
+    "unagreed": [
+     {
+      "line": 29,
+      "text": "Emplo yer ori he Relono omay bol palited exder pes ai inmpay or",
+      "missing": [
+       "Emplo",
+       "yer",
+       "ori",
+       "Relono",
+       "omay",
+       "bol",
+       "palited",
+       "exder",
+       "pes",
+       "ai",
+       "inmpay"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,000.00",
+     "value": 1000.0,
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 15,
+    "agreed_spans": 15,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 18,
+    "agreed_spans": 17,
+    "agreed_words": 0.991,
+    "unagreed": [
+     {
+      "line": 15,
+      "text": "AAA",
+      "missing": [
+       "AAA"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "garbled",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 11,
+    "agreed_spans": 9,
+    "agreed_words": 0.444,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "- 2019.",
+      "missing": []
+     },
+     {
+      "line": 17,
+      "text": "Before me, the undersigned Notary Public, personally appeared the above signed individual, whose name is signed to the foregoing Agreement, and who is known to me, after seing ndul seworh en pat, deposed and acknowedged that, being informed of the contents of In witness whereof, the undersigned Notary Public has signed this acknowledgment on",
+      "missing": [
+       "seing",
+       "ndul",
+       "seworh",
+       "en",
+       "pat,",
+       "acknowedged"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "such instrument, he executed the same voluntarily."
+    ],
+    "missing_words": 7
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:17-cv-00683-JHE",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/21/19",
+     "value": "2019-06-21",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  }
+ ]
+}

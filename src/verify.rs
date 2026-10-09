@@ -706,6 +706,25 @@ pub fn report<'a>(
                 )
             })
         };
+        // Amounts in words against numerals, and table totals against their rows.
+        let mismatches = if p.error.is_none() {
+            crate::arithmetic::check(&p.body)
+        } else {
+            Vec::new()
+        };
+        for m in &mismatches {
+            if !page_check.iter().any(|c| c == m.reason) {
+                page_check.push(m.reason.into());
+            }
+        }
+        for f in fields.iter_mut().filter(|f| f.kind == Kind::Amount) {
+            if let Some(m) = mismatches
+                .iter()
+                .find(|m| m.line == f.line && m.amounts.contains(&f.text))
+            {
+                f.why.push(m.reason);
+            }
+        }
         // The other reading has whole lines the OCR lacks: dropped text, or text not visible on
         // the page. Either way the page needs a look.
         if text_agreement
@@ -1240,6 +1259,23 @@ mod tests {
             assert_eq!(status("$48,250.00").1, Status::Check);
             assert_eq!(status("$48,250.00").2, vec!["not_in_second_reading"]);
         }
+    }
+
+    #[test]
+    fn arithmetic_mismatches_check_the_page_and_the_amount() {
+        let body = "Pay Five Thousand Dollars ($3,000.00) by May 7, 2024.\n\n\
+            | Invoice | Amount |\n|---|---|\n| A | $100.00 |\n| B | $200.00 |\n| Total | $310.00 |";
+        let r = run(&[page(1, body)], VerifyFields::Flagged, "");
+        assert_eq!(
+            r.pages[0].page_check,
+            ["words_numerals_mismatch", "arithmetic_mismatch"]
+        );
+        let got = statuses(&r);
+        let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
+        assert_eq!(status("$3,000.00").1, Status::Check);
+        assert!(status("$3,000.00").2.contains(&"words_numerals_mismatch"));
+        assert!(status("$310.00").2.contains(&"arithmetic_mismatch"));
+        assert_eq!(r.azure_pages, "1");
     }
 
     #[test]

@@ -310,6 +310,8 @@ An example (abridged):
   - `bates_out_of_sequence`: the Bates number breaks the page sequence.
   - `not_in_second_reading`: a scanned page (no embedded text) was read a second time, and that reading does not have the value.
   - `doubtful_in_second_reading`: the second reading has the value, but Vision marks that line as doubtful or offers a different next-best reading.
+  - `words_numerals_mismatch`: an amount in words disagrees with its numerals. `Five Thousand Dollars ($3,000.00)` means one side was misread, or the document itself is wrong.
+  - `arithmetic_mismatch`: a table's total row disagrees with the sum of the amounts above it. A `Subtotal` row and what follows it, such as tax, are allowed for.
   - `unconfirmed`: with `--verify-fields all`, nothing confirmed the value.
 - **Second reading of scanned pages (macOS):** pages without embedded text that have values are read again with Vision's line recognizer at 300 DPI (`second_reader: true` on the page).
   - **Model engines:** when the second reading has the same value, the value is `verified` (`matches_second_reading`). A model and Vision are independent readers.
@@ -317,7 +319,7 @@ An example (abridged):
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
 - **Values:** amounts include a scale word (`$33.5 million` has the value 33500000), also when the word starts the next line, and a `K`/`M`/`B` suffix (`$1.5B`). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
 - **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.
-- **`page_check`:** the suspect reasons, `failed: …`, or `missing_text`, when the whole page needs a second reading.
+- **`page_check`:** the suspect reasons, `failed: …`, `missing_text`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
   - **`missing_text`:** the other reading (embedded text or second reader) has whole lines the OCR lacks: at least 5 words in lines with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the OCR. They are listed in `text_agreement.missing_lines`.
   - On the public filings this caught Apple Vision dropping a whole visible paragraph ("ARTICLE NINTH: Execution of Agreement") and a footnote.
   - On embedded text it can also mean text that is not visible on the page, such as text under a drawn redaction box.

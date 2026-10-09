@@ -616,3 +616,18 @@ All of these are the safe direction: a sentence that does not agree is not quote
 - **Azure cost:** `azure_pages` went from 55 to 57. Born-digital pages with `missing_text` get `second_reading: embedded_text` when their values match, because the PDF's own text is the free second reading.
 
 **Not yet measured:** precision over the whole set. It needs a labelled sample of flagged lines; the eval item in the queue will add it.
+
+## Arithmetic checks (2026-10-09)
+
+`src/arithmetic.rs` adds two checks to `--verify-json`. A mismatch adds its reason to `page_check` and to the amount fields involved. No value is ever changed.
+
+**Amounts in words against numerals**, for example `Three Hundred Ninety Two Dollars and Thirty One Cents ($392.31)`, `four million dollars ($4 million)`, or `FORTY-FIVE THOUSAND AND NO/100 DOLLARS ($45,000.00)`.
+- The words must name money (`dollars`, `cents`, `NN/100`), so `Section Two ($500 per day)` is not compared.
+- An error-injection test changes a digit on either side, or a number word, and each change is caught.
+
+**Table totals:** a row labelled total must equal the sum of the money cells above it in the same column, back to the header or the previous total.
+- A `Subtotal` row is allowed for: the next total may equal the subtotals plus the rows after them (tax, fees).
+- Cells count as money only with `$`, digit grouping or cents, so years and counts are not summed.
+- An injection test changes each line item, and then the total; each change is caught.
+
+**Public filings:** no mismatches. The two amounts in words in the set (`four million dollars ($4 million)` and `Three Hundred Ninety Two Dollars and Thirty One Cents ($392.31)`) agree with their numerals, and no table has a total row whose sum fails. Both checks are therefore exercised mostly by the synthetic tests.

@@ -58,6 +58,7 @@ Long scans write per-page checkpoints. If a run is interrupted, running the same
 When the user will rely on figures, dates, docket numbers or citations, scan with `--verify-json`. Use `--verify-fields all` when nothing may be missed, for example amounts in a settlement or deadlines. Then read `<stem>.verify.json`:
 
 - **Quote or compute only with values that are `verified`**, or that a second reader has confirmed. Always give the page, and the Bates number if there is one.
+- **`words_numerals_mismatch` or `arithmetic_mismatch`:** an amount in words disagrees with its numerals, or a table total with its rows. Present neither value as fact; say they disagree and give the page.
 - **`missing_text` in a page's `page_check`:** the OCR lacks whole lines another reading has. The lines are in `text_agreement.missing_lines`. Do not say a page doesn't mention something based on its OCR alone; check those lines or the PDF page.
 - **Quote text word for word only when its sentence agrees.** A sentence agrees when it is absent from `unagreed` on a page whose `text_agreement.independent` is true. Otherwise, paraphrase and say the wording is unconfirmed, or check the PDF page.
 - **Treat `check` values as unconfirmed.** Never present them as fact. If a second OCR service is available (for example an Azure Document Intelligence tool), send it only the pages the question needs, taken from `azure_pages` or from the pages of the relevant fields. Use its reading where the two disagree, and say that you did.

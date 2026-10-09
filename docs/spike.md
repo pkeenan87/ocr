@@ -565,3 +565,33 @@ Eight were real shared errors. A Jane Street filing carries two overprinted stam
 - **Time:** 125 s → 144 s for the whole set; 60 pages were re-read.
 
 **Not yet measured:** a live model run. The model path (agreement verifies) is unit-tested only.
+
+## Whole-text agreement (2026-10-09)
+
+`--verify-json` now reports, per page, which sentences another reading has word for word (`text_agreement`, `src/agreement.rs`). This tells a tool which wording it can quote.
+- **Spans:** sentences, or whole lines when shorter. Abbreviations like `No.`, `U.S.C.` and `Inc.` do not end a sentence.
+- **Comparison:** words are compared as letters and digits, case-insensitively, in order, and with nothing between them.
+
+Each rule below came from a failure on the public filings, or from the error-injection test, which changes, drops or doubles every word of a reference passage in turn:
+- **Pleading line numbers** may be skipped, but only structurally:
+  - in the other reading, when they stand alone on a line or start one;
+  - in the Markdown, only at the start of a line.
+
+  A number inside a line is never skipped, so `30` read for `80` still differs, and so does a `30` that only the OCR has. That matters because a model can invent a number.
+- **Edges:** in prose (a span ending in sentence punctuation), the span must start and end at a sentence or line edge of the other reading. A span that follows another sentence in the Markdown must follow a sentence end there too. Without this, a sentence missing its first word ("Not later than…" read as "later than…") agreed, and so did a doubled `2024.` at a line start. Headers and table cells are exempt, because Vision splits them where the PDF has one line.
+- **Margin legends:** PDFKit puts the vertical left-margin legend ("United States District Court / Northern District of California") between a paragraph's lines. A whole line of the other reading may be skipped inside a match only if it has at least three words, and the Markdown has it on another line. A line the OCR dropped is not elsewhere in the Markdown, so it still breaks agreement (tested).
+
+**Measured on the 20 public filings** (Apple, default `auto`):
+
+| Pages | Compared with | Sentences agreed | Median words agreed per page |
+|---|---|---|---|
+| Born-digital (139) | embedded text | 77.2% | 90% |
+| Partly born-digital (28) | embedded text | 91.4% | 94% |
+| Scanned (59) | second Apple reading, not independent | 64.6% | 64% |
+
+**What remains unagreed on born-digital pages:**
+- real differences: OCR misreads (`Issu`, `It'l`) on pages the embedded correction does not touch;
+- a 1985 scan whose text layer is itself bad OCR, and a handwritten form;
+- condensed two-up transcripts, whose layout the PDF text orders differently.
+
+All of these are the safe direction: a sentence that does not agree is not quoted as confirmed.

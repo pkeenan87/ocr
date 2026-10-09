@@ -1,5 +1,6 @@
 //! `ocr` — local document OCR for macOS, and (PLAN §9) Linux and Windows with a GPU.
 
+pub mod agreement;
 pub mod anchor;
 pub mod checkpoint;
 pub mod cli;

@@ -322,6 +322,13 @@ An example (abridged):
   - `embedded_text`: a suspect page whose values all match the PDF's own text; read that text instead, at no cost.
   - `azure`: any other page that needs a second reading.
 - **`azure_pages`:** the `azure` pages. It is empty when nothing needs a paid second reading.
+- **`text_agreement`:** which sentences of the page another reading has word for word, for quoting.
+  - `compared_with` is `embedded_text` or `second_reader`.
+  - `independent` is true for embedded text, and for Vision against a model engine. Quote as agreed only from independent comparisons, because two Apple readings share blind spots.
+  - `unagreed` lists the sentences that do not agree, each with its line within the page's Markdown and the words the other reading lacks entirely.
+  - `agreed_spans` and `agreed_words` count what agrees. `summary.agreed_spans` and `summary.unagreed_spans` total the independent comparisons.
+  - **What is compared:** letters and digits, case-insensitively, and in order. A changed, dropped or doubled word breaks agreement. Line breaks, hyphenation and pleading line numbers don't, and neither does a margin legend that the PDF text puts between a paragraph's lines.
+  - **Edges:** a sentence must also start and end where a sentence or line does in the other reading, so a dropped first or last word is caught. Headers and table cells are matched within longer lines.
 
 Measured on the 20 public court filings (230 pages, Apple engine, eval/PUBLIC_SET.md):
 

@@ -1,0 +1,1647 @@
+{
+ "source": "depo-christoforo-lupo.pdf",
+ "markdown": "depo-christoforo-lupo.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:57:20Z",
+ "verify_fields": "flagged",
+ "azure_pages": "1-5",
+ "summary": {
+  "fields": 15,
+  "verified": 0,
+  "check": 15,
+  "unchecked": 0,
+  "pages_to_check": 5,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [
+    "misreads",
+    "junk_lines"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 105,
+    "agreed_spans": 42,
+    "agreed_words": 0.275,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "Document e7ag0 Filed0917/2007",
+      "missing": [
+       "e7ag0"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Pages 1 to 91",
+      "missing": [
+       "91"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "GILMOKE,",
+      "missing": [
+       "GILMOKE,"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "RROS, CARUSON & CATAbUU, P.",
+      "missing": [
+       "RROS,",
+       "CARUSON",
+       "CATAbUU,",
+       "P."
+      ]
+     },
+     {
+      "line": 21,
+      "text": "Ryhihitg 1 to 8",
+      "missing": [
+       "Ryhihitg"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "UNITED STATES DISTRICT COURT",
+      "missing": [
+       "UNITED"
+      ]
+     },
+     {
+      "line": 34,
+      "text": "DISTRICE OF MASSACHUSETTS",
+      "missing": [
+       "DISTRICE"
+      ]
+     },
+     {
+      "line": 38,
+      "text": "McCormick, III, Esq.",
+      "missing": [
+       "Esq."
+      ]
+     },
+     {
+      "line": 40,
+      "text": "by Edward J.",
+      "missing": [
+       "Edward"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "for the i",
+      "missing": []
+     },
+     {
+      "line": 44,
+      "text": "Plaintsff",
+      "missing": [
+       "Plaintsff"
+      ]
+     },
+     {
+      "line": 50,
+      "text": "MONIAR & PADRLLARO",
+      "missing": [
+       "MONIAR",
+       "PADRLLARO"
+      ]
+     },
+     {
+      "line": 58,
+      "text": "JOSEPH CERISTOFORO,",
+      "missing": [
+       "JOSEPH",
+       "CERISTOFORO,"
+      ]
+     },
+     {
+      "line": 68,
+      "text": "y Jay Hodapi",
+      "missing": [
+       "y",
+       "Hodapi"
+      ]
+     },
+     {
+      "line": 70,
+      "text": "Bul1ahapo",
+      "missing": [
+       "Bul1ahapo"
+      ]
+     },
+     {
+      "line": 78,
+      "text": "& COSTELIO",
+      "missing": [
+       "COSTELIO"
+      ]
+     },
+     {
+      "line": 82,
+      "text": "MERRICK, LOUISON",
+      "missing": [
+       "MERRICK,",
+       "LOUISON"
+      ]
+     },
+     {
+      "line": 92,
+      "text": "Batterynarch St.",
+      "missing": [
+       "Batterynarch"
+      ]
+     },
+     {
+      "line": 96,
+      "text": "TH HTC CPACTZY AS",
+      "missing": [
+       "TH",
+       "HTC",
+       "CPACTZY"
+      ]
+     },
+     {
+      "line": 104,
+      "text": "SHERIPE, AND CRRTAIN",
+      "missing": [
+       "CRRTAIN"
+      ]
+     },
+     {
+      "line": 108,
+      "text": "Sor tee Defendant Prank G. Cousins, St.",
+      "missing": [
+       "Sor",
+       "tee"
+      ]
+     },
+     {
+      "line": 110,
+      "text": "econes",
+      "missing": [
+       "econes"
+      ]
+     },
+     {
+      "line": 112,
+      "text": "UNKNONE",
+      "missing": [
+       "UNKNONE"
+      ]
+     },
+     {
+      "line": 116,
+      "text": "Defendant (9).",
+      "missing": []
+     },
+     {
+      "line": 130,
+      "text": "DEPOSITION OF JULIUS J. LUPO, a witness called by",
+      "missing": []
+     },
+     {
+      "line": 160,
+      "text": "applicable rules, before Diane I. McElvee, Registered",
+      "missing": [
+       "applicable",
+       "McElvee,",
+       "Registered"
+      ]
+     },
+     {
+      "line": 164,
+      "text": "Merit Reporter and Notary Public in and for the",
+      "missing": [
+       "Public"
+      ]
+     },
+     {
+      "line": 168,
+      "text": "Comsonvealth of Massachusetta, at the Offices of",
+      "missing": [
+       "Comsonvealth"
+      ]
+     },
+     {
+      "line": 172,
+      "text": "GILMORE, REES, CARLSON & CATALDO, P.C, 1000 Franklín",
+      "missing": [
+       "Franklín"
+      ]
+     },
+     {
+      "line": 178,
+      "text": "Village Drive, Pranklin, Massachusetts, on Monday,",
+      "missing": [
+       "Pranklin,"
+      ]
+     },
+     {
+      "line": 180,
+      "text": "May 16, 2005, cosnencing at 2:35 PM.",
+      "missing": [
+       "cosnencing"
+      ]
+     },
+     {
+      "line": 188,
+      "text": "DIANE L. MCELKEE, RPR, RMR",
+      "missing": [
+       "MCELKEE,"
+      ]
+     },
+     {
+      "line": 196,
+      "text": "Pagc 4",
+      "missing": [
+       "Pagc"
+      ]
+     },
+     {
+      "line": 198,
+      "text": "PROCEEDINGS",
+      "missing": [
+       "PROCEEDINGS"
+      ]
+     },
+     {
+      "line": 202,
+      "text": "TNDE X",
+      "missing": [
+       "TNDE",
+       "X"
+      ]
+     },
+     {
+      "line": 210,
+      "text": "MR. McCORMICK: Counsel, with",
+      "missing": []
+     },
+     {
+      "line": 214,
+      "text": "REDIRECZ",
+      "missing": [
+       "REDIRECZ"
+      ]
+     },
+     {
+      "line": 220,
+      "text": "DERKC",
+      "missing": [
+       "DERKC"
+      ]
+     },
+     {
+      "line": 226,
+      "text": "regards to stipulations, the usual stipulations wc have had in previous depositions, that being that all objections except as to the form of the question and motions to strike will be reserved until the time of trial?",
+      "missing": [
+       "regards",
+       "wc",
+       "objections",
+       "reserved"
+      ]
+     },
+     {
+      "line": 266,
+      "text": "Mx.",
+      "missing": [
+       "Mx."
+      ]
+     },
+     {
+      "line": 268,
+      "text": "Hodape",
+      "missing": [
+       "Hodape"
+      ]
+     },
+     {
+      "line": 278,
+      "text": "McCornick",
+      "missing": [
+       "McCornick"
+      ]
+     },
+     {
+      "line": 280,
+      "text": "MR. HODAPP: Agrecd.",
+      "missing": [
+       "Agrecd."
+      ]
+     },
+     {
+      "line": 284,
+      "text": "MR. MCCORMICK: With regard to",
+      "missing": []
+     },
+     {
+      "line": 288,
+      "text": "EXHIBITS",
+      "missing": [
+       "EXHIBITS"
+      ]
+     },
+     {
+      "line": 290,
+      "text": "reading and signing this deposition, what's your preference, counsel?",
+      "missing": []
+     },
+     {
+      "line": 296,
+      "text": "Page 45",
+      "missing": [
+       "45"
+      ]
+     },
+     {
+      "line": 304,
+      "text": "Statenent given to Mr. Roche",
+      "missing": [
+       "Statenent"
+      ]
+     },
+     {
+      "line": 312,
+      "text": "36 pagos",
+      "missing": [
+       "pagos"
+      ]
+     },
+     {
+      "line": 318,
+      "text": "ceport",
+      "missing": [
+       "ceport"
+      ]
+     },
+     {
+      "line": 322,
+      "text": "115",
+      "missing": [
+       "115"
+      ]
+     },
+     {
+      "line": 324,
+      "text": "wN",
+      "missing": [
+       "wN"
+      ]
+     },
+     {
+      "line": 328,
+      "text": "eetioye rhandavok reed 1725/99",
+      "missing": [
+       "eetioye",
+       "rhandavok",
+       "reed",
+       "1725/99"
+      ]
+     },
+     {
+      "line": 330,
+      "text": "Recoiot for navinя",
+      "missing": [
+       "Recoiot",
+       "navinя"
+      ]
+     },
+     {
+      "line": 345,
+      "text": "hearing by Sheriff",
+      "missing": [
+       "Sheriff"
+      ]
+     },
+     {
+      "line": 355,
+      "text": "Settlenent agreonent, three pages",
+      "missing": [
+       "agreonent,"
+      ]
+     },
+     {
+      "line": 361,
+      "text": "Resignation letter",
+      "missing": [
+       "Resignation"
+      ]
+     },
+     {
+      "line": 367,
+      "text": "eceipt for having read the mployee handbook dated in 200",
+      "missing": [
+       "mployee",
+       "200"
+      ]
+     },
+     {
+      "line": 369,
+      "text": "[20] JULIUS J. LUPO, a witness identified and sworn, sas (211 examined and testificd as follows:",
+      "missing": [
+       "sworn,",
+       "sas",
+       "(211",
+       "testificd"
+      ]
+     },
+     {
+      "line": 375,
+      "text": "Receipt for having read",
+      "missing": [
+       "Receipt"
+      ]
+     },
+     {
+      "line": 385,
+      "text": "BY MR. McCORMICK:",
+      "missing": []
+     },
+     {
+      "line": 387,
+      "text": "123]",
+      "missing": [
+       "123]"
+      ]
+     },
+     {
+      "line": 391,
+      "text": "State your name, please.",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "acos 1 co yl"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:03-cv-12307-RGS",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 16, 2005",
+     "value": "2005-05-16",
+     "line": 180,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "1/2/03",
+     "value": "2003-01-02",
+     "line": 314,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [
+    "junk_lines"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 90,
+    "agreed_spans": 60,
+    "agreed_words": 0.462,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 1:03-cv-12307-RGS Document 57Pagc Piled 09/17/2007",
+      "missing": [
+       "57Pagc"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "7, $2800 for rent.",
+      "missing": []
+     },
+     {
+      "line": 11,
+      "text": "A It's a corporation.",
+      "missing": [
+       "It's"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "A I worked for the Department of Corrections, Middleton, Mass.",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "Q Is that the Essex County - A Essex County Sheriff's Department.",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "1 am, myself.",
+      "missing": [
+       "myself."
+      ]
+     },
+     {
+      "line": 61,
+      "text": "Q When did you first go to work for the Essex County Sherif's Department, Mr. Lupo?",
+      "missing": [
+       "Sherif's"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "A Bither December of 97 or January '98, something like that.",
+      "missing": [
+       "Bither"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "Q IfI show you your answers to interrogatorics, No. 3, Please state your employment background listing the name and address of each cmployer you have worked from 1985 to the present, you state that you went to work for the Essex County House of Correction in Middleton, Mass. in 1999.",
+      "missing": [
+       "IfI",
+       "interrogatorics,",
+       "cmployer"
+      ]
+     },
+     {
+      "line": 117,
+      "text": "Yes, I have a seven-year lease.",
+      "missing": [
+       "seven-year"
+      ]
+     },
+     {
+      "line": 123,
+      "text": "By thatlease you are not only leasing the",
+      "missing": [
+       "thatlease"
+      ]
+     },
+     {
+      "line": 139,
+      "text": "I don't understand that.",
+      "missing": []
+     },
+     {
+      "line": 143,
+      "text": "Q So it would be 1999 that you went - A Yes, that would be correct.",
+      "missing": []
+     },
+     {
+      "line": 147,
+      "text": "Doyou lease the building from anyone else",
+      "missing": [
+       "Doyou",
+       "else"
+      ]
+     },
+     {
+      "line": 159,
+      "text": "Q Now for what job were you hired to perform at the Essex County House of Correction by the",
+      "missing": []
+     },
+     {
+      "line": 169,
+      "text": "What do you pay a month for rent?",
+      "missing": []
+     },
+     {
+      "line": 195,
+      "text": "What were your duties and responsibilitics",
+      "missing": [
+       "responsibilitics"
+      ]
+     },
+     {
+      "line": 211,
+      "text": "O Did you actually cook?",
+      "missing": []
+     },
+     {
+      "line": 213,
+      "text": "Yes, I cooked for the staff, for the correctional officers, and all the staff of the Bsscx County Jail.",
+      "missing": [
+       "Bsscx"
+      ]
+     },
+     {
+      "line": 215,
+      "text": "So you coked for thestaff and the",
+      "missing": [
+       "coked",
+       "thestaff"
+      ]
+     },
+     {
+      "line": 255,
+      "text": "Yes. We give them the recipe, go over thei recipe with them, tell them how to do the procedures, and let them do the product.",
+      "missing": [
+       "thei"
+      ]
+     },
+     {
+      "line": 259,
+      "text": "A Yes. There was two other correctional cooks",
+      "missing": []
+     },
+     {
+      "line": 265,
+      "text": "there, too. Weall worked together, because if I was out, then another gentleman would step in and take",
+      "missing": [
+       "Weall",
+       "gentleman"
+      ]
+     },
+     {
+      "line": 271,
+      "text": "ISI",
+      "missing": [
+       "ISI"
+      ]
+     },
+     {
+      "line": 275,
+      "text": "O Now is that the position that you took when you irst joined the Sheriffs Department in 1999?",
+      "missing": [
+       "irst"
+      ]
+     },
+     {
+      "line": 281,
+      "text": "A It changed in approximately maybe a year or year and a half later.",
+      "missing": [
+       "half"
+      ]
+     },
+     {
+      "line": 309,
+      "text": "when you first started in 992",
+      "missing": [
+       "992"
+      ]
+     },
+     {
+      "line": 311,
+      "text": "117",
+      "missing": [
+       "117"
+      ]
+     },
+     {
+      "line": 319,
+      "text": "So your job stayed the same, but it was what",
+      "missing": []
+     },
+     {
+      "line": 331,
+      "text": "Q When you say the second feeding, what times are the inmates fed in Middleton?",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:03-cv-12307-RGS",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "09/17/2007",
+     "value": "2007-09-17",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$2800",
+     "value": 2800.0,
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "misreads",
+    "junk_lines"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 95,
+    "agreed_spans": 63,
+    "agreed_words": 0.49,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "Yes, it could be.",
+      "missing": [
+       "could"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "Document 57 Page-fled 09/17/2007",
+      "missing": [
+       "Page-fled"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "What were you taught at this boot camp?",
+      "missing": []
+     },
+     {
+      "line": 27,
+      "text": "Q Anything else?",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "That's all.",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "You say you were taught sclf-defense at",
+      "missing": [
+       "sclf-defense"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "From whom were you being taught to",
+      "missing": []
+     },
+     {
+      "line": 91,
+      "text": "Were you taught anyspecifictacticsor body maneuvers on how to defend yourself from inmates?",
+      "missing": [
+       "anyspecifictacticsor"
+      ]
+     },
+     {
+      "line": 93,
+      "text": "I don't recall what the specifics were.",
+      "missing": [
+       "specifics"
+      ]
+     },
+     {
+      "line": 97,
+      "text": "Were you taught howto defend yourself in",
+      "missing": [
+       "howto"
+      ]
+     },
+     {
+      "line": 107,
+      "text": "[2] up.",
+      "missing": []
+     },
+     {
+      "line": 109,
+      "text": "Q Were you taught any specific vulnerable parts of the bady on which to strike an inmate if you",
+      "missing": [
+       "bady"
+      ]
+     },
+     {
+      "line": 130,
+      "text": "You were taught how to use a pistol and",
+      "missing": []
+     },
+     {
+      "line": 148,
+      "text": "O And you were taught what to do if there was a riot, correci?",
+      "missing": [
+       "correci?"
+      ]
+     },
+     {
+      "line": 170,
+      "text": "• With regard to controlling the situation, what were you taught on how to control inmates?",
+      "missing": []
+     },
+     {
+      "line": 190,
+      "text": "MR. MCCORMICK: I will rephrasc.",
+      "missing": [
+       "MCCORMICK:",
+       "rephrasc."
+      ]
+     },
+     {
+      "line": 192,
+      "text": "Were you given any specifie instructions on",
+      "missing": [
+       "specifie"
+      ]
+     },
+     {
+      "line": 196,
+      "text": "Just to let the riot guards, officers handle",
+      "missing": [
+       "officers"
+      ]
+     },
+     {
+      "line": 214,
+      "text": "Meaning the nonrioting inmates?",
+      "missing": []
+     },
+     {
+      "line": 230,
+      "text": "Were you given anyinstructionson whatto do when an inmate refused any of your directives?",
+      "missing": [
+       "anyinstructionson",
+       "whatto",
+       "directives?"
+      ]
+     },
+     {
+      "line": 234,
+      "text": "What eise were you taught to do relative to if there was a riot at the House of Correction?",
+      "missing": []
+     },
+     {
+      "line": 238,
+      "text": "A Just the people to call and stay there.",
+      "missing": [
+       "people"
+      ]
+     },
+     {
+      "line": 282,
+      "text": "Q Ever usc any means of self-defense that you were taught?",
+      "missing": []
+     },
+     {
+      "line": 292,
+      "text": "Q When was the first time you struck an inmate at the Essex County House of Correction?",
+      "missing": []
+     },
+     {
+      "line": 296,
+      "text": "A December 23d, Joscph Cristoforo.",
+      "missing": [
+       "Joscph"
+      ]
+     },
+     {
+      "line": 300,
+      "text": "• Tell us about that incident.",
+      "missing": [
+       "Tell"
+      ]
+     },
+     {
+      "line": 300,
+      "text": "What happened that caused you to strike Mr. Cristoforo on or about December 23, 20022",
+      "missing": [
+       "20022"
+      ]
+     },
+     {
+      "line": 310,
+      "text": "When you say \"they,\" who do you mean?",
+      "missing": []
+     },
+     {
+      "line": 314,
+      "text": "A The inmates were setting up the trays for lanch feeding.",
+      "missing": [
+       "lanch"
+      ]
+     },
+     {
+      "line": 320,
+      "text": "118]",
+      "missing": [
+       "118]"
+      ]
+     },
+     {
+      "line": 326,
+      "text": "A Talking between all the inmates, causing problems.",
+      "missing": []
+     },
+     {
+      "line": 336,
+      "text": "A Just work problems, work-related probiems.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:03-cv-12307-RGS",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "09/17/2007",
+     "value": "2007-09-17",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "misreads",
+    "junk_lines"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 117,
+    "agreed_spans": 84,
+    "agreed_words": 0.575,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Page 33",
+      "missing": []
+     },
+     {
+      "line": 5,
+      "text": "Document 57Pagc Piled 09/17/2007",
+      "missing": [
+       "57Pagc"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "Did he physically stop anyone from working",
+      "missing": [
+       "physically",
+       "stop"
+      ]
+     },
+     {
+      "line": 34,
+      "text": "So he did this, in your opinion, simply by",
+      "missing": [
+       "simply",
+       "by"
+      ]
+     },
+     {
+      "line": 106,
+      "text": "first time I went to tell him to be quict, and then",
+      "missing": [
+       "quict,"
+      ]
+     },
+     {
+      "line": 112,
+      "text": "Q You heard him say, This place sucks; we",
+      "missing": []
+     },
+     {
+      "line": 115,
+      "text": "don't have to do this, words to that effect?",
+      "missing": [
+       "effect?"
+      ]
+     },
+     {
+      "line": 119,
+      "text": "Something like that.",
+      "missing": []
+     },
+     {
+      "line": 129,
+      "text": "I went over and told him to keep the noise",
+      "missing": []
+     },
+     {
+      "line": 141,
+      "text": "He said something, and I turned my back.",
+      "missing": []
+     },
+     {
+      "line": 153,
+      "text": "He said, Fuck him.",
+      "missing": []
+     },
+     {
+      "line": 161,
+      "text": "I went back to my table, and when the noise",
+      "missing": []
+     },
+     {
+      "line": 169,
+      "text": "his ear and told him tobe quiet.",
+      "missing": [
+       "tobe"
+      ]
+     },
+     {
+      "line": 171,
+      "text": "Q When you flicked his ear, as you put it, was",
+      "missing": []
+     },
+     {
+      "line": 183,
+      "text": "O You came at him from the side?",
+      "missing": []
+     },
+     {
+      "line": 211,
+      "text": "Was it open or closed?",
+      "missing": [
+       "closed?"
+      ]
+     },
+     {
+      "line": 225,
+      "text": "-back part of my hand.",
+      "missing": []
+     },
+     {
+      "line": 231,
+      "text": "I11]",
+      "missing": [
+       "I11]"
+      ]
+     },
+     {
+      "line": 245,
+      "text": "A His eariobe.",
+      "missing": [
+       "eariobe."
+      ]
+     },
+     {
+      "line": 247,
+      "text": "O His carlobe?",
+      "missing": []
+     },
+     {
+      "line": 273,
+      "text": "So you gave a backhand and only touched his",
+      "missing": [
+       "only"
+      ]
+     },
+     {
+      "line": 277,
+      "text": "A No, not a backhand.",
+      "missing": []
+     },
+     {
+      "line": 277,
+      "text": "I flicked him, a fip.",
+      "missing": [
+       "fip."
+      ]
+     },
+     {
+      "line": 279,
+      "text": "Q How far away from him when you first initiated -",
+      "missing": [
+       "initiated"
+      ]
+     },
+     {
+      "line": 281,
+      "text": "A Right beside him.",
+      "missing": []
+     },
+     {
+      "line": 293,
+      "text": "Q How far away?",
+      "missing": []
+     },
+     {
+      "line": 295,
+      "text": "A Not even two inches.",
+      "missing": []
+     },
+     {
+      "line": 297,
+      "text": "Q He hadn't turned to look at you?",
+      "missing": []
+     },
+     {
+      "line": 301,
+      "text": "Q So you were two inches - you came up upon him two inches away, and he hadn't turned to look at you?",
+      "missing": []
+     },
+     {
+      "line": 313,
+      "text": "and hit just his earlobe?",
+      "missing": [
+       "earlobe?"
+      ]
+     },
+     {
+      "line": 335,
+      "text": "114)",
+      "missing": [
+       "114)"
+      ]
+     },
+     {
+      "line": 361,
+      "text": "cyclash?",
+      "missing": [
+       "cyclash?"
+      ]
+     },
+     {
+      "line": 367,
+      "text": "Didn't turn to you and say, What do you",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "09/17/2007",
+     "value": "2007-09-17",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "1:03-cv-12307-RGS",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 76,
+    "agreed_spans": 20,
+    "agreed_words": 0.189,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "| Page 45 [1] | Case 1:03-cv-12307-RGS You have it.",
+      "missing": []
+     },
+     {
+      "line": 1,
+      "text": "| Document 5-Page ffiled 09/17/2007 Page 5 of 5 who they were? |",
+      "missing": [
+       "5-Page",
+       "ffiled"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "| [2] | Q Can I see that for a minute, Mr. Lupo?",
+      "missing": []
+     },
+     {
+      "line": 4,
+      "text": "| (3] • Do you know an inmate by the name of Bugene |",
+      "missing": [
+       "Bugene"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "| [4] | MR. PFAFF: Okay. | Fernandes? |",
+      "missing": []
+     },
+     {
+      "line": 6,
+      "text": "| [5] | (Pausc) | 151 A No. |",
+      "missing": []
+     },
+     {
+      "line": 7,
+      "text": "| [6] | (Discussion off the record) | So it's safe to say you don't know he was |",
+      "missing": [
+       "off"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "| [7) | (Pausc) Q Mr. Lupo, have you had an opportunity to | [8] A It's safe to say I don't know if he was one |",
+      "missing": []
+     },
+     {
+      "line": 10,
+      "text": "| [9] of the inmates. |",
+      "missing": []
+     },
+     {
+      "line": 11,
+      "text": "| (10] | Yes. | [10) What about Mr. Smith?",
+      "missing": []
+     },
+     {
+      "line": 11,
+      "text": "I believe we talked |",
+      "missing": [
+       "talked"
+      ]
+     },
+     {
+      "line": 12,
+      "text": "| (11] | Q And is that in fact your statement that you | (1] about an inmate named Robert Smith carlier. Do you |",
+      "missing": [
+       "carlier."
+      ]
+     },
+     {
+      "line": 13,
+      "text": "| (12] recall if he was on the line that day? |",
+      "missing": []
+     },
+     {
+      "line": 14,
+      "text": "| [13] | Yes. | [13] Yes. |",
+      "missing": []
+     },
+     {
+      "line": 15,
+      "text": "| [14) | MR. McCORMICK: Can we have this | [14] Q Washe? |",
+      "missing": [
+       "Washe?"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "| (15] | marked as Exhibit 1, please.",
+      "missing": [
+       "please."
+      ]
+     },
+     {
+      "line": 17,
+      "text": "(Exhibit 1 marked for identification) | [16] What about Raiph Sordello? |",
+      "missing": []
+     },
+     {
+      "line": 18,
+      "text": "| (17) A I don't recall. |",
+      "missing": []
+     },
+     {
+      "line": 19,
+      "text": "| [18] | You gave that to Michacl Roche on January 2,-2002, | [18] Q Do you know an inmate by the name of David |",
+      "missing": [
+       "Michacl"
+      ]
+     },
+     {
+      "line": 20,
+      "text": "| (19] | correot? | [19] Souther, SOUTHE R? |",
+      "missing": [
+       "SOUTHE",
+       "R?"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "| (20] | Yes. | (20) A I don't recall that. |",
+      "missing": []
+     },
+     {
+      "line": 22,
+      "text": "| (21] Q You don't recall him? |",
+      "missing": []
+     },
+     {
+      "line": 23,
+      "text": "| [22] A I don't recall him. |",
+      "missing": []
+     },
+     {
+      "line": 24,
+      "text": "| | The inmates that were on line with | (23] You do recall Mr. Smith was on the line that |",
+      "missing": []
+     },
+     {
+      "line": 25,
+      "text": "| [23] | Mr. Cristoforo the day you struck him, do you recall | (24] day? |",
+      "missing": []
+     },
+     {
+      "line": 26,
+      "text": "| [24] 1251 | | (25] |",
+      "missing": [
+       "1251"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "| Page 47 | | Page 48 |",
+      "missing": []
+     },
+     {
+      "line": 28,
+      "text": "| [1] | Yes. | [1) A I called Deputy McCoy. |",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "| [2] | Q Do you recall where he was working in | [2] Q Why? |",
+      "missing": []
+     },
+     {
+      "line": 30,
+      "text": "| [3] | relationship to Mr. Cristoforo on December 23, 20022 | [3) A To take me up to the infirmary to see what |",
+      "missing": [
+       "20022"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "| [4] | No, I don't know where.",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "| 14) was going on.",
+      "missing": []
+     },
+     {
+      "line": 32,
+      "text": "| [ 5] | Bur in total there were only about eight | [5] |",
+      "missing": [
+       "total"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "| A Totake me to the infirmary to see Joc |",
+      "missing": [
+       "Joc"
+      ]
+     },
+     {
+      "line": 34,
+      "text": "| [7 | Yes. | Cristoforo. |",
+      "missing": []
+     },
+     {
+      "line": 35,
+      "text": "| | O Andhewas working on theassembly line as | [8] • Joe Cristoforo was already at the infirmary. |",
+      "missing": [
+       "Andhewas",
+       "theassembly"
+      ]
+     },
+     {
+      "line": 36,
+      "text": "| [91 You called Mr. McCoy to bring him to the infirmary, |",
+      "missing": [
+       "[91"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "| [10] correct? A To bring me to the infirmary. |",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "| [12) | Mr. Cristoforo, you say you went to the supermarket, | [12] Q Why did you want to go to the infirmary? |",
+      "missing": [
+       "supermarket,"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "| [13] | correct? | [13] See what was Cristoforo's problem. |",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "| [14] Did you go to the infirmary? |",
+      "missing": []
+     },
+     {
+      "line": 42,
+      "text": "| 1151 | Q And you came back.",
+      "missing": [
+       "1151"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "Did you retum to the | [15) A With Deputy McCoy.",
+      "missing": [
+       "retum"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "Q Would that be a yes? |",
+      "missing": [
+       "be"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "| | Essex County jail? | [16] |",
+      "missing": []
+     },
+     {
+      "line": 44,
+      "text": "| [17 A Yes. |",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "| (17) | Q What did you do when you returned?",
+      "missing": []
+     },
+     {
+      "line": 46,
+      "text": "| (18) | | 119] A On or abour that day. |",
+      "missing": [
+       "119]"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "| | A When I returned, an officer told me that | (20] • Is it the same day you struck |",
+      "missing": []
+     },
+     {
+      "line": 48,
+      "text": "What did you say to him?",
+      "missing": []
+     },
+     {
+      "line": 48,
+      "text": "| (21] Mr. Cristoforo? |",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "| (21] | I said, Why?",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "| [22) A Yes, the same day I struck Joe Cristoforo. |",
+      "missing": []
+     },
+     {
+      "line": 50,
+      "text": "| 123] O When you went to the infirmary, did you see |",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "| [23] | Q What was your reaction?",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "| 124] Mr. Cristoforo there? |",
+      "missing": [
+       "124]"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Document 57Pagc Filed 09/17/2007"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:03-cv-12307-RGS",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "09/17/2007",
+     "value": "2007-09-17",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 2, 2003",
+     "value": "2003-01-02",
+     "line": 13,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 2, 2003",
+     "value": "2003-01-02",
+     "line": 23,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 23, 2002",
+     "value": "2002-12-23",
+     "line": 45,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

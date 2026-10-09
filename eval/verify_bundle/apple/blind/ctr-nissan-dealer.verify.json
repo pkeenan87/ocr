@@ -1,0 +1,2977 @@
+{
+ "source": "ctr-nissan-dealer.pdf",
+ "markdown": "ctr-nissan-dealer.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:57:43Z",
+ "verify_fields": "flagged",
+ "azure_pages": "1-3,7-8,10,12-15",
+ "summary": {
+  "fields": 68,
+  "verified": 0,
+  "check": 52,
+  "unchecked": 16,
+  "pages_to_check": 10,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 94,
+    "agreed_spans": 66,
+    "agreed_words": 0.419,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "individual",
+      "missing": [
+       "individual"
+      ]
+     },
+     {
+      "line": 54,
+      "text": "5 N. 210 HERITAGE COURT WAYNE, II. 60184",
+      "missing": [
+       "II."
+      ]
+     },
+     {
+      "line": 96,
+      "text": "IN WITNESS THEREOF, the parties hereto bere executed this Agrement in triplicate an of",
+      "missing": [
+       "bere",
+       "executed",
+       "Agrement",
+       "triplicate"
+      ]
+     },
+     {
+      "line": 114,
+      "text": "Lanh Qret PrEsInNen",
+      "missing": [
+       "Lanh",
+       "Qret",
+       "PrEsInNen"
+      ]
+     },
+     {
+      "line": 116,
+      "text": "Ву-",
+      "missing": [
+       "Ву-"
+      ]
+     },
+     {
+      "line": 118,
+      "text": "Title GENERAL/MANAGER, NISSANOIVISION",
+      "missing": [
+       "GENERAL/MANAGER,",
+       "NISSANOIVISION"
+      ]
+     },
+     {
+      "line": 120,
+      "text": "By ffolecolu",
+      "missing": [
+       "ffolecolu"
+      ]
+     },
+     {
+      "line": 132,
+      "text": "The purpose of this Agreement is to establish Dealer as an authorized dealer of Nissan Products and to provide for the sale and servicing of Nissan Products in a manner that will best serve the interests of Seller, Dealer, other Authorized Nissan Dealers and owners and purchasers of Nissan Products.",
+      "missing": []
+     },
+     {
+      "line": 132,
+      "text": "This Agreement sets forth: the rights which Dealer will enjoy as an Authorized Nissan Dealer;",
+      "missing": []
+     },
+     {
+      "line": 132,
+      "text": "the responsibilities which Dealer assumes in consideration of its receipt of these rights;",
+      "missing": []
+     },
+     {
+      "line": 132,
+      "text": "and the respective conditions, rights and obligations of Seller and Dealer that apply to Seller's grant to Dealer of such rights and Dealer's assumption of such responsibilities.",
+      "missing": [
+       "obligations"
+      ]
+     },
+     {
+      "line": 134,
+      "text": "This is a personal services Ăgreement.",
+      "missing": [
+       "Ăgreement."
+      ]
+     },
+     {
+      "line": 134,
+      "text": "In entering into this Agreement and appointing Dealer as provided below, Seller is relving upon the personal qualifications, expertise, reputation, integrity, experience, ability and representations of the individual(s) named herein as Principal Owner(s) and Executive Manager Achievement of the purposes of this Agreement is premised upon mutual understanding and cooperation between Seller and Dealer.",
+      "missing": [
+       "relving"
+      ]
+     },
+     {
+      "line": 134,
+      "text": "Dealer has entered into this Agreement in reliance upon Seller's integrity and expressed intention to deal fairly with Dealer and the consuming public.",
+      "missing": []
+     },
+     {
+      "line": 134,
+      "text": "Seller has entered into this Agreement in reliance upon Dealer's integrity and ability and expressed intention to deal fairly with Seller and the consum-",
+      "missing": [
+       "consum-"
+      ]
+     },
+     {
+      "line": 136,
+      "text": "It is the responsibility of Seller to market Nissan Products throughout the Territory.",
+      "missing": [
+       "throughout"
+      ]
+     },
+     {
+      "line": 138,
+      "text": "l'he success of Seller and Dealer will depend on how well they each fulhl! their respective",
+      "missing": [
+       "l'he",
+       "fulhl!"
+      ]
+     },
+     {
+      "line": 140,
+      "text": "esponsibilities under this Apreement.",
+      "missing": [
+       "esponsibilities",
+       "Apreement."
+      ]
+     },
+     {
+      "line": 140,
+      "text": "It is recognized that: Nissan Motor Co., Ltd. (hereinafter called \"Manufac turer\") will endeavor to provide motor vehicles that offer outstanding value to the consuming public;",
+      "missing": [
+       "\"Manufac",
+       "turer\")"
+      ]
+     },
+     {
+      "line": 140,
+      "text": "and Dealer will endeavor to fulfill its responsibilities through aggressive, sound, ethical selling practices and through conscientious regard for customer service.",
+      "missing": [
+       "fulfill"
+      ]
+     },
+     {
+      "line": 142,
+      "text": "Seller and Dealer shall refrain from engaging in conduct or activities which might be detrimental to or reflect adversely upon the reputation of Seller, Manufacturer, Dealer or Nissan Products and shall engage in no discourteous, deceptive, misleading or unethical practices or activities.",
+      "missing": [
+       "reflect"
+      ]
+     },
+     {
+      "line": 144,
+      "text": "ing of the provisions in which they appear.",
+      "missing": [
+       "ing"
+      ]
+     },
+     {
+      "line": 152,
+      "text": "manner provided in this Agreement.",
+      "missing": []
+     },
+     {
+      "line": 156,
+      "text": "fts aperhemeny and pegfect ts ethe otser conimen and prauhonisod Nis a prealeranl, in dy sideraeio ot",
+      "missing": [
+       "fts",
+       "aperhemeny",
+       "pegfect",
+       "ts",
+       "ethe",
+       "otser",
+       "conimen",
+       "prauhonisod",
+       "Nis",
+       "prealeranl,",
+       "dy",
+       "sideraeio",
+       "ot"
+      ]
+     },
+     {
+      "line": 160,
+      "text": "establishing and maintaining at the Dealership Locations the Dealership Facilities in accordance with",
+      "missing": []
+     },
+     {
+      "line": 164,
+      "text": "hiacs velgin Deaiteti Primary Markeh Arle at acail dlance en Seelects, the the Standard Pravio Nisea",
+      "missing": [
+       "hiacs",
+       "velgin",
+       "Deaiteti",
+       "Markeh",
+       "Arle",
+       "acail",
+       "dlance",
+       "en",
+       "Seelects,",
+       "Pravio",
+       "Nisea"
+      ]
+     },
+     {
+      "line": 166,
+      "text": "ehieles within Dealers rmmary",
+      "missing": [
+       "ehieles",
+       "rmmary"
+      ]
+     },
+     {
+      "line": 169,
+      "text": "(d) building and maintaining consumer confidence in Dealer and in Nissan Products in accordance with Section 5 of the Standard Provisions; and",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "5N. 210 HERTTAGE COURT",
+     "IN WITNESS THEREOF, the parties heretobere exeeuted this Aggeement in tson, Cal ors of",
+     "For consistency and clarity, terms which are used frequently in this Agreement have been defined in Section 1",
+     "meaning stated in said Standard Provisions. These definitions should be read carefully for a proper understand-",
+     "(a) appoints Dealer as an Authorized Nissan Deaier and grants Dealer the non-exclusive right to bay from",
+     "Seller those Nissan Products specified in Dealer's current Product Addendum hereto, for resale, rental or lease",
+     "(b) actively and effectively promoting the sale at retail (and, if Dealer elects, the leasing and rental) of Nissan"
+    ],
+    "missing_words": 104
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cV-16084",
+     "line": 20,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 20,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "51%",
+     "line": 74,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "49%",
+     "line": 78,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "51%",
+     "line": 94,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 52,
+    "agreed_spans": 20,
+    "agreed_words": 0.17,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case: 1:23-cv-16084 Document #: 45-1 Filed: 01/23/25 Page 2 of 45 PageID #:569",
+      "missing": [
+       "PageID"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "(a) Owners. This Agreement has been entered into by Seller in reliance upon, and in consideration of, the personal qualifications, expertise, reputation, integrity, experience, ability and representations with respeet thereto of the Principal Owner(s) named in the Final Article of this Agreement and in reliance upon Dealer's representations concerning the ownership of Dealer as follows:",
+      "missing": [
+       "respeet"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "Dealer represents and agrees that the person(s) named as Principal Owner(s) in the Final Article",
+      "missing": []
+     },
+     {
+      "line": 9,
+      "text": "of this Agreement, and only those person(s), shall be the Principal Owner(s) of Dealer;",
+      "missing": []
+     },
+     {
+      "line": 15,
+      "text": "If one or more of the owner(s) of Dealer is a corporation, partnership or other entity and not a natural person (hereinafter called \"Holding Company\"), Dealer and Seller agree that the natural persons listed in the Holding Company Addendum of this Agreement as owners of the Holding Company shall be deemed to be the Principal Owner(s) and Other Owner(s) of Dealer, as the case may be and that the terms and conditions of this Agreement, including without limitation the provisions of this Article Third and Sections 12, 14 and 15 of the Standard Provisions, shall apply to the owner(s) of the Holding Company as well as to Dealer.",
+      "missing": []
+     },
+     {
+      "line": 16,
+      "text": "In view of the fact that this is a personal services agreement and in view of its objectives and purposes, this Agreement and the rights and privileges conferred on Dealer hereunder are not assignable, transferable or salable by Dealer, and no property right or interest is or shall be deemed to be sold, conveyed or transferred to Dealer under this Agreement.",
+      "missing": [
+       "property"
+      ]
+     },
+     {
+      "line": 16,
+      "text": "Dealer agrees that any change in the ownership of Dealer specified herein requires the prior written consent of Seller, excepting only changes in the record or beneficial ownership interests of Other Owner(s) not effecting a change in majority control or interest.",
+      "missing": []
+     },
+     {
+      "line": 16,
+      "text": "Dealer shall give Seller prior notice of any proposed change in said ownership requiring the consent of Seller and immediate notice of the death or incapacity of any Principal Owner.",
+      "missing": []
+     },
+     {
+      "line": 16,
+      "text": "No such change, and no assignment of this Agreement or of any right or interest herein, shall be effective against Seller unless and until embodied in an appropriate amendment to or assignment of this Agreement, as the case may be, duly executed and delivered by Seller and by Dealer.",
+      "missing": []
+     },
+     {
+      "line": 16,
+      "text": "Seller shall not, however, unreasonably withhold its consent to any such change.",
+      "missing": []
+     },
+     {
+      "line": 16,
+      "text": "Seller shall have no obligation to transact business with any person who is not named either as a Principal Owner or Executive Manager of Dealer hereunder or otherwise to give effect to any proposed sale or transfer of the ownership or management of Dealer prior to having concluded the evaluation of such a proposal as provided in Section 15 of the Standard Provisions.",
+      "missing": [
+       "effect"
+      ]
+     },
+     {
+      "line": 20,
+      "text": "Seller and Dealer agree that the retention by Dealer of qualified management is of critical importance to the successful operation of Dealer and to the achievement of the purposes and objectives of this Agreement.",
+      "missing": [
+       "qualified",
+       "importance"
+      ]
+     },
+     {
+      "line": 20,
+      "text": "This Agreement has been entered into by Seller in reliance upon, and in consideration of, the personal qualifications, expertise, reputation, integrity, experience, ability and representations with respect thereto of the person named as Executive Manager in the Final Article of this Agreement and on Dealer's representation to Seller and agreement that the person identified as Executive Manager shall be Dealer's executive manager, shall have full managerial authority for the Dealership Operations, and shall continually Paiitehis or her personal services in operating the dealership and will be physically present at the Dealership",
+      "missing": [
+       "Paiitehis"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "In view of the fact that this is a personal services Agreement and in view of its objectives and purposes, Dealer agrees that any change in the Executive Manager from that specified in the Final Article of this Agreement requires the prior written consent of Seller.",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "Dealer shall give Seller prior notice of any proposed change in Executive Manager and immediate notice of the death or incapacity of any Executive Manager.",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "No change in Executive Manager shall be effective unless and until embodied in an",
+      "missing": []
+     },
+     {
+      "line": 23,
+      "text": "Subject to the foregoing, Dealer shall make its own, independent decisions concerning the hiring and firing of its employees including without limitation, its Executive Manager.",
+      "missing": [
+       "Subject"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "While Seller shall not unreasonably withhold its consent to any such change, it is agreed that any successor Executive Manager must possess personal qualifica-tions, expertise, reputation, integrity, experience and ability which are, in the opinion of Seller, satistactory.",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "Seller shall have no obligation to transact business with any person who is not named as an Executive Manager of Dealer hereunder prior to having concluded its evaluation of such person.",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "Dealer and Seller understand and acknowledge that the personal qualifica-tions, expertise, reputation, ability, integrity, experience and ability of the Executive Manager and his or her ability to effectively manage Dealer's day-to-day Dealership Operations is critical to the success of Dealer in performing its obligations under this Agreement.",
+      "missing": [
+       "success"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "Seller may from time to time develop standards and/or procedures for evaluating the performance of the Executive Manager and of Dealer's personnel generally.",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "Seller may, from time to time, evaluate the performance of the Executive Manager and will advise Dealer and the Executive Manager of the results of such evaluations, and Dealer shall promptly take such action as may be required to correct any deficiencies in the Executive Manager's performance to the reasonable satisfaction of",
+      "missing": []
+     },
+     {
+      "line": 33,
+      "text": "# ARTICLE FIFTH: Additional Provisions",
+      "missing": [
+       "FIFTH:"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "The additional provisions set forth in the attached \"Nissan Dealer Sales and Service Agreement Standard",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "ment. The Notice of Primary Market Area, Dealership Facilities Addendum, Product Addendum, Dealer Identification Addendum, Holding Company Addendum, if applicable, and all Guides referred to in this Agreement (including references contained in the Standard Provisions referred to above) are hereby incorporated in and made a part of this Agreement.",
+      "missing": [
+       "Product",
+       "Identification"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "Seller's Manuals or Instructions heretofore or hereafter issued by Seller to Dealer;",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "any amendment, revision or supplement to any of the foregoing;",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "lhis Agreement cancels, supersedes and annuls all prior contracts, agreements and understandings except as stated herein, all negotiations, representations and understandings being merged herein.",
+      "missing": [
+       "lhis"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "No waiver, modifica ion or change of any of the terms of this Agreement or change or erasure of any printed part of this Agreement ur addition to it (except filling of blank spaces and lines) will be valid or binding on Seller unless approved ir writing by the President or an authorized Vice-President of Seller.",
+      "missing": [
+       "modifica",
+       "ion",
+       "ur",
+       "filling",
+       "ir"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "This Agreement shall have a term commencing on the effective date hereof and continuing until terminated by either party in accordance with Section 12 of the Standard Provisions.",
+      "missing": [
+       "commencing",
+       "terminated"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "If Dealer is required to secure or maintain a license for the conduct of its business as contemplated by this Agreement in any state or jurisdiction where any of its Dealership Operations are to be conducted or any of its Dealership Facilities are located, this Agreement shall not be valid until and unless Dealer shall have furnished Seller with written notice specifying the date and number, if any, of such license or licenses issued to Dealer, Dealer shall notify Seller immediately in writing if Dealer shall fail to secure or maintain any and all such licenses or renewal thereof or, if such license or licenses are suspended or revoked, specifying the effective date of any such suspension or revocation.",
+      "missing": [
+       "conduct"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "Sce Exhibit A which is incorporated by this reference into this agreement for all purposes.",
+      "missing": [
+       "Exhibit"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Eexcule kinagere N chaingeo i Esecule e Miaemeger tuan be urentie dihlene anst ud cralodile im a",
+     "ARTICLE NINTH: Execution of Agreement",
+     "when such signature is a tacsimile, the manuai countersignature of an authorized employee of Seller and a duplicate",
+     "original thereof is delivered personally or by mail to the main Dealership Location. This Agreement shall bind",
+     "Dealer oniy when it is signed by: a duly authorized officer or executive of Dealer if a corperation; one of the",
+     "ARTICLE TENTH: Special Conditions"
+    ],
+    "missing_words": 82
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 39,
+    "agreed_spans": 32,
+    "agreed_words": 0.744,
+    "unagreed": [
+     {
+      "line": 13,
+      "text": "by and",
+      "missing": []
+     },
+     {
+      "line": 17,
+      "text": "between the Nissan Division of NISSAN NORTH AMERICA, INC., a California corporation (hereinafter \"Seller\"), and WOODFIELD NISSAN, INC., an Illinois corporation (hereinafter \"Dealer\").",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "relfect an erecelve manager hanger, Seller and Dealer agred to amend the Agreement to",
+      "missing": [
+       "erecelve",
+       "hanger,",
+       "agred"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "The Executive Manager of Dealer is as follows:",
+      "missing": []
+     },
+     {
+      "line": 73,
+      "text": "full force and effect ated Shal co condetoe bior the pareemet, to the extent not modiled herelin, shal remain in",
+      "missing": [
+       "co",
+       "condetoe",
+       "bior",
+       "pareemet,",
+       "modiled",
+       "herelin,"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "IN WITNESS WHEREOF, the parties have executed this Agreement in triplicate as of the day and",
+      "missing": [
+       "WITNESS"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "year first above written.",
+      "missing": [
+       "written."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "reguise anigatipnsand provisionslins atoordance netl sellersuedesandecesnelretaecoat"
+    ],
+    "missing_words": 6
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "November 24, 2014",
+     "value": "2014-11-24",
+     "line": 11,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "October 19, 1993",
+     "value": "1993-10-19",
+     "line": 17,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "October 19, 1993",
+     "value": "1993-10-19",
+     "line": 31,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 29, 1996",
+     "value": "1996-04-29",
+     "line": 35,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 15, 2001",
+     "value": "2001-05-15",
+     "line": 39,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 30, 2004",
+     "value": "2004-09-30",
+     "line": 43,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "0%",
+     "line": 71,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 20,
+    "agreed_spans": 12,
+    "agreed_words": 0.491,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "Case: 1:23-cv-16084 Document #: 45-1 Filed: 01/23/25 Page 4 of 45 PagelD #:571",
+      "missing": [
+       "PagelD"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "Amendment No. 5",
+      "missing": [
+       "Amendment",
+       "5"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "eP4i)Ia",
+      "missing": [
+       "eP4i)Ia"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Vice President, Dealer Network Development",
+      "missing": []
+     },
+     {
+      "line": 33,
+      "text": "lvaay",
+      "missing": [
+       "lvaay"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "Du",
+      "missing": [
+       "Du"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "Regionlal Vice President",
+      "missing": [
+       "Regionlal"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "Midwest Region",
+      "missing": [
+       "Region"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 43,
+    "agreed_spans": 37,
+    "agreed_words": 0.751,
+    "unagreed": [
+     {
+      "line": 15,
+      "text": "Nissan Division of NISSAN NORTH AMERICA, INC., a California corporation (hereinafter \"Seller\"), and WOODFIELD NISSAN, INC., an illinois corporation (hereinafter \"Dealer\").",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "WHEREAS on May15,2001,Sellerand Dealer agreed to amend the Agreement to reflect",
+      "missing": [
+       "May15,2001,Sellerand"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "THEREFORE, the parties hereby agree to amerd the Agreement as follows:",
+      "missing": [
+       "amerd"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "1. The identification of Owner(s) and Executive Manager in the Final Article is hereby amended to read as follows",
+      "missing": [
+       "1.",
+       "amended"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "The Principal Oner of Dealer is as follows:",
+      "missing": [
+       "Oner"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "The terms and conditions of the Agreement, to the extent not modified herein, shall remain in fuil force",
+      "missing": [
+       "conditions",
+       "fuil"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "October 19, 1993",
+     "value": "1993-10-19",
+     "line": 15,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "October 19, 1993",
+     "value": "1993-10-19",
+     "line": 23,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "April 29,1996",
+     "value": "1996-04-29",
+     "line": 27,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "September 30, 2004",
+     "value": "2004-09-30",
+     "line": 35,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "percent",
+     "text": "100%",
+     "line": 61,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "percent",
+     "text": "100%",
+     "line": 77,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 17,
+    "agreed_words": 0.84,
+    "unagreed": [
+     {
+      "line": 25,
+      "text": "NISSAN NORTH AMERICA, ING.",
+      "missing": [
+       "ING."
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Albert Castignetti",
+      "missing": [
+       "Albert",
+       "Castignetti"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "# By COatA PO",
+      "missing": [
+       "COatA",
+       "PO"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "Walter H. Burchfield,",
+      "missing": [
+       "Walter"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 109,
+    "agreed_spans": 78,
+    "agreed_words": 0.312,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "IMESON!",
+      "missing": [
+       "IMESON!"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "| | | FACILTIES AOGEN SIE S gant: E Ssovuce Builinm sarvice | | | | |",
+      "missing": [
+       "AOGEN",
+       "SIE",
+       "S",
+       "gant:",
+       "E",
+       "Ssovuce",
+       "Builinm",
+       "sarvice"
+      ]
+     },
+     {
+      "line": 12,
+      "text": "| Site Address | Sq.",
+      "missing": []
+     },
+     {
+      "line": 12,
+      "text": "Ft | Sg. Ft | Service Service Bays | Sq.",
+      "missing": []
+     },
+     {
+      "line": 12,
+      "text": "Ft | Sq. Ft | Total Building Sq. Ft |",
+      "missing": []
+     },
+     {
+      "line": 13,
+      "text": "| 700 W. Higgins Road | 10,000 | 4,340 | 26 | 16,420 | | 30,760 |",
+      "missing": [
+       "26"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "| Actual | 10,000 | 4,340 | 26 | 16,420 | | 30,760 |",
+      "missing": [
+       "26"
+      ]
+     },
+     {
+      "line": 18,
+      "text": "| Guide | 8,000 | 7,250 | 29 | 15,225 | 260 | 30,735 |",
+      "missing": [
+       "29"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "| Actual % Guide | 125% | 60% | 90% | 108% | | 100% |",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "Total Total Butding tazand",
+      "missing": [
+       "tazand"
+      ]
+     },
+     {
+      "line": 109,
+      "text": "384%",
+      "missing": [
+       "384%"
+      ]
+     },
+     {
+      "line": 119,
+      "text": "Inis Dastshin Farhes sodendum ie pxeciter hy",
+      "missing": [
+       "Inis",
+       "Dastshin",
+       "Farhes",
+       "ie",
+       "pxeciter"
+      ]
+     },
+     {
+      "line": 124,
+      "text": "Planning vofume",
+      "missing": [
+       "vofume"
+      ]
+     },
+     {
+      "line": 128,
+      "text": "Dealer and Seller pursuant to Section 2.A of the Nissan",
+      "missing": [
+       "pursuant"
+      ]
+     },
+     {
+      "line": 130,
+      "text": "Sesler Sales and Sawice Aryeamentm effect hetupen said parties and is effective as of the date set forth below.",
+      "missing": [
+       "Sesler",
+       "Sales",
+       "Sawice",
+       "Aryeamentm",
+       "effect",
+       "hetupen"
+      ]
+     },
+     {
+      "line": 130,
+      "text": "Dealer and Seller goren that as of the sfective date the information above accurately describes the Dealership Location and Dealership Facilties, the purposes for which each location is used and the current Guides for such facilties based on the Planning Volumes stated herein.",
+      "missing": [
+       "goren",
+       "sfective"
+      ]
+     },
+     {
+      "line": 130,
+      "text": "The execution of this Facilities Addendum shall not be construed as evidence of Dealer's fulfiknent of its nesponsiblities under Section 2 of the Agreernent.",
+      "missing": [
+       "fulfiknent",
+       "its",
+       "nesponsiblities",
+       "2",
+       "Agreernent."
+      ]
+     },
+     {
+      "line": 130,
+      "text": "Changes in the Dealership Location, the Dealership Faciyies or thei usage from the ocations and spectic uses stated herein cannot be",
+      "missing": [
+       "Faciyies",
+       "thei",
+       "usage",
+       "ocations",
+       "spectic"
+      ]
+     },
+     {
+      "line": 138,
+      "text": "TOTALS 1,042",
+      "missing": []
+     },
+     {
+      "line": 148,
+      "text": "made bv Desler without me ort watlen consent ofl Seller.",
+      "missing": [
+       "made",
+       "bv",
+       "Desler",
+       "me",
+       "ort",
+       "watlen",
+       "consent",
+       "ofl"
+      ]
+     },
+     {
+      "line": 148,
+      "text": "Such changes and any changes in Seller's Guides will be reflecied in a new Dealersho Fachfar Addendum when deemed necessary by Seller.",
+      "missing": [
+       "will",
+       "reflecied",
+       "Dealersho",
+       "Fachfar"
+      ]
+     },
+     {
+      "line": 148,
+      "text": "This Dealership Facilities Addendum cancels and supersedes any prior Dealership Faciities Addenda execuled by Seler and Dealer.",
+      "missing": [
+       "prior",
+       "execuled",
+       "Seler"
+      ]
+     },
+     {
+      "line": 150,
+      "text": "оkalsnwlie SNYwtN",
+      "missing": [
+       "оkalsnwlie",
+       "SNYwtN"
+      ]
+     },
+     {
+      "line": 154,
+      "text": "Anl",
+      "missing": [
+       "Anl"
+      ]
+     },
+     {
+      "line": 158,
+      "text": "Principal Owner rpmerege for seller",
+      "missing": [
+       "rpmerege"
+      ]
+     },
+     {
+      "line": 162,
+      "text": "M. Scott Compton, Market Representation Manager",
+      "missing": [
+       "Market",
+       "Representation"
+      ]
+     },
+     {
+      "line": 164,
+      "text": "Date veis",
+      "missing": [
+       "veis"
+      ]
+     },
+     {
+      "line": 166,
+      "text": "e Verified",
+      "missing": [
+       "e"
+      ]
+     },
+     {
+      "line": 174,
+      "text": "Woodrielle Name, Inc..",
+      "missing": [
+       "Woodrielle",
+       "Name,"
+      ]
+     },
+     {
+      "line": 194,
+      "text": "Albert Castignett",
+      "missing": [
+       "Albert",
+       "Castignett"
+      ]
+     },
+     {
+      "line": 196,
+      "text": "ice President & General Manager, Nissan Divisio Watfult Regional Vice President",
+      "missing": [
+       "ice",
+       "Divisio",
+       "Watfult"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "TACHTES AOKOIN SE Sgarte a Strvice Bulatime Service\"",
+     "Ihis Deseishio rachies sodendum is execubed hy",
+     "OPAA SnRSannSA Ayanari eiRaneuaen",
+     "Deaersno Lecalkn eno wealeishit racles.ue",
+     "Dealer's tultilnent orits respons briles under Sectonzl",
+     "the Ces ership Facikies or ther usape from the",
+     "пябe ov Uesler without tne Drt ynten corsent ai",
+     "Totar Total Butding &t Land"
+    ],
+    "missing_words": 54
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-CV-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "125%",
+     "line": 19,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "60%",
+     "line": 19,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "90%",
+     "line": 19,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "108%",
+     "line": 19,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "100%",
+     "line": 19,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "384%",
+     "line": 109,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "169%",
+     "line": 111,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "186%",
+     "line": 113,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "171%",
+     "line": 115,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "118%",
+     "line": 117,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 87,
+    "agreed_spans": 60,
+    "agreed_words": 0.687,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "# LSITE A",
+      "missing": [
+       "LSITE"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "E All Dealership Operations",
+      "missing": []
+     },
+     {
+      "line": 11,
+      "text": "• New Vehicle Sales",
+      "missing": []
+     },
+     {
+      "line": 15,
+      "text": "Used Vehicle Sales",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "• All Dealership Operations",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "New Vehicle Sales",
+      "missing": []
+     },
+     {
+      "line": 33,
+      "text": "Used Vehide Sales",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "[SITE C",
+      "missing": [
+       "C"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "• All Dealership Operations",
+      "missing": []
+     },
+     {
+      "line": 50,
+      "text": "• Nem Vehicle Sales",
+      "missing": [
+       "Nem"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "Used Vehicle Sales",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "• Office &e Administration",
+      "missing": []
+     },
+     {
+      "line": 67,
+      "text": "• All Dealership Operations",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "New Vehicle Sales",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "•Used Vehicte Sales",
+      "missing": []
+     },
+     {
+      "line": 85,
+      "text": "Facilties are owned by:",
+      "missing": [
+       "Facilties"
+      ]
+     },
+     {
+      "line": 89,
+      "text": "E Afiliate of Deator",
+      "missing": [
+       "Afiliate",
+       "Deator"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "• Owner of Dealer",
+      "missing": []
+     },
+     {
+      "line": 96,
+      "text": "• Desle-",
+      "missing": [
+       "Desle-"
+      ]
+     },
+     {
+      "line": 98,
+      "text": "E Affliate of Dealer",
+      "missing": [
+       "Affliate"
+      ]
+     },
+     {
+      "line": 107,
+      "text": "• Owner of Dealer",
+      "missing": []
+     },
+     {
+      "line": 112,
+      "text": "•vealer",
+      "missing": [
+       "•vealer"
+      ]
+     },
+     {
+      "line": 114,
+      "text": "D Afliate of Dealer",
+      "missing": [
+       "Afliate"
+      ]
+     },
+     {
+      "line": 116,
+      "text": "• Orner of Dealer",
+      "missing": [
+       "Orner"
+      ]
+     },
+     {
+      "line": 119,
+      "text": "LEASE INFORMATION (Compiete, if leased)",
+      "missing": [
+       "(Compiete,"
+      ]
+     },
+     {
+      "line": 123,
+      "text": "December 31, 2019",
+      "missing": [
+       "31,",
+       "2019"
+      ]
+     },
+     {
+      "line": 125,
+      "text": "Net Monthly Cost (Taxes, Insurance, etc.): $70,000",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "El Artiate of Deale",
+     "Explain contingencles or ortions*"
+    ],
+    "missing_words": 8
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-CV-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 31, 2019",
+     "value": "2019-12-31",
+     "line": 123,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$70,000",
+     "value": 70000.0,
+     "line": 125,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 36,
+    "agreed_spans": 30,
+    "agreed_words": 0.697,
+    "unagreed": [
+     {
+      "line": 23,
+      "text": "We authorize you to sell, deliver, or ship Nissan Motor vehicles to this dealer without our prior approval and we agree topay Nissan therefore by paying at par upon presentation, provided that such drafts will be presented to Nissan Motor Acceptance",
+      "missing": [
+       "topay"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Each draft will show information specifying among ther things that the vehicle(s) appearing thereon is sold to the dealer, together with the invoice number, serial number, and amount for each vehicle.",
+      "missing": [
+       "ther"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "and agree that this",
+      "missing": []
+     },
+     {
+      "line": 40,
+      "text": "instructions remain in effect unless and until Nissan Motor Acceptance Corporation notifies Nissan of a change in delivery instructions.",
+      "missing": []
+     },
+     {
+      "line": 44,
+      "text": "All written notices permitted or required to be sent to Nissan hereunder shall be addressed to NISSAN NORTH AMERICA, INC. and shall be sent certified mail with the return receipt requested to One Nissan Way, Franklin, TN 37067, Attention: Dealer Agreements with a copy to MWR",
+      "missing": []
+     },
+     {
+      "line": 52,
+      "text": "Woodfield Nissan, Inc._Cash_Draft_Letter_3",
+      "missing": [
+       "Inc._Cash_Draft_Letter_3"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "November 25, 2014",
+     "value": "2014-11-25",
+     "line": 11,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 37,
+    "agreed_spans": 26,
+    "agreed_words": 0.563,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "# The aut hor zate a gre efteo pae io metor e ands sul, decdered, or reppes o the bei",
+      "missing": [
+       "The",
+       "aut",
+       "hor",
+       "zate",
+       "gre",
+       "efteo",
+       "pae",
+       "io",
+       "metor",
+       "e",
+       "ands",
+       "sul,",
+       "decdered,",
+       "reppes",
+       "o",
+       "the",
+       "bei"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "ealer's flooring limit is $11,500,000.00. Daily maximum limit, if any is: NONE.",
+      "missing": [
+       "ealer's",
+       "flooring",
+       "limit",
+       "is",
+       "$11,500,000.00.",
+       "Daily",
+       "maximum",
+       "limit,",
+       "if",
+       "any",
+       "is:",
+       "NONE."
+      ]
+     },
+     {
+      "line": 9,
+      "text": "This cast irat leras appriya ai subeler pea kesaie o an N dealer numbers",
+      "missing": [
+       "This",
+       "cast",
+       "irat",
+       "leras",
+       "appriya",
+       "ai",
+       "subeler",
+       "pea",
+       "kesaie",
+       "o",
+       "an",
+       "N",
+       "numbers"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "- Eea",
+      "missing": [
+       "Eea"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "Gardena, CA 90746",
+      "missing": [
+       "Gardena,",
+       "90746"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "Bank No. 16 Bank Code: 00661",
+      "missing": [
+       "16"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "12,8",
+      "missing": [
+       "12,8"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "Woodfield Nissan, Inc.",
+      "missing": [
+       "Woodfield"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "NNA Region No. 24",
+      "missing": [
+       "24"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "Date:/21-14",
+      "missing": [
+       "Date:/21-14"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "weoodfietd filisan, inc_ Cash_Drafege 201 2",
+      "missing": [
+       "weoodfietd",
+       "filisan,",
+       "Cash_Drafege",
+       "201",
+       "2"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Thie authorzaten gie efte ive tor medior ve anad sod cecdeeay or preppeds auhobeaor",
+     "or delivered to it."
+    ],
+    "missing_words": 18
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-CV-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "November 25, 2014",
+     "value": "2014-11-25",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$11,500,000.00",
+     "value": 11500000.0,
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 60,
+    "agreed_spans": 40,
+    "agreed_words": 0.484,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case: 1:23-cv-16084 DocumenGEATIFED MAIL RECEIP 11 of 45 PageID #578",
+      "missing": [
+       "Case:",
+       "1:23-cv-16084",
+       "DocumenGEATIFED",
+       "RECEIP"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "(Domestic Mail Only;",
+      "missing": []
+     },
+     {
+      "line": 17,
+      "text": "Certified Fee",
+      "missing": [
+       "Certified"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "Return Receipt Fee",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "(Endorsement Roquirod)",
+      "missing": [
+       "Roquirod)"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "Restricted Delivery Fee (Endorsement Required)",
+      "missing": [
+       "Required)"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "Sent To",
+      "missing": [
+       "Sent"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "City, State, Zißi4 Hoffman Estates, IL 60195",
+      "missing": [
+       "City,",
+       "State,",
+       "Zißi4"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "PS.Ferm 3B00, January 2001",
+      "missing": [
+       "PS.Ferm",
+       "3B00,",
+       "January"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "Soe Reverse for Instructions",
+      "missing": [
+       "Soe",
+       "Instructions"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "SENDER: COMPLETE THIS SECTION",
+      "missing": []
+     },
+     {
+      "line": 63,
+      "text": "* Complete items 1,2, and 3. Also complete tem 4 if Restricted Delivery is desired",
+      "missing": [
+       "1,2,",
+       "tem"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "• Print your name and address on the reverse so that we can return the card to you.",
+      "missing": []
+     },
+     {
+      "line": 66,
+      "text": "• Attach this card to the back of the mailpiece, or on the front if space permits.",
+      "missing": []
+     },
+     {
+      "line": 70,
+      "text": "COMPLETE THIS SECTION ON DELIVERY",
+      "missing": []
+     },
+     {
+      "line": 74,
+      "text": "V Agent",
+      "missing": [
+       "V",
+       "Agent"
+      ]
+     },
+     {
+      "line": 78,
+      "text": "B. Received, by (Printed Name vokeiner",
+      "missing": [
+       "B.",
+       "Received,",
+       "by",
+       "vokeiner"
+      ]
+     },
+     {
+      "line": 80,
+      "text": ". Date ot Deliver 3-1(-04",
+      "missing": [
+       "ot",
+       "3-1(-04"
+      ]
+     },
+     {
+      "line": 96,
+      "text": "OExpress Mail",
+      "missing": [
+       "OExpress"
+      ]
+     },
+     {
+      "line": 98,
+      "text": "Certified Mail",
+      "missing": [
+       "Certified"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "C. Date of Delivery"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 37,
+    "agreed_spans": 10,
+    "agreed_words": 0.133,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case: 1:23-CV-16084 Document #: 45-1 Filed: 01/23/25 Page 12 of 45 PagelD #:579",
+      "missing": [
+       "PagelD"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "Certilied Mail Provides:",
+      "missing": []
+     },
+     {
+      "line": 5,
+      "text": "# A mailing receip!",
+      "missing": [
+       "receip!"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "* A unique identifier for your mailpiece",
+      "missing": [
+       "identifier"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "• A signature upon delivery",
+      "missing": [
+       "signature"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "• A record of delivery kept by the Postal Service for two years nportent Reminder Certified Mail may ONLY be combined with First-Class Mail or Priority Mai",
+      "missing": [
+       "kept",
+       "Reminder",
+       "Mai"
+      ]
+     },
+     {
+      "line": 12,
+      "text": "Cerlilied Mail is not available for any class of international mail.",
+      "missing": [
+       "Cerlilied",
+       "not",
+       "available"
+      ]
+     },
+     {
+      "line": 14,
+      "text": "valuables, please considier insured or Registored Mailh Certilled Mail.",
+      "missing": [
+       "considier",
+       "insured",
+       "Registored",
+       "Mailh",
+       "Certilled"
+      ]
+     },
+     {
+      "line": 14,
+      "text": "For :m For an additional fee, a Retum Receipt may be requested to provide proof of delivery.",
+      "missing": [
+       ":m"
+      ]
+     },
+     {
+      "line": 14,
+      "text": "To obtain Retum Receipt service, please complete and attach a Retum) Receipt (PS Form 3811) to the article and add.ipplicable postage to cover the fee.",
+      "missing": [
+       "Form"
+      ]
+     },
+     {
+      "line": 14,
+      "text": "Endorse mailpiece \"Relumn Receip!",
+      "missing": [
+       "\"Relumn",
+       "Receip!"
+      ]
+     },
+     {
+      "line": 14,
+      "text": "Requested\". To receive a fee waiver for a duplicate return recelpt, a USPS postmark on your Certified Mail receipt is requizeci.",
+      "missing": [
+       "return",
+       "requizeci."
+      ]
+     },
+     {
+      "line": 16,
+      "text": "SS NO INSURANCE COVERAGE IS",
+      "missing": [
+       "SS"
+      ]
+     },
+     {
+      "line": 18,
+      "text": "PROVIDED",
+      "missing": [
+       "PROVIDED"
+      ]
+     },
+     {
+      "line": 20,
+      "text": "•e For an additional fee.",
+      "missing": []
+     },
+     {
+      "line": 22,
+      "text": "dellvery, may.",
+      "missing": [
+       "dellvery,"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "restricted to the addressee or",
+      "missing": [
+       "restricted"
+      ]
+     },
+     {
+      "line": 28,
+      "text": "addresses's authorized agent.",
+      "missing": [
+       "authorized"
+      ]
+     },
+     {
+      "line": 28,
+      "text": "Adyise the clerk or mark the mailpiece with the endorsement \"Restricted Defivery\".",
+      "missing": [
+       "Adyise",
+       "\"Restricted",
+       "Defivery\"."
+      ]
+     },
+     {
+      "line": 30,
+      "text": "us If a postmark on the Certifled Mail receipt is desired,",
+      "missing": [
+       "us",
+       "Certifled",
+       "desired,"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "please present the il a postmarkenstocertfied ail",
+      "missing": [
+       "postmarkenstocertfied",
+       "ail"
+      ]
+     },
+     {
+      "line": 34,
+      "text": "dle ai the post oilice ior posttnarkurg",
+      "missing": [
+       "dle",
+       "ai",
+       "post",
+       "oilice",
+       "ior",
+       "posttnarkurg"
+      ]
+     },
+     {
+      "line": 36,
+      "text": "receipt is not needed, sielach and affix label with postage and mail.",
+      "missing": [
+       "not",
+       "needed,",
+       "sielach",
+       "affix"
+      ]
+     },
+     {
+      "line": 38,
+      "text": "IMPORTANT: Save this receipt and present it when making an inquiry.",
+      "missing": [
+       "IMPORTANT:"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "PS Form 3800.",
+      "missing": [
+       "Form"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "January 2001 (Revorse)",
+      "missing": [
+       "January",
+       "(Revorse)"
+      ]
+     },
+     {
+      "line": 60,
+      "text": "j-R",
+      "missing": [
+       "j-R"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "$ta A signaturo upon delivury",
+     "valuables, please consider insureci or Registered Mail)",
+     "is If & postmark or 3he Gerlllled Nrail recelpt is deslred,",
+     "please presen! the arti",
+     "R Bi l posi gilca is",
+     "PS Furm 3800. Jamsiey 2001 (Romurse)"
+    ],
+    "missing_words": 38
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-CV-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 47,
+    "agreed_spans": 38,
+    "agreed_words": 0.476,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case: 1:23-cv-16084 Document #: 45-1 Filed: 01/23/25 Page 13 of 45 PagelD #:580",
+      "missing": [
+       "PagelD"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "PUSSANI",
+      "missing": [
+       "PUSSANI"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "Pursuant to Sections I.B, I.C and I.X of the Nissan Dealer Sales & Service Agreement (the \"Agreement\") in effect between the Authorized Nissan Dealer named below and Nissan North America, Inc. (\"Seller\"), Seller hereby grants Dealer the non-exclusive right to buy for resale the Nissan Products identified below:",
+      "missing": [
+       "I.B,",
+       "identified"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "Genuine Nissan Accessories for such Vehicles (this includes all other products",
+      "missing": [
+       "Accessories"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "All other products and services branded with Nissan and offered by Nissan North America or",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "EPEPESTER",
+      "missing": [
+       "EPEPESTER"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "be reguped by a Adapilcable stfective as of September 1, 2007 or such later date, as may",
+      "missing": [
+       "reguped",
+       "Adapilcable",
+       "stfective"
+      ]
+     },
+     {
+      "line": 85,
+      "text": "# NebDy",
+      "missing": [
+       "NebDy"
+      ]
+     },
+     {
+      "line": 91,
+      "text": "General Manager, Nissan Division nii Gel",
+      "missing": [
+       "General",
+       "nii",
+       "Gel"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "This Product Addendum shall remain in effect unless and until superseded by a new",
+     "Product Addendum issued to Dealer by Selier.",
+     "supersedes any previous Product Addendum furnished to Dealer by Seller pursuant to the",
+     "existing terms of the Agreement (except for the supplemental Altima Hybrid Product",
+     "Addendum issued to a limited number",
+     "of Nissan Dealers exclusively in the states of",
+     "California, Connecticut, Maine, Massachusetts, New Jersey, New York, Rhode Island, and",
+     "Vermont, which shall remain in full force and effect).",
+     "be required by any applicable statute."
+    ],
+    "missing_words": 86
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 1, 2007",
+     "value": "2007-09-01",
+     "line": 59,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 24,
+    "agreed_spans": 16,
+    "agreed_words": 0.525,
+    "unagreed": [
+     {
+      "line": 5,
+      "text": "# ENISSAN",
+      "missing": [
+       "ENISSAN"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "600 Enterprise St.",
+      "missing": [
+       "600",
+       "Enterprise",
+       "St."
+      ]
+     },
+     {
+      "line": 11,
+      "text": "Aurora, IL OUDU4",
+      "missing": [
+       "OUDU4"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Mailing Address: P.O. Box 2060",
+      "missing": [
+       "P.O.",
+       "Box"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Telephone: 6308518000",
+      "missing": [
+       "6308518000"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Nationally, all Nissan dealers are receiving new Product Addenda as a result of the addition of the all new Nissan Rogue to our product line-up, scheduled for wholesale release on September 18, 2007.",
+      "missing": []
+     },
+     {
+      "line": 37,
+      "text": "Please keep this revised Product Addendum with your Sales & Service Agreement (as well as the supplemental Altima Hybrid Product Addendum - if you are one of the limited number of Nissan Dealers operating in the states of California, Connecticut, Maine, Massachusetts, New Jersey, New York, Rhode Island, and Vermont to whom it was issued) all other previously issued Product Addenda are no longer valid.",
+      "missing": [
+       "other"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "Sincerely mi lúl",
+      "missing": [
+       "mi",
+       "lúl"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Mailing Address: P10. Bnx 2060"
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-cv-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 29, 2007",
+     "value": "2007-06-29",
+     "line": 19,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 18, 2007",
+     "value": "2007-09-18",
+     "line": 29,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 15,
+   "page_check": [
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 56,
+    "agreed_spans": 14,
+    "agreed_words": 0.139,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case: 1:23-CV-16084 Document #: 45-1 Filed: 01/23/25 Page 15 of 45 PagelD #:582ge | of 1",
+      "missing": [
+       "PagelD",
+       "1"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Company Name: Nissan North America, Inc.",
+      "missing": [
+       "Company",
+       "North"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "E-mail: joyce.dillonanissan-usa.com",
+      "missing": [
+       "joyce.dillonanissan-usa.com"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "| Our records indicate that the following shipment has been delivered: | |",
+      "missing": []
+     },
+     {
+      "line": 25,
+      "text": "| Tracking number: | 791338687953 |",
+      "missing": []
+     },
+     {
+      "line": 26,
+      "text": "| Reference: | MARKET REP DEPT |",
+      "missing": [
+       "Reference:",
+       "REP"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "| Ship (P/U) date: | Jul 9, 2007 |",
+      "missing": [
+       "(P/U)",
+       "Jul"
+      ]
+     },
+     {
+      "line": 28,
+      "text": "| Delivery date: | Jul 10, 2007 1:20 PM |",
+      "missing": [
+       "Jul",
+       "1:20"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "| Sign for by: | I.COLEMAN |",
+      "missing": [
+       "Sign",
+       "for",
+       "I.COLEMAN"
+      ]
+     },
+     {
+      "line": 30,
+      "text": "| Delivered to: | Shipping/Receiving |",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "| Service type: | FedEx 2Day |",
+      "missing": [
+       "Service",
+       "type:",
+       "2Day"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "| Packaging type: | FedEx Envelope |",
+      "missing": [
+       "Packaging",
+       "type:"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "| Number of pieces: | |",
+      "missing": []
+     },
+     {
+      "line": 34,
+      "text": "| Reight: | 0.50 1b. |",
+      "missing": [
+       "Reight:"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "| Shipper Information | Recipient Information |",
+      "missing": [
+       "Information"
+      ]
+     },
+     {
+      "line": 36,
+      "text": "| JOHN MELISI | ATTN: DEALER PRINCIPAL |",
+      "missing": []
+     },
+     {
+      "line": 37,
+      "text": "| Nissan North America, Inc. | WOODFIELD NISSAN, INC. |",
+      "missing": [
+       "North"
+      ]
+     },
+     {
+      "line": 38,
+      "text": "| 600 Encerprise Street | 700 W. HIGGINS ROAD |",
+      "missing": [
+       "600",
+       "Encerprise",
+       "W."
+      ]
+     },
+     {
+      "line": 39,
+      "text": "| дUrOra | HOPPMAN ESTATES |",
+      "missing": [
+       "дUrOra",
+       "HOPPMAN"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "| IL | IL |",
+      "missing": [
+       "IL"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "| US | US |",
+      "missing": []
+     },
+     {
+      "line": 42,
+      "text": "| 60504 | 60195 |",
+      "missing": [
+       "60504"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "Please do not respond to this message.",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "This email was sent from an unactended nailbox.",
+      "missing": [
+       "unactended",
+       "nailbox."
+      ]
+     },
+     {
+      "line": 47,
+      "text": "This report was generated at approximately 1:25 FM CDT on 07/10/2007.1",
+      "missing": [
+       "07/10/2007.1"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "# To learn more about FedEx Exp",
+      "missing": [
+       "Exp"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "All weights are estimated.",
+      "missing": [
+       "All",
+       "weights",
+       "estimated."
+      ]
+     },
+     {
+      "line": 53,
+      "text": "To track the latest status of or visit us at fedex.com.",
+      "missing": [
+       "latest",
+       "status",
+       "visit"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "This tracking update has been Requestor noted above.",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "FedEx requestor and does not valida request, the requestor's mess tracking results and fedex.co",
+      "missing": [
+       "valida",
+       "mess",
+       "fedex.co"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Thank you for your business.",
+      "missing": [
+       "Thank",
+       "for",
+       "your",
+       "business."
+      ]
+     },
+     {
+      "line": 59,
+      "text": "# ress, please visit our website at fe",
+      "missing": [
+       "ress,",
+       "visit",
+       "website",
+       "fe"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "your shipment, click on the trackir",
+      "missing": [
+       "your",
+       "trackir"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "sent to you by FedEx on the behalf does not validate the authenticity te, guarantee or warrant the authent age, or the accuracy of this tracki!",
+      "missing": [
+       "te,",
+       "guarantee",
+       "authent",
+       "age,",
+       "tracki!"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "terms of use, go to fedex.com.",
+      "missing": [
+       "terms"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "m's",
+      "missing": [
+       "m's"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "# edex.com.",
+      "missing": [
+       "edex.com."
+      ]
+     },
+     {
+      "line": 75,
+      "text": "1g",
+      "missing": [
+       "1g"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "›f the :icity of",
+      "missing": [
+       "›f",
+       ":icity"
+      ]
+     },
+     {
+      "line": 81,
+      "text": "the For",
+      "missing": [
+       "For"
+      ]
+     },
+     {
+      "line": 83,
+      "text": "update.",
+      "missing": []
+     },
+     {
+      "line": 85,
+      "text": "1g",
+      "missing": [
+       "1g"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "comcany Name: Nessan Rolen smnerica, 1ac.",
+     "sul velents are estilated.",
+     "Thans rou tor vour puslness."
+    ],
+    "missing_words": 15
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:23-CV-16084",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/23/25",
+     "value": "2025-01-23",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 10, 2007",
+     "value": "2007-07-10",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jul 9, 2007",
+     "value": "2007-07-09",
+     "line": 27,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jul 10, 2007",
+     "value": "2007-07-10",
+     "line": 28,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "07/10/2007",
+     "value": "2007-07-10",
+     "line": 47,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "7/10/2007",
+     "value": "2007-07-10",
+     "line": 87,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

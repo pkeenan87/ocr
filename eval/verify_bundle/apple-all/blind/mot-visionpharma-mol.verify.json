@@ -1,0 +1,750 @@
+{
+ "source": "mot-visionpharma-mol.pdf",
+ "markdown": "mot-visionpharma-mol.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:50:23Z",
+ "verify_fields": "all",
+ "azure_pages": "1-10",
+ "summary": {
+  "fields": 37,
+  "verified": 0,
+  "check": 37,
+  "unchecked": 0,
+  "pages_to_check": 10,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 14,
+    "agreed_spans": 12,
+    "agreed_words": 0.931,
+    "unagreed": [
+     {
+      "line": 10,
+      "text": "-against-",
+      "missing": [
+       "-against-"
+      ]
+     },
+     {
+      "line": 16,
+      "text": "SUNRISE PHARMACEUTICALS, INC.,",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "110 EAST 59™H STREET"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 16,
+    "agreed_words": 0.862,
+    "unagreed": [
+     {
+      "line": 13,
+      "text": "Point 1",
+      "missing": []
+     },
+     {
+      "line": 22,
+      "text": "3. There Is No Personal Jurisdiction Under CPLR 302(a)(3).",
+      "missing": [
+       "3."
+      ]
+     },
+     {
+      "line": 25,
+      "text": "Point II",
+      "missing": [
+       "II"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Point III",
+      "missing": [
+       "III"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "ill",
+      "missing": [
+       "ill"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 9,
+    "agreed_spans": 7,
+    "agreed_words": 0.8,
+    "unagreed": [
+     {
+      "line": 4,
+      "text": "B. Vision Florida's Contract And Warranty Claims RelatingTo Transactions Which Occurred Prior To April 10, 2009 Are Barred By The Statute Of Limitations...",
+      "missing": [
+       "RelatingTo"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "ii",
+      "missing": [
+       "ii"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 10, 2009",
+     "value": "2009-04-10",
+     "line": 4,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 33,
+    "agreed_spans": 30,
+    "agreed_words": 0.916,
+    "unagreed": [
+     {
+      "line": 19,
+      "text": "Ashcroft v. lgbal",
+      "missing": [
+       "lgbal"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "Etema Assa Sust Le Cha ManS.ment Apl VCnen",
+      "missing": [
+       "Etema",
+       "Assa",
+       "Sust",
+       "Le",
+       "Cha",
+       "ManS.ment",
+       "Apl",
+       "VCnen"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Finest rruits, Inc. v. Bertuca",
+      "missing": [
+       "Finest"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-Cv-02405-RA",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "August 18, 2005",
+     "value": "2005-08-18",
+     "line": 17,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 29, 2009",
+     "value": "2009-09-29",
+     "line": 49,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 35,
+    "agreed_spans": 31,
+    "agreed_words": 0.888,
+    "unagreed": [
+     {
+      "line": 29,
+      "text": "Lujanv. Defenders of Wildife",
+      "missing": [
+       "Lujanv.",
+       "Wildife"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "Pik v. Institute of Int' Educ.",
+      "missing": [
+       "Int'"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Ryan v. Volpone Stamp Co",
+      "missing": [
+       "Ryan",
+       "Volpone",
+       "Stamp",
+       "Co"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "107 F. Supp. 2d 369 (S.D.N.Y. 2000)",
+      "missing": [
+       "107",
+       "369"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Global Detection and Reporting, Inc. v. Securetec Detektions-Systeme AG",
+     "Lujan v. Defenders of Wildiife",
+     "Ryar V: Supp.2 S1a9 (S.D.N. Y. 2000.."
+    ],
+    "missing_words": 21
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 23, 2010",
+     "value": "2010-12-23",
+     "line": 19,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 24, 2013",
+     "value": "2013-04-24",
+     "line": 39,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "November 10, 2008",
+     "value": "2008-11-10",
+     "line": 51,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Aug. 23, 2012",
+     "value": "2012-08-23",
+     "line": 55,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 30,
+    "agreed_spans": 30,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 12,
+    "agreed_spans": 12,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12A",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12A",
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 2-201",
+     "line": 13,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 2-725",
+     "line": 15,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§2-725(2)",
+     "line": 17,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 17,
+    "agreed_spans": 16,
+    "agreed_words": 0.868,
+    "unagreed": [
+     {
+      "line": 27,
+      "text": "Among other things, Sunrise is not located in New York, has no property, employees or customers in New York and all of the Drug Products were manufactured in New Jersey for a New Jersey based customer and",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 20, 2013",
+     "value": "2013-06-20",
+     "line": 25,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 25,
+    "agreed_words": 0.965,
+    "unagreed": [
+     {
+      "line": 15,
+      "text": "Florida's claims.Indeed, theentity with which Sunrise contracted and dealt is non-party",
+      "missing": [
+       "non-party"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "August 28, 2009",
+     "value": "2009-08-28",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 17,
+    "agreed_words": 0.694,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "Drug Products or that Vision Florida was unable to sell the Drug Products. Accordingly,",
+      "missing": [
+       "sell"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Patei Decl, 1| 3. Plaintiff",
+      "missing": [
+       "Patei"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "Complaint, 1l 1. Vision Florida was formed on August 28, 2009.' Non-party Vision New Jersey is a pharmaceutical company organized as a limited liability company under the laws of New Jersey and located in New Jersey.",
+      "missing": [
+       "1l"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Complaint, T1l 7 and 8. Although Vision Florida's claims against Sunrise are based primarily on written agreements between Vision New Jersey and Sunrise",
+      "missing": [
+       "T1l"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "A copy of the Detail by Entity Name and Articles of Organization for Vision Florida filed with the",
+     "Florida Department of State, Division of Corporations is annexed to the Patel Decl as Exhibit A",
+     "Exhilbit C, ane a er ctopy opy oi vesiov es yerseysi ceatil ofe orf caineilaton ie to the oate pa as,"
+    ],
+    "missing_words": 55
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:13-cv-02405-RA",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "06/25/13",
+     "value": "2013-06-25",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "August 28, 2009",
+     "value": "2009-08-28",
+     "line": 21,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 21, 2003",
+     "value": "2003-04-21",
+     "line": 21,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "October 2, 2009",
+     "value": "2009-10-02",
+     "line": 21,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

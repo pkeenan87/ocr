@@ -1,0 +1,968 @@
+{
+ "source": "ord-ironworkers-bogart.pdf",
+ "markdown": "ord-ironworkers-bogart.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:54:52Z",
+ "verify_fields": "flagged",
+ "azure_pages": "",
+ "summary": {
+  "fields": 41,
+  "verified": 41,
+  "check": 0,
+  "unchecked": 0,
+  "pages_to_check": 0,
+  "embedded_text_pages": 8,
+  "agreed_spans": 183,
+  "unagreed_spans": 38
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 23,
+    "agreed_spans": 22,
+    "agreed_words": 0.972,
+    "unagreed": [
+     {
+      "line": 23,
+      "text": "MONOLITHIC POWER SYSTEMS, INC., a",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 41,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 17,
+    "agreed_words": 0.801,
+    "unagreed": [
+     {
+      "line": 63,
+      "text": "See Docket No. 1 at 1910-11.",
+      "missing": [
+       "1910-11."
+      ]
+     },
+     {
+      "line": 65,
+      "text": "2 See id. at 91 12-16, 18-19 (naming Karen A. Smith Bogart, Herbert Chang, Victor K. Lee, Douglas McBurnie, James C. Moyer (“Moyer”), Jeff Zhou, and Michael R. Hsing (“Hsing”) as defendants because they breached their fiduciary duty to MPS).",
+      "missing": [
+       "91"
+      ]
+     },
+     {
+      "line": 66,
+      "text": "3 See id. at 9|17 (naming Umesh Padval as a defendant for breach of fiduciary duty).",
+      "missing": [
+       "9|17"
+      ]
+     },
+     {
+      "line": 68,
+      "text": "See id. at 913.",
+      "missing": [
+       "913."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "4 See id. at ¶¶ 20-23 (naming Deming Xiao (“Xiao”), Maurice Sciammas (“Sciammas”), Paul",
+     "Ueunten (“Ueunten”), and C. Richard Neely, Jr. (“Neely”), as defendants based on the theory of",
+     "unjust enrichment because of their increased compensation packages)."
+    ],
+    "missing_words": 35
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "31.17%",
+     "line": 45,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "24.99%",
+     "line": 45,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 33",
+     "line": 70,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 74,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 16,
+    "agreed_words": 0.724,
+    "unagreed": [
+     {
+      "line": 37,
+      "text": "To achieve this goal, we have designed and implemented our compensation programs for our named executives to motivate and reward them for sustained financial and operating performance and leadership excellence, to align their interests with those of our stockholders and to encourage them to remain with the Company for long and productive careers. ®",
+      "missing": [
+       "careers."
+      ]
+     },
+     {
+      "line": 59,
+      "text": "7 See id. at 91 35.",
+      "missing": [
+       "91"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "See id. at 9) 36.",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "See id. at 92.",
+      "missing": [
+       "92."
+      ]
+     },
+     {
+      "line": 71,
+      "text": "See id. at 938.",
+      "missing": [
+       "938."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "9 See id. (alleging an increase in compensation for Xiao from $622,615 to $2,058,471; an increase",
+     "in compensation for Sciammas from $582,615 to $1,443,700; an increase in compensation for",
+     "Ueunten from $561,662 to $1,158,900; and an increase in compensation for Neely from $525,000"
+    ],
+    "missing_words": 42
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$5,625,500",
+     "value": 5625500.0,
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,000,000.8",
+     "value": 1000000.8,
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 29, 2011",
+     "value": "2011-04-29",
+     "line": 33,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 16, 2011",
+     "value": "2011-06-16",
+     "line": 39,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "64%",
+     "line": 41,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,041,900",
+     "value": 1041900.0,
+     "line": 63,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 30",
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 73,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 24,
+    "agreed_spans": 19,
+    "agreed_words": 0.627,
+    "unagreed": [
+     {
+      "line": 43,
+      "text": "is entitled to relief.”15 If a plaintiff fails to proffer “enough facts to state a claim to relief that is plausible on its face,” the complaint may be dismissed for failure to state a claim upon which relief may be granted.",
+      "missing": [
+       "granted."
+      ]
+     },
+     {
+      "line": 45,
+      "text": "On a motion to dismiss, the court must accept all material allegations in the complaint as true and construe them in the light most favorable to the non-moving party.",
+      "missing": [
+       "party."
+      ]
+     },
+     {
+      "line": 69,
+      "text": "l Bell Atlantic Corp. v. Twombly, 550 U.S. 544, 570, 127 S.Ct. 1955, 167 L.Ed.2d 929 (2007).",
+      "missing": [
+       "l"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "' Ashcroftv. lqbal, U.S. _, 129 S.Ct. 1937, 1940, 173 L.Ed.2d 868 (2009).",
+      "missing": [
+       "Ashcroftv.",
+       "lqbal,"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "50 U.S. at 561 (“a wholly conclusory statement of [a] claim” will not survive a motion to dismiss).",
+      "missing": [
+       "50"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 45",
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 83,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 25,
+    "agreed_spans": 22,
+    "agreed_words": 0.839,
+    "unagreed": [
+     {
+      "line": 47,
+      "text": "Federal Rule of Civil Procedure 23.1(a) imposes a heightened pleading standard when \"onc",
+      "missing": [
+       "\"onc"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "C EXIS 151, at *19 (Del.",
+      "missing": [
+       "C",
+       "EXIS"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "Ch. Oct. 12, 2011) (internal citations omitted) (holding that if areholder does not “first demand that the directors pursue the alleged cause of action, he mı tablish that demand is excused by satisfying stringent pleading requirements of factual",
+      "missing": [
+       "areholder",
+       "mı",
+       "tablish"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "(explaining that a plaintiff is able to bring a shareholder derivative lawsuit if: (1) the plaintiff",
+     "owned shares in the corporation at the time of the disputed transaction; and (2) the plaintiff alleged"
+    ],
+    "missing_words": 33
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5215-VCG",
+     "line": 79,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Oct. 12, 2011",
+     "value": "2011-10-12",
+     "line": 79,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 20,
+    "agreed_spans": 14,
+    "agreed_words": 0.382,
+    "unagreed": [
+     {
+      "line": 11,
+      "text": "shareholder has pleaded with \"with particularity facts that establish that demand would be futile because the direetors are not independent or disinterested.*2 The sccond prong of the test asks whether there is a reasonable doubt that \"the challenged transaction was otherwise the product of a valid exercise of business judgment.\"28 These prongs are in the disjunctive, and therefore, \"if either prong is satisfied, demand is excused.\"29",
+      "missing": [
+       "direetors",
+       "disinterested.*2",
+       "sccond"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "As explained above, the first prong of the Aronson test examines whether the board members were sufficiently disinterested or independent.\" MPS and First Niagara contends that at best only two of the seven board members, Hsing and Moyer,\" personally benefited from the",
+      "missing": []
+     },
+     {
+      "line": 67,
+      "text": "particularty by setting torth particularzed tactual statements that are essential to the claim in orde o demonstrate that making demand would be futile.\"). Demand futility is determined under the lav Orche IomDenyas ine Orpsa 27g rsuphich ,in 9, lpro ent D. Cal, Doelaware.",
+      "missing": [
+       "particularty",
+       "torth",
+       "particularzed",
+       "tactual",
+       "orde",
+       "o",
+       "lav",
+       "Orche",
+       "IomDenyas",
+       "ine",
+       "Orpsa",
+       "27g",
+       "rsuphich",
+       "lpro",
+       "ent",
+       "D.",
+       "Doelaware."
+      ]
+     },
+     {
+      "line": 71,
+      "text": "2 In reJ.P. Morgan Chase & Co. S'holder Litig., 906 A.2d 808, 820 (Del.",
+      "missing": [
+       "reJ.P."
+      ]
+     },
+     {
+      "line": 75,
+      "text": "2º Brehm v. Eisner, 746 A.2d 244, 256 (Del. 2000).",
+      "missing": [
+       "2º"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "3 Thelicomilins deas oryl 5e hate es Eocaiy ed a iacroase impoge or eaier h",
+      "missing": [
+       "Thelicomilins",
+       "deas",
+       "oryl",
+       "5e",
+       "hate",
+       "es",
+       "Eocaiy",
+       "ed",
+       "iacroase",
+       "impoge",
+       "eaier",
+       "h"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Tech., In. Derivative Litig., 278 F.Supp.2d 1079, 1090 (N.D. Cal. 2003).",
+     "analyzed under the similar test in Rales v. Blasband, 634 A.2d 927 (Del. 1993). See In re Bidz.com,",
+     "Inc. Derivative Litig., 773 F.Supp.2d 844, 851 (C.D. Cal. 2011). Because the court concludes that",
+     "the Fund fails to allege demand futility under either case’s standard, the court need not resolve this",
+     "31 The complaint does not allege that Moyer received an increase in compensation. Rather the",
+     "complaint alleges that Moyer is on the MPS Board and is also an employee of MPS leaving the"
+    ],
+    "missing_words": 93
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 18,
+    "agreed_spans": 14,
+    "agreed_words": 0.635,
+    "unagreed": [
+     {
+      "line": 33,
+      "text": "MPS therefore argues that the Fund did not adequately plead that a majority of the board was motivated by personal interest or lacked independence with respect to the challenged action.",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "likelihood of director liability therefore exist,” which can show that the board members were not independent or disinterested, 3 “However, the mere threat of personal liability for approving a questioned transaction, standing alone, is insufficient to challenge either the independence or disinterestedness of directors.”37 It is not sufficient to state that a demand was futile simply because the board approved the underlying transaction.38",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "See Docket No. 1 at 916.",
+      "missing": [
+       "916."
+      ]
+     },
+     {
+      "line": 58,
+      "text": "3'Id.",
+      "missing": [
+       "3'Id."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "United States District Court",
+     "35 Rales v. Blasband, 634 A.2d 927, 936 (Del. 1993). See also In re J.P. Morgan Chase & Co.",
+     "S'holder Litig., 906 A.2d at 821 (“Disinterested means that directors can neither appear on both",
+     "sides of a transaction nor expect to derive any personal financial benefit from it in the sense of self-",
+     "dealing, as opposed to a benefit which devolves upon the corporation or all stockholders"
+    ],
+    "missing_words": 69
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 31,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 62,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 23,
+    "agreed_spans": 20,
+    "agreed_words": 0.943,
+    "unagreed": [
+     {
+      "line": 69,
+      "text": "25 A 2/p.",
+      "missing": [
+       "2/p."
+      ]
+     },
+     {
+      "line": 69,
+      "text": "280).See has Ce C. 64 A 2el lt36 (quo4ig Sinczair Oiliorp., 2e WA.2d717, 72..",
+      "missing": [
+       "280).See",
+       "Ce",
+       "C.",
+       "64",
+       "2el",
+       "lt36",
+       "(quo4ig",
+       "Sinczair",
+       "Oiliorp.,",
+       "2e",
+       "WA.2d717,",
+       "72.."
+      ]
+     },
+     {
+      "line": 71,
+      "text": "280 A.2d 717.72(",
+      "missing": [
+       "717.72("
+      ]
+     }
+    ],
+    "missing_lines": [
+     "825 A.2d at 286). See also Cede, 634 A.2d at 361 (quoting Sinclair Oil Corp., 280 A.2d 717, 720"
+    ],
+    "missing_words": 19
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 77,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 28,
+    "agreed_spans": 24,
+    "agreed_words": 0.903,
+    "unagreed": [
+     {
+      "line": 69,
+      "text": "Accord Plumbers Local No. 137 Pension Fund v. Davis, Case No. 03:11-",
+      "missing": [
+       "03:11-"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "633-AC, 2012 U.S. Dist. LEXIS 5053 (D. Or.",
+      "missing": [
+       "633-AC,"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "é alyțirs Darei Sec Oriersi, 2012 U.S. Dis.",
+      "missing": [
+       "é",
+       "alyțirs",
+       "Darei",
+       "Sec",
+       "Oriersi,",
+       "Dis."
+      ]
+     },
+     {
+      "line": 75,
+      "text": "LEXIS 3029 as 252 the court adopis that same",
+      "missing": [
+       "3029",
+       "as",
+       "252",
+       "adopis"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "46 Judge Davila provides a thorough analysis of why this is so, and the court adopts that same"
+    ],
+    "missing_words": 17
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "64%",
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Sept. 20, 2011",
+     "value": "2011-09-20",
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4093 EJD",
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Mar. 7, 2012",
+     "value": "2012-03-07",
+     "line": 69,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jan. 11, 2012",
+     "value": "2012-01-11",
+     "line": 71,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 77,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 18,
+    "agreed_spans": 15,
+    "agreed_words": 0.91,
+    "unagreed": [
+     {
+      "line": 19,
+      "text": "Porl s. Aenl",
+      "missing": [
+       "Porl",
+       "Aenl"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "For the Nod Sem Distiet of Califomia",
+      "missing": [
+       "Nod",
+       "Sem",
+       "Distiet",
+       "Califomia"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "Uni",
+      "missing": [
+       "Uni"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "For the Northern District of California"
+    ],
+    "missing_words": 6
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 2, 2012",
+     "value": "2012-07-02",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "6/13/2012",
+     "value": "2012-06-13",
+     "line": 21,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 75,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1160 @@
+{
+ "source": "ord-garland-dunkin.pdf",
+ "markdown": "ord-garland-dunkin.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:57:53Z",
+ "verify_fields": "flagged",
+ "azure_pages": "5,9,12,14",
+ "summary": {
+  "fields": 76,
+  "verified": 0,
+  "check": 8,
+  "unchecked": 68,
+  "pages_to_check": 4,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 23,
+    "agreed_words": 0.782,
+    "unagreed": [
+     {
+      "line": 81,
+      "text": "No. 1 (“Compl.”) ¶ 5. According to the complaint, Dunkin’ charges from $0.50 to $2.15 extra to customers who are lactose intolerant in order to substitute a non-dairy alternative such as soy, oat, coconut or almond milk in Dunkin’ beverages.",
+      "missing": [
+       "$0.50"
+      ]
+     },
+     {
+      "line": 83,
+      "text": "Id. 19|7-9, 14.",
+      "missing": [
+       "19|7-9,"
+      ]
+     },
+     {
+      "line": 83,
+      "text": "Id. ¶¶ 8-10. Dunkin’ will also modify its beverages at no extra charge to make them caffeine-free or sugar-free. Id. ¶¶ 11-12.",
+      "missing": [
+       "sugar-free."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 47,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 47,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "docket",
+     "text": "23-cv-06621-SI",
+     "line": 63,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "May 31, 2024",
+     "value": "2024-05-31",
+     "line": 69,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 5",
+     "line": 81,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$0.50",
+     "value": 0.5,
+     "line": 81,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$2.15",
+     "value": 2.15,
+     "line": 81,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "percent",
+     "text": "2%",
+     "line": 83,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "¶¶ 8-10",
+     "line": 83,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "¶¶ 11-12",
+     "line": 83,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 25,
+    "agreed_words": 0.936,
+    "unagreed": [
+     {
+      "line": 61,
+      "text": "Plaintiffs sue under the Americans with Disabilities Act (“ADA”) and the antidiscrimination laws of the states of California, Colorado, Hawaii, Texas, Massachusetts, and New York.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 60",
+     "line": 61,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 25,
+    "agreed_spans": 23,
+    "agreed_words": 0.85,
+    "unagreed": [
+     {
+      "line": 63,
+      "text": "To survive a Rule 12(b)(6) motion to dismiss, the plaintiff must allege “enough facts to state a claim to relief that is plausible on its face.” Bell Atl.",
+      "missing": [
+       "“enough"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "This “facial plausibility” standard requires the plaintiff to allege facts that add up to “more than a sheer possibility that a defendant has acted unlawfully.” Ashcroft v. Iqbal, 556 U.S. 662, 678 (2009).",
+      "missing": [
+       "Iqbal,"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 22,
+    "agreed_spans": 21,
+    "agreed_words": 0.895,
+    "unagreed": [
+     {
+      "line": 31,
+      "text": "Compl. 35. Defendant contends that this Court lacks personal jurisdiction over it for the following reasons: \"[T]t has not engaged in any activities that would render it subject to specific jurisdiction in California.",
+      "missing": [
+       "\"[T]t"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 1,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "garbled"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 25,
+    "agreed_spans": 21,
+    "agreed_words": 0.799,
+    "unagreed": [
+     {
+      "line": 65,
+      "text": "(2) the claim must be one which arises out of or relates to the defendant’s forum-relatec autistatsa jusic3, ic.",
+      "missing": [
+       "forum-relatec",
+       "autistatsa",
+       "jusic3,",
+       "ic."
+      ]
+     },
+     {
+      "line": 65,
+      "text": "iemussi be rcsuniadiction must comport with fair play and Axiom Foods, Inc. v. Acerchem Int’l, Inc., 874 F.3d 1064, 1068 (9th Cir. 2017) (alterations and quotations omitted).",
+      "missing": [
+       "iemussi",
+       "rcsuniadiction"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "The plaintiff bears the burden of satisfying the first two prongs of the test, and if the plaintiff fails to satisfy either prong, then the district court does not have personal jurisdiction over the defendant.",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "B.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 53,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 53,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 18,
+    "agreed_words": 0.768,
+    "unagreed": [
+     {
+      "line": 55,
+      "text": "9| 3. Defendant asserts that the following facts are “not subject to reasonable dispute[,]” asking the Court to take judicial notice that:",
+      "missing": [
+       "9|",
+       "3."
+      ]
+     },
+     {
+      "line": 57,
+      "text": "• Dunkin’-branded restaurants are primarily owned and operated by franchises, including all of the ones located in Plaintiffs’ states of residence Hawaii, New York, Colorado, Massachusetts, and Texas.",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "Moreover, should this case proceed on the merits, some of the critical factual questions will be who owns or operates the restaurants in question and whether or not defendant has any control over the prices of products sold in the franchises.",
+      "missing": [
+       "Moreover,"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 53,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 53,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "March 24, 2023",
+     "value": "2023-03-24",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 2",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "March 4, 2024",
+     "value": "2024-03-04",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "December 31, 2022",
+     "value": "2022-12-31",
+     "line": 62,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "December 31, 2023",
+     "value": "2023-12-31",
+     "line": 62,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "March 24, 2023",
+     "value": "2023-03-24",
+     "line": 69,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "December 26, 2023",
+     "value": "2023-12-26",
+     "line": 69,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 18,
+    "agreed_words": 0.828,
+    "unagreed": [
+     {
+      "line": 63,
+      "text": "2005); Butcher’ s Union Local No. 498, United Food & Commercial Workers v. SDC Inv., Inc., 788 F.2d 535, 540 (9th Cir. 1986)).",
+      "missing": [
+       "Butcher’",
+       "s"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "¶ 22; see also id. 9.35 (“Dunkin operates over 9,500 coffee stores in the United States and over 125 in the state of California.”).",
+      "missing": [
+       "9.35",
+       "coffee"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "Defendant argues that it does not “operate” any retail stores in California but that all of the Dunkin’-branded restaurant in California are owned and operated by franchisees.",
+      "missing": [
+       "operated"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 51,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 51,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 22",
+     "line": 65,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 16,
+    "agreed_spans": 14,
+    "agreed_words": 0.955,
+    "unagreed": [
+     {
+      "line": 59,
+      "text": "allegations, plaintiffs have not met their burden to show this Court has personal jurisdiction over defendant.",
+      "missing": []
+     },
+     {
+      "line": 65,
+      "text": "Il.",
+      "missing": [
+       "Il."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 25,
+    "agreed_spans": 20,
+    "agreed_words": 0.521,
+    "unagreed": [
+     {
+      "line": 57,
+      "text": "As a general rule, Title III provides that \"En]o individual shall be discriminated against on the basis of disability in the full and equal enjoyment of the goods, services, facilities, privileges, advantages, or accommodations of any place of public accommodation by any person who owns, leases (or leases to), or operates a place of public accommodation.” Id. § 12182(a).",
+      "missing": [
+       "\"En]o"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "In the disability context, California state law operates similarly to the ADA, as the Unruh Act provides that any violation of the ADA necessarily “shall constitute a violation of [the Unruh Act].” Cal. Civ. Code § 51(f) (2016);",
+      "missing": [
+       "51(f)"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "A Title III discrimination claim, and by extension the Unruh Act, is premised on the following elements: (1) the plaintiff is disabled within the meaning of the ADA;",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "Congress found that the Supreme Court had “interpreted the term ‘substantially limits’ to require a greater degree of limitation than was intended by Congress” and that lower courts had “incorrectly found in individual cases that people with a range of substantially limiting impairments are not people with disabilities[.]” Id. § 2(a)(6), (7).",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "As relevant to the present case, the ADAAA specifies that “major life activities include, but are not limited to, eating.” 42",
+      "missing": [
+       "eating.”"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 51,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 51,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 12182-12188",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12182(a)",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 51(f)",
+     "line": 59,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§§ 12182(a)",
+     "line": 61,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(1)",
+     "line": 65,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 2(a)(4)",
+     "line": 69,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 2(a)(6)",
+     "line": 71,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "bates": "WL 5835149",
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 23,
+    "agreed_spans": 19,
+    "agreed_words": 0.639,
+    "unagreed": [
+     {
+      "line": 67,
+      "text": "Among other things, the statute now states that “[a]n impairment that is episodic or in remission is a disability if it would substantially limit a major life activity when active.” Id. § 12102(4)(D).2 The Title III regulations, which went into effect in October 2016, likewise direct that, \"li]n determining whether an impairment substantially limits a major life activity, the term major shall not be interpreted strictly to create a demanding standard.” 28 C.F.R. § 36.105(c)(2)(i). The regulations go on to state that, as a rule of construction,",
+      "missing": [
+       "III",
+       "\"li]n"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "(ii) The primary object of attention in cases brought under title III of the ADA should be whether public accommodations have complied with their obligations and whether discrimination has occurred, not the extent to which an individual’s impairment substantially limits a major life activity.",
+      "missing": [
+       "III"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "Accordingly, the threshold Issu of whether an impairment substantially limits a major life activity should not demand extensive analysis.",
+      "missing": [
+       "Issu"
+      ]
+     },
+     {
+      "line": 77,
+      "text": "Sept. 16, 2016).",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "bates",
+     "text": "WL 5835149",
+     "line": 0,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(2)",
+     "line": 59,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(2)",
+     "line": 61,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(4)",
+     "line": 65,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(4)",
+     "line": 67,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 36.105(c)(2)(i)",
+     "line": 67,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 36.105(d)(1)",
+     "line": 73,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "docket",
+     "text": "6:16-CV-00385",
+     "line": 75,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "July 6, 2016",
+     "value": "2016-07-06",
+     "line": 75,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "docket",
+     "text": "16-CV-0385",
+     "line": 75,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "Sept. 16, 2016",
+     "value": "2016-09-16",
+     "line": 77,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 12102(4)",
+     "line": 81,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 24,
+    "agreed_spans": 20,
+    "agreed_words": 0.705,
+    "unagreed": [
+     {
+      "line": 55,
+      "text": "Compl. 1125-34. The complaint also states that another plaintiff (Ruby Smith, who resides in Texas) “has had medical treatment related to her lactose intolerance including, but not limited to, an emergency room visit.” Id. 9| 34.",
+      "missing": [
+       "1125-34."
+      ]
+     },
+     {
+      "line": 55,
+      "text": "Aside from these two individuals, the complaint repeats only the same generic, conclusory descriptor of each plaintiff’s condition: “As a result of [his/her] lactose intolerance, [plaintiff] is substantially impaired in several major life activities and is required to consume non-dairy milk alternatives.” See id. 19 25-34.",
+      "missing": [
+       "19"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Nevertheless, plaintiffs’ reliance on this case is curious, given that the Harris court affirmed the demurrer on the cause of action alleging violation of the Unruh Act based on a violation of the ADA.",
+      "missing": [
+       "reliance"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "“simply advising a restaurant that one is lactose intolerant does not provide notice that the person suffers from a qualifying disability.” Id. at *4.",
+      "missing": [
+       "qualifying"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 49,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 49,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 40",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "Oct. 1, 2020",
+     "value": "2020-10-01",
+     "line": 57,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 22,
+    "agreed_spans": 15,
+    "agreed_words": 0.637,
+    "unagreed": [
+     {
+      "line": 53,
+      "text": "types of milk allergies, one of which may cause immediate symptoms such as “swelling, breathing problems, rashes, loss of consciousness and anaphylaxis.” Id. ¶ 45.",
+      "missing": [
+       "45."
+      ]
+     },
+     {
+      "line": 59,
+      "text": "Title III regulations state: “The determination of whether an impairment substantially limits a major life activity requires an individualized assessment.",
+      "missing": [
+       "III"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "However, in making this assessment, the term",
+      "missing": []
+     },
+     {
+      "line": 63,
+      "text": "In addition to the Hebert case noted above, plaintiffs rely throughout their brief on Phillips v. P.F. Chang’s China Bistro, Inc., No. 5:15- CV-00344-RMW, 2015 WL 7429497 (N.D. Cal. Nov.",
+      "missing": [
+       "5:15-",
+       "CV-00344-RMW,"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "23, 2015) (“Phillips IT\").",
+      "missing": [
+       "IT\")."
+      ]
+     },
+     {
+      "line": 63,
+      "text": "That case involved a plaintiff with celiac disease who sought to represent a class of people challenging P.F. Chang’s practice of charging $1 more for some gluten-free menu items than for comparable non-gluten-free menu items.",
+      "missing": []
+     },
+     {
+      "line": 63,
+      "text": "As with Hebert, the allegations in Phillips II were tied to the symptoms and experiences of the plaintiff herself rather than relying on generic descriptions of what celiac disease could do to a hypothetical individual.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 51,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 51,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 45",
+     "line": 53,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 46",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 36.105(d)(1)(vi)",
+     "line": 61,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "citation",
+     "text": "§ 36.105(d)(1)(ii)",
+     "line": 61,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "Nov. 23, 2015",
+     "value": "2015-11-23",
+     "line": 63,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "amount",
+     "text": "$1",
+     "value": 1.0,
+     "line": 63,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 23,
+    "agreed_spans": 20,
+    "agreed_words": 0.738,
+    "unagreed": [
+     {
+      "line": 53,
+      "text": "Still, the Court describes Phillips II here to illustrate that, even under the cases plaintiffs cite, the allegations were much more than conclusory.",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "The Court further notes that the Phillips II court dismissed a prior version of the complaint, finding insufficient the bare allegations that the plaintiff “must eat a diet of foods not containing gluten and that has not been exposed to gluten,” and that she would “suffer adverse health consequences if she ingests gluten.” See Phillips v. P.F. Chang’s China Bistro, Inc., No. 5:15-CV-00344-RMW, 2015",
+      "missing": [
+       "eat"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "6, 2015) (“Phillips I”).",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 49,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 49,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "docket",
+     "text": "5:15-CV-00344-RMW",
+     "line": 53,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "Aug. 6, 2015",
+     "value": "2015-08-06",
+     "line": 55,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "June 21, 2024",
+     "value": "2024-06-21",
+     "line": 73,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "page_check": [
+    "pleading_table"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 9,
+    "agreed_spans": 9,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "3:23-cv-06621-SI",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "05/31/24",
+     "value": "2024-05-31",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "May 31, 2024",
+     "value": "2024-05-31",
+     "line": 12,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

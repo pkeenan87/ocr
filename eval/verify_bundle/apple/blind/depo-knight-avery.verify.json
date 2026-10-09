@@ -1,0 +1,665 @@
+{
+ "source": "depo-knight-avery.pdf",
+ "markdown": "depo-knight-avery.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:57:12Z",
+ "verify_fields": "flagged",
+ "azure_pages": "2,4-5,8",
+ "summary": {
+  "fields": 21,
+  "verified": 0,
+  "check": 6,
+  "unchecked": 15,
+  "pages_to_check": 4,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 15,
+    "agreed_spans": 9,
+    "agreed_words": 0.294,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "·UNITED STATES DISTRICT COURT EASTERN DISTRICT OF WISCONSIN",
+      "missing": [
+       "·UNITED",
+       "COURT",
+       "EASTERN"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "# ·UNITED STATES DISTRICT COURT",
+      "missing": [
+       "·UNITED",
+       "COURT"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "LT. AVERY, OFFICER TAYLOR, and",
+      "missing": [
+       "LT."
+      ]
+     },
+     {
+      "line": 23,
+      "text": "·before me at Green Bay Correctional Institution, ·Green Bay, Brown County, Wisconsin, on the 16th ·day of April, 2024, A.D., otherwise than as a ·witness on the trial, wherein the parties thereto ·are as set forth above.",
+      "missing": [
+       "above."
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Page1 E3hi8it ip. 1",
+      "missing": [
+       "Page1",
+       "E3hi8it",
+       "ip."
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Case 2:23-cv-00886-NJ",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "23-CV-886-PP",
+     "line": 11,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 29,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 31,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "bates": "CV-00886",
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 17,
+    "agreed_spans": 14,
+    "agreed_words": 0.841,
+    "unagreed": [
+     {
+      "line": 59,
+      "text": "PAGE MARKED",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "**Original exhibits placed with original transcript**",
+      "missing": [
+       "transcript**"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "Page 2ËXhiB1,p.2",
+      "missing": [
+       "2ËXhiB1,p.2"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Page 2 Ehibime,1p. 2"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "bates",
+     "text": "CV-00886",
+     "line": 0,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:23-CV-00886-NJ",
+     "line": 75,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 75,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 20,
+    "agreed_spans": 17,
+    "agreed_words": 0.565,
+    "unagreed": [
+     {
+      "line": 35,
+      "text": "·Said KEENAN T. KNIGHT, having been first duly sworn by me to testify the truth, the whole truth, and nothing but the truth relative to said cause, in answer to oral interrogatories, deposed and made answer as follows:",
+      "missing": [
+       "T.",
+       "follows:"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "(The examination began at 1:12 p.m.",
+      "missing": []
+     },
+     {
+      "line": 75,
+      "text": "Case 2223CV00886-NJ Fied 080124 Page3ExhiBitl0. 3",
+      "missing": [
+       "2223CV00886-NJ",
+       "Fied",
+       "Page3ExhiBitl0."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Case 2:23-cv-00886-NJ Filed 08/01/24"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": null,
+   "fields": []
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 24,
+    "agreed_spans": 21,
+    "agreed_words": 0.895,
+    "unagreed": [
+     {
+      "line": 61,
+      "text": "General studies and also certificate --",
+      "missing": [
+       "certificate"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "certification for the study of maintenance.",
+      "missing": [
+       "certification"
+      ]
+     },
+     {
+      "line": 85,
+      "text": "Page E3hi8it9 ip. 4",
+      "missing": [
+       "E3hi8it9",
+       "ip."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Page 4 0f329h Bgaynept 41i1"
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 87,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 87,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 19,
+    "agreed_spans": 16,
+    "agreed_words": 0.94,
+    "unagreed": [
+     {
+      "line": 49,
+      "text": "(Witness complies with request.)",
+      "missing": [
+       "request.)"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "Page 5 5329h iayment 41",
+      "missing": [
+       "5329h",
+       "iayment",
+       "41"
+      ]
+     },
+     {
+      "line": 71,
+      "text": ".0.c",
+      "missing": [
+       ".0.c"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Page 5 0f429 h Boaunept 41:1"
+    ],
+    "missing_words": 6
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 65,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 67,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 20,
+    "agreed_words": 0.978,
+    "unagreed": [
+     {
+      "line": 71,
+      "text": "Page ЁХhiB1,d. 6",
+      "missing": [
+       "Page",
+       "ЁХhiB1,d.",
+       "6"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 73,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 75,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 18,
+    "agreed_words": 0.523,
+    "unagreed": [
+     {
+      "line": 45,
+      "text": "I was arrested December 2nd of 2021, so I would have had arrived at Milwaukee County Jail maybe approximately December 5th, due to being held at the police station during the time in between.· So I would have arrived at the County actually probably December 5th, --",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "Of'21.",
+      "missing": [
+       "Of'21."
+      ]
+     },
+     {
+      "line": 53,
+      "text": "part of that was due to COVID and the backlog that created in the system,",
+      "missing": [
+       "system,"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 77,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 77,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "bates": "CV-00886",
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 30,
+    "agreed_spans": 20,
+    "agreed_words": 0.712,
+    "unagreed": [
+     {
+      "line": 6,
+      "text": "| 5 | A | Yes. |",
+      "missing": [
+       "5"
+      ]
+     },
+     {
+      "line": 8,
+      "text": "| 7 | A | Yes. |",
+      "missing": [
+       "7"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "| 9 | A | Iwelve years and -- it was 20 years. |",
+      "missing": [
+       "9"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "| 14 | A | Thirty-four. |",
+      "missing": [
+       "14"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "| 16 | A | Yes. |",
+      "missing": [
+       "16"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "| 18 | A | One. |",
+      "missing": [
+       "18"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "| 20 | A | Sixteen. |",
+      "missing": []
+     },
+     {
+      "line": 23,
+      "text": "| 22 | A | Boy. |",
+      "missing": [
+       "22"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "| 24 | A | Yes. |",
+      "missing": [
+       "24"
+      ]
+     },
+     {
+      "line": 30,
+      "text": "Page EXhiBi9,lp. 8",
+      "missing": [
+       "EXhiBi9,lp."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Page Eh 0. 8"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "bates",
+     "text": "CV-00886",
+     "line": 0,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:23-CV-00886-NJ",
+     "line": 32,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 32,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 23,
+    "agreed_words": 0.902,
+    "unagreed": [
+     {
+      "line": 57,
+      "text": "either before that or outside of the --",
+      "missing": []
+     },
+     {
+      "line": 85,
+      "text": "Page 9 5629h iayment 410",
+      "missing": [
+       "Page",
+       "5629h",
+       "iayment",
+       "410"
+      ]
+     },
+     {
+      "line": 87,
+      "text": ",O. Y",
+      "missing": [
+       ",O.",
+       "Y"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 81,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 83,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 27,
+    "agreed_spans": 26,
+    "agreed_words": 0.988,
+    "unagreed": [
+     {
+      "line": 89,
+      "text": "Page EXhibiPn:'10",
+      "missing": [
+       "EXhibiPn:'10"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 91,
+     "status": "unchecked",
+     "why": []
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 93,
+     "status": "unchecked",
+     "why": []
+    }
+   ]
+  }
+ ]
+}

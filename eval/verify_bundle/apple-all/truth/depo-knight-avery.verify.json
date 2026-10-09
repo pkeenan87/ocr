@@ -1,0 +1,1037 @@
+{
+ "source": "depo-knight-avery.pdf",
+ "markdown": "depo-knight-avery.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:48:41Z",
+ "verify_fields": "all",
+ "azure_pages": "2,8",
+ "summary": {
+  "fields": 21,
+  "verified": 19,
+  "check": 2,
+  "unchecked": 0,
+  "pages_to_check": 2,
+  "embedded_text_pages": 6,
+  "agreed_spans": 116,
+  "unagreed_spans": 104
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 15,
+    "agreed_spans": 12,
+    "agreed_words": 0.494,
+    "unagreed": [
+     {
+      "line": 23,
+      "text": "·before me at Green Bay Correctional Institution, ·Green Bay, Brown County, Wisconsin, on the 16th ·day of April, 2024, A.D., otherwise than as a ·witness on the trial, wherein the parties thereto ·are as set forth above.",
+      "missing": [
+       "above."
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Page1 E3hi8it ip. 1",
+      "missing": [
+       "Page1",
+       "E3hi8it",
+       "ip."
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Case 2:23-cv-00886-NJ",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Case 2:23-cv-00886-NJ Filed 08/01/24 Page 1 of 129 Document 41-1Exhibit 1, p. 1"
+    ],
+    "missing_words": 13
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "23-CV-886-PP",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 31,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "bates": "CV-00886",
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 17,
+    "agreed_spans": 11,
+    "agreed_words": 0.508,
+    "unagreed": [
+     {
+      "line": 43,
+      "text": "appeared on behalf of the Defendants.",
+      "missing": [
+       "Defendants."
+      ]
+     },
+     {
+      "line": 49,
+      "text": "INDEX TO EXHIBITS",
+      "missing": [
+       "INDEX"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "Exhibit 1 - Copy of photograph Exhibit 2 - Copy of photograph",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "**Original exhibits placed with original transcript**",
+      "missing": [
+       "transcript**"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "Page 2ËXhiB1,p.2",
+      "missing": [
+       "2ËXhiB1,p.2"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "Case 2:23-CV-00886-NJ Filed 08/01/24",
+      "missing": [
+       "Case"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "·1· ·2· ·3· ·4· ·5· ·6· ·7· ·8",
+     "Case 2:23-cv-00886-NJ Filed 08/01/24 Page 2 of 129 Document 41-1Exhibit 1, p. 2"
+    ],
+    "missing_words": 20
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "bates",
+     "text": "CV-00886",
+     "line": 0,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:23-CV-00886-NJ",
+     "line": 75,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 75,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 20,
+    "agreed_spans": 7,
+    "agreed_words": 0.157,
+    "unagreed": [
+     {
+      "line": 35,
+      "text": "·Said KEENAN T. KNIGHT, having been first duly sworn by me to testify the truth, the whole truth, and nothing but the truth relative to said cause, in answer to oral interrogatories, deposed and made answer as follows:",
+      "missing": [
+       "follows:"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "(The examination began at 1:12 p.m.",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "State your name, please.",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "Keenan Knight.",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "How old are you, Mr. Knight?",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "Thirty-four.",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "Can you detail for me your educational background, please?",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "I have a GED and some college-level education.",
+      "missing": []
+     },
+     {
+      "line": 61,
+      "text": "Where did you get your GED?",
+      "missing": []
+     },
+     {
+      "line": 65,
+      "text": "Boscobel, Wisconsin.",
+      "missing": []
+     },
+     {
+      "line": 67,
+      "text": "Did you get that while you were incarcerated?",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 75,
+      "text": "Case 2223CV00886-NJ Fied 080124 Page3ExhiBitl0. 3",
+      "missing": [
+       "2223CV00886-NJ",
+       "Fied",
+       "Page3ExhiBitl0."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Case 2:23-cv-00886-NJ Filed 08/01/24 Page 3 of 129 Document 41-1Exhibit 1, p. 3"
+    ],
+    "missing_words": 13
+   },
+   "second_reading": "embedded_text",
+   "fields": []
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 24,
+    "agreed_spans": 7,
+    "agreed_words": 0.105,
+    "unagreed": [
+     {
+      "line": 41,
+      "text": "those up?",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "Danville Area College in Illinois.",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "D-A-N-N-V-I-L-L-E or one N?",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "D-A-N-V-I-L-L-E.",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "Okay.· How many credits do you have?",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "Approximately 30.· Thirty, 35 maybe.",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "In what subjects?",
+      "missing": []
+     },
+     {
+      "line": 61,
+      "text": "General studies and also certificate --",
+      "missing": [
+       "certificate"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "certification for the study of maintenance.",
+      "missing": [
+       "certification"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "In what?",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "Custodial maintenance.",
+      "missing": []
+     },
+     {
+      "line": 75,
+      "text": "So that was a technical college?",
+      "missing": []
+     },
+     {
+      "line": 77,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 79,
+      "text": "Were you living down in Illinois at the time?",
+      "missing": []
+     },
+     {
+      "line": 81,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 83,
+      "text": "We're here because of a lawsuit that you filed that stems from your time at Milwaukee County Jail and your interaction with some officers in the jail.· The questions I'm going to ask you are going to be about what happened there.· And if at any point you don't understand a question that I'm asking you, just ask me to rephrase it for you. Okay?",
+      "missing": []
+     },
+     {
+      "line": 85,
+      "text": "Page E3hi8it9 ip. 4",
+      "missing": [
+       "E3hi8it9",
+       "ip."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Case 2:23-cv-00886-NJ Filed 08/01/24 Page 4 of 129 Document 41-1Exhibit 1, p. 4"
+    ],
+    "missing_words": 13
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 87,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 87,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 19,
+    "agreed_spans": 8,
+    "agreed_words": 0.315,
+    "unagreed": [
+     {
+      "line": 37,
+      "text": "# All right.",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "You have some papers in front of you and we were chatting a little bit off the record about what they were.· You had indicated that they were some responses that we had provided you to discovery you've sent us, the complaint, the screening order, and also some notes.· Did you review those documents to prepare you to testify today?",
+      "missing": []
+     },
+     {
+      "line": 43,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "Okay.· I'm really interested in the notes that you wrote.· Can you pull those out for me, please?",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "(Witness complies with request.)",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "How many pages are there?",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "Nine.",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "And can you tell me when you authored those notes?",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "There is no date actually on these notes.",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "Page 5 5329h iayment 41",
+      "missing": [
+       "5329h",
+       "iayment",
+       "41"
+      ]
+     },
+     {
+      "line": 71,
+      "text": ".0.c",
+      "missing": [
+       ".0.c"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 65,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 67,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 7,
+    "agreed_words": 0.065,
+    "unagreed": [
+     {
+      "line": 35,
+      "text": "accurate?",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "Do you have any notes that you authored shortly after the events of this lawsuit?",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "Meaning?",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "Did you take notes about what happened within the weeks after this incident that we're here about?",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "No.· Everything that was -- everything was placed in the complaint that I initially filed.",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "Fair enough.· So you were involved in a decentralization and you were tased while in Milwaukee County Jail, and that forms the basis of this lawsuit, correct?",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "So is it okay if we talk about the incident and we'll both know that we're talking about your incident with the taser?",
+      "missing": []
+     },
+     {
+      "line": 61,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 63,
+      "text": "And do you know what date that incident occurred?",
+      "missing": []
+     },
+     {
+      "line": 67,
+      "text": "May 31st, 2023.",
+      "missing": []
+     },
+     {
+      "line": 69,
+      "text": "Okay.· So then for shorthand, we'll just refer to it as the incident.· Okay?",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "Page ЁХhiB1,d. 6",
+      "missing": [
+       "ЁХhiB1,d."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Case 2:23-cv-00886-NJ Filed 08/01/24 Page 6 of 129 Document 41-1Exhibit 1, p. 6"
+    ],
+    "missing_words": 13
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 73,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 75,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 7,
+    "agreed_words": 0.131,
+    "unagreed": [
+     {
+      "line": 39,
+      "text": "Okay.",
+      "missing": []
+     },
+     {
+      "line": 43,
+      "text": "How long had you been in Milwaukee County Jail before May 31st, '23, when this incident occurred?",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "I was arrested December 2nd of 2021, so I would have had arrived at Milwaukee County Jail maybe approximately December 5th, due to being held at the police station during the time in between.· So I would have arrived at the County actually probably December 5th, --",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "Of'21.",
+      "missing": [
+       "Of'21."
+      ]
+     },
+     {
+      "line": 51,
+      "text": "-- 2021.",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "So you were there for a considerably long time;",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "part of that was due to COVID and the backlog that created in the system,",
+      "missing": [
+       "system,"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 61,
+      "text": "-- I take it?",
+      "missing": []
+     },
+     {
+      "line": 65,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 67,
+      "text": "What were your charges?",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "Armed robbery, firearms, fleeing/eluding, second degree reckless endangerment, and bail jumping.",
+      "missing": []
+     },
+     {
+      "line": 73,
+      "text": "Serious charges.",
+      "missing": []
+     },
+     {
+      "line": 75,
+      "text": "Yeah.",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "Case 2:23-cv-00886-NJ Filed 08/01/24 Page 7 of 129 Document 41-1Exhibit 1, p. 7"
+    ],
+    "missing_words": 13
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 77,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 77,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "bates": "CV-00886",
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 30,
+    "agreed_spans": 26,
+    "agreed_words": 0.848,
+    "unagreed": [
+     {
+      "line": 10,
+      "text": "| 9 | A | Iwelve years and -- it was 20 years. |",
+      "missing": [
+       "Iwelve"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "| 12 | | And I'm sorry.",
+      "missing": []
+     },
+     {
+      "line": 14,
+      "text": "| 13 | | forgot already.",
+      "missing": []
+     },
+     {
+      "line": 30,
+      "text": "Page EXhiBi9,lp. 8",
+      "missing": [
+       "EXhiBi9,lp."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "·1· ·2· ·3· ·4· ·5· ·6· ·7· ·8· ·9· 10· 11· 12· 13· 14· 15· 16· 17· 18· 19· 20· 21· 22· 23· 24· 25· ·Q· · What was your bail set at?",
+     "Case 2:23-cv-00886-NJ Filed 08/01/24 Page 8 of 129 Document 41-1Exhibit 1, p. 8"
+    ],
+    "missing_words": 44
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "bates",
+     "text": "CV-00886",
+     "line": 0,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "2:23-CV-00886-NJ",
+     "line": 32,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 32,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 26,
+    "agreed_spans": 13,
+    "agreed_words": 0.559,
+    "unagreed": [
+     {
+      "line": 43,
+      "text": "You play football when you were a kid?",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "Where'd you go to high school?",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "I didn't attend high school.",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "either before that or outside of the --",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 61,
+      "text": "-- school setting.",
+      "missing": []
+     },
+     {
+      "line": 65,
+      "text": "Yes.",
+      "missing": []
+     },
+     {
+      "line": 67,
+      "text": "Which one, both?",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "Both.",
+      "missing": []
+     },
+     {
+      "line": 73,
+      "text": "Okay.· Can you detail for me your employment history?",
+      "missing": []
+     },
+     {
+      "line": 79,
+      "text": "Have you had training since you -- well, you haven't been here that long;",
+      "missing": []
+     },
+     {
+      "line": 85,
+      "text": "Page 9 5629h iayment 410",
+      "missing": [
+       "5629h",
+       "iayment",
+       "410"
+      ]
+     },
+     {
+      "line": 87,
+      "text": ",O. Y",
+      "missing": [
+       ",O.",
+       "Y"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 81,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 83,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 27,
+    "agreed_spans": 18,
+    "agreed_words": 0.708,
+    "unagreed": [
+     {
+      "line": 41,
+      "text": "here.",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "No.",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "Plan on getting any educational training or vocational training while you're here if it becomes available to you?",
+      "missing": []
+     },
+     {
+      "line": 51,
+      "text": "Yes.· I'm interested in taking welding.",
+      "missing": []
+     },
+     {
+      "line": 53,
+      "text": "Taking welding.",
+      "missing": []
+     },
+     {
+      "line": 57,
+      "text": "Yeah.",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "It's an excellent profession.· High paying these days, if you can weld stainless steel.",
+      "missing": []
+     },
+     {
+      "line": 65,
+      "text": "Not officially.",
+      "missing": []
+     },
+     {
+      "line": 89,
+      "text": "Page EXhibiPn:'10",
+      "missing": [
+       "EXhibiPn:'10"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Exhibit 1, p. 10 Case 2:23-cv-00886-NJ Filed 08/01/24 Page 10 of 129 Document 41-1"
+    ],
+    "missing_words": 14
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:23-cv-00886-NJ",
+     "line": 91,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "08/01/24",
+     "value": "2024-08-01",
+     "line": 93,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,639 @@
+{
+ "source": "mot-cimontubo-reply.pdf",
+ "markdown": "mot-cimontubo-reply.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:53:26Z",
+ "verify_fields": "flagged",
+ "azure_pages": "",
+ "summary": {
+  "fields": 31,
+  "verified": 31,
+  "check": 0,
+  "unchecked": 0,
+  "pages_to_check": 0,
+  "embedded_text_pages": 3,
+  "agreed_spans": 122,
+  "unagreed_spans": 25
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [
+    "mixed_case"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 23,
+    "agreed_spans": 22,
+    "agreed_words": 0.966,
+    "unagreed": [
+     {
+      "line": 43,
+      "text": "TcL: (212) 981-2300",
+      "missing": [
+       "TcL:"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 3,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "20 Civ. 05382",
+     "line": 13,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 20, 2021",
+     "value": "2021-04-20",
+     "line": 29,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 9,
+    "agreed_spans": 8,
+    "agreed_words": 0.889,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "Immediately Following the First-Missed Paymen......",
+      "missing": [
+       "Paymen......"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 16,
+    "agreed_spans": 8,
+    "agreed_words": 0.333,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "Co. ofN. Am.,",
+      "missing": [
+       "ofN."
+      ]
+     },
+     {
+      "line": 11,
+      "text": "Citibank, N.A. ». Nyland (CF8), T3d,",
+      "missing": [
+       "T3d,"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "878 F.2d 620 (2d Cir.1989).. a re Gas Reclamation, Inc. Sec. Lilig",
+      "missing": [
+       "Lilig"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "41 F. Supp. 1094 (S.D.N.Y. 1990).",
+      "missing": [
+       "41"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "*: Cr.A.D. 3a 4ost?.",
+      "missing": [
+       "Cr.A.D.",
+       "3a",
+       "4ost?."
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Cen. Mar, Tns Co",
+      "missing": [
+       "Cen.",
+       "Mar,",
+       "Tns"
+      ]
+     },
+     {
+      "line": 20,
+      "text": "11 Samuel Williston & Richard A. Lord, A Treatise on the Law of Contracs § 31:1 (4th ed.9.....",
+      "missing": [
+       "Contracs",
+       "ed.9....."
+      ]
+     },
+     {
+      "line": 22,
+      "text": "https://www.merriam-wehster.com/dictionary/outstanding...",
+      "missing": [
+       "https://www.merriam-wehster.com/dictionary/outstanding..."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Ins. Co. of New York v. Cent. Mut. Ins. Co.,",
+     "47 A.D.3d 469 (2008) ................................................................................................................................. 2"
+    ],
+    "missing_words": 14
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-CV-05382-GBD-GWG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 31",
+     "line": 20,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 26,
+    "agreed_spans": 22,
+    "agreed_words": 0.909,
+    "unagreed": [
+     {
+      "line": 13,
+      "text": "I.",
+      "missing": []
+     },
+     {
+      "line": 15,
+      "text": "The Note Agreement Provides for Default Interest on all Outstanding Amounts Immediately Following First-Missed Payment",
+      "missing": []
+     },
+     {
+      "line": 27,
+      "text": "The basic dictionary definition of “outstanding” is “unpaid.” See https://www.merriam-",
+      "missing": [
+       "https://www.merriam-"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "webster.com/dictionary/outstanding (definition #2).",
+      "missing": [
+       "webster.com/dictionary/outstanding"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "March 4, 2021",
+     "value": "2021-03-04",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 2.04(a)",
+     "line": 21,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "8.50%",
+     "line": 25,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 31",
+     "line": 35,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 29,
+    "agreed_spans": 29,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "8.5%",
+     "line": 5,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "8.5%",
+     "line": 31,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "misreads"
+   ],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 23,
+    "agreed_spans": 14,
+    "agreed_words": 0.527,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "The Note Agrec-ment is, after all, the negotiated contract between the parties;",
+      "missing": [
+       "Agrec-ment"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "the Note is part of the implementa-",
+      "missing": [
+       "implementa-"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "tion of the Note Agreement.",
+      "missing": [
+       "tion"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "Il.",
+      "missing": [
+       "Il."
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Citibank, N.A. v. Nyland (CF8), L ta., 878 F.2d 620, 624–25 (2d Cir.1989) (“The notes provided for annual interest of four percent but, in the event of default, the rate would rise to six percent.",
+      "missing": [
+       "L",
+       "ta.,"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "Notably absent from PDVSA’s papers is any explanation of why a debtor who misses a pay-",
+      "missing": [
+       "pay-"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "ment should be accorded the grace of continuing the initial interest rate rather than a default rate.",
+      "missing": [
+       "ment"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "PDVSA has failed to raise a single credible reason as to why its calculation of interest should govern over Cimontubo’s. Cimontubo’s calcula-",
+      "missing": [
+       "calcula-"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "tion of interest, however, is grounded by the express terms of the Note Agreement, as well as the expectations of the parties and commercial reasonableness.",
+      "missing": [
+       "tion"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "embedded_text",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": true,
+   "ocr_text_layer": false,
+   "second_reader": false,
+   "text_agreement": {
+    "compared_with": "embedded_text",
+    "independent": true,
+    "spans": 21,
+    "agreed_spans": 19,
+    "agreed_words": 0.93,
+    "unagreed": [
+     {
+      "line": 13,
+      "text": "and (d) post-",
+      "missing": [
+       "post-"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "judgment interest at a rate of 8.5%.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": null,
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "1:20-cv-05382-GBD-GWG",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "04/20/21",
+     "value": "2021-04-20",
+     "line": 1,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$35,720,631.43",
+     "value": 35720631.43,
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 2, 2021",
+     "value": "2021-04-02",
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$10,486,693.72",
+     "value": 10486693.72,
+     "line": 7,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "February 28, 2021",
+     "value": "2021-02-28",
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$124,533.35",
+     "value": 124533.35,
+     "line": 9,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 2, 2021",
+     "value": "2021-04-02",
+     "line": 11,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "8.5%",
+     "line": 15,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 20, 2021",
+     "value": "2021-04-20",
+     "line": 19,
+     "status": "verified",
+     "why": [
+      "matches_embedded_text"
+     ]
+    }
+   ]
+  }
+ ]
+}

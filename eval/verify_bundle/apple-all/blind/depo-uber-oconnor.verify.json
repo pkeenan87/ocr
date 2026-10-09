@@ -1,0 +1,1840 @@
+{
+ "source": "depo-uber-oconnor.pdf",
+ "markdown": "depo-uber-oconnor.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:51:26Z",
+ "verify_fields": "all",
+ "azure_pages": "1-15",
+ "summary": {
+  "fields": 17,
+  "verified": 0,
+  "check": 17,
+  "unchecked": 0,
+  "pages_to_check": 15,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 2,
+    "agreed_spans": 2,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "13-cv-03826-EMC",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 15,
+    "agreed_spans": 15,
+    "agreed_words": 1.0,
+    "unagreed": [],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "13-cv-03826-EMC",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 69,
+    "agreed_spans": 42,
+    "agreed_words": 0.453,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas asmior, e-Sy-03826-EMC Document313-5 Filed07/23/15 Page3 of 15",
+      "missing": [
+       "asmior,",
+       "e-Sy-03826-EMC"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "NORTHERN DISTRICT OF CALIFORNIA",
+      "missing": []
+     },
+     {
+      "line": 17,
+      "text": "1 APPRARANCES OF COUNSEL",
+      "missing": [
+       "APPRARANCES"
+      ]
+     },
+     {
+      "line": 18,
+      "text": "2 POR PLAINTIPPS:",
+      "missing": []
+     },
+     {
+      "line": 24,
+      "text": "LICHTEN & LISS-RIORDAS, P.C.",
+      "missing": [
+       "LISS-RIORDAS,"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "BY: SHANNON LISS-RIORDAII, ATTORNEX AT LAW",
+      "missing": [
+       "SHANNON",
+       "LISS-RIORDAII,"
+      ]
+     },
+     {
+      "line": 36,
+      "text": "PLAINTIPFS,",
+      "missing": [
+       "PLAINTIPFS,"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "CASE NO. 13-03826-EMC",
+      "missing": [
+       "13-03826-EMC"
+      ]
+     },
+     {
+      "line": 46,
+      "text": "20th Floor",
+      "missing": [
+       "Floor"
+      ]
+     },
+     {
+      "line": 48,
+      "text": "UBERTECHNOLOGIES, INC.,",
+      "missing": [
+       "UBERTECHNOLOGIES,"
+      ]
+     },
+     {
+      "line": 68,
+      "text": "Telephone: (617) 994-5800",
+      "missing": [
+       "Telephone:"
+      ]
+     },
+     {
+      "line": 70,
+      "text": "Email: Sliss@llrlaw.com",
+      "missing": [
+       "Email:",
+       "Sliss@llrlaw.com"
+      ]
+     },
+     {
+      "line": 80,
+      "text": "DEPOSITION OF MICHAEL COLEMAN NEDNESDAZ, JULX 9, 2014",
+      "missing": [
+       "JULX"
+      ]
+     },
+     {
+      "line": 94,
+      "text": "BY: ROBERT JON HENDRICKS, ATTORNEX AT LAW",
+      "missing": [
+       "ROBERT"
+      ]
+     },
+     {
+      "line": 98,
+      "text": "Spear Strect Tower",
+      "missing": [
+       "Spear",
+       "Strect"
+      ]
+     },
+     {
+      "line": 102,
+      "text": "Telephone: (415) 442-1000",
+      "missing": [
+       "Telephone:"
+      ]
+     },
+     {
+      "line": 104,
+      "text": "Email: Rhendricks@morganlewis.com",
+      "missing": [
+       "Email:"
+      ]
+     },
+     {
+      "line": 112,
+      "text": "BX: CXNTHIA F. DAMMANA, CSR NO. 10610 22",
+      "missing": [
+       "DAMMANA,",
+       "22"
+      ]
+     },
+     {
+      "line": 118,
+      "text": "MATT AIKIN",
+      "missing": [
+       "MATT"
+      ]
+     },
+     {
+      "line": 132,
+      "text": "2 WEDNESDAX, JULY 9, 2014",
+      "missing": [
+       "WEDNESDAX,"
+      ]
+     },
+     {
+      "line": 153,
+      "text": "# Deposition of MICHAEL COLEMAN, taken on",
+      "missing": []
+     },
+     {
+      "line": 157,
+      "text": "11 1800, San Francisco, California, commencing at 9:33",
+      "missing": [
+       "11",
+       "commencing"
+      ]
+     },
+     {
+      "line": 159,
+      "text": "12 A.M., WEDNEDAX, JULY 9, 2014, before Cynthia F.",
+      "missing": [
+       "12",
+       "WEDNEDAX,",
+       "before"
+      ]
+     },
+     {
+      "line": 160,
+      "text": "13 Dammann, Certified Shorthand Reporter No. 10610,",
+      "missing": [
+       "13"
+      ]
+     },
+     {
+      "line": 178,
+      "text": "122฿",
+      "missing": [
+       "122฿"
+      ]
+     },
+     {
+      "line": 218,
+      "text": "-о00-",
+      "missing": [
+       "-о00-"
+      ]
+     },
+     {
+      "line": 220,
+      "text": "# QUESTIONS WITNESS INSTRUCTED NOI IO ANSWER:",
+      "missing": [
+       "ANSWER:"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "13-03826-EMC",
+     "line": 40,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [
+    "page_order",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 106,
+    "agreed_spans": 85,
+    "agreed_words": 0.762,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas &asmor, 3-Sl-03826-EMC Document313-5 Filed07/23/15 Page4 of 15",
+      "missing": [
+       "&asmor,",
+       "3-Sl-03826-EMC"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Nunber",
+      "missing": [
+       "Nunber"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "Craig's List posting - 1 page",
+      "missing": [
+       "Craig's"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "2 and F subject to the objections that we made in our",
+      "missing": [
+       "F",
+       "subject"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Pago",
+      "missing": [
+       "Pago"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "Uber document - 5 pages",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "voe- рroвeacaczon рacкос = s/ pages",
+      "missing": [
+       "voe-",
+       "рroвeacaczon",
+       "рacкос"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "Uber presentation packet - 6 pages",
+      "missing": [
+       "presentation"
+      ]
+     },
+     {
+      "line": 89,
+      "text": "7 Matt Atkin, who we --",
+      "missing": []
+     },
+     {
+      "line": 91,
+      "text": "MS. LISS-RIORDAN: Matt Atkin?",
+      "missing": []
+     },
+     {
+      "line": 109,
+      "text": "MR. HENDRICKS: To the extent you want to 13 ask certain questions that are outside the scope of",
+      "missing": [
+       "13"
+      ]
+     },
+     {
+      "line": 111,
+      "text": "269",
+      "missing": [
+       "269"
+      ]
+     },
+     {
+      "line": 113,
+      "text": "14 the designation, we'll allow that, but that -- T'1l",
+      "missing": [
+       "14",
+       "T'1l"
+      ]
+     },
+     {
+      "line": 129,
+      "text": "-00o-",
+      "missing": [
+       "-00o-"
+      ]
+     },
+     {
+      "line": 149,
+      "text": "# WEDNESDAY, JULY 9, 2014; 9:33 A.M.",
+      "missing": [
+       "WEDNESDAY,"
+      ]
+     },
+     {
+      "line": 159,
+      "text": "-00o-",
+      "missing": [
+       "-00o-"
+      ]
+     },
+     {
+      "line": 161,
+      "text": "MR. HENDRICKS: Counsel, before we get 8 going, let me do a little bit of housekeeping, first",
+      "missing": []
+     },
+     {
+      "line": 179,
+      "text": "15 objections. Having said that, as Llook at this",
+      "missing": [
+       "Llook"
+      ]
+     },
+     {
+      "line": 224,
+      "text": "MR. HENDRICKS: Objection, privacy.",
+      "missing": []
+     },
+     {
+      "line": 233,
+      "text": "MR. HENDRICKS: I just don't think that 19 question's appropriate given the designation. So we",
+      "missing": []
+     },
+     {
+      "line": 248,
+      "text": "O'Brien & Levinc",
+      "missing": [
+       "Levinc"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "voee presencaczon pacкet - ss pages",
+     "uaeh presentution packet - o pages"
+    ],
+    "missing_words": 10
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 116,
+    "agreed_spans": 100,
+    "agreed_words": 0.756,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page5 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "July 9, 2014",
+      "missing": [
+       "July",
+       "9,",
+       "2014"
+      ]
+     },
+     {
+      "line": 24,
+      "text": "7 Q. And let me just clarify before you go on.",
+      "missing": [
+       "7",
+       "clarify"
+      ]
+     },
+     {
+      "line": 28,
+      "text": "10 can either be working with a transportation company",
+      "missing": [
+       "10"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "He -- the question's been --",
+      "missing": []
+     },
+     {
+      "line": 34,
+      "text": "MS. LISS-RIORDAN: I'm not stating testimony.",
+      "missing": []
+     },
+     {
+      "line": 52,
+      "text": "MR. HENDRICKS: I really can. Misstates the",
+      "missing": []
+     },
+     {
+      "line": 118,
+      "text": "1 Q. Am I correct, in order to lead into my next",
+      "missing": [
+       "1",
+       "Am"
+      ]
+     },
+     {
+      "line": 120,
+      "text": "2 question, that there are -- that drivers who want to work with Uber -- use the Uber platform can either be working with a transportation company or they can be on their own and directly working with the Uber platform?",
+      "missing": [
+       "2"
+      ]
+     },
+     {
+      "line": 140,
+      "text": "have to be a part of a licensed limo company. For",
+      "missing": []
+     },
+     {
+      "line": 158,
+      "text": "20 understand you said that UberX includes peer-to-peer",
+      "missing": [
+       "20"
+      ]
+     },
+     {
+      "line": 186,
+      "text": "They could own their own 6 company and the company can partner with Uber.",
+      "missing": [
+       "6"
+      ]
+     },
+     {
+      "line": 205,
+      "text": "Can you continue by telling me what a driver",
+      "missing": []
+     },
+     {
+      "line": 229,
+      "text": "website. These are essentially some functional --",
+      "missing": []
+     },
+     {
+      "line": 233,
+      "text": "what we consider functional requirements to use the",
+      "missing": []
+     },
+     {
+      "line": 241,
+      "text": "sign up on the website, they provide documentation 24 that allows us to see that they are a licensed limo",
+      "missing": [
+       "24"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 112,
+    "agreed_spans": 95,
+    "agreed_words": 0.805,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page6 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "July 9, 2014",
+      "missing": [
+       "9,",
+       "2014"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "12 A. They --",
+      "missing": [
+       "12"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "13 MR. HENDRICKS: Again, as framed, the",
+      "missing": []
+     },
+     {
+      "line": 44,
+      "text": "18 be a part of a fully operational limo business.",
+      "missing": [
+       "18"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "attend essentially an on-boarding session where they would, you know, learn how to use the software.",
+      "missing": []
+     },
+     {
+      "line": 59,
+      "text": "We 3 would do some basic, basic checking to ensure that",
+      "missing": [
+       "3"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "4 are -- you know, they're a top quality driver, 5 they're going to provide services that we're",
+      "missing": [
+       "4",
+       "5"
+      ]
+     },
+     {
+      "line": 99,
+      "text": "MR. HENDRICKS: Again, vague and ambiguous 21 aso to the term \"work with\" Uber platform. Vague",
+      "missing": [
+       "21"
+      ]
+     },
+     {
+      "line": 147,
+      "text": "documentation, such as driver's license. They do --",
+      "missing": []
+     },
+     {
+      "line": 151,
+      "text": "16 they typically come into the office.",
+      "missing": [
+       "16"
+      ]
+     },
+     {
+      "line": 162,
+      "text": "20 Q. What else?",
+      "missing": [
+       "20",
+       "else?"
+      ]
+     },
+     {
+      "line": 177,
+      "text": "It 2 has changed over time.",
+      "missing": [
+       "2"
+      ]
+     },
+     {
+      "line": 181,
+      "text": "3 specifically to Seattle since I was there early on,",
+      "missing": [
+       "3",
+       "Seattle",
+       "early"
+      ]
+     },
+     {
+      "line": 183,
+      "text": "4 but with -- our goal is to ensure that we're",
+      "missing": [
+       "4"
+      ]
+     },
+     {
+      "line": 191,
+      "text": "8 office to pick up a phone, to learn about the",
+      "missing": [
+       "8"
+      ]
+     },
+     {
+      "line": 200,
+      "text": "And if, based on that meeting with",
+      "missing": [
+       "based"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 110,
+    "agreed_spans": 97,
+    "agreed_words": 0.768,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page7 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "July 9, 2014",
+      "missing": [
+       "July",
+       "9,",
+       "2014"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "1 they -- you know, in general, this is what you should do when we have no way of knowing what happens in a car without getting that rider 4 feedback.",
+      "missing": [
+       "4",
+       "feedback."
+      ]
+     },
+     {
+      "line": 34,
+      "text": "service items, no, we don't tell them what is 14 expected of them.",
+      "missing": [
+       "14"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "18 later on, but since you brought up the star rating, 19 can you just explain to me what the star rating is?",
+      "missing": [
+       "18",
+       "19"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "And 23 over time there becomes this average of how riders",
+      "missing": [
+       "23"
+      ]
+     },
+     {
+      "line": 66,
+      "text": "8 MR. HENDRICKS: Calls for a narrative, 9 overly broad, but you may answer.",
+      "missing": [
+       "8",
+       "9"
+      ]
+     },
+     {
+      "line": 78,
+      "text": "assault a passenger, something of that nature, 15 anything safety related, we will deactivate them as",
+      "missing": []
+     },
+     {
+      "line": 90,
+      "text": "19 of partners.",
+      "missing": [
+       "19"
+      ]
+     },
+     {
+      "line": 96,
+      "text": "relates to any specific service item, no, there's 23 nothing actionable related to that, such as like if",
+      "missing": [
+       "23"
+      ]
+     },
+     {
+      "line": 116,
+      "text": "star rating allows us to see which providers in this pool of drivers and partners, which ones are 9 providing top tier service.",
+      "missing": [
+       "9"
+      ]
+     },
+     {
+      "line": 173,
+      "text": "6 reasons why a driver may be deactivated, such as if",
+      "missing": [
+       "6"
+      ]
+     },
+     {
+      "line": 191,
+      "text": "THE WITNESS: I think that pretty much",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 101,
+    "agreed_spans": 88,
+    "agreed_words": 0.793,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page8 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "July 9, 2014",
+      "missing": [
+       "July",
+       "9,",
+       "2014"
+      ]
+     },
+     {
+      "line": 54,
+      "text": "MR. HENDRICKS: Again, as framed, it's 21 overly broad, it's vague and ambiguous as to city",
+      "missing": [
+       "21"
+      ]
+     },
+     {
+      "line": 64,
+      "text": "# 1 use the Uber platform.",
+      "missing": [
+       "1"
+      ]
+     },
+     {
+      "line": 80,
+      "text": "8 deactivated from the system or not. Whether they --",
+      "missing": [
+       "8"
+      ]
+     },
+     {
+      "line": 82,
+      "text": "9 whether the partner -- if we decide not to",
+      "missing": [
+       "9"
+      ]
+     },
+     {
+      "line": 101,
+      "text": "18 should no longer be able to use the Uber system but",
+      "missing": [
+       "18"
+      ]
+     },
+     {
+      "line": 105,
+      "text": "20 using the Uber platform, Uber could tell the partner",
+      "missing": [
+       "20"
+      ]
+     },
+     {
+      "line": 121,
+      "text": "7 Q. Well, if there's a driver who's been accused of having engaged in some serious safety-related 9 issue or defrauding of a passenger, would Uber rely",
+      "missing": [
+       "7",
+       "9"
+      ]
+     },
+     {
+      "line": 131,
+      "text": "MR. HENDRICKS: Again, the question is an 14 incomplete hypothetical, it lacks foundation, it's",
+      "missing": [
+       "14"
+      ]
+     },
+     {
+      "line": 149,
+      "text": "situational, depends on the city, but we would go 20 and speak with the partner related to the service",
+      "missing": [
+       "20"
+      ]
+     },
+     {
+      "line": 170,
+      "text": "5 incomplete hypothetical, overly broad, but you may 6 answer.",
+      "missing": [
+       "5",
+       "6"
+      ]
+     },
+     {
+      "line": 187,
+      "text": "MR. HENDRICKS: Again, that's an incomplete 16 hypothetical, it also lacks foundation as framed, it",
+      "missing": [
+       "16"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [
+    "transcript_table",
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 112,
+    "agreed_spans": 101,
+    "agreed_words": 0.842,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas Sasm3r, e SV-03826-EMC Document313-5 Filed07/23/15 Page9 of 15",
+      "missing": [
+       "Sasm3r,",
+       "e",
+       "SV-03826-EMC"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "July 9, 2014",
+      "missing": [
+       "July",
+       "9,",
+       "2014"
+      ]
+     },
+     {
+      "line": 22,
+      "text": "7 general manager, could, in their discretion, decide to then reactivate a driver if the driver attempts 9 to convince Uber that he or she shouldn't have been",
+      "missing": [
+       "7",
+       "9"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "11 MR. HENDRICKS: Again --",
+      "missing": [
+       "11"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "17 may answer.",
+      "missing": [
+       "17"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "THE WITNESS: It is within the scope of the 19 operations manager or GM's job description to be",
+      "missing": [
+       "19"
+      ]
+     },
+     {
+      "line": 82,
+      "text": "| | 17 deactivated, it typically would fall within the |",
+      "missing": [
+       "17"
+      ]
+     },
+     {
+      "line": 83,
+      "text": "| | 18 discretion of the operations manager. |",
+      "missing": [
+       "18"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "| | 22 your new question, we are right at like a few |",
+      "missing": [
+       "22",
+       "few"
+      ]
+     },
+     {
+      "line": 112,
+      "text": "It's an incomplete hypothetical.",
+      "missing": []
+     },
+     {
+      "line": 195,
+      "text": "MR. HENDRICKS: As framed, the question is 15 outside the specific scope, but you may answer in",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 111,
+    "agreed_spans": 99,
+    "agreed_words": 0.83,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7se302,-Cx:03826-EMC Document313-5 Filed07/23/15 Page10 of 15",
+      "missing": [
+       "S7se302,-Cx:03826-EMC"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "July 9, 2014",
+      "missing": [
+       "July",
+       "9,",
+       "2014"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "15 ambiguous as to the term \"negotiate.\" You may 16",
+      "missing": [
+       "16"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "aus wel.",
+      "missing": [
+       "aus",
+       "wel."
+      ]
+     },
+     {
+      "line": 51,
+      "text": "with potential partners, but before any partner uses 20 the platform, they're fully aware of what these fees",
+      "missing": [
+       "20",
+       "they're"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "MS. LISS-RIORDAN: I just want to point out 3 for the record that Topic F is how drivers using",
+      "missing": [
+       "3"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "So--MR. HENDRICKS: We'll have to MS. LISS-RIORDAN: I don't want to get into",
+      "missing": []
+     },
+     {
+      "line": 93,
+      "text": "17 it, so she can proceed as she thinks is best. And",
+      "missing": [
+       "17",
+       "best."
+      ]
+     },
+     {
+      "line": 156,
+      "text": "16 it's possible that prices may go up and of course --",
+      "missing": [
+       "16",
+       "course"
+      ]
+     },
+     {
+      "line": 158,
+      "text": "and down based on demand.",
+      "missing": []
+     },
+     {
+      "line": 189,
+      "text": "THE WITNESS: Uber sets the prices that are 4 offered to riders and offered to drivers as well.",
+      "missing": [
+       "4"
+      ]
+     },
+     {
+      "line": 212,
+      "text": "14 Overly broad, may lack foundation, but you may 15 answer.",
+      "missing": [
+       "14"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [
+    "transcript_table",
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 116,
+    "agreed_spans": 104,
+    "agreed_words": 0.843,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7se302,-Cx:03826-EMC Document313-5 Filed07/23/15 Page11 of 15",
+      "missing": [
+       "S7se302,-Cx:03826-EMC"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "July 9, 2014",
+      "missing": [
+       "July",
+       "9,",
+       "2014"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "MR. HENDRICKS: Vague and ambiguous. You",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "That's what we 18 built.",
+      "missing": [
+       "18"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "19 a rider to a driver, and there's just no need for",
+      "missing": [
+       "19"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "22 Q. And not only is there no need for cash, 23 drivers are instructed they are not to accept cash",
+      "missing": [
+       "22",
+       "23"
+      ]
+     },
+     {
+      "line": 81,
+      "text": "10 Q. So Uber tells riders that the tip is",
+      "missing": [
+       "10"
+      ]
+     },
+     {
+      "line": 87,
+      "text": "MR. HENDRICKS: I'm having a hard time --",
+      "missing": []
+     },
+     {
+      "line": 89,
+      "text": "13 and I know counsel has made the point of me asking",
+      "missing": [
+       "13"
+      ]
+     },
+     {
+      "line": 93,
+      "text": "15 the noise -- the extensive noise we're hearing out on the street level, I sometimes have a hard time 17 hearing the question.",
+      "missing": [
+       "17"
+      ]
+     },
+     {
+      "line": 103,
+      "text": "MS. LISS-RIORDAN: Do you want to try 22 closing the window more?",
+      "missing": [
+       "22"
+      ]
+     },
+     {
+      "line": 193,
+      "text": "| | (Record read: So Uber tells riders that the | |",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 108,
+    "agreed_spans": 88,
+    "agreed_words": 0.693,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7S0302,-CX:03826-EMC Document313-5 Filed07/23/15 Page12 of 15",
+      "missing": [
+       "S7S0302,-CX:03826-EMC"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "enough about the intricacies of Rasier versus Uber and that entire structure to be able to answer",
+      "missing": [
+       "enough"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "fully. I don't --",
+      "missing": []
+     },
+     {
+      "line": 24,
+      "text": "7 respect to how the whole system works between the driver partners who receive their payments directly 9 from Uber and the driver partners who receive their",
+      "missing": [
+       "7"
+      ]
+     },
+     {
+      "line": 46,
+      "text": "particular designation potentially, depending on 17 what the question really is.",
+      "missing": [
+       "17"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "3 insurance.",
+      "missing": [
+       "3"
+      ]
+     },
+     {
+      "line": 78,
+      "text": "5 Q. Drivers using the platform, they're required",
+      "missing": [
+       "5",
+       "platform,",
+       "they're"
+      ]
+     },
+     {
+      "line": 88,
+      "text": "10 Q. And does Uber carry insurance for drivers in",
+      "missing": [
+       "10"
+      ]
+     },
+     {
+      "line": 104,
+      "text": "guess or speculate, but to the extent you have 17 knowledge, you may testify in your individual",
+      "missing": [
+       "17"
+      ]
+     },
+     {
+      "line": 130,
+      "text": "2 provided. Whether it's -- whether they have one driver or a hundred drivers, we pay the limo company 4 for the services provided.",
+      "missing": [
+       "2",
+       "4"
+      ]
+     },
+     {
+      "line": 150,
+      "text": "THE WITNESS: The fare collected from the 17 rider is for the full services provided. There's no",
+      "missing": [
+       "17"
+      ]
+     },
+     {
+      "line": 155,
+      "text": "20 Q. And there's no reimbursement for insurance, 21 is there?",
+      "missing": [
+       "21"
+      ]
+     },
+     {
+      "line": 169,
+      "text": "There's an 2 ambulance going in the background that's a little",
+      "missing": [
+       "2"
+      ]
+     },
+     {
+      "line": 175,
+      "text": "6 topics, but you may answer to the extent you know in",
+      "missing": [
+       "6"
+      ]
+     },
+     {
+      "line": 183,
+      "text": "10 Taxi, for example, they would enter tolls -- I",
+      "missing": [
+       "10"
+      ]
+     },
+     {
+      "line": 185,
+      "text": "11 believe in most cases enter tolls in their meter, or",
+      "missing": [
+       "11",
+       "meter,"
+      ]
+     },
+     {
+      "line": 187,
+      "text": "12 they may be automatically entered into the meter. I",
+      "missing": [
+       "12",
+       "meter."
+      ]
+     },
+     {
+      "line": 191,
+      "text": "14 course, the rider would be charged for the full",
+      "missing": [
+       "14"
+      ]
+     },
+     {
+      "line": 197,
+      "text": "For Uber Black, peer-to-peer, where Uber is 18 doing the calculation for the full fare, those tolls",
+      "missing": [
+       "18"
+      ]
+     },
+     {
+      "line": 207,
+      "text": "So they go -- flow",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 107,
+    "agreed_spans": 96,
+    "agreed_words": 0.854,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7se302,-Cx:03826-EMC Document313-5 Filed07/23/15 Page13 of 15",
+      "missing": [
+       "S7se302,-Cx:03826-EMC"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "That's what we pay to the partner, the full fare less the fees that we've 7 collected.",
+      "missing": [
+       "we've",
+       "7"
+      ]
+     },
+     {
+      "line": 76,
+      "text": "2 or off duty or, as you put it, online or offline, з right?",
+      "missing": [
+       "2",
+       "з"
+      ]
+     },
+     {
+      "line": 86,
+      "text": "8 they want to use the system.",
+      "missing": [
+       "8"
+      ]
+     },
+     {
+      "line": 92,
+      "text": "11 MR. HENDRICKS: As framed, lacks foundation, 12 vague and ambiguous, outside the scope for the",
+      "missing": [
+       "11",
+       "12"
+      ]
+     },
+     {
+      "line": 109,
+      "text": "19 Q. And does Uber maintain data regarding how",
+      "missing": [
+       "19"
+      ]
+     },
+     {
+      "line": 196,
+      "text": "3 offline.",
+      "missing": [
+       "3"
+      ]
+     },
+     {
+      "line": 204,
+      "text": "7 determine when there's more demand, less demand, 8 need for more drivers to be online.",
+      "missing": [
+       "7",
+       "8"
+      ]
+     },
+     {
+      "line": 208,
+      "text": "10 respect to the term \"tracks,\" lacks foundation.",
+      "missing": [
+       "10",
+       "term"
+      ]
+     },
+     {
+      "line": 210,
+      "text": "You may 12 answer in your individual capacity.",
+      "missing": [
+       "12"
+      ]
+     },
+     {
+      "line": 230,
+      "text": "You 20 may answer.",
+      "missing": [
+       "20"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "page_check": [
+    "page_order"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 104,
+    "agreed_spans": 91,
+    "agreed_words": 0.753,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Douglas S7se302,-Cx:03826-EMC Document313-5 Filed07/23/15 Page14 of 15",
+      "missing": [
+       "S7se302,-Cx:03826-EMC"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "THE WITNESS: If a driver's star rating 3 falls below what a city has determined to be",
+      "missing": [
+       "3"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "star rating is for that city and that product, is 21 the driver automatically deactivated, or does the",
+      "missing": [
+       "21"
+      ]
+     },
+     {
+      "line": 106,
+      "text": "17 Q. And if a driver decides that he or she",
+      "missing": [
+       "17"
+      ]
+     },
+     {
+      "line": 110,
+      "text": "19 give some kind of notice to Uber, do they?",
+      "missing": [
+       "19"
+      ]
+     },
+     {
+      "line": 116,
+      "text": "21 for a legal conclusion with respect to what they",
+      "missing": [
+       "21"
+      ]
+     },
+     {
+      "line": 118,
+      "text": "This is outside of the scope of the application -- of the 24 topics.",
+      "missing": [
+       "24"
+      ]
+     },
+     {
+      "line": 126,
+      "text": "fully. It's vague and ambiguous, it's overly broad as to situation, location and time, but you may",
+      "missing": []
+     },
+     {
+      "line": 204,
+      "text": "THE WITNESS: I'm not aware of what's 4 legally in the contract, but again they just don't",
+      "missing": [
+       "4"
+      ]
+     },
+     {
+      "line": 215,
+      "text": "MR. HENDRICKS: Again, this is outside the 11 scope, lacks foundation as framed.",
+      "missing": [
+       "11"
+      ]
+     },
+     {
+      "line": 223,
+      "text": "terms of interpreting the agreement.",
+      "missing": [
+       "terms"
+      ]
+     },
+     {
+      "line": 223,
+      "text": "If you have 14 personal knowledge, you may provide it, but I don't",
+      "missing": [
+       "14"
+      ]
+     },
+     {
+      "line": 243,
+      "text": "agreement. I'm asking does Uber expect that drivers are going to inform it in advance when they've 22 decided they no longer want to use the Uber",
+      "missing": [
+       "22"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "July 9, 2014",
+     "value": "2014-07-09",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 15,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 17,
+    "agreed_spans": 15,
+    "agreed_words": 0.942,
+    "unagreed": [
+     {
+      "line": 23,
+      "text": "IN WITNESS WHEREOF, I have hereunto set my",
+      "missing": [
+       "WHEREOF,"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "# Gpsttafiomauna",
+      "missing": [
+       "Gpsttafiomauna"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "13-cv-03826-EMC",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  }
+ ]
+}

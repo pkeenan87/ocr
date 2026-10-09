@@ -1,0 +1,2537 @@
+{
+ "source": "cmpl-rcr-deline.pdf",
+ "markdown": "cmpl-rcr-deline.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:50:06Z",
+ "verify_fields": "all",
+ "azure_pages": "1-15",
+ "summary": {
+  "fields": 61,
+  "verified": 0,
+  "check": 61,
+  "unchecked": 0,
+  "pages_to_check": 15,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 40,
+    "agreed_spans": 30,
+    "agreed_words": 0.714,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "Richard Rideout, Esq.",
+      "missing": [
+       "Esq."
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Р.О. Bоx 389",
+      "missing": [
+       "Р.О.",
+       "Bоx"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "OKEYENRE",
+      "missing": [
+       "OKEYENRE"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "'00 FEB 3 PA 3 41",
+      "missing": []
+     },
+     {
+      "line": 45,
+      "text": "00CV 024-J",
+      "missing": [
+       "024-J"
+      ]
+     },
+     {
+      "line": 55,
+      "text": "M. DELINE; GARY I. PALMER and ) NANCY J. PALMER;",
+      "missing": [
+       "GARY"
+      ]
+     },
+     {
+      "line": 58,
+      "text": "2nd 1% нRACнAм, I LeLNG,?",
+      "missing": [
+       "2nd",
+       "нRACнAм,",
+       "LeLNG,?"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "of the Board of County Conni 3s1oner3, Garbon couaty, I Wyoming,",
+      "missing": [
+       "Conni",
+       "3s1oner3,",
+       "Garbon",
+       "couaty,"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "NOTICE OF REMOVAI",
+      "missing": [
+       "REMOVAI"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "Cummans:(ssued",
+      "missing": [
+       "Cummans:(ssued"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cv-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "1%",
+     "line": 58,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 23,
+    "agreed_spans": 20,
+    "agreed_words": 0.869,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "Rideout, PC, Cheyenne, Wyoming, and pursuant to 28 U.s.C.",
+      "missing": []
+     },
+     {
+      "line": 9,
+      "text": "$1446, Rule 81 of the Federal Rules of Civil Procedure",
+      "missing": [
+       "Procedure"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "of Wyoming from State of Wyoming District Court, Second",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cv-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1446",
+     "value": 1446.0,
+     "line": 9,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "CV-00-0012",
+     "line": 29,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 31,
+    "agreed_spans": 30,
+    "agreed_words": 0.982,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "Civil Action No. CV-00-0012.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cV-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "CV-00-0012",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "January 13, 2000",
+     "value": "2000-01-13",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1446(b)",
+     "line": 11,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$24",
+     "value": 24.0,
+     "line": 33,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 38,
+    "agreed_spans": 32,
+    "agreed_words": 0.839,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 2:00-cV-00024-ABJ Document 1 Filed 02/03/00 Page 4 of 25",
+      "missing": [
+       "1",
+       "Filed"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "Complaint, paragraph 12 (v)) (Material omitted and bracketed",
+      "missing": [
+       "12"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "United States Constitutions.",
+      "missing": [
+       "United"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "hearing and the conduct of the Board rather than to.",
+      "missing": []
+     },
+     {
+      "line": 55,
+      "text": "o1",
+      "missing": [
+       "o1"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "constitutional rights.",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cV-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1983",
+     "value": 1983.0,
+     "line": 9,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1983",
+     "line": 73,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§1331",
+     "line": 73,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 24,
+    "agreed_words": 0.937,
+    "unagreed": [
+     {
+      "line": 9,
+      "text": "28 U.S.C. § 1441(b).",
+      "missing": []
+     },
+     {
+      "line": 40,
+      "text": "'the civil action now pending in the State of Wyoming",
+      "missing": []
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cV-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1441(b)",
+     "line": 9,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§ 1367",
+     "line": 15,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 28,
+    "agreed_spans": 19,
+    "agreed_words": 0.472,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "Case 2:00-cv-00024-ABJ Document 1 Filed 02/03/00 Page 6 of 25",
+      "missing": [
+       "1",
+       "Filed"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "# Kihanl Vilemue",
+      "missing": [
+       "Kihanl",
+       "Vilemue"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "211 West 19th Street, Suite 100",
+      "missing": [
+       "19th"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "P.O. Box 389 leyenne, wyomir",
+      "missing": [
+       "leyenne,",
+       "wyomir"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "07) 632-190",
+      "missing": [
+       "07)",
+       "632-190"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "I, RICHARD RIDEOUT, do hereby certify that a true ano correct copy of the foregoing NOTICE OF REMOVAL was servec py depds iting t3edsame in te United states m idd eosta e",
+      "missing": [
+       "ano",
+       "servec",
+       "py",
+       "depds",
+       "iting",
+       "t3edsame",
+       "te",
+       "United",
+       "states",
+       "m",
+       "idd",
+       "eosta",
+       "e"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "follows:",
+      "missing": [
+       "follows:"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "Brown, Nagel, Waters & Hiser, LLC",
+      "missing": [
+       "LLC"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "All Pilout",
+      "missing": [
+       "All"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "BOARD OF COUNTY COMMISSIONERS OF",
+     "CARBON COUNTY, WYOMING, ARTLIN",
+     "prdapd, thns 3el ane of febuited st 2eg addpostage"
+    ],
+    "missing_words": 18
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cv-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 47,
+    "agreed_spans": 26,
+    "agreed_words": 0.466,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 2:00-cv-00024-ABJ Document 1",
+      "missing": [
+       "2:00-cv-00024-ABJ",
+       "Document"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "PAGE ,82",
+      "missing": [
+       ",82"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "WKWTLAW",
+      "missing": [
+       "WKWTLAW"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "FAX NO. 1307745738[",
+      "missing": [
+       "1307745738["
+      ]
+     },
+     {
+      "line": 25,
+      "text": "MARTHA K. GFRAY,",
+      "missing": [
+       "GFRAY,"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "SUTE OF WICMINO COUNTYORCUECLED",
+      "missing": [
+       "WICMINO",
+       "COUNTYORCUECLED"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "vS.",
+      "missing": [
+       "vS."
+      ]
+     },
+     {
+      "line": 35,
+      "text": "INDYL. SCHMIDT CLEK OF DISTRICT COUTT",
+      "missing": [
+       "INDYL.",
+       "CLEK"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "Civil Action No. CV. OU-0012",
+      "missing": [
+       "OU-0012"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "SERVED 1 18/00",
+      "missing": [
+       "18/00"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "LINDA SMiTH",
+      "missing": [
+       "SMiTH"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "PLEMING AND LEE MEACHAM in their oflicial capacities as members of the Board of County",
+      "missing": [
+       "PLEMING"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "Auncuan",
+      "missing": [
+       "Auncuan"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Commissionere, Carbon County, Wyoming.",
+      "missing": [
+       "Commissionere,"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "7.ckle\"",
+      "missing": [
+       "7.ckle\""
+      ]
+     },
+     {
+      "line": 69,
+      "text": "Gray and Martha K. Gray, by and through their attorneys Brown, Nagel, Waters & Hiser, LLC and for their Complaint against tho Defendante đo hereby state and allege as followa:",
+      "missing": [
+       "attorneys",
+       "Hiser,",
+       "Defendante",
+       "đo",
+       "hereby",
+       "followa:"
+      ]
+     },
+     {
+      "line": 73,
+      "text": "1. Plaintiff R.C.R., Inc. is a Wyoming Corporation owning real",
+      "missing": [
+       "Plaintiff"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "property located within Carbon County, State of Wyomning, Plaintifts Joa R.",
+      "missing": []
+     },
+     {
+      "line": 77,
+      "text": "Gray and Martha K. Gray, husband and wife, are the sole shareholders of Plaintiff, R.C.R, Inc., and are the holders of an interest in real property located within Carbon County, State of Wyoming as set forth herein.",
+      "missing": [
+       "shareholders",
+       "Plaintiff,"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "2. Defendants Robert E. Deline, Annabelle M. Deline, Gary L.",
+      "missing": [
+       "2."
+      ]
+     },
+     {
+      "line": 81,
+      "text": "Palmer, Nancy J. Palmer and Kirk Company are the ownery of real property located in Carbon County, State of Wyoming.",
+      "missing": []
+     }
+    ],
+    "missing_lines": [
+     "CLMK OF TISTEACT COUTT"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cv-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/0Q",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "confusable_characters"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/17/1995",
+     "value": "1995-01-17",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "2/8/00",
+     "value": "2000-02-08",
+     "line": 55,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "2/3/00",
+     "value": "2000-02-03",
+     "line": 59,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§24-9-101",
+     "line": 85,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 32,
+    "agreed_spans": 14,
+    "agreed_words": 0.302,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Cath 20CV-000242B1, Document 1",
+      "missing": [
+       "Cath",
+       "20CV-000242B1,"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "Flled 02/03/00",
+      "missing": [
+       "Flled"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "Page 8 ot25",
+      "missing": [
+       "ot25"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "WKWTLAN",
+      "missing": [
+       "WKWTLAN"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "FAX NO. 13077457385",
+      "missing": [
+       "13077457385"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "seq. (hereinafter referred to as the \"Wyoming Private Road Statutes\") with the authority to establish and locate private roads and hear and assess",
+      "missing": [
+       "seq."
+      ]
+     },
+     {
+      "line": 23,
+      "text": "4. Jurisdiction and venue are proper in this Court.",
+      "missing": [
+       "Jurisdiction"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "Annabelle M. Deline, Gary L. Palmer, Nancy J. Palmer and Kirk Coropuny Gled a Petition for a Private Road (hereinafter \"Private Road Action\") naming R.C.R., Inc., and Alex el.",
+      "missing": [
+       "el."
+      ]
+     },
+     {
+      "line": 26,
+      "text": "Hlors: as Contestees/Respondents.",
+      "missing": [
+       "Hlors:"
+      ]
+     },
+     {
+      "line": 26,
+      "text": "Said Private Road Action was filed with the Board of Commissioners of Carbon County.",
+      "missing": []
+     },
+     {
+      "line": 26,
+      "text": "Said action sought to establish a private road across land owned by the Contestees/Respondents located in Carbon County, State of Wyoming.",
+      "missing": [
+       "across"
+      ]
+     },
+     {
+      "line": 30,
+      "text": "As a result of that interest and in an attempt to protect said interest, on or about September 29, 1998, said Plaintiffs filed a Motion to Intervene as Respondente in the Privale Road Action.",
+      "missing": []
+     },
+     {
+      "line": 32,
+      "text": "Gray were not allowed to intervene on the basis that the Wyoming Private Road Statutes do not allow holders of equitable interest to partioipate in Private Road Actions.",
+      "missing": [
+       "partioipate"
+      ]
+     },
+     {
+      "line": 34,
+      "text": "7. A bank located in Carbon County, The Bark of Commerce, is the holder of a mortgage on a porlion of the real properly subject to the Private Road Action.",
+      "missing": [
+       "porlion"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "8. Defendant Board of Commissioners, acting through its Defendant members, determined that a private road would be located over land owned by Plaintiff R.C.R.. Inc., as more fully set forth in its Order Adopting Hearing Offcer's Recommended Findings of Fact, Conclusions of Law and Order and Order Establishing & Private Road entered December 7, 1999, a copy of which is attached hereto.",
+      "missing": [
+       "Offcer's",
+       "Law"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "10. Plaintifis R.C.R., Inc., Jon R. Gray and Martha K. Gray have been injured in fact by the actions of the Board of County Commissioners in allowing a private road to be established over real property which said Plaintiffs clatm an Interest in favor of the Contestants/Potitioners in the Private Road Action.",
+      "missing": [
+       "Contestants/Potitioners"
+      ]
+     },
+     {
+      "line": 40,
+      "text": "11. Plaintifls R.C.R., Inc., Jon R. Gray and Martha K. Gray are persons harroed or affiected by the application of the Wyoming frivate Hoad",
+      "missing": [
+       "Plaintifls",
+       "harroed",
+       "affiected",
+       "frivate"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "Fega &ef 10",
+      "missing": [
+       "Fega",
+       "&ef"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 16, 1997",
+     "value": "1997-09-16",
+     "line": 24,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "September 29, 1998",
+     "value": "1998-09-29",
+     "line": 30,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "December 7, 1999",
+     "value": "1999-12-07",
+     "line": 37,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 7,
+    "agreed_words": 0.152,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# case 2:00-CV-00024-ABJ",
+      "missing": [
+       "case",
+       "2:00-CV-00024-ABJ"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "JAN-14-00 FRI 13:52",
+      "missing": [
+       "JAN-14-00"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "\"1C",
+      "missing": [
+       "\"1C"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "WKWTLANd",
+      "missing": [
+       "WKWTLANd"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "P. 05/19",
+      "missing": [
+       "P.",
+       "05/19"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "Statutes and who are entitled to a determinalion of the constitutionality and validity uf W.S. §24-9-101 et seq. with a declaration of their rights based thereon.",
+      "missing": [
+       "entitled",
+       "determinalion"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "12. Wyoming Private Road Statutes §24 9-101 et seg.",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "constitutes un unlawful exercise of power under both the Constitation of the State of Wyoming and the Constitution of tha United States.",
+      "missing": [
+       "constitutes",
+       "un",
+       "unlawful"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "a. They deprive the Plaintiffs of their right to procedural due process as required under the 5th and 14th Amendments to the Constitution of the United States and Article 1, Sections 6, 32 and 33 of the Constitution of the State of Wyoming.",
+      "missing": [
+       "33"
+      ]
+     },
+     {
+      "line": 25,
+      "text": "They deprive the Plaintiffa of their right to substantive duc procese as requirod under the 5th and 14th Amendmente to the Constitution of the United Statec and Artiole 1, Sectione 6, 32 and 33 of the Constitution of the State of Wyoming.",
+      "missing": [
+       "Plaintiffa",
+       "Statec",
+       "Artiole",
+       "33"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "They deprive the Plaintiffs their right to equal protection under the law inasmuch ae the otatute gives the private road petitioner the exclusive right to the total exclusion of the Board of County Commissioners to detormine tho location of the privato road to the detriment of Plaintiffs and without considoration of proporty owned by the private road potitionore or their altor ogo.",
+      "missing": [
+       "ae",
+       "otatute",
+       "Commissioners",
+       "detormine",
+       "potitionore"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "In addition, the statuto unconstitutionally precludes the viewerz from considering a private road across lands not designatod by the private road petitioner.",
+      "missing": [
+       "addition,",
+       "viewerz",
+       "designatod"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "They deprive the Plaintiffs of their right to be heard on the issue of iocation.",
+      "missing": [
+       "iocation."
+      ]
+     },
+     {
+      "line": 33,
+      "text": "They deprive the Plaintiffs of their right to be heard on the issue of damages.",
+      "missing": []
+     },
+     {
+      "line": 35,
+      "text": "e.",
+      "missing": [
+       "e."
+      ]
+     },
+     {
+      "line": 37,
+      "text": "To the extent damages may be awarded, the damages allowed under Wyoming law constitute a taking of prívate property without, iust compensation in that current Wyoming law fails to provide full and complete compensation to the owner of the servient estate.",
+      "missing": [
+       "prívate"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "They are void and unconstitutional as they conflict with the Warranty Deed Statute, W.S. §34-2-108, wherein the grantor is requtred to warrant quiet and peaceful possession of the premises.",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "mpiat",
+      "missing": [
+       "mpiat"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "oge 3 of 1",
+      "missing": [
+       "oge"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-CV-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§24-9-101",
+     "line": 17,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§24",
+     "line": 21,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§34-2-108",
+     "line": 39,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 34,
+    "agreed_spans": 11,
+    "agreed_words": 0.158,
+    "unagreed": [
+     {
+      "line": 1,
+      "text": "# Case 2:00-CV-00024-ABJ Document 1:Filed 02/03/00 Page 10 of 25",
+      "missing": [
+       "25"
+      ]
+     },
+     {
+      "line": 3,
+      "text": "13073248117",
+      "missing": [
+       "13073248117"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "PAGE 85",
+      "missing": [
+       "85"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "01/17/1995 23:31",
+      "missing": [
+       "01/17/1995",
+       "23:31"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "WKWTLAN",
+      "missing": [
+       "WKWTLAN"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "P. 06/19",
+      "missing": [
+       "P.",
+       "06/19"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "h. They deprive the Plaintiffs of their right to have alternate routes across property not designated by the Petitioners included for consideration by the viewers.",
+      "missing": []
+     },
+     {
+      "line": 29,
+      "text": "Petitioner of the private road have not included in the petition.",
+      "missing": []
+     },
+     {
+      "line": 31,
+      "text": "They deprive the Plaintiffs of the right to join other landowners in the Private Road Action and have the viewers consider locating a private road across lands nwned by anyone other than property owners designated by the private road petstioner.",
+      "missing": [
+       "nwned",
+       "petstioner."
+      ]
+     },
+     {
+      "line": 35,
+      "text": "They deprive persons or entities who hold legally recognized interests in the property other than \"owners\" from claiming damages to their interests in the roal property.",
+      "missing": [
+       "roal"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "Said interests include those holders of mortgage or other security interests, equitable ownerehip interests and persons holding options to purchase the real property in question.",
+      "missing": [
+       "holders"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "In the case of the Private Road Action, the Bank of Commerce, referred to in paragraph 1, would be an example nf'such a person/entity.",
+      "missing": [
+       "example",
+       "nf'such"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "They constituto a taking of property for a private purpose and not a public purpose.",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "m. They constitute a taking of property by eniarging a pre-csisting easement held by Jon R. Gray and Martha K. Gray a6 recorded in book 863 at pagc 893 of the Carbon County records.",
+      "missing": [
+       "a6",
+       "pagc"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "n.",
+      "missing": [
+       "n."
+      ]
+     },
+     {
+      "line": 47,
+      "text": "0. The statutes are vague and ambiguous and/or constitute an unconstitutional taking of private property rights in that the statute allows the private road petitioners to expropriate more property rights than are necessary to serve the purpose uf the privale way.",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "There is also no recognized method for terminating a private road once one is establiehed and the alleged need for the road no longer exists.",
+      "missing": [
+       "method"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "The statutes are unconstitutional in that they authorize private Individuals to take more property rikhte than are reasonable, necessary and/or appropriate.",
+      "missing": [
+       "rikhte"
+      ]
+     },
+     {
+      "line": 49,
+      "text": "Specifically, it allows the owners of the dominant estate to obtain a private ruad in peruetuity when the only right such owners allegedly need is some legally enforceable access until a public way becomes available.",
+      "missing": [
+       "obtain",
+       "ruad",
+       "peruetuity"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "p.",
+      "missing": [
+       "p."
+      ]
+     },
+     {
+      "line": 53,
+      "text": "limitine the class to freeholders and electors.",
+      "missing": [
+       "limitine"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "Comploust",
+      "missing": [
+       "Comploust"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "Paso f of 10",
+      "missing": [
+       "Paso",
+       "f"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-CV-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/17/1995",
+     "value": "1995-01-17",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 24,
+    "agreed_spans": 5,
+    "agreed_words": 0.045,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "LLC",
+      "missing": [
+       "LLC"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "r. They constitute an impermissible delegalion of power and authority to the applicant.",
+      "missing": [
+       "impermissible",
+       "delegalion"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "s. They authorizo an unlawfo!",
+      "missing": [
+       "authorizo",
+       "unlawfo!"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "Caking of proparty for private purpose in violation of the 5th and 14th Amsendiments to the United States Constitution.",
+      "missing": [
+       "Amsendiments",
+       "States",
+       "Constitution."
+      ]
+     },
+     {
+      "line": 10,
+      "text": "In addition, said statutes constitute an unconstitutional delegation of' the powers of eminent domain, wherein the power 1s removed from the State and placed into the hands of privata citizens.",
+      "missing": [
+       "unconstitutional",
+       "privata"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "A Private Road Action is not a contested case hearing.",
+      "missing": []
+     },
+     {
+      "line": 10,
+      "text": "It is a legislative or argumentative type proceeding before the Board of County Commissionere solely for the purpose of helping them understand whether the legal criteria for proceeding exists, or does not exist.",
+      "missing": [
+       "solely"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "If they decide incorrectiy on the facts before them, that decision is not a decision of record and is subject to consideration de novo by the District Court on challenge to the proceedings.",
+      "missing": [
+       "subject"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "The Wsoming Administrative Procedure Act does not apply to this proceeding.",
+      "missing": [
+       "Wsoming",
+       "Act"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "Consistent with the foregoing arguments, a Hearing Officer should not.",
+      "missing": []
+     },
+     {
+      "line": 10,
+      "text": "have been involved in these proceedings at all.",
+      "missing": []
+     },
+     {
+      "line": 10,
+      "text": "By making rulings on the admisibillity of evidence and denying the right to unconstitutionally exceeded bis authority in there proceedings.",
+      "missing": [
+       "there"
+      ]
+     },
+     {
+      "line": 10,
+      "text": "The Hearing Officer should have provided no more than procedural arsistance to the Board of County Commissioners and in without authority to exclude evidence or exclude matters to be considered by the Board.",
+      "missing": [
+       "arsistance"
+      ]
+     },
+     {
+      "line": 12,
+      "text": "The action of the Board of County Commissioners, and of the individuai County Commissioners and the Hearing Officer, in entering findings and making an order in accordance with the Recommended Finding of Frct and Order, tnconstitutionally deprived Respondent, And Jnn K. Giray and Martha K. Gray of their Federal Civll Rights in contravention of 42 USCS $ 1983.",
+      "missing": [
+       "individuai",
+       "Frct",
+       "tnconstitutionally",
+       "Jnn",
+       "Giray",
+       "Federal"
+      ]
+     },
+     {
+      "line": 14,
+      "text": "v.",
+      "missing": [
+       "v."
+      ]
+     },
+     {
+      "line": 16,
+      "text": "18. The foregoing have wrongfully and unconstitutionally deprived the Plaintiffs of the use of their land and/or their interests in such land",
+      "missing": [
+       "18."
+      ]
+     },
+     {
+      "line": 20,
+      "text": "14. On April 7, 1998, the Board of Commissioners adopted \"Rules of Practice Governing Hearings and Contested Cases Before the Carbon County Board of Commissioners.\"",
+      "missing": [
+       "April"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "15. Said rules were illegally andor improperly adopted in a manner contrary to applicable law by the Board of Commissioners and are therefore Invalld and unenforceable.",
+      "missing": []
+     },
+     {
+      "line": 21,
+      "text": "Specificaliy. said Rules of Practice were adopted",
+      "missing": [
+       "Specificaliy."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "005/20-9-0222111,Document1 te 200 Page 11 of 25E 06"
+    ],
+    "missing_words": 8
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "amount",
+     "text": "$ 1983",
+     "value": 1983.0,
+     "line": 12,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 7, 1998",
+     "value": "1998-04-07",
+     "line": 20,
+     "status": "check",
+     "why": [
+      "suspect_page",
+      "not_in_second_reading"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "page_check": [
+    "garbled",
+    "misreads"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 33,
+    "agreed_spans": 11,
+    "agreed_words": 0.159,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "124-248117 Document 1",
+      "missing": [
+       "124-248117"
+      ]
+     },
+     {
+      "line": 7,
+      "text": "WKWTLAH (",
+      "missing": [
+       "WKWTLAH"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "81/17/1995",
+      "missing": [
+       "81/17/1995"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "P. 0B/19",
+      "missing": [
+       "0B/19"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "on an emergency basis without advance nulice to the pribiic when in fact no buna fide emergency existed.",
+      "missing": [
+       "pribiic"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "however, the Board of Commissioners failed and/or refused to rescind said rules.",
+      "missing": [
+       "refused"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "Sald rules deprive Plaintifly substantive and procedural due process inasmuch as chey impuse a scheduling urder which contains unreasonable deadlines and does nut allow Plaintifis an adequate opportunity to prepare its case, obtain nécessary evidence and prepare a defense.",
+      "missing": [
+       "Sald",
+       "urder",
+       "does",
+       "Plaintifis",
+       "nécessary",
+       "defense."
+      ]
+     },
+     {
+      "line": 29,
+      "text": "17. The Board of Commissioners have imposed the iltegally and/or",
+      "missing": [
+       "iltegally"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "improperly adopted Rules of Procedure against the Piaintiff in the Private Road Action.",
+      "missing": [
+       "Piaintiff"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "18. Plaintiffs hava exhausted its administrative remedies and is",
+      "missing": [
+       "hava",
+       "administrative"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "entitled to an injunction and/or a Court decree determining and declaring that the adoption of the Rules of Practice was unlawful and that said Rules of Practice may not be imposed upon the Plaintuff in the Private Road Action.",
+      "missing": [
+       "Plaintuff"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "FAILURE TO INCLUDE NECESSARY PARTIES",
+      "missing": []
+     },
+     {
+      "line": 41,
+      "text": "property interest in the real property owned by Alex J. Horst who is a party to the Private Road Action.",
+      "missing": [
+       "owned"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "Othors also claim ownership intereste in the",
+      "missing": [
+       "Othors",
+       "ownership"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "property, such as mortgagees, who also have not been included in the action.",
+      "missing": []
+     },
+     {
+      "line": 47,
+      "text": "20. The validity of said equitable or other property inferest was disputed in thet certain proceeding entitled Alex J. Horst u. Jon R. Gray and Martha K. Gray, Civil Action Number CV-97-0203 filed with the District Court, Second Judicial District, Carbon County, State of Wyoming.",
+      "missing": [
+       "inferest",
+       "u."
+      ]
+     },
+     {
+      "line": 48,
+      "text": "21. As a result of their equitable or other property interest in the real property.",
+      "missing": []
+     },
+     {
+      "line": 48,
+      "text": "Jon R. Gray and Martha K. Gray are necessury and proper parties in the Private Road Action.",
+      "missing": []
+     },
+     {
+      "line": 49,
+      "text": "22. Proceeding with the Private RoadAction.will cause permanent and irreparable injury to the equitable property interests held by Jon R. Gray and Martha K. Gray without due process of law.",
+      "missing": [
+       "RoadAction.will"
+      ]
+     },
+     {
+      "line": 50,
+      "text": "23. Plaintiffs are entitled to an injunction prohibiting the Board of Commissioners from proceeding with the Private Road Action unlers and until the real parties in interest have been identified and the proper and necessary parties are included.",
+      "missing": [
+       "unlers"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "24. During the course of the proceedings, the Defendant Board of County Commiesioners assigned a Hearing Officer who made rulings on the",
+      "missing": [
+       "24."
+      ]
+     },
+     {
+      "line": 53,
+      "text": "Раgо 6о55:",
+      "missing": [
+       "Раgо",
+       "6о55:"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cv-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "81/17/1995",
+     "line": 11,
+     "status": "check",
+     "why": [
+      "invalid_date",
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "CV-97-0203",
+     "line": 47,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 35,
+    "agreed_spans": 13,
+    "agreed_words": 0.256,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "13873248117",
+      "missing": [
+       "13873248117"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "81/17/1995",
+      "missing": [
+       "81/17/1995"
+      ]
+     },
+     {
+      "line": 11,
+      "text": "WKWTLAU",
+      "missing": [
+       "WKWTLAU"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "admissibility uf the evidence.",
+      "missing": []
+     },
+     {
+      "line": 19,
+      "text": "Seid ruiings were made prior lo and during formul hearings before the Board of County Commissioners.",
+      "missing": [
+       "lo"
+      ]
+     },
+     {
+      "line": 21,
+      "text": "25. In making his decisions, the Hearing Officer made rulings deciding what evidence would ard would not be heard by the Boaid of andsuet miate ouese dri she pene iot of the e Maidor",
+      "missing": [
+       "ard",
+       "Boaid",
+       "andsuet",
+       "miate",
+       "ouese",
+       "dri",
+       "she",
+       "pene",
+       "iot",
+       "e",
+       "Maidor"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "# andsuet miate ouese dri she pene iot of the e Maidor",
+      "missing": [
+       "andsuet",
+       "miate",
+       "ouese",
+       "dri",
+       "she",
+       "pene",
+       "iot",
+       "e",
+       "Maidor"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "26. That at the tima of the formal hearings before the Euard of Commissioners, the Plaintiff R.C.R., Inc., was precluded from intruducing evidence which it felt was necessary to be heard by the Buard of Commissioners.",
+      "missing": [
+       "26.",
+       "Euard",
+       "necessary"
+      ]
+     },
+     {
+      "line": 29,
+      "text": "28. By allowing the Hearing Oflicer to raake rulings on the admissibility of evidence, the Board of Comxomissioners abdicated its responeibility to hear tho ovidence and determine the admissibility thereni, thus depriving Plaintiff R.C.R., Inc. an opportunity to be fully heard. II.LEGAL SUBDIVISION",
+      "missing": [
+       "raake",
+       "Comxomissioners",
+       "tho",
+       "thereni,",
+       "II.LEGAL"
+      ]
+     },
+     {
+      "line": 30,
+      "text": "29. Since 1972, Carbon County by and through its Buard uf Counly",
+      "missing": []
+     },
+     {
+      "line": 34,
+      "text": "30. In 1980, the Defendant Board of County Commissioners approved",
+      "missing": []
+     },
+     {
+      "line": 40,
+      "text": "Regulations were made effective on March 5, 1980, and remain in effect at the present time.",
+      "missing": [
+       "effective"
+      ]
+     },
+     {
+      "line": 42,
+      "text": "The Subdivision Regulations imapose a duty to enforce such",
+      "missing": []
+     },
+     {
+      "line": 44,
+      "text": "regulations upon the Defendant Board of Commissioners aa follows:",
+      "missing": [
+       "follows:"
+      ]
+     },
+     {
+      "line": 48,
+      "text": "No final plat of a subdivision shall be",
+      "missing": []
+     },
+     {
+      "line": 50,
+      "text": "approvod by the Planning Commission and approved by the Board unless it conforms to the provisions of these",
+      "missing": []
+     },
+     {
+      "line": 54,
+      "text": "32. The said Subdivision Regulations set forth certain mirimum",
+      "missing": [
+       "mirimum"
+      ]
+     },
+     {
+      "line": 56,
+      "text": "requirements which must be met in order to obtain a subdiviston permit, Includine, but not limited to, a requirement that there bé adequate access to the subdivision.",
+      "missing": [
+       "subdiviston",
+       "Includine,",
+       "but"
+      ]
+     },
+     {
+      "line": 58,
+      "text": "33. In addition to laws applicable to subdivisions, Wyoming statutes",
+      "missing": [
+       "subdivisions,"
+      ]
+     },
+     {
+      "line": 60,
+      "text": "Wyoming Statute $34-12-102 requires that the original owners uf any tract ur parcel of land whlich drvides",
+      "missing": [
+       "requires",
+       "any",
+       "tract",
+       "whlich"
+      ]
+     },
+     {
+      "line": 62,
+      "text": "Crrayieins",
+      "missing": [
+       "Crrayieins"
+      ]
+     },
+     {
+      "line": 64,
+      "text": "Eage i 6l 10",
+      "missing": [
+       "Eage",
+       "i",
+       "6l",
+       "10"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Commissioners. Such rulings were adverse to the interests of Plaintiff"
+    ],
+    "missing_words": 10
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cv-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "81/17/1995",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "invalid_date",
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "March 5, 1980",
+     "value": "1980-03-05",
+     "line": 40,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$34",
+     "value": 34.0,
+     "line": 60,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 36,
+    "agreed_spans": 12,
+    "agreed_words": 0.14,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "13873248117",
+      "missing": [
+       "13873248117"
+      ]
+     },
+     {
+      "line": 13,
+      "text": "WKWTLAN",
+      "missing": [
+       "WKWTLAN"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "JAN-14-00 FRI 13:55",
+      "missing": [
+       "FRI"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "uLC",
+      "missing": [
+       "uLC"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "FAX NO. 13077457385",
+      "missing": [
+       "13077457385"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "such land into three or tnore parcels to couse a plat to be filed.",
+      "missing": [
+       "tnore"
+      ]
+     },
+     {
+      "line": 23,
+      "text": "Wyoming Statute $34-12-103 requires such a plat to meet the approval of the Board of County Commissioners if the land in question is outside the boundaries of any city or town.",
+      "missing": []
+     },
+     {
+      "line": 25,
+      "text": "34. With the exception of property.",
+      "missing": []
+     },
+     {
+      "line": 25,
+      "text": "located within proper municipal corporation and by virtue of the applicable Wyoming statutes and the Subdivision Regulations, the Board of County Commissioners have a duty w enforce all platting and subdivision statutes and the Subdivision Regulations relating to land located within Curbon County, State of Wyoming.",
+      "missing": [
+       "w",
+       "Curbon"
+      ]
+     },
+     {
+      "line": 27,
+      "text": "3Б. Rainbow Canyon, Inc. is the owner of real property located withln the jurisdiction of the Board of County Commissioner, said property being located generally within a parcel described as follows:",
+      "missing": [
+       "withln"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "Section 9: E1/2551/4 and SW1/4SE1/4",
+      "missing": [
+       "E1/2551/4"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "36. Over the course of soveral jears, Rainbow Canyon, Ine. sold",
+      "missing": [
+       "soveral",
+       "jears,"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "various portiona of the above said rea!",
+      "missing": [
+       "above"
+      ]
+     },
+     {
+      "line": 35,
+      "text": "property to various individuals owning a portion of the sharos of sald Rainbow Canyon, Inc. The sale and transfer of such property was in violation of applicable Wyoming law relating to platting and/or subdivisions.",
+      "missing": [
+       "sald",
+       "transfer"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "37. The Contostanta/Petitioners in the Private Road Action obtained",
+      "missing": [
+       "Contostanta/Petitioners",
+       "obtained"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "title to their land from Rainbow Canycn, Ine.",
+      "missing": [
+       "Canycn,"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "which has failed and/or refused to comply with applicable law including Wyoming statutes relating to platting and subdivisions and the Subdivision Regulations.",
+      "missing": [
+       "failed"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "Rainbow Canyon, Inc. has sold and/or transferred property to individuals involved in the Private Road Action in violation of applicable statutes, mulas and/or regulations.",
+      "missing": [
+       "transferred",
+       "mulas"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "in gond feith and as such the action should be barred.",
+      "missing": [
+       "gond"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "the owners of alleged landlocked parcels sold by Rainbow Canyon, Inc. in violation of the applicable statutes and/or regulations.",
+      "missing": [
+       "landlocked"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "Ihe feiltre of the Board of Commissioners to enforce the applicable statutes and/or Subdivision Rogulations have cauved harm and damagas to Plaintiffs.",
+      "missing": [
+       "Ihe",
+       "feiltre",
+       "Rogulations",
+       "cauved",
+       "harm",
+       "damagas"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "principles of Rainbow Canyon, Inc., a private fishing club, and upon information and belief, said Contestants/Petitioners own three of the four outetanding shares of Rainbow Canyon, Inc., and Rainbow Canyon, Inc. is the alter ego of Contestants/Petitioners.",
+      "missing": [
+       "outetanding"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "Private Road Action have used land owned by Rainbow Canyon, Inc. to access their lots and either own or have tho ability to obtain the legal right to use lands owned by Rainbow Canyon, Inc. to obtain access to their lots.",
+      "missing": [
+       "use"
+      ]
+     },
+     {
+      "line": 53,
+      "text": "Papaoi",
+      "missing": [
+       "Papaoi"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Rogulatione have caured harın and damggas to Plaintiffs."
+    ],
+    "missing_words": 8
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cv-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 5,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/17/1995",
+     "value": "1995-01-17",
+     "line": 11,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$34",
+     "value": 34.0,
+     "line": 23,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 15,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 26,
+    "agreed_spans": 8,
+    "agreed_words": 0.145,
+    "unagreed": [
+     {
+      "line": 3,
+      "text": "124-4811, Document 1 ld 02/03/00 Page 15 of 25",
+      "missing": [
+       "124-4811,",
+       "ld"
+      ]
+     },
+     {
+      "line": 5,
+      "text": "PAGE 10",
+      "missing": [
+       "10"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "JAN-14-00 FRI 13:56",
+      "missing": [
+       "13:56"
+      ]
+     },
+     {
+      "line": 15,
+      "text": "P.11/19",
+      "missing": [
+       "P.11/19"
+      ]
+     },
+     {
+      "line": 17,
+      "text": "41. Rainbow Canyon, Inc. bas benefited from its fallure/refusal to comply with applicable Subdivision Regulations inasmuch as it has nut been required to provide access to the properties it has sold, and now the principles of Rainbow Canyon, Inc. are attempting to have a private road established over the property of R.C.R., Inc. as opposed to havine to provide acceos across its own property.",
+      "missing": [
+       "acceos"
+      ]
+     },
+     {
+      "line": 18,
+      "text": "42. That said Private Road Action would not have been brought if the",
+      "missing": [
+       "42."
+      ]
+     },
+     {
+      "line": 24,
+      "text": "have an outlet or connection with a publie road if Rainbow Canyon, Ine.",
+      "missing": [
+       "publie"
+      ]
+     },
+     {
+      "line": 24,
+      "text": "had complied with applicable Subdivicion Regulations.",
+      "missing": []
+     },
+     {
+      "line": 26,
+      "text": "44. The Contestants/Petitioners could bave filed for an action for a prívate ruad against Rainbow Canyon, Inc., but failed to do eo in order to preserve the value of the land owned by their alter ogo.",
+      "missing": [
+       "bave",
+       "prívate",
+       "land",
+       "ogo."
+      ]
+     },
+     {
+      "line": 29,
+      "text": "Action, the viewers, If appointed, will be precluded from considering any private roadway which crosses the property owned by Rainbow Canyon, Iac.",
+      "missing": [
+       "Iac."
+      ]
+     },
+     {
+      "line": 31,
+      "text": "46. That the Wyoming Private Road Statutes found at W.S. §24-9-101 et seq. is unconstitutional inasmuch as it authorizes an unlawful taking of property for private purpoee in violation of the 5th and 14th Amendments to the United States Consticution.",
+      "missing": [
+       "purpoee",
+       "Amendments"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "In addition, said statutes constitute an unconstitutional delegation of the powers of eminent domain wherein the puwer is removed from the State and placed into the hands of privato citizons.",
+      "missing": [
+       "puwer",
+       "privato"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "47. Plaintiff has requested that the Buard of Cownissioners take action to enforce the applicable platting and/or zoning statutes as well as the Subdivision Regulations.",
+      "missing": [
+       "Cownissioners"
+      ]
+     },
+     {
+      "line": 32,
+      "text": "The Board of Commissioners has failed and/or refused to enforce said statules and require Rainbow Canyon, Inc. to come into compltance with the statutory and regulatory requirements.",
+      "missing": [
+       "compltance"
+      ]
+     },
+     {
+      "line": 33,
+      "text": "48. Plaintiff is without an adequate remedy at law and must therefore file this Complaint in equity demanding that the Board uf Commissioners fully enforce the applicable statutes and Subdivision Regulationa and require Rainbow Canyon, Inc. lo immediately comply with the applicable regulations and slalutes.",
+      "missing": [
+       "equity",
+       "lo",
+       "slalutes."
+      ]
+     },
+     {
+      "line": 36,
+      "text": "WIIDREFORE, Pinintiffs praya for relief os follows:",
+      "missing": [
+       "WIIDREFORE,",
+       "Pinintiffs",
+       "follows:"
+      ]
+     },
+     {
+      "line": 38,
+      "text": "That the Wyoming Private Ruad Statutes be declared",
+      "missing": []
+     },
+     {
+      "line": 40,
+      "text": "unconstitutional und unonforcvable aguinee tho l'laintiffo is thio artion.",
+      "missing": [
+       "unonforcvable",
+       "aguinee",
+       "tho",
+       "l'laintiffo",
+       "thio",
+       "artion."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "unconstitutional und uuenforvoable aguines the Pleintiffa in thia action."
+    ],
+    "missing_words": 9
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "2:00-cv-00024-ABJ",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "02/03/00",
+     "value": "2000-02-03",
+     "line": 3,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "01/17/1995",
+     "value": "1995-01-17",
+     "line": 7,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "§24-9-101",
+     "line": 31,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1172 @@
+{
+ "source": "ord-ironworkers-bogart.pdf",
+ "markdown": "ord-ironworkers-bogart.md",
+ "engine": "apple (Vision RecognizeDocuments)",
+ "generated": "2026-10-09T16:52:20Z",
+ "verify_fields": "all",
+ "azure_pages": "1-10",
+ "summary": {
+  "fields": 41,
+  "verified": 0,
+  "check": 41,
+  "unchecked": 0,
+  "pages_to_check": 10,
+  "embedded_text_pages": 0,
+  "agreed_spans": 0,
+  "unagreed_spans": 0
+ },
+ "pages": [
+  {
+   "page": 1,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 23,
+    "agreed_spans": 21,
+    "agreed_words": 0.961,
+    "unagreed": [
+     {
+      "line": 23,
+      "text": "MONOLITHIC POWER SYSTEMS, INC., a",
+      "missing": []
+     },
+     {
+      "line": 39,
+      "text": "I. INTRODUCTION",
+      "missing": [
+       "I."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 29,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 41,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 15,
+    "agreed_words": 0.482,
+    "unagreed": [
+     {
+      "line": 45,
+      "text": "Fund is a shareholder of MPS, a fabless semiconductor company that designs and markets advanced analog and mixed-signal semiconductors.1 The Fund brought this suit on behalf of MPS against all seven members currently on the MPS board,2 as well as one former director3 and current or former senior officers of MPS.4 In 2010, MPS shareholders suffered a negative 31.17% annual shareholder return, while shareholders of its peer group of companies received, on average, a positive annual return of 24.99%. In 2010, despite these alleged poor shareholder returns, the MPS Board, with the assistance of First Niagara, dramatically increased compensation for MPS’s",
+      "missing": [
+       "semiconductors.1",
+       "board,2",
+       "director3",
+       "MPS.4"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "See Docket No. 1 at 1910-11.",
+      "missing": [
+       "1910-11."
+      ]
+     },
+     {
+      "line": 65,
+      "text": "2 See id. at 91 12-16, 18-19 (naming Karen A. Smith Bogart, Herbert Chang, Victor K. Lee, Douglas McBurnie, James C. Moyer (“Moyer”), Jeff Zhou, and Michael R. Hsing (“Hsing”) as defendants because they breached their fiduciary duty to MPS).",
+      "missing": [
+       "2",
+       "91",
+       "Douglas"
+      ]
+     },
+     {
+      "line": 66,
+      "text": "3 See id. at 9|17 (naming Umesh Padval as a defendant for breach of fiduciary duty).",
+      "missing": [
+       "3",
+       "9|17"
+      ]
+     },
+     {
+      "line": 68,
+      "text": "See id. at 913.",
+      "missing": [
+       "913."
+      ]
+     },
+     {
+      "line": 70,
+      "text": "6 See id at ¶ 33.",
+      "missing": [
+       "6"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "* See id. at 99 20-23 (naming Deming Xiao (\"Xiao\"), Maurice Sciammas (\"Sciammas\"), Paul",
+     "Ueunten (\"Ueunten\"), and C. Richard Neely, Jr. (\"Neely\"), as defendants based on the theory of",
+     "unjust enrichment because of their increased compensation packages)."
+    ],
+    "missing_words": 36
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "31.17%",
+     "line": 45,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "24.99%",
+     "line": 45,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 33",
+     "line": 70,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 74,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 21,
+    "agreed_spans": 14,
+    "agreed_words": 0.636,
+    "unagreed": [
+     {
+      "line": 29,
+      "text": "top executives. For example, Hsing received $5,625,500 in total 2010 compensation, a significant increase over his 2009 compensation of $1,000,000.8 Other top executives at MPS enjoyed also significant pay raises. 9",
+      "missing": [
+       "$5,625,500",
+       "$1,000,000.8"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "This substantial increase in executive compensation took place against a backdrop of",
+      "missing": []
+     },
+     {
+      "line": 43,
+      "text": "compensation.12 The MPS shareholder base consists primarily of sophisticated institutional investors who possess experience, expertise and resources to assess whether, in their own independent business judgment, executive compensation is in their best interests as shareholder owners.13",
+      "missing": [
+       "compensation.12",
+       "owners.13"
+      ]
+     },
+     {
+      "line": 59,
+      "text": "7 See id. at 91 35.",
+      "missing": [
+       "7",
+       "91"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "to $1,041,900.).",
+      "missing": [
+       "$1,041,900.)."
+      ]
+     },
+     {
+      "line": 65,
+      "text": "See id. at ¶ 30.",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "See id. at 938.",
+      "missing": [
+       "938."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$5,625,500",
+     "value": 5625500.0,
+     "line": 29,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,000,000.8",
+     "value": 1000000.8,
+     "line": 29,
+     "status": "check",
+     "why": [
+      "not_in_second_reading"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "April 29, 2011",
+     "value": "2011-04-29",
+     "line": 33,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "June 16, 2011",
+     "value": "2011-06-16",
+     "line": 39,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "64%",
+     "line": 41,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "amount",
+     "text": "$1,041,900",
+     "value": 1041900.0,
+     "line": 63,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 30",
+     "line": 65,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 73,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 24,
+    "agreed_spans": 16,
+    "agreed_words": 0.492,
+    "unagreed": [
+     {
+      "line": 37,
+      "text": "III. LEGAL STANDARDS",
+      "missing": [
+       "III."
+      ]
+     },
+     {
+      "line": 43,
+      "text": "is entitled to relief.”15 If a plaintiff fails to proffer “enough facts to state a claim to relief that is plausible on its face,” the complaint may be dismissed for failure to state a claim upon which relief may be granted.",
+      "missing": [
+       "relief.”15"
+      ]
+     },
+     {
+      "line": 43,
+      "text": "! A claim is facially plausible “when the pleaded factual content allows the court to draw the reasonable inference that the defendant is liable for the misconduct alleged.”17",
+      "missing": [
+       "alleged.”17"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "' The court’s review is limited to the face of the complaint, materials incorporated into the complaint by reference, and matters of which the court may take judicial notice.19 However, the court need not accept as true allegations that are conclusory, unwarranted deductions of fact, or unreasonable inferences.20",
+      "missing": [
+       "notice.19",
+       "inferences.20"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "See id. at ¶ 45.",
+      "missing": []
+     },
+     {
+      "line": 71,
+      "text": "' Ashcroftv. lqbal, U.S. _, 129 S.Ct. 1937, 1940, 173 L.Ed.2d 868 (2009).",
+      "missing": [
+       "Ashcroftv.",
+       "lqbal,"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "19 See Metzler, 540 F.3d at 1061.",
+      "missing": [
+       "19"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "50 U.S. at 561 (“a wholly conclusory statement of [a] claim” will not survive a motion to dismiss).",
+      "missing": [
+       "50"
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "citation",
+     "text": "¶ 45",
+     "line": 65,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 83,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 25,
+    "agreed_spans": 17,
+    "agreed_words": 0.52,
+    "unagreed": [
+     {
+      "line": 43,
+      "text": "“Dismissal with prejudice and without leave to amend is not appropriate unless it is clear that the complaint could not be saved by amendment.”21",
+      "missing": [
+       "amendment.”21"
+      ]
+     },
+     {
+      "line": 47,
+      "text": "Federal Rule of Civil Procedure 23.1(a) imposes a heightened pleading standard when \"onc",
+      "missing": [
+       "\"onc"
+      ]
+     },
+     {
+      "line": 51,
+      "text": "derivative action to enforce a right that the corporation or association may properly assert but has failed to enforce.”22 Under this standard, the complaint must “state with particularity: (A) any effort by the plaintiff to obtain the desired action from the directors or comparable authority and, if",
+      "missing": [
+       "enforce.”22"
+      ]
+     },
+     {
+      "line": 57,
+      "text": "When no demand is made, futility of demand must be pleaded.25 Under the seminal Aronson test, there are two ways to show demand futility.",
+      "missing": [
+       "pleaded.25"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "24 Beam ex rel.",
+      "missing": [
+       "24"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "See In re Goldman Sachs Group, Inc. S'holder Litig., Case No. 5215-VCG, 2011 Del.",
+      "missing": []
+     },
+     {
+      "line": 79,
+      "text": "C EXIS 151, at *19 (Del.",
+      "missing": [
+       "C",
+       "EXIS"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "Ch. Oct. 12, 2011) (internal citations omitted) (holding that if areholder does not “first demand that the directors pursue the alleged cause of action, he mı tablish that demand is excused by satisfying stringent pleading requirements of factual",
+      "missing": [
+       "areholder",
+       "mı",
+       "tablish"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "(explaining that a plaintiff is able to bring a sharcholder derivative lawsuit if: (1) the plaintiff",
+     "owned shares in the corporation at the time of the disputed transaction; and (2) the plaintitt alleged"
+    ],
+    "missing_words": 33
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "5215-VCG",
+     "line": 79,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Oct. 12, 2011",
+     "value": "2011-10-12",
+     "line": 79,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 81,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "page_check": [
+    "garbled",
+    "misreads",
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 20,
+    "agreed_spans": 14,
+    "agreed_words": 0.503,
+    "unagreed": [
+     {
+      "line": 11,
+      "text": "shareholder has pleaded with \"with particularity facts that establish that demand would be futile because the direetors are not independent or disinterested.*2 The sccond prong of the test asks whether there is a reasonable doubt that \"the challenged transaction was otherwise the product of a valid exercise of business judgment.\"28 These prongs are in the disjunctive, and therefore, \"if either prong is satisfied, demand is excused.\"29",
+      "missing": [
+       "direetors",
+       "either"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "particularty by setting torth particularzed tactual statements that are essential to the claim in orde o demonstrate that making demand would be futile.\"). Demand futility is determined under the lav Orche IomDenyas ine Orpsa 27g rsuphich ,in 9, lpro ent D. Cal, Doelaware.",
+      "missing": [
+       "particularty",
+       "torth",
+       "particularzed",
+       "tactual",
+       "orde",
+       "o",
+       "lav",
+       "Orche",
+       "IomDenyas",
+       "ine",
+       "Orpsa",
+       "27g",
+       "rsuphich",
+       "9,",
+       "lpro",
+       "ent",
+       "D.",
+       "Doelaware."
+      ]
+     },
+     {
+      "line": 71,
+      "text": "2 In reJ.P. Morgan Chase & Co. S'holder Litig., 906 A.2d 808, 820 (Del.",
+      "missing": [
+       "2",
+       "reJ.P."
+      ]
+     },
+     {
+      "line": 73,
+      "text": "28 Id. (internal citations omitted).",
+      "missing": [
+       "28",
+       "Id."
+      ]
+     },
+     {
+      "line": 75,
+      "text": "2º Brehm v. Eisner, 746 A.2d 244, 256 (Del. 2000).",
+      "missing": [
+       "2º"
+      ]
+     },
+     {
+      "line": 79,
+      "text": "3 Thelicomilins deas oryl 5e hate es Eocaiy ed a iacroase impoge or eaier h",
+      "missing": [
+       "3",
+       "Thelicomilins",
+       "deas",
+       "oryl",
+       "5e",
+       "hate",
+       "es",
+       "Eocaiy",
+       "ed",
+       "iacroase",
+       "impoge",
+       "eaier",
+       "h"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "Tech., In. Derivative Litig., 278 F.Supp.2d 1079, 1090 (N.D. Cal. 2003).",
+     "analyzed under the similar test in Rales v. Blasband, 634 A.2d 927 (Del. 1993). See In re Bidz.com,",
+     "Inc. Derivative Litig., 773 F.Supp.2d 844, 851 (C.D. Cal. 2011). Because the court concludes that",
+     "the Fund fails to allege demand futility under cither case's standard, the court need not resolve this",
+     "The complaint does not allege that Moyer received an increase in compensation. Rather the",
+     "complaint alleges that Moyer is on the MPS Board and is also an employee of MPS leaving the"
+    ],
+    "missing_words": 93
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 81,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 18,
+    "agreed_spans": 12,
+    "agreed_words": 0.401,
+    "unagreed": [
+     {
+      "line": 33,
+      "text": "The Fund responds that all of the board members face a substantial likelihood of liability, and are therefore subject to a disqualifying interest.33",
+      "missing": [
+       "interest.33"
+      ]
+     },
+     {
+      "line": 37,
+      "text": "benefit or detriment to the director as a result of the decision.”34 For example, “a director is considered interested where he or she will receive a personal financial benefit from a transaction that is not equally shared by the stockholders.”35 In rare cases, “a transaction may be so egregious on its face that board approval cannot meet the test of business judgment, and a substantial",
+      "missing": [
+       "decision.”34",
+       "stockholders.”35"
+      ]
+     },
+     {
+      "line": 39,
+      "text": "likelihood of director liability therefore exist,” which can show that the board members were not independent or disinterested, 3 “However, the mere threat of personal liability for approving a questioned transaction, standing alone, is insufficient to challenge either the independence or disinterestedness of directors.”37 It is not sufficient to state that a demand was futile simply because the board approved the underlying transaction.38",
+      "missing": [
+       "directors.”37",
+       "futile",
+       "transaction.38"
+      ]
+     },
+     {
+      "line": 41,
+      "text": "See Docket No. 1 at 916.",
+      "missing": [
+       "916."
+      ]
+     },
+     {
+      "line": 46,
+      "text": "34 Beam, 845 A.2d at 1049.",
+      "missing": [
+       "34"
+      ]
+     },
+     {
+      "line": 58,
+      "text": "3'Id.",
+      "missing": [
+       "3'Id."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "United States District Court"
+    ],
+    "missing_words": 4
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 31,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 62,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "page_check": [],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 23,
+    "agreed_spans": 16,
+    "agreed_words": 0.473,
+    "unagreed": [
+     {
+      "line": 13,
+      "text": "to show that either of these directors dominated the MPS Board or that the MPS Board was so",
+      "missing": [
+       "either"
+      ]
+     },
+     {
+      "line": 61,
+      "text": "informed basis, in good faith and in the honest belief that the action taken was in the best interest of the company.”40 In the context of a pre-suit demand, board members are presumed to have been faithful in their fiduciary duties, and “the burden is upon the plaintiff in a derivative action to overcome that presumption.\"41 In order to rebut this presumption, the plaintiff “must plead particularized facts sufficient to raise (1) a reason to doubt that the action was taken honestly and in good faith or (2) a reason to doubt that the board was adequately informed in making the decision.\"42",
+      "missing": [
+       "company.”40",
+       "presumption.\"41",
+       "decision.\"42"
+      ]
+     },
+     {
+      "line": 63,
+      "text": "39 See In re Walt Disney Co. Derivative Litig., 825 A.2d 275, 286 (Del. Ch. 2003).",
+      "missing": [
+       "39"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "25 A 2/p.",
+      "missing": [
+       "25",
+       "2/p."
+      ]
+     },
+     {
+      "line": 69,
+      "text": "280).See has Ce C. 64 A 2el lt36 (quo4ig Sinczair Oiliorp., 2e WA.2d717, 72..",
+      "missing": [
+       "280).See",
+       "Ce",
+       "C.",
+       "64",
+       "2el",
+       "lt36",
+       "(quo4ig",
+       "Sinczair",
+       "Oiliorp.,",
+       "2e",
+       "WA.2d717,",
+       "72.."
+      ]
+     },
+     {
+      "line": 71,
+      "text": "280 A.2d 717.72(",
+      "missing": [
+       "280",
+       "717.72("
+      ]
+     },
+     {
+      "line": 73,
+      "text": "(Del. 1971)) (\"a decision made by a loyal and informed board will not be overturned by the courts unless it ‘cannot be attributed to any rational business purpose.’”).",
+      "missing": [
+       "1971))",
+       "made",
+       "by",
+       "loyal",
+       "will",
+       "be",
+       "overturned",
+       "courts",
+       "unless",
+       "it",
+       "‘cannot",
+       "attributed",
+       "rational",
+       "purpose.’”)."
+      ]
+     }
+    ],
+    "missing_words": 0
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 77,
+     "status": "check",
+     "why": [
+      "unconfirmed"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 28,
+    "agreed_spans": 18,
+    "agreed_words": 0.576,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "The Fund does not even claim that the MPS Board was not adequately informed when it made its decision to increase executive compensation.43 Instead, the Fund primarily relies upon the",
+      "missing": [
+       "compensation.43"
+      ]
+     },
+     {
+      "line": 9,
+      "text": "negative “say-on-pay” vote to cast doubt on the honesty and good faith of MPS’s board in making its decision to increase executive compensation.",
+      "missing": []
+     },
+     {
+      "line": 61,
+      "text": "sufficient to overcome the presumption that the MPS Board reasonably exercised its business judgment.45 The fact that the Fund’s interpretation of the “pay-for-performance” policy does not",
+      "missing": [
+       "judgment.45"
+      ]
+     },
+     {
+      "line": 65,
+      "text": "Additionally, the 64% negative vote by shareholders does not, on its own, rebut the business judgment presumption.46",
+      "missing": [
+       "presumption.46"
+      ]
+     },
+     {
+      "line": 67,
+      "text": "43 The complainant actually shows that the MPS Board took adequate steps to become informed by hiring First Niagara to provide executive compensation advisory services.",
+      "missing": [
+       "43"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "20, 2011) (“Cincinnati Bell”).",
+      "missing": [
+       "20,"
+      ]
+     },
+     {
+      "line": 69,
+      "text": "Accord Plumbers Local No. 137 Pension Fund v. Davis, Case No. 03:11-",
+      "missing": [
+       "03:11-"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "633-AC, 2012 U.S. Dist. LEXIS 5053 (D. Or.",
+      "missing": [
+       "633-AC,"
+      ]
+     },
+     {
+      "line": 75,
+      "text": "é alyțirs Darei Sec Oriersi, 2012 U.S. Dis.",
+      "missing": [
+       "é",
+       "alyțirs",
+       "Darei",
+       "Sec",
+       "Oriersi,",
+       "Dis."
+      ]
+     },
+     {
+      "line": 75,
+      "text": "LEXIS 3029 as 252 the court adopis that same",
+      "missing": [
+       "3029",
+       "as",
+       "252",
+       "adopis"
+      ]
+     }
+    ],
+    "missing_lines": [
+     "4° Judge Davila provides a thorough analysis of why this is so, and the court adopts that same"
+    ],
+    "missing_words": 17
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "percent",
+     "text": "64%",
+     "line": 65,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Sept. 20, 2011",
+     "value": "2011-09-20",
+     "line": 69,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4093 EJD",
+     "line": 69,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Mar. 7, 2012",
+     "value": "2012-03-07",
+     "line": 69,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "Jan. 11, 2012",
+     "value": "2012-01-11",
+     "line": 71,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 77,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "page_check": [
+    "missing_text"
+   ],
+   "embedded_text": false,
+   "ocr_text_layer": false,
+   "second_reader": true,
+   "text_agreement": {
+    "compared_with": "second_reader",
+    "independent": false,
+    "spans": 18,
+    "agreed_spans": 13,
+    "agreed_words": 0.697,
+    "unagreed": [
+     {
+      "line": 7,
+      "text": "complaint must be dismissed.47",
+      "missing": [
+       "must",
+       "dismissed.47"
+      ]
+     },
+     {
+      "line": 19,
+      "text": "Porl s. Aenl",
+      "missing": [
+       "Aenl"
+      ]
+     },
+     {
+      "line": 31,
+      "text": "For the Nod Sem Distiet of Califomia",
+      "missing": [
+       "Nod",
+       "Sem",
+       "Distiet",
+       "Califomia"
+      ]
+     },
+     {
+      "line": 45,
+      "text": "Uni",
+      "missing": [
+       "Uni"
+      ]
+     },
+     {
+      "line": 71,
+      "text": "1 As the court finds that the Fund did not satisfy the demand requirement, the court will not address Defendants’ remaining arguments.",
+      "missing": [
+       "1",
+       "address",
+       "arguments."
+      ]
+     }
+    ],
+    "missing_lines": [
+     "the Northern District of California"
+    ],
+    "missing_words": 5
+   },
+   "second_reading": "azure",
+   "fields": [
+    {
+     "kind": "docket",
+     "text": "11-cv-04604-PSG",
+     "line": 1,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "July 2, 2012",
+     "value": "2012-07-02",
+     "line": 13,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "date",
+     "text": "6/13/2012",
+     "value": "2012-06-13",
+     "line": 21,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    },
+    {
+     "kind": "docket",
+     "text": "11-4604 PSG",
+     "line": 75,
+     "status": "check",
+     "why": [
+      "suspect_page"
+     ]
+    }
+   ]
+  }
+ ]
+}

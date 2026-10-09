@@ -595,3 +595,24 @@ Each rule below came from a failure on the public filings, or from the error-inj
 - condensed two-up transcripts, whose layout the PDF text orders differently.
 
 All of these are the safe direction: a sentence that does not agree is not quoted as confirmed.
+
+## Missing-text check (2026-10-09)
+
+`text_agreement.missing_lines` lists the lines of the other reading (embedded text, or the second reader) that the OCR lacks entirely. A page with at least 5 such words gets `missing_text` in `page_check`.
+
+**What counts as missing:** a line with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the page's Markdown. A misread word spoils at most two pairs, so lines with OCR errors are not taken for missing ones.
+
+**How the rule was reached:**
+- The first rule was "no three-word run in common". It flagged 106 pages, because short lines with one misread (`prepare a detense.`) lost every run.
+- Letter-spaced headings (`A P P E A R A N C E S`) are joined into one word.
+- An error-injection test drops each line of a page in turn: each is reported, and the full page reports nothing.
+
+**Measured on the 20 public filings** (Apple, default `auto`):
+- **Pages with `missing_text`:** 88, of which 57 born-digital, 13 partly born-digital, and 18 scanned (against the second reader).
+- **Spread:** more than a third of them are on two documents. One is a 1985 loan note whose text layer is itself bad OCR, which matches nothing (10 pages). The other is a bankruptcy filing whose "Created with Scanner Pro" stamp the OCR garbles on every page (15).
+- **Real drops:** spot checks found Apple Vision skipped whole visible text.
+  - On a two-column dealer agreement, the "ARTICLE NINTH: Execution of Agreement" paragraph is plainly printed and absent from the OCR.
+  - On an order, a footnote citation (`278 F.Supp.2d 1079`) is missing.
+- **Azure cost:** `azure_pages` went from 55 to 57. Born-digital pages with `missing_text` get `second_reading: embedded_text` when their values match, because the PDF's own text is the free second reading.
+
+**Not yet measured:** precision over the whole set. It needs a labelled sample of flagged lines; the eval item in the queue will add it.

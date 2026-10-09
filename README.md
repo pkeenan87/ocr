@@ -301,7 +301,7 @@ An example (abridged):
 - **Fields:** `amount`, `date` (with `value` as YYYY-MM-DD), `docket` (federal shapes such as `3:26-cv-04417`), `bates`, `citation` (with `§` or `¶`) and `percent`. Each field has the exact text as it appears in the Markdown, its page, and its line within the page.
 - **`verified`:** the same value appears in the page's embedded PDF text, a second, independent reading. Values are compared, not substrings: `$3,000` does not match `$3,000,000` in the embedded text, and `3:26-cv-4417` matches `3:26-cv-04417`. Born-digital filings are mostly verified for free.
 - **`check`:** something speaks against the value. `why` says what:
-  - `suspect_page`: the page is in `suspect_pages`, or it failed.
+  - `suspect_page`: the page is in `suspect_pages`, failed, or has `missing_text`.
   - `not_in_embedded_text`: the page has embedded text and the value is not in it.
   - `confusable_characters`: a letter that looks like a digit (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`), such as `3:26-cv-O4417` or `$1,O00`. Such a field has no `value`.
   - `invalid_date`: an impossible date, such as `02/30` or `0Q`.
@@ -317,7 +317,11 @@ An example (abridged):
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
 - **Values:** amounts include a scale word (`$33.5 million` has the value 33500000), also when the word starts the next line, and a `K`/`M`/`B` suffix (`$1.5B`). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
 - **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.
-- **`page_check`:** the suspect reasons, or `failed: …`, when the whole page needs a second reading.
+- **`page_check`:** the suspect reasons, `failed: …`, or `missing_text`, when the whole page needs a second reading.
+  - **`missing_text`:** the other reading (embedded text or second reader) has whole lines the OCR lacks: at least 5 words in lines with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the OCR. They are listed in `text_agreement.missing_lines`.
+  - On the public filings this caught Apple Vision dropping a whole visible paragraph ("ARTICLE NINTH: Execution of Agreement") and a footnote.
+  - On embedded text it can also mean text that is not visible on the page, such as text under a drawn redaction box.
+  - A born-digital page with `missing_text` gets `second_reading: embedded_text` when its values match, so reading the PDF's own text covers it at no cost.
 - **`second_reading`:** how to get the page's second reading, if it needs one.
   - `embedded_text`: a suspect page whose values all match the PDF's own text; read that text instead, at no cost.
   - `azure`: any other page that needs a second reading.

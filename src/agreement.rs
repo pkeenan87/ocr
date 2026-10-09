@@ -33,6 +33,55 @@ pub struct TextAgreement {
     /// Share of the page's words in agreed spans.
     pub agreed_words: f64,
     pub unagreed: Vec<Unagreed>,
+    /// Lines of the other reading that the Markdown lacks entirely (no three consecutive words
+    /// in common): text the OCR may have dropped. On embedded text this can also be text that
+    /// is not visible on the page, such as text under a drawn redaction box.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub missing_lines: Vec<String>,
+    /// Words in `missing_lines`.
+    pub missing_words: usize,
+}
+
+/// Normalized words of a line, with letter-spaced words joined (`A P P E A R` -> `appear`).
+fn line_words(line: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    let mut spaced = false;
+    for w in line.split_whitespace().map(norm).filter(|w| !w.is_empty()) {
+        let letter = w.chars().count() == 1 && w.chars().all(char::is_alphabetic);
+        match out.last_mut() {
+            Some(last) if letter && spaced => last.push_str(&w),
+            _ => out.push(w),
+        }
+        spaced = letter;
+    }
+    out
+}
+
+/// Lines of `other` with at least four words of which fewer than a third of the word pairs
+/// occur anywhere in the Markdown. A misread word spoils at most two pairs, so a line with an
+/// OCR error is not taken for a missing one. Leading line numbers are ignored.
+fn missing_lines(body: &str, other: &str) -> (Vec<String>, usize) {
+    let words: Vec<String> = body.lines().flat_map(line_words).collect();
+    let pairs: std::collections::HashSet<String> = words.windows(2).map(|w| w.join(" ")).collect();
+    let (mut lines, mut count) = (Vec::new(), 0);
+    for line in other.lines() {
+        let mut w = line_words(line);
+        if w.first().is_some_and(|f| line_number(f)) {
+            w.remove(0);
+        }
+        if w.len() < 4 {
+            continue;
+        }
+        let found = w
+            .windows(2)
+            .filter(|p| pairs.contains(&p.join(" ")))
+            .count();
+        if found * 3 < w.len() - 1 {
+            lines.push(line.trim().to_string());
+            count += w.len();
+        }
+    }
+    (lines, count)
 }
 
 /// Letters and digits, lowercased.
@@ -293,6 +342,7 @@ pub fn compare(
             format!(" {} ", w.join(" "))
         })
         .collect();
+    let (missing_lines, missing_words) = missing_lines(body, other);
     let other = stream(other, &markdown);
     let present: std::collections::HashSet<&str> = other.iter().map(|w| w.text.as_str()).collect();
     let mut out = TextAgreement {
@@ -302,6 +352,8 @@ pub fn compare(
         agreed_spans: 0,
         agreed_words: 0.0,
         unagreed: Vec::new(),
+        missing_lines,
+        missing_words,
     };
     let (mut words_all, mut words_agreed) = (0usize, 0usize);
     for (i, line) in body.lines().enumerate() {
@@ -521,6 +573,39 @@ mod tests {
         let body = "Case 5:26-cv-07616 Document 1\nFiled 07/10/26 Page 3 of 29";
         let other = "Case 5:26-cv-07616 Document 1 Filed 07/10/26 Page 3 of 29";
         assert_eq!(compare(body, other, "x", true).agreed_spans, 2);
+    }
+
+    /// Error injection: each line of a page dropped from the OCR is reported missing, and the
+    /// full page reports nothing.
+    #[test]
+    fn every_dropped_line_is_reported_missing() {
+        let other = "1 UNITED STATES DISTRICT COURT\n2 NORTHERN DISTRICT OF CALIFORNIA\n\
+            3 Plaintiff brings this action for breach of the Supply Agreement dated\n\
+            4 March 3, 2024, under which Defendant agreed to deliver 12,500 units.\n\
+            5 Defendant failed to perform and owes $122,525.50 plus interest.\n\
+            6 The parties shall appear for a case management conference on May 7, 2024.";
+        let lines: Vec<&str> = other
+            .lines()
+            .map(|l| l.split_once(' ').unwrap().1)
+            .collect();
+        let full = compare(&lines.join("\n"), other, "embedded_text", true);
+        assert!(full.missing_lines.is_empty(), "{full:#?}");
+        for drop in 0..lines.len() {
+            let mut ocr = lines.clone();
+            let gone = ocr.remove(drop);
+            let a = compare(&ocr.join("\n"), other, "embedded_text", true);
+            assert_eq!(a.missing_lines.len(), 1, "{gone}: {a:#?}");
+            assert!(a.missing_lines[0].ends_with(gone), "{gone}");
+        }
+        // OCR misreads in a line, or a letter-spaced heading, are not a missing line.
+        for (from, to) in [
+            ("Supply", "Suppiy"),
+            ("conference on May", "conferencc on Mav"),
+            ("UNITED STATES", "U N I T E D STATES"),
+        ] {
+            let a = compare(&lines.join("\n").replace(from, to), other, "x", true);
+            assert!(a.missing_lines.is_empty(), "{to}: {a:#?}");
+        }
     }
 
     #[test]

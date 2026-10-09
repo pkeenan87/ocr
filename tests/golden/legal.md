@@ -16,7 +16,7 @@ NORTHERN DISTRICT OF CALIFORNIA
 
 SMITH HOLDINGS, LLC, Plaintiff, v. JONES MANUFACTURING, INC., Defendant.
 
-Case No. 3:26-cv-04417
+Case No.3:26-cv-04417
 
 1. Plaintiff brings this action for breach of the Supply Agreement dated March 3, 2024, under which Defendant agreed to deliver 12,500 units.
 2. Defendant failed to perform as follows:

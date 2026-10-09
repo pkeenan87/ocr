@@ -14,6 +14,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Condvar, Mutex};
 use std::time::{Duration, Instant};
 
+use crate::anchor::{self, MiniPage};
 use crate::cli::Engine;
 use crate::config::state_dir;
 use crate::engines::{self, Limits};
@@ -31,6 +32,10 @@ pub(crate) const LOOP_PENALTY: f64 = 1.15;
 const BACKOFF_SECS: [f64; 3] = [0.5, 1.0, 2.0];
 /// Padding of band and table crops, as a fraction of the page.
 const CROP_PAD: f64 = 0.01;
+/// Least resolution of the mini-page crops of a transcript sheet. Tuned on eval seeds 0-2
+/// (`transcript4up`, Paddle): lines exact 90.4% at 150, 93.5% at 175, 95.4% at 200, then worse
+/// (90.2% at 225 with a failed seed, 75.8% at 250, 84.9% at 300: the model drops or repeats lines).
+const TRANSCRIPT_CROP_DPI: u32 = 200;
 
 /// Repetition detector: unit length range, repeat count, and the tail it looks at.
 const MIN_UNIT: usize = 10;
@@ -89,11 +94,6 @@ pub trait ScanEngine: Sync {
     }
     /// Whether the prompt comes before the image in the message (olmOCR, as upstream).
     fn text_first(&self) -> bool {
-        false
-    }
-    /// Whether to point transcript pages at `--model paddleocr-vl` (docs/spike.md: this
-    /// engine scores below 95% on transcripts).
-    fn transcript_hint(&self) -> bool {
         false
     }
     /// The request plan of a page and whether it is a column split.
@@ -156,7 +156,15 @@ pub type Spec = (Prompt, Option<[f64; 4]>);
 /// The request plan for a page, and whether it is a column split.
 pub fn choose_plan(side: &SidePass) -> (Vec<Spec>, bool) {
     if side.transcript {
-        // Vision mislabels transcripts as tables, and crops would drop the line numbers.
+        // Vision mislabels transcripts as tables, and column crops would drop the line numbers.
+        // A multi-up sheet is sent as one crop per mini-page, in `Page N` order: whole
+        // sheets make Paddle invent text.
+        if let Some(crops) = anchor::crops(&side.mini) {
+            return (
+                crops.into_iter().map(|c| (Prompt::Ocr, Some(c))).collect(),
+                true,
+            );
+        }
         return (vec![(Prompt::Ocr, None)], false);
     }
     if side.columns() >= 2
@@ -779,6 +787,8 @@ pub struct Prepared {
     pub(crate) index: usize,
     bates: Option<String>,
     transcript: bool,
+    /// Transcript pages: the mini-pages with their Vision lines.
+    mini: Vec<MiniPage>,
     column_split: bool,
     pub(crate) planned: Result<Vec<Planned>, String>,
     /// Region crops to try if the single full-page request loops or is cut off.
@@ -818,7 +828,7 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
     let engine = ctx.spec;
     let prompt = engine.page_prompt();
     let full: Vec<Spec> = vec![(prompt, None)];
-    let (specs, split, alt, bates, transcript) =
+    let (specs, split, alt, bates, transcript, mini) =
         match pipeline::side_pass(path, index, s.dpi, &s.options) {
             Ok(side) => {
                 let (specs, split) = engine.plan(&side);
@@ -832,9 +842,10 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
                     alt,
                     markdown::find_bates(&side.blocks),
                     side.transcript,
+                    side.mini,
                 )
             }
-            Err(_) => (full, false, None, None, false),
+            Err(_) => (full, false, None, None, false, Vec::new()),
         };
     if s.verbose && !s.quiet {
         let kinds: Vec<&str> = specs.iter().map(|(p, _)| p.label()).collect();
@@ -850,12 +861,20 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
             }
         ));
     }
+    // Mini-page crops of a transcript are rendered at no less than TRANSCRIPT_CROP_DPI: Paddle
+    // drops or repeats lines in 8 pt print at its 150 DPI default (docs/spike.md).
+    let dpi = if split && transcript {
+        s.dpi.max(TRANSCRIPT_CROP_DPI)
+    } else {
+        s.dpi
+    };
     Work::Model(Prepared {
         index,
         bates,
         transcript,
+        mini,
         column_split: split,
-        planned: render_specs(path, index, s.dpi, &specs, engine),
+        planned: render_specs(path, index, dpi, &specs, engine),
         alt,
     })
 }
@@ -864,21 +883,34 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
     let number = prep.index + 1;
     let started = Instant::now();
     let result = match ctx.spec.run(ctx, path, &prep, s) {
-        Ok(out) => PageResult {
-            // Off macOS there is no Vision side-pass: the Bates number comes from the model's
-            // own text, which keeps the footer (PLAN §9.5).
-            bates: prep.bates.clone().or(out.bates).or_else(|| {
-                cfg!(not(target_os = "macos"))
-                    .then(|| markdown::find_bates_in_text(&out.body))
-                    .flatten()
-            }),
-            body: out.body,
-            column_split: prep.column_split,
-            transcript: prep.transcript,
-            table: out.table,
-            flagged: out.flagged,
-            ..blank(number)
-        },
+        Ok(out) => {
+            let (body, line_numbers) = if prep.transcript {
+                // The engine's words keep their order; the numbers come from the page geometry.
+                match anchor::apply(&prep.mini, Some(&out.body)) {
+                    Some(a) => (a.body, Some(a.anchored)),
+                    None => (out.body, Some(false)),
+                }
+            } else {
+                (out.body, None)
+            };
+            PageResult {
+                // Off macOS there is no Vision side-pass: the Bates number comes from the
+                // model's own text, which keeps the footer, or from olmOCR's corner requests
+                // (PLAN §9.5).
+                bates: prep.bates.clone().or(out.bates).or_else(|| {
+                    cfg!(not(target_os = "macos"))
+                        .then(|| markdown::find_bates_in_text(&body))
+                        .flatten()
+                }),
+                body,
+                column_split: prep.column_split && !prep.transcript,
+                transcript: prep.transcript,
+                table: out.table,
+                flagged: out.flagged,
+                line_numbers,
+                ..blank(number)
+            }
+        }
         Err(Fail::Failed(reason)) if cfg!(not(target_os = "macos")) => {
             // No Apple Vision text to fall back to: the page fails, and a re-run retries it.
             progress::line(format!("warning: page {number}: {reason}"));
@@ -926,6 +958,7 @@ fn blank(number: usize) -> PageResult {
         table: false,
         fallback: false,
         flagged: false,
+        line_numbers: None,
         error: None,
     }
 }
@@ -967,12 +1000,11 @@ impl Backend for Ctx {
         self.is_stopped()
     }
 
-    fn transcript_note(&self, input: &Path, pages: &str) -> Option<String> {
-        self.spec.transcript_hint().then(|| {
+    fn transcript_note(&self, input: &Path, _: &str, unverified: &str) -> Option<String> {
+        (!unverified.is_empty()).then(|| {
             format!(
-                "note: {} looks like a deposition transcript (pages {pages}); {} drops line numbers on transcripts — use --model paddleocr-vl",
-                input.display(),
-                self.spec.engine().name()
+                "note: {}: transcript pages {unverified} could not be re-anchored to page geometry (line_numbers.unverified); verify page:line citations against the PDF",
+                input.display()
             )
         })
     }
@@ -1008,6 +1040,7 @@ mod tests {
             regions,
             crops,
             transcript,
+            mini: Vec::new(),
         }
     }
 

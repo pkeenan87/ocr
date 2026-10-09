@@ -293,6 +293,99 @@ For model engines this tests side-pass and assembly concurrency, not model batch
 - `src/supervisor.rs`: a non-dry-run `ocr scan` re-executes itself as a child. If the child dies from SIGSEGV, SIGBUS, SIGILL or SIGTRAP it prints `note: Apple Vision crashed (signal N); resuming from checkpoints (retry k of 3)` and runs again, resuming from the per-page checkpoints. At most 3 retries; SIGINT, SIGTERM and SIGKILL are never retried; the child's exit code is passed through. The parent handles SIGINT with a no-op handler (the child gets Ctrl-C from the terminal's process group), forwards SIGTERM/SIGHUP, and the child exits if the parent is killed. A retry keeps the crashed run's checkpoints even with `--overwrite`; in a directory scan, files that finished before the crash are redone.
 - Tests: `tests/supervisor.rs` injects crashes with `OCR_TEST_CRASH_AFTER=N` (after N checkpoints; `OCR_TEST_CRASH_ATTEMPTS`, `OCR_TEST_CRASH_SIGNAL`) and reads the in-flight peak through `OCR_TEST_VISION_STATS`.
 
+## Transcript line-number re-anchoring (2026-10-08)
+
+**Problem.** A deposition transcript numbers every *physical* line 1-25, wrapped continuations included (`6 Q. Did you ever agree to extend the payment` then `7 deadline?`). Every engine reads the words well, but the models join a continuation onto the line above and renumber their output sequentially, so every number after a wrap is wrong and page:line citations break. Before this change, exact `N text` lines on eval seeds 10-12 (`transcript4up`): dots 68%, Apple 38%, olmOCR 30%, Paddle 25%.
+
+**Method** (`src/anchor.rs`; transcript-flagged pages only, every engine including Apple). The numbers come from page geometry, never from the model:
+
+1. **Mini-pages.** A header pass reads the whole sheet at 200 DPI and finds the `Page N` labels (fuzzy: Vision reads `Fage 42`). A 2x2 (or any 2+ cell) sheet becomes one cell per grid position, with the grid completed when a label is missing (cell edges at the midpoints between label columns, and just above each label row). A page with fewer than two labels is one region. The Phase 2b regions are **not** used: on eval sheets they find two full-height columns, not quadrants. Each cell is then recognized on its own at 300 DPI with the bridge's new `lines` option (`DocumentObservation.Container.Text.lines`: `[{text, bbox}]` per page, normalized, top-left origin, mapped back to page coordinates for crops). Whole-sheet Vision lines on a 4-up sheet at 200 DPI are mostly garbage, a quadrant crop is nearly perfect. Mini-pages are ordered by their `Page N` number.
+2. **Slot grid.** Vision lines that start with a 1-25 number (a separate observation, or glued to the text; a glued number must start left of where plain text starts) are fitted by y = a + b·n with the median of pairwise slopes (Theil-Sen) and the median intercept, discarding points more than 0.4 pitch off and refitting. Accepted with at least 5 distinct inlier numbers, median residual under 0.15 pitch and a pitch of 0.4-8% of the region. Otherwise the typical line pitch (median of the small gaps between text lines) is placed with at least two consistent numbers; if that fails too, the region is unverified.
+3. **Physical lines.** Each remaining Vision line goes to the slot nearest its y-centre (pieces of one slot are joined left to right); a number prefix that agrees with the grid is stripped. A line far from every slot stays an unnumbered line.
+4. **Alignment.** The engine's text, with its own leading numbers and `Page N` lines removed, is tokenized to words and aligned to the Vision word stream of all regions with word-level Needleman-Wunsch (similarity = 1 - edit distance / length; two words match at 0.5; a mismatch costs less than two gaps, so `Q.` against Vision's `l.` still lines up). The engine may read the regions in any order, so every order of up to 4 regions is tried and the best alignment wins. Each engine word takes the physical line of the Vision word it aligns to; unaligned engine words join the previous line, or the next one if they start a line of the engine's own. Output is `N <engine words>`: the engine's words, `Q.`/`A.`/`MR. X:` prefixes and all, with the geometry's numbers. For Apple the engine text is the Vision lines themselves, so Apple also moves to per-mini-page crops.
+5. **Confidence.** A region needs at least 80% of its engine words and 80% of its Vision words matched; otherwise that region keeps the engine's own lines. A page with any such region (or with no credible grid, or no readable geometry) is `unverified`. Front matter: `line_numbers: {anchored: [pages], unverified: [pages]}`, only present when the document has transcript pages (so the other goldens are byte-identical).
+6. **Paddle** sends each mini-page of a multi-up sheet as a crop (4 requests, in `Page N` order) instead of the whole sheet; a full-page transcript stays one request. Other engines keep their request plans.
+
+**Bug found on the way.** The bridge decoded its options with a non-optional `lines` key; a request without the key failed to decode and silently reset every option (language correction back to on). The key is now optional on the Swift side and always sent by Rust. The four goldens (`legal`, `legal_scan`, `two_column`, `three_pages`) are byte-identical.
+
+**Tests.** `src/anchor.rs`: slot fit with missing numbers and outliers, pitch fallback, wrapped continuation gets its own number, typo-heavy Vision still aligns, low coverage is unverified, engine reading order and missing headers, ordering by `Page N`, grid completion. Fake-server (`tests/paddle.rs`): a fake reply with merged wraps and sequential renumbering (served from `FAKE_REPLIES`) comes out with exactly the ground-truth numbering, from four crop requests; a non-matching reply is kept and marked unverified. Apple (`tests/apple.rs`): `transcript_full.pdf` and `four_up.pdf`.
+
+**Measured** (`eval/anchor_eval.py`, scored with `eval/score.py`: exact `N text` lines of `transcript4up`; tune = seeds 0-2, accept = seeds 10-12, run once).
+
+Exact `N text` lines, `transcript4up` family (`eval/anchor_eval.py`, scored with `eval/score.py`):
+
+| Engine | Before (seeds 10-12) | Held-out, seeds 40-42 (run once, thresholds frozen) | Seeds 10-12 (run once, then retuned: no longer held out) | Tune seeds |
+|---|---|---|---|---|
+| dots-ocr | 68% | **99.9%** (699/700) | not run | 0-2 offline replay of earlier whole-sheet output: 42.4% to 99.8% |
+| Apple | 38% | **97.4%** (682/700) | 98.1% (883/900) | 0-2: 97.1% |
+| olmOCR | 30% | **99.9%** (699/700) | not run | n/a |
+| PaddleOCR-VL | 25% | **94.9%** (664/700), **misses the 95% target** | 92.0% (828/900), engine coverage threshold 0.8 | 0-2: 95.4%; 3-9: 94.0% to 95.2% |
+
+Sheets unverified (fallback rate): 0 of 7 on seeds 40-42 for every engine. On seeds 10-12 Paddle had 1 unverified sheet of 9 (a mini-page where the model repeated and invented lines); with the final engine-coverage threshold such pages are anchored.
+
+**Tuning (seeds 0-9 only).** Paddle crop DPI, seeds 0-2: 150: 90.4%; 175: 93.5%; 200: 95.4%; 225: 90.2% (one seed failed); 250: 75.8%; 300: 84.9%. At high DPI Paddle drops or repeats lines. Transcript crops therefore render at no less than 200 DPI (`TRANSCRIPT_CROP_DPI`). Engine-side coverage threshold, Paddle seeds 3-9: 0.8: 94.0%; 0.5: 95.2%. A region needs 80% of its Vision words but only 50% of its engine words matched, because a model that repeats or invents lines leaves extra engine words that align to nothing while the lines it did read are still placed reliably. Dots and olmOCR were not re-tuned.
+
+**Paddle misses 95% on held-out seeds 40-42 (94.9%).** The remaining misses are the model's, not the numbering's: it drops whole lines, repeats a line three times, invents extra Q lines, or reads `Q.` as another letter. The engine's words are kept as produced, so those lines cannot become exact. Of the 36 inexact lines, a loose check finds the text elsewhere on the page for 23 (usually because the model dropped or duplicated a line, shifting the following lines, and the text repeats in the transcript), and the text wrong or missing for 13.
+
+**Notes.**
+- The stderr transcript hints were updated afterwards (40562ab). Apple now says line numbers were re-anchored, points to `line_numbers.unverified` and recommends dots-ocr. Model engines warn only when a transcript page could not be re-anchored.
+- A `Page N` header is added from Vision's reading when the engine put several mini-pages on one sheet; for a single-region page it is only kept if the engine wrote one.
+- Dots and olmOCR read the whole sheet; their regions may come out in any order (all orders of up to 4 regions are tried) and the output is always in `Page N` order.
+- `examples/anchor_replay.rs` re-anchors saved engine output offline; `eval/anchor_diag.py` classifies misses.
+
+
+## Vision limit: crash test at 4 and quiet benchmark (2026-10-08)
+
+**Quiet-machine 300-page benchmark** (`spike/out/bench300/big.pdf`, binary at de8b78a+, nothing else running):
+
+| Vision limit | Time | Notes |
+|---|---|---|
+| Unlimited (`OCR_VISION_MAX_CONCURRENT=64`) | 29.0 s | |
+| 3 | 57.3 s | |
+| 2 (default) | 84-96 s | about 3x slower than unlimited |
+
+- With the limit of 2, peak memory of the worker process is 192 MB, measured via `OCR_SCAN_CHILD=1 /usr/bin/time -l`. Under the supervisor, `/usr/bin/time` measures the parent, about 2 MB.
+- All 300 pages were correct: case number 200/200, two-column 100/100.
+- The earlier "about 1.36-1.5x" estimate was measured while dots was running on the GPU, and it understated the cost.
+
+**Crash test** (`spike/repro_init_race.sh`, bench mode, 12 threads, with dots running concurrently; log in `spike/out/cap4_crash_test.log`):
+
+| Limit | Launches | Crashes |
+|---|---|---|
+| Unlimited control | 100 | 6 (6%), codes 139 x5 and 133 |
+| 4 | 300 | 7 (2.3%) |
+| 2 | 100 + 100 earlier (bench and scan) | 0 |
+
+- Every real crash happened within 0.81 s of process launch.
+- The supervisor retries from checkpoints.
+- Decision (user, 2026-10-08, second time): keep the limit at 2 after seeing the corrected 3x cost.
+
+## Column split false positives on real filings (2026-10-08)
+
+The public court-filing set (eval/PUBLIC_SET.md) showed Apple splitting single-column pages into columns and cutting lines mid-word. `examples/split_survey.rs` runs the side pass (150 DPI, regions at 100 DPI) on every page (first 60 per document) and lists the pages with two or more column regions.
+
+Three causes, measured with a temporary chain dump:
+
+- **Drifting cuts.** A gutter candidate is tracked strip to strip with 5 px of drift allowed. On typewriter text and ragged captions, word spaces and line ends overlap pairwise but no straight channel runs through all four strips (Lozano p3: `lo=455 hi=127`; Knight p1: `lo=417 hi=217`). The old code then cut at the mean midpoint, which runs through words. Every true split measured had a straight channel (7-167 px).
+- **Pleading margins wider than 0.08.** Line numbers plus sideways court-name text or form numbers reach 0.085-0.134 of the page width (Garland, Ironworkers, Lozano p1), so the strip became a column.
+- **Q/A marker strips.** Full-page transcripts have a 0.013-0.025-wide strip of Q and A markers that was split off as its own column (Knight, 12 pages).
+
+Fix (`src/regions.rs`):
+- a gutter must be one straight channel through all four strips (`lo < hi`), cut at its middle;
+- `MIN_GUTTER` is 0.02 of the page width (was 0.012). Courier word spaces line up into straight rivers 11-14 px wide at 100 DPI; real gutters measured 17-167 px (a skewed one had a 7 px common channel with 22 px runs);
+- a margin strip (dropped when the page is split) must be under 0.14 of the page width (was 0.08), span at least half the page height, sit in the edge zone, and be under half as wide as the widest piece of the cut. The last two rules came from checking every Column-to-Margin flip: an absolute 0.14 alone dropped the first column of a landscape table (Nissan p27) and the first words of a Courier paragraph (Nissan p15);
+- a piece narrower than 0.05 of the page width that is not a margin joins its neighbour instead of becoming a column. Table columns at 0.053-0.054 (Nissan p27) are just above this; a table with narrower columns is read whole by Vision rather than split.
+
+Four new unit tests (a drifting typewriter river, a Q/A marker strip, six narrow table columns, and a short narrow edge piece) each fail with their rule removed.
+
+| Set | Pages split before | After |
+|---|---|---|
+| Public filings, 25 documents (first 60 pages each) | 119 | 71 |
+| of which Knight transcript / Garland order / Ironworkers order / Lozano | 13 / 13 / 10 / 4 | 0 / 1 / 1 / 2 |
+| Synthetic fixtures and seeds 10-12 | 10 pages | the same 10 pages |
+
+Every remaining Margin on the public set was rendered and holds only line numbers, a form stamp or scan specks. The remaining splits are side-by-side caption, signature and index blocks and 4-up transcripts. The only synthetic change: on `four_up.pdf` each mini-page's line-number strip now stays with its text (before, the left one was a margin and the right one a column of its own). Apple transcript lines on held-out seeds 40-42 are unchanged at 682/700 (97.4%). All goldens are byte-identical. Lozano p3 now reads as whole lines; Knight p6 is no longer split, but it is still not detected as a transcript (separate follow-up).
+
 ## llama-server spike (2026-10-08, Linux, PLAN §9 Phase 7a/7d-1)
 
 **Setup.** llama.cpp b11510 (`ubuntu-vulkan-x64` and `ubuntu-x64` CPU builds) on this Linux box: Ryzen 9950X, integrated Radeon (RADV RAPHAEL_MENDOCINO), 30 GB RAM, no NVIDIA. Model `PaddlePaddle/PaddleOCR-VL-1.6-GGUF` (BF16, plus mmproj). Pages were rendered through the production path (`examples/render_png`, pdfium). The request had the same shape as `model_engine::post`: image first, then text, temperature 0, `max_tokens` 4096.

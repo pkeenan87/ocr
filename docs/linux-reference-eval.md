@@ -8,6 +8,17 @@ Paste the prompt below into Claude Code on the Linux machine after `git clone gi
 
 ---
 
+> **Transcript line numbers: compare raw against raw.** Since 2026-10-08 the Mac's `ocr` re-anchors transcript line numbers to page geometry, using Apple Vision line positions (`src/anchor.rs`), for every engine. That is post-processing which the vLLM run does not get. For **transcript-line accuracy**, compare against the Mac's **before re-anchoring** numbers, the raw engine output:
+>
+> | Engine | Transcript lines, raw | After re-anchoring (held-out seeds 40–42) |
+> |---|---|---|
+> | dots-ocr | 68% | 99.9% |
+> | olmocr | 30% | 99.9% |
+> | apple | 38% | 97.4% |
+> | paddleocr-vl | 25% | 94.9% |
+>
+> The raw numbers are from seeds 10–12; see `docs/eval.md`'s Transcripts section and docs/spike.md, "Transcript line-number re-anchoring". Report the after-anchoring numbers only as context. Every other metric (CER, token recall, Bates) is unaffected and compares directly.
+
 ## Prompt
 
 You are running a reference accuracy evaluation for the `ocr` project, which is the current repo. `ocr` is a macOS CLI and cannot be built here. Do not try to build it. You will reproduce its model requests with vLLM on this machine's RTX 3090 (24 GB) and score the results with the repo's own scorer.
@@ -67,6 +78,8 @@ For each engine and family, record:
 - pypdfium2 rendering vs CoreGraphics;
 - the absent Apple side-pass and table crops;
 - full precision vs quantized.
+
+- **Transcript lines:** compare against the Mac's *raw* (before re-anchoring) numbers, not the re-anchored ones. See the "compare raw against raw" note at the top of `docs/linux-reference-eval.md` for the table and the reason.
 
 ### 6. Write the results to Notion
 

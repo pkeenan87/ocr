@@ -33,6 +33,12 @@ struct BlockOut: Encodable {
     var rows: [[String]]? = nil
 }
 
+struct LineOut: Encodable {
+    let text: String
+    /// Normalized bounding box, origin at top-left: [x, y, w, h].
+    var bbox: [Double]
+}
+
 struct Options: Decodable {
     var languages: [String] = ["en-US"]
     var autoDetectLanguage = false
@@ -40,6 +46,9 @@ struct Options: Decodable {
     var customWords: [String] = []
     /// Optional normalized crop [x, y, w, h], origin top-left, applied to the rendered page.
     var crop: [Double]? = nil
+    /// Also return Vision's line-level observations (`lines`); off by default. Optional so a
+    /// request without the key still decodes (a failed decode would silently reset every option).
+    var lines: Bool? = nil
 }
 
 struct PageOut: Encodable {
@@ -48,6 +57,8 @@ struct PageOut: Encodable {
     var width: Int = 0
     var height: Int = 0
     var blocks: [BlockOut] = []
+    /// Physical text lines; filled only when `Options.lines` is set.
+    var lines: [LineOut] = []
 }
 
 struct InfoOut: Encodable {
@@ -207,11 +218,17 @@ private func runVision(_ perform: (RecognizeDocumentsRequest) async throws -> [D
         request.textRecognitionOptions.customWords = options.customWords
         let observations = try await perform(request)
         var blocks: [BlockOut] = []
+        var lines: [LineOut] = []
         for obs in observations {
+            if options.lines == true {
+                for line in obs.document.text.lines where !line.transcript.isEmpty {
+                    lines.append(LineOut(text: line.transcript, bbox: topLeftBox(line.boundingRegion)))
+                }
+            }
             let s = structure(obs.document)
             blocks.append(contentsOf: readingOrder(title: s.title, paragraphs: s.paragraphs, structured: s.structured))
         }
-        return PageOut(ok: true, blocks: blocks)
+        return PageOut(ok: true, blocks: blocks, lines: lines)
     } catch {
         return PageOut(ok: false, error: String(describing: error))
     }
@@ -244,6 +261,10 @@ private func recognizePage(path: String, index: Int, dpi: Double, options: Optio
             for i in out.blocks.indices {
                 let b = out.blocks[i].bbox
                 out.blocks[i].bbox = [c[0] + b[0] * c[2], c[1] + b[1] * c[3], b[2] * c[2], b[3] * c[3]]
+            }
+            for i in out.lines.indices {
+                let b = out.lines[i].bbox
+                out.lines[i].bbox = [c[0] + b[0] * c[2], c[1] + b[1] * c[3], b[2] * c[2], b[3] * c[3]]
             }
         }
         out.width = image.width

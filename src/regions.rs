@@ -10,8 +10,10 @@ const INK_BELOW: u8 = 128;
 /// are rules (pleading rules, box borders) and are erased.
 const RULE_LENGTH: f64 = 0.08;
 const RULE_THICKNESS: usize = 4;
-/// Narrowest gutter, as a fraction of page width.
-const MIN_GUTTER: f64 = 0.012;
+/// Narrowest gutter, as a fraction of page width: wider than a monospaced word space (Courier
+/// spaces line up into straight rivers about 11-14 px wide at 100 DPI); real gutters measured
+/// 17-167 px.
+const MIN_GUTTER: f64 = 0.02;
 /// A gutter may drift this fraction of page width from one strip to the next (skewed scans).
 const GUTTER_DRIFT: f64 = 0.005;
 const STRIPS: usize = 4;
@@ -34,10 +36,17 @@ const MIN_Y_GAP: f64 = 0.015;
 const TABLE_PAD: f64 = 0.01;
 /// A y-cut gap must exceed the node's median inter-line gap by this factor.
 const Y_GAP_RATIO: f64 = 1.5;
-/// An edge strip narrower than this fraction of the page width is a margin (line numbers).
-const MARGIN_WIDTH: f64 = 0.08;
+/// An edge strip narrower than this fraction of the page width is a margin (line numbers, plus
+/// sideways court-name text or form numbers, which together reach 0.134 on real filings).
+const MARGIN_WIDTH: f64 = 0.14;
+/// A piece narrower than this fraction of the page width, outside the margin zones, is not a
+/// column (the Q/A marker strip of a transcript, about 0.013-0.025); it joins its neighbour.
+const MIN_COLUMN_WIDTH: f64 = 0.05;
 /// A margin strip's outer ink edge lies within this fraction of the page edge.
 const MARGIN_ZONE: f64 = 0.15;
+/// A margin strip spans at least this fraction of the page height (pleading line numbers run
+/// the full page); a short narrow edge piece is text and must not be dropped.
+const MARGIN_MIN_HEIGHT: f64 = 0.5;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Kind {
@@ -227,18 +236,7 @@ fn runs(flags: impl Iterator<Item = bool>) -> Vec<(usize, usize)> {
 fn cut(map: &Map, node: Rect, out: &mut Vec<(Rect, Kind)>) {
     let Some(node) = map.trim(node) else { return };
     if let Some(pieces) = x_cut(map, node) {
-        let last = pieces.len() - 1;
-        let width = |r: &Rect| (r.x1 - r.x0) as f64 / map.w as f64;
-        let is_margin = |i: usize, r: &Rect| {
-            width(r) < MARGIN_WIDTH
-                && ((i == 0 && (r.x0 as f64) < MARGIN_ZONE * map.w as f64)
-                    || (i == last && (r.x1 as f64) > (1.0 - MARGIN_ZONE) * map.w as f64))
-        };
-        let margins: Vec<bool> = pieces
-            .iter()
-            .enumerate()
-            .map(|(i, r)| is_margin(i, r))
-            .collect();
+        let margins = margin_flags(map, &pieces);
         let body: Vec<Rect> = pieces
             .iter()
             .zip(&margins)
@@ -269,14 +267,31 @@ fn cut(map: &Map, node: Rect, out: &mut Vec<(Rect, Kind)>) {
     out.push((node, Kind::Band));
 }
 
+/// Which pieces of an x-cut are margin strips: narrow, tall, at a page edge, and narrow next to
+/// the widest piece (equal narrow pieces at the edges are table columns).
+fn margin_flags(map: &Map, pieces: &[Rect]) -> Vec<bool> {
+    let last = pieces.len().saturating_sub(1);
+    let width = |r: &Rect| (r.x1 - r.x0) as f64 / map.w as f64;
+    let widest = pieces.iter().map(width).fold(0.0, f64::max);
+    pieces
+        .iter()
+        .enumerate()
+        .map(|(i, r)| {
+            width(r) < MARGIN_WIDTH
+                && width(r) * 2.0 < widest
+                && (r.y1 - r.y0) as f64 >= MARGIN_MIN_HEIGHT * map.h as f64
+                && ((i == 0 && (r.x0 as f64) < MARGIN_ZONE * map.w as f64)
+                    || (i == last && (r.x1 as f64) > (1.0 - MARGIN_ZONE) * map.w as f64))
+        })
+        .collect()
+}
+
 /// An x-gutter candidate tracked from strip to strip.
 struct Chain {
     /// The latest run with ink on both sides (or the first run, until there is one).
     last: (usize, usize),
     lo: usize,
     hi: usize,
-    mid_sum: usize,
-    count: usize,
     /// Narrowest run in any strip.
     narrowest: usize,
     /// Some strip had ink on both sides of the run, so it separates something.
@@ -289,8 +304,6 @@ impl Chain {
             last: run,
             lo: run.0,
             hi: run.1,
-            mid_sum: run.0 + run.1,
-            count: 2,
             narrowest: run.1 - run.0,
             bounded,
         }
@@ -303,18 +316,13 @@ impl Chain {
         }
         self.lo = self.lo.max(run.0);
         self.hi = self.hi.min(run.1);
-        self.mid_sum += run.0 + run.1;
-        self.count += 2;
         self.narrowest = self.narrowest.min(run.1 - run.0);
         self.bounded |= bounded;
     }
 
+    /// Middle of the straight channel common to every strip.
     fn cut_x(&self) -> usize {
-        if self.lo < self.hi {
-            (self.lo + self.hi) / 2
-        } else {
-            self.mid_sum / self.count
-        }
+        (self.lo + self.hi) / 2
     }
 }
 
@@ -361,7 +369,10 @@ fn x_cut(map: &Map, node: Rect) -> Option<Vec<Rect>> {
     }
     let mut cuts: Vec<usize> = chains
         .iter()
-        .filter(|c| c.bounded && c.narrowest >= min_gutter)
+        // A gutter must be one straight empty channel through every strip. A chain whose runs
+        // only overlap pairwise (word spaces lining up in typewriter text, ragged caption lines)
+        // has no such channel, and a cut anywhere along it slices words.
+        .filter(|c| c.bounded && c.narrowest >= min_gutter && c.lo < c.hi)
         .map(Chain::cut_x)
         .collect();
     cuts.sort_unstable();
@@ -387,14 +398,30 @@ fn x_cut(map: &Map, node: Rect) -> Option<Vec<Rect>> {
         let weak = pieces
             .iter()
             .position(|p| p.is_none_or(|r| coverage(map, r, node) < MIN_COVERAGE));
-        match weak {
-            None => return (pieces.len() > 1).then(|| pieces.into_iter().flatten().collect()),
-            Some(i) => {
-                cuts.remove(i.saturating_sub(1));
-                if cuts.is_empty() {
-                    return None;
-                }
+        // Narrow pieces label the text beside them, unless they are margin strips.
+        let narrow = if weak.is_none() {
+            let found: Vec<Rect> = pieces.iter().flatten().copied().collect();
+            let margins = margin_flags(map, &found);
+            found
+                .iter()
+                .zip(margins)
+                .position(|(r, m)| !m && ((r.x1 - r.x0) as f64) < MIN_COLUMN_WIDTH * map.w as f64)
+        } else {
+            None
+        };
+        match (weak, narrow) {
+            (None, None) => {
+                return (pieces.len() > 1).then(|| pieces.into_iter().flatten().collect());
             }
+            (Some(i), _) => {
+                cuts.remove(i.saturating_sub(1));
+            }
+            (None, Some(i)) => {
+                cuts.remove(i.min(cuts.len() - 1));
+            }
+        }
+        if cuts.is_empty() {
+            return None;
         }
     }
 }
@@ -653,6 +680,60 @@ mod tests {
         p.skewed_lines(450, 780, 100, 60, 0.9);
         let r = p.regions(&[]);
         assert_eq!(columns(&r).len(), 2, "{r:?}");
+    }
+
+    #[test]
+    fn transcript_marker_strip_is_not_a_column() {
+        let mut p = Page::new();
+        // Line numbers at the edge, a Q/A marker strip, then the answer text.
+        p.lines(60, 75, 100, 40, 20);
+        p.lines(140, 152, 100, 40, 20);
+        p.lines(190, 780, 100, 40, 20);
+        let r = p.regions(&[]);
+        assert!(columns(&r).len() < 2, "{r:?}");
+    }
+
+    #[test]
+    fn single_column_typewriter_page_is_not_split() {
+        let mut p = Page::new();
+        // Monospaced word spaces line up into a 14 px river that moves 5 px per strip (the
+        // page's text spans y 100-962, four strips), so each strip's gap overlaps the next
+        // but no straight channel runs through all of them.
+        for i in 0..35 {
+            let y = 100 + i * 25;
+            let strip = (y - 100) * 4 / 862;
+            if (y + 11 - 100) * 4 / 862 != strip {
+                continue; // keep each line inside one strip
+            }
+            let x = 300 + 5 * strip;
+            p.ink(70, y, x, y + 12);
+            p.ink(x + 14, y, 780, y + 12);
+        }
+        let r = p.regions(&[]);
+        assert!(columns(&r).is_empty(), "{r:?}");
+    }
+
+    #[test]
+    fn narrow_table_columns_at_the_edges_are_not_margins() {
+        let mut p = Page::new();
+        // Six equal 0.09-wide columns; the outer two sit inside the margin zones.
+        for i in 0..6 {
+            let x0 = 70 + i * 125;
+            p.lines(x0, x0 + 77, 300, 20, 14);
+        }
+        let r = p.regions(&[]);
+        assert!(!kinds(&r).contains(&Kind::Margin), "{r:?}");
+        assert_eq!(columns(&r).len(), 6, "{r:?}");
+    }
+
+    #[test]
+    fn short_narrow_edge_piece_is_not_a_margin() {
+        let mut p = Page::new();
+        // A short block whose first words are cut off at the left edge must never be dropped.
+        p.lines(70, 130, 700, 16, 14);
+        p.lines(160, 700, 700, 16, 14);
+        let r = p.regions(&[]);
+        assert!(!kinds(&r).contains(&Kind::Margin), "{r:?}");
     }
 
     #[test]

@@ -36,16 +36,12 @@ spike/fixtures/three_pages.pdf: Pdf, 3 page(s)
     Band [0.420, 0.952, 0.519, 0.013]
 spike/fixtures/four_up.pdf: Pdf, 1 page(s)
   page 1: gray@100 850x1100, png@200 (1700, 2200), fit1288 (995, 1288), crop+fit1000+rot90 (1000, 773)
-    Margin [0.069, 0.089, 0.011, 0.796]
-    Column [0.095, 0.058, 0.220, 0.828]
-    Column [0.492, 0.089, 0.039, 0.796]
-    Column [0.547, 0.057, 0.219, 0.829]
+    Column [0.069, 0.058, 0.246, 0.828]
+    Column [0.492, 0.057, 0.274, 0.829]
 spike/fixtures/transcript_full.pdf: Pdf, 1 page(s)
   page 1: gray@100 850x1100, png@200 (1700, 2200), fit1288 (995, 1288), crop+fit1000+rot90 (1000, 773)
     Margin [0.120, 0.135, 0.020, 0.736]
-    Column [0.188, 0.135, 0.019, 0.738]
-    Column [0.225, 0.134, 0.044, 0.737]
-    Column [0.284, 0.134, 0.300, 0.740]
+    Band [0.188, 0.134, 0.395, 0.740]
 spike/fixtures/narrow_unequal_seed2.pdf: Pdf, 1 page(s)
   page 1: gray@100 850x1100, png@200 (1700, 2200), fit1288 (995, 1288), crop+fit1000+rot90 (1000, 773)
     Column [0.082, 0.067, 0.505, 0.831]
@@ -58,25 +54,21 @@ spike/fixtures/multipage.tif: Image, 2 page(s)
     Band [0.132, 0.540, 0.502, 0.014]
     Band [0.414, 0.955, 0.519, 0.010]
   page 2: gray@100 850x1100, png@200 (1700, 2200), fit1288 (995, 1288), crop+fit1000+rot90 (1000, 773)
-    Column [0.089, 0.064, 0.302, 0.610]
-    Column [0.400, 0.064, 0.385, 0.613]
+    Band [0.321, 0.064, 0.358, 0.013]
+    Column [0.089, 0.116, 0.244, 0.557]
+    Column [0.531, 0.116, 0.254, 0.560]
 spike/fixtures/legal_scan_rot90.png: Image, 1 page(s)
   page 1: gray@100 1100x850, png@200 (2200, 1700), fit1288 (1288, 995), crop+fit1000+rot90 (773, 1000)
-    Column [0.035, 0.085, 0.395, 0.854]
-    Column [0.445, 0.085, 0.015, 0.549]
-    Column [0.482, 0.084, 0.150, 0.716]
-    Column [0.634, 0.084, 0.221, 0.739]
-    Column [0.876, 0.087, 0.015, 0.660]
-    Margin [0.906, 0.088, 0.015, 0.635]
+    Column [0.035, 0.085, 0.364, 0.854]
+    Column [0.421, 0.084, 0.434, 0.739]
+    Margin [0.876, 0.087, 0.045, 0.660]
 spike/heldout/block_quote.pdf: Pdf, 1 page(s)
   page 1: gray@100 850x1100, png@200 (1700, 2200), fit1288 (995, 1288), crop+fit1000+rot90 (1000, 773)
     Band [0.119, 0.081, 0.585, 0.461]
 spike/heldout/four_up.pdf: Pdf, 1 page(s)
   page 1: gray@100 850x1100, png@200 (1700, 2200), fit1288 (995, 1288), crop+fit1000+rot90 (1000, 773)
-    Margin [0.069, 0.089, 0.011, 0.796]
-    Column [0.095, 0.058, 0.220, 0.828]
-    Column [0.492, 0.089, 0.039, 0.796]
-    Column [0.547, 0.057, 0.219, 0.829]
+    Column [0.069, 0.058, 0.246, 0.828]
+    Column [0.492, 0.057, 0.274, 0.829]
 spike/heldout/lower_half_columns.pdf: Pdf, 1 page(s)
   page 1: gray@100 850x1100, png@200 (1700, 2200), fit1288 (995, 1288), crop+fit1000+rot90 (1000, 773)
     Band [0.099, 0.095, 0.507, 0.262]

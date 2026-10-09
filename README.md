@@ -13,7 +13,7 @@ Local, private OCR of PDFs and images to Markdown on Apple Silicon, and on Linux
 
 It is built for legal documents that run to hundreds of pages: it streams pages, writes per-page checkpoints, resumes after an interruption, keeps Bates numbers in page markers and flags pages it is not sure about.
 
-Status: Phase 6 (quality evaluation) is in progress. Numbers marked `TODO(eval)` are pending the final evaluation.
+Status: Phase 6 evaluation is done; results are in [docs/eval.md](docs/eval.md). The fixtures are synthetic.
 
 ## Requirements
 
@@ -26,11 +26,11 @@ Memory needed by the model engines (peak physical footprint measured with `vmmap
 
 | Engine (default quant) | Weights on disk | Peak memory |
 |---|---|---|
-| paddleocr-vl 1.6 (bf16) | 1.8 GiB | 3.8 GB |
-| dots-ocr, dots.mocr (8bit) | 4.1 GiB | 7.3 GB |
-| olmocr (8bit) | 8.8 GiB | 10.9 GB |
+| paddleocr-vl 1.6 (bf16) | 1.8 GiB | 3.8-4.0 GB |
+| dots-ocr, dots.mocr (8bit) | 4.1 GiB | 6.8 GB at the default 100 DPI (7.6 GB at 200) |
+| olmocr (8bit) | 8.8 GiB | 10.9-11.5 GB |
 
-Setup checks installed RAM. For olmOCR 8bit it is silent at 24 GB or more, warns at 16-24 GB and refuses below 16 GB unless you pass `--force`; `--quant 4bit` (about 5.5 GB estimated) is the recommendation on smaller machines. For the other engines it warns when 1.5x the footprint exceeds RAM and refuses when the footprint exceeds 75% of RAM. Apple Vision needs no download; a 300-page scan peaks at about 0.5 GB.
+Setup checks installed RAM. For olmOCR 8bit it is silent at 24 GB or more, warns at 16-24 GB and refuses below 16 GB unless you pass `--force`; `--quant 4bit` (about 5.5 GB estimated) is the recommendation on smaller machines. For the other engines it warns when 1.5x the footprint exceeds RAM and refuses when the footprint exceeds 75% of RAM. Apple Vision needs no download; a 500-page production peaked at about 0.5 GB.
 
 ## Build and install
 
@@ -153,7 +153,7 @@ Usage (`ocr scan --help`):
     --no-front-matter          Omit the YAML header
     --use-text-layer <MODE>    auto, never, always (default: never)
     --legal-cleanup            Strip running headers and footers repeated across pages (opt-in)
-    --dpi <N>                  Render resolution, 72-600 (default 200)
+    --dpi <N>                  Render resolution, 72-600 (default 150; dots-ocr 100)
     --jobs <N>                 Total pages in flight across the whole run [alias: --parallel]
     --quiet / --verbose
     --dry-run                  Print the planned input -> output mapping and exit
@@ -167,7 +167,7 @@ Examples:
     ocr scan --input-dir ./case                                  # writes ./case/ocr-output/<stem>.md
     ocr scan --input-dir ./case --recursive --file-type pdf      # walk subfolders, PDFs only
     ocr scan --input-dir ./case --file-type image --dry-run      # show the mapping, do nothing
-    ocr scan --input-file depo.pdf --model paddleocr-vl          # deposition transcript
+    ocr scan --input-file depo.pdf --model dots-ocr              # deposition transcript
     ocr scan --input-file big.pdf --pages 1-50,75
     ocr scan --input-file big.pdf --jobs 4                       # Apple: 4 pages at once
     ocr scan --input-file big.pdf --overwrite                    # discard output and checkpoints
@@ -181,7 +181,7 @@ Notes on the options:
 - **`--model-version`** pins an older model release; it applies to `paddleocr-vl` and `dots-ocr` only.
 - **`--jobs` / `--parallel`** is the total number of pages in flight. The default is the number of performance cores for Apple and 1 for model engines. A model server handles one request at a time (`--max-num-seqs 1`), so `--jobs` above 1 on a model engine only overlaps rendering, the Apple side-pass and assembly, and prints a note. Output is the same for `--jobs 1` and `--jobs 8`.
 - **`--use-text-layer`** defaults to `never` for every engine. The text-layer path has no layout handling: margin line numbers come out inline, tables are flattened and the Bates number is lost. Use `auto` or `always` only for clean born-digital PDFs where speed matters.
-- **`--dpi`** defaults to 200, which was the most accurate for Apple Vision (higher is not better; 150 scored marginally better on the tuning seeds but 200 is kept). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so. For dots, lower DPI is much faster (about 34 s/page at 200 DPI, 17 s at 150, 9 s at 100 on one test page).
+- **`--dpi`** has a per-engine default tuned in Phase 6: Apple 150 (switched from 200 on 2026-10-08 by user decision: 150 scored better on the synthetic fixtures, mostly on fax scans; pleading CER and Bates were slightly worse, so use `--dpi 200` on clean pleadings if that matters), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so.
 - **`--legal-cleanup`** is opt-in because it changes citable text. A line is stripped when it sits in the top or bottom three lines of at least half the pages (minimum 3 pages); lines of 20 or more characters match fuzzily. Transcript pages, table rows, Bates numbers and page markers are never stripped. It runs at assembly time, so toggling it never redoes OCR.
 - **`--no-currency-fix`**: Vision sometimes reads `$` as `S`. By default `S22,375.50` becomes `$22,375.50` on Apple pages (counted per page in the front matter). Model-engine output is not touched.
 - **`--file-type`**: pdf is `.pdf`; image is `.png .jpg .jpeg .tif .tiff .heic .bmp .gif .webp` (multi-page TIFF is a multi-page document). In directory mode it filters which files are picked up.
@@ -231,41 +231,57 @@ Front matter fields (`--no-front-matter` omits the header):
 - `text_layer_pages`: pages taken from the embedded PDF text instead of OCR.
 - `column_split_pages`: pages where multi-column regions were detected and recognized column by column.
 - `transcript_pages`: pages that look like deposition transcripts (numbered Q./A. lines).
+- `line_numbers: {anchored: [...], unverified: [...]}` (only when there are transcript pages): pages whose line numbers were re-anchored to the page geometry, and pages where that failed and the engine's own numbering is kept. Check the unverified ones against the PDF.
 - `table_pages` and `fallback_pages` (model engines): pages with a table recognized separately, and pages where the model failed and Apple Vision text was used instead.
 - `currency_fixes` (Apple engine, instead of the two above): `{page: count}` of `S` to `$` corrections.
 - `legal_cleanup` (with `--legal-cleanup`): number of stripped lines.
-- `flagged_pages`: pages to check by hand: failed pages, fallbacks that lost quality, transcripts Apple cannot read, and so on.
+- `flagged_pages`: pages to check by hand: failed pages, fallbacks that lost quality, and so on.
 
 Every page starts with a marker, `<!-- page 42 -->`, or with the Bates number when one is found at the bottom of the page: `<!-- page 3 · Bates ABC0000123 -->`. A page that failed outright appears as `<!-- page N: OCR failed: ... -->`. Page numbers are 1-based and always match the source document, also with `--pages`. When a model fails on a page (timeout, runaway repetition, empty or truncated output) it is retried and then falls back to Apple Vision text; that page is listed in `fallback_pages` and `flagged_pages`.
 
 ## Which engine?
 
-| Engine | Best for | Speed | 300-page estimate | Memory |
+| Engine | Best for | Speed (measured) | 300-page estimate | Memory (server peak) |
 |---|---|---|---|---|
-| apple | General documents, contracts, pleadings, scans, bulk runs | about 10 pages/s (8 jobs) | about 30 s (measured, 28.4 s) | about 0.5 GB |
-| paddleocr-vl | Deposition transcripts; best speed/quality among model engines | about 0.4 pages/s (about 2.5 s/page) | about 12 minutes | 3.8 GB |
-| olmocr | Clean prose and tables in ordinary documents; not transcripts | about 0.06 pages/s (about 16 s/page) | about 80 minutes | 10.9 GB (5.5 GB at 4bit, estimated) |
-| dots-ocr | Transcripts and layout-heavy pages when time does not matter | about 0.03 pages/s (about 34 s/page at 200 DPI) | about 2.9 hours | 7.3 GB |
+| apple | General documents, contracts, pleadings, scans, bulk runs. Transcripts work (line numbers re-anchored) but dots-ocr is more accurate | about 3.4-3.5 pages/s at 150 DPI with the Vision limit of 2 (16 pages/s before the limit; see below) | about 85-87 s | `ocr` worker about 178 MB |
+| paddleocr-vl | The fastest model engine; text-heavy documents, tables | about 0.19 pages/s (5.3 s/page at 150 DPI) | about 27 minutes | 4.0 GB |
+| olmocr | Clean prose and tables in ordinary documents | about 0.06 pages/s (about 16 s/page, from the spike) | about 80 minutes | 11-11.5 GB (5.5 GB at 4bit, estimated) |
+| dots-ocr | **Deposition transcripts (most accurate)** and layout-heavy pages | about 0.086 pages/s (11.6 s/page at 100 DPI) | about 58 minutes | 6.8 GB |
 
-The per-page figures are from docs/spike.md on a nearly idle 32 GB M-series Mac. Final evaluation results (accuracy, throughput, memory) are pending: TODO(eval) accuracy per engine and family (CER, token recall, Bates accuracy, transcript line accuracy); TODO(eval) measured pages/s per model engine on the eval set; TODO(eval) final 300-page estimates; TODO(eval) tuned dots DPI and its speed; TODO(eval) peak memory per engine from the eval run.
+Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 85-87 s at the 150 DPI default (84-96 s at 200 DPI), about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes. Accuracy on the synthetic eval set (accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
+
+| Engine | Token recall | CER | Bates | Notes |
+|---|---|---|---|---|
+| apple | 97.4% (no transcripts) | 2.3% | 93/105 pages on pleadings | fax scans 96.3% at the 150 DPI default (88.5% at 200) |
+| paddleocr-vl | 99.6% (no transcripts) | 3.3% (pleading CER inflated by margin numbers) | 100% | transcripts 81.5% recall; lines exact 25% before re-anchoring, 94.9% after |
+| dots-ocr | 100% (no transcripts and 99.8% on a 60-page production) | 0.6% | 100% | transcripts 100% recall; lines exact 68% before re-anchoring, 99.9% after |
+| olmocr | 99.3% (no transcripts) | 0.0% | 10 of 11 pages | transcripts 96.9% recall; lines exact 30% before re-anchoring, 99.9% after |
 
 Guidance:
 
 - **Start with Apple.** It is fast and light, with exact case numbers and amounts on the test fixtures, and does not need a server.
-- **Deposition transcripts: `paddleocr-vl`.** It keeps the line numbers and Q./A. markers (100/100 on the test transcripts). Apple Vision drops them, so Apple flags such pages and suggests `--model paddleocr-vl`.
-- **olmOCR: not for transcripts.** It drops the margin line numbers (0/25 exact on a full-size transcript) and prints a hint to use paddleocr-vl. It also drops headers, footers and Bates numbers; those come from an Apple Vision side-pass that every model engine runs.
-- **dots: also reads transcripts exactly (25/25 and 100/100) but is slow.** Consider `--dpi 150` or lower to speed it up.
+- **Deposition transcripts: use `dots-ocr`, and check `line_numbers.unverified`.** Transcripts number every physical line, wrapped continuations included, and the models renumber sequentially after a wrap. So for every engine (Apple included) the line numbers of transcript pages are re-anchored to the page geometry, never taken from the model. On held-out seeds 40-42, lines exact were dots-ocr 99.9%, olmOCR 99.9%, Apple 97.4% and paddleocr-vl 94.9% (before re-anchoring: 68%, 30%, 38% and 25%). dots-ocr is the most accurate engine for transcripts and `paddleocr-vl` the least. A page whose text could not be matched to the geometry keeps the engine's own numbering and is listed under `line_numbers.unverified` in the front matter; `ocr` prints a note for those pages. Verify page:line citations on them against the PDF.
+- **Pleadings with tables on `paddleocr-vl`:** its table crops pull the margin line numbers in as an extra column. Use another engine for pleading-paper tables.
 
 ## Limitations
 
-- Apple Vision cannot read deposition transcripts reliably: it drops the line numbers and misreads `Q.` and `A.`. Such pages are flagged, with a hint to use `--model paddleocr-vl`.
+- Transcript line numbers are re-anchored to page geometry for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr and olmOCR). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
 - The text-layer path (`--use-text-layer auto|always`) has no layout handling, which is why it is off by default.
-- Pleading margin line numbers (1-2 digits in the left margin) are dropped by Apple Vision but kept by the model engines (and they can land inside table crops on pleading paper). Recovering `page:line` citations is not implemented.
+- Pleading margin line numbers (1-2 digits in the left margin) are dropped by Apple Vision, dots and olmOCR but kept by `paddleocr-vl`, where they can be glued to paragraph numbers and land in table crops on pleading paper. Recovering `page:line` citations is not implemented.
 - With olmOCR, a rotated page loses its Bates number in the marker, because the Apple side-pass cannot read a sideways page.
 - Column detection was tuned on synthetic fixtures; it found about 97.6% of lines on held-out synthetic layouts, and unusual layouts can still be mis-ordered.
-- Fixtures and evaluation data are synthetic, not real filings.
+- Fixtures and evaluation data are synthetic, not real filings. Apple Bates accuracy on pleadings was 88.6% on the accept seeds.
+- Apple Vision crashed intermittently at process start in the evaluation binary (an Apple framework init race); the current build caps Vision at 2 concurrent requests and re-runs a crashed child from its checkpoints.
 - Handwriting is not evaluated; there is no trustworthy ground truth for it.
 - Model engines are slower than they look: a 300-page scan takes minutes to hours depending on the engine, so use the progress bar ETA and rely on resume.
+
+## Using ocr from an agent (Claude Code skill)
+
+[skills/ocr/SKILL.md](skills/ocr/SKILL.md) is a Claude Code skill. It tells an agent when to reach for `ocr`, how to check setup, which engine to pick, how to read exit codes, front matter and Bates markers, and to keep documents local. Install it for your user account:
+
+    mkdir -p ~/.claude/skills && cp -R skills/ocr ~/.claude/skills/
+
+or for one project only, copy it to `<project>/.claude/skills/ocr/`. The skill does not install the `ocr` binary itself.
 
 ## Privacy
 
@@ -287,4 +303,9 @@ Documents:
 
 - [PLAN.md](PLAN.md): the specification and all decisions.
 - [docs/spike.md](docs/spike.md): measurements to date.
-- docs/eval.md: evaluation results (coming).
+- [docs/eval.md](docs/eval.md): evaluation method, per-engine results, targets and known gaps.
+- [docs/azure-eval.md](docs/azure-eval.md): prompt for an Azure Document Intelligence comparison on another machine.
+
+## License
+
+MIT; see [LICENSE](LICENSE). Model weights are not bundled: `ocr server setup` downloads them from Hugging Face under each model's own license.

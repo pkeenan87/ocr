@@ -6,7 +6,7 @@ use std::path::Path;
 use anyhow::{Context, Result, bail};
 use serde::Deserialize;
 
-use super::{Block, DocInfo, DocKind, GrayImage, Options, Page};
+use super::{Block, DocInfo, DocKind, GrayImage, Line, Options, Page};
 
 unsafe extern "C" {
     fn ocr_bridge_recognize_document(
@@ -52,6 +52,8 @@ struct PageOut {
     height: u32,
     #[serde(default)]
     blocks: Vec<Block>,
+    #[serde(default)]
+    lines: Vec<Line>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -141,6 +143,7 @@ pub fn recognize_page(path: &Path, page_index: usize, dpi: u32, options: &Option
         width: page.width,
         height: page.height,
         blocks: page.blocks,
+        lines: page.lines,
     })
 }
 

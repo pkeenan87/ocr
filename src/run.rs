@@ -54,7 +54,9 @@ pub trait Backend: Sync {
         false
     }
     /// The stderr note for transcript pages, if the engine has one.
-    fn transcript_note(&self, input: &Path, pages: &str) -> Option<String>;
+    /// `pages`: every transcript page; `unverified`: those whose line numbers could not be
+    /// re-anchored to the page geometry.
+    fn transcript_note(&self, input: &Path, pages: &str, unverified: &str) -> Option<String>;
 }
 
 /// How one file ended.
@@ -72,6 +74,8 @@ pub struct FileOutcome {
     pub fallback: usize,
     /// Pages that look like deposition transcripts.
     pub transcripts: Vec<usize>,
+    /// Transcript pages whose line numbers could not be re-anchored (`line_numbers.unverified`).
+    pub unverified: Vec<usize>,
     pub elapsed: Duration,
 }
 
@@ -405,6 +409,11 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
             .filter(|r| r.transcript)
             .map(|r| r.number)
             .collect(),
+        unverified: results
+            .iter()
+            .filter(|r| r.transcript && r.line_numbers == Some(false))
+            .map(|r| r.number)
+            .collect(),
         elapsed: e.b.started.elapsed(),
     })
 }
@@ -531,8 +540,15 @@ pub fn run(items: &[Item], backend: &dyn Backend, s: &Settings, per_file_bars: b
 /// The per-file line and the transcript note.
 fn report_file(item: &Item, o: &FileOutcome, backend: &dyn Backend, quiet: bool) {
     if !o.transcripts.is_empty() {
-        let pages: Vec<String> = o.transcripts.iter().map(|n| n.to_string()).collect();
-        if let Some(note) = backend.transcript_note(&item.input, &pages.join(", ")) {
+        let list = |v: &[usize]| {
+            v.iter()
+                .map(|n| n.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        };
+        if let Some(note) =
+            backend.transcript_note(&item.input, &list(&o.transcripts), &list(&o.unverified))
+        {
             progress::line(note);
         }
     }

@@ -31,6 +31,12 @@ pub struct Line {
     pub text: String,
     /// Normalized [x, y, w, h], origin top-left.
     pub bbox: [f64; 4],
+    /// `Options::reader` `text` only: Vision's confidence in `text` (coarse in accurate mode:
+    /// mostly 0.5 or 1.0), and its next-best readings of the line.
+    #[serde(default)]
+    pub confidence: Option<f64>,
+    #[serde(default)]
+    pub alternatives: Vec<String>,
 }
 
 /// Text-recognition settings passed to Vision.
@@ -46,6 +52,10 @@ pub struct Options {
     pub crop: Option<[f64; 4]>,
     /// Also return the line-level observations (`Page::lines`); used on transcript candidates.
     pub lines: bool,
+    /// `text`: read lines with Vision's older `RecognizeTextRequest` instead of the document
+    /// recognizer. Returns `Page::lines` only, with confidence and alternatives; no blocks.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reader: Option<&'static str>,
 }
 
 impl Default for Options {
@@ -58,6 +68,7 @@ impl Default for Options {
             custom_words: Vec::new(),
             crop: None,
             lines: false,
+            reader: None,
         }
     }
 }

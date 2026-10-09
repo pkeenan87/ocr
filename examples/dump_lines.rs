@@ -1,4 +1,5 @@
 //! Prints Vision's line-level observations of one page: `dump_lines <pdf> <page> <dpi> [x,y,w,h]`.
+//! `READER=text` uses the second reader (`RecognizeTextRequest`) and prints its confidence.
 use std::path::PathBuf;
 
 use ocr::vision::{self, Options};
@@ -15,14 +16,15 @@ fn main() -> anyhow::Result<()> {
     let opts = Options {
         crop,
         lines: true,
+        reader: std::env::var_os("READER").map(|_| "text"),
         ..Options::default()
     };
     let page = vision::recognize_page(&path, page - 1, dpi, &opts)?;
     for l in &page.lines {
         let b = l.bbox;
         println!(
-            "x={:.4} y={:.4} w={:.4} h={:.4}  {}",
-            b[0], b[1], b[2], b[3], l.text
+            "x={:.4} y={:.4} w={:.4} h={:.4} c={:?}  {} {:?}",
+            b[0], b[1], b[2], b[3], l.confidence, l.text, l.alternatives
         );
     }
     Ok(())

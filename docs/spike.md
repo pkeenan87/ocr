@@ -533,3 +533,35 @@ Measured on the 20 public filings (Apple, default `auto`), against the substring
 - `$246.95` on a scanned loan form, where the embedded text has `246 95` with the cents in a separate box.
 
 Both outcomes are the safe direction. The newly verified values are amounts whose scale word was on the next line.
+
+## Second reader for scanned pages (2026-10-09)
+
+`--verify-json` now reads each page that has values but no embedded text a second time. The bridge gained a `reader: "text"` option. It runs Vision's older `RecognizeTextRequest` (line level, accurate, no language correction) at 300 DPI, and returns lines with confidence and the next-best readings. Two re-reads run at a time, within the bridge's Vision limit.
+
+**Confidence and alternatives carry no signal in accurate mode.** On 732 lines of a scanned motion, confidence was 1.0 on every line, and no line had an alternative. The doubtful check (confidence below 0.5, or a next-best reading that changes the value) is kept because it costs nothing, but in practice it does not fire.
+
+**Measured blind on born-digital pages.** The pages were OCRed with `--use-text-layer never`, and the embedded text was hidden from verify (`OCR_VERIFY_IGNORE_EMBEDDED=1`), so the second reader decided alone. Its decisions were graded against the run that could see the embedded text. 20 public filings, 230 pages:
+
+| | Values |
+|---|---|
+| Values the embedded text confirms | 574 |
+| Of these, flagged by the second reader (false alarms) | 27 (4.7%) |
+| Values the embedded text contradicts | 47 |
+| Of these, flagged by the second reader | 21 (45%) |
+
+**Agreement between two Apple readings proved not independent.** Before agreement was demoted, 546 values were confirmed this way, and 25 of them disagreed with the embedded text. Most of those 25 were cases where the embedded text was itself wrong or misparsed:
+- a 1985 scan with an old OCR text layer;
+- a handwritten form;
+- a footnote marker stuck to an amount, `$1,000,000.8`.
+
+Eight were real shared errors. A Jane Street filing carries two overprinted stamps, `Filed 04/24/24` and `Filed 04/18/24`, and both Apple readers read the blend as `04/28/24`, a date in neither stamp.
+
+**Hence:** on Apple pages the second reading only finds disagreements. Agreement verifies a value only when the first reading came from a model engine, and the page did not fall back to Apple.
+
+**Symbol repair:** the second reading gets the same `§`/`¶` restoration as the first. Without it, `S 1983` was a disagreement with `§ 1983`. Restoring the symbols cut false alarms from 46 to 27, and catches went from 22 to 21. Bare pleading line numbers are dropped before matching, because they come between `May 7,` and `2007.`. `S5,500` counts as `$5,500` when the amount has digit grouping or cents.
+
+**Default run** (Apple, `auto`, 20 filings), compared with master:
+- **Pages in `azure_pages`:** 53 → 55. Nine values on scans are now `check` rather than `unchecked`. Three of them are `§` misread as `$` (`$1446`, `$ 1983`, `$2254`).
+- **Time:** 125 s → 144 s for the whole set; 60 pages were re-read.
+
+**Not yet measured:** a live model run. The model path (agreement verifies) is unit-tested only.

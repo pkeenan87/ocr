@@ -102,6 +102,7 @@ fn matrix(image: &std::path::Path) -> anyhow::Result<()> {
                 custom_words: Vec::new(),
                 crop: None,
                 lines: false,
+                reader: None,
             };
             let blocks = vision::recognize_document(image, &opts)?;
             let all: String = blocks

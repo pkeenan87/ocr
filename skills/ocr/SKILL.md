@@ -59,7 +59,7 @@ When the user will rely on figures, dates, docket numbers or citations, scan wit
 
 - **Quote or compute only with values that are `verified`**, or that a second reader has confirmed. Always give the page, and the Bates number if there is one.
 - **Treat `check` values as unconfirmed.** Never present them as fact. If a second OCR service is available (for example an Azure Document Intelligence tool), send it only the pages the question needs, taken from `azure_pages` or from the pages of the relevant fields. Use its reading where the two disagree, and say that you did.
-- **`unchecked` means nobody confirmed the value.** Say so if the value matters.
+- **`unchecked` means nobody confirmed the value.** Say so if the value matters. On scanned pages with the Apple engine, `ocr` has already read the page a second time. An `unchecked` value there means the two Apple readings agree, but they share blind spots, so it is still unconfirmed. A `check` with `not_in_second_reading` means the two readings disagree.
 - **Never fill a gap from memory or by inference.** If a value cannot be confirmed, say that it needs checking against page N of the PDF.
 
 ## Reading the output

@@ -37,6 +37,9 @@ struct LineOut: Encodable {
     let text: String
     /// Normalized bounding box, origin at top-left: [x, y, w, h].
     var bbox: [Double]
+    /// `reader: "text"` only: Vision's confidence in `text`, and its next-best readings.
+    var confidence: Double? = nil
+    var alternatives: [String]? = nil
 }
 
 struct Options: Decodable {
@@ -49,6 +52,9 @@ struct Options: Decodable {
     /// Also return Vision's line-level observations (`lines`); off by default. Optional so a
     /// request without the key still decodes (a failed decode would silently reset every option).
     var lines: Bool? = nil
+    /// `"text"`: read lines with `RecognizeTextRequest` (line-level, with confidence and
+    /// alternatives) instead of `RecognizeDocumentsRequest`. Used as a second reading.
+    var reader: String? = nil
 }
 
 struct PageOut: Encodable {
@@ -234,6 +240,34 @@ private func runVision(_ perform: (RecognizeDocumentsRequest) async throws -> [D
     }
 }
 
+/// Line-level reading with the older text recognizer: each line with its confidence and up to
+/// two alternative readings. No blocks.
+private func runTextLines(_ image: CGImage, options: Options) async -> PageOut {
+    do {
+        var request = RecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = options.languages.map { Locale.Language(identifier: $0) }
+        request.automaticallyDetectsLanguage = options.autoDetectLanguage
+        request.usesLanguageCorrection = options.languageCorrection
+        request.customWords = options.customWords
+        let observations = try await request.perform(on: image)
+        var lines: [LineOut] = []
+        for obs in observations {
+            let candidates = obs.topCandidates(3)
+            guard let best = candidates.first, !best.string.isEmpty else { continue }
+            let r = obs.boundingBox.cgRect
+            lines.append(LineOut(
+                text: best.string,
+                bbox: [r.minX, 1.0 - r.maxY, r.width, r.height],
+                confidence: Double(best.confidence),
+                alternatives: candidates.dropFirst().map(\.string)))
+        }
+        return PageOut(ok: true, lines: lines)
+    } catch {
+        return PageOut(ok: false, error: String(describing: error))
+    }
+}
+
 private func recognize(path: String, options: Options) async -> PageOut {
     await runVision({ try await $0.perform(on: URL(fileURLWithPath: path)) }, options: options)
 }
@@ -256,7 +290,10 @@ private func recognizePage(path: String, index: Int, dpi: Double, options: Optio
             // Normalized crop actually applied, for mapping boxes back to page coordinates.
             crop = [rect.minX / w, rect.minY / h, rect.width / w, rect.height / h]
         }
-        var out = await runVision({ try await $0.perform(on: target) }, options: options)
+        let input = target
+        var out = options.reader == "text"
+            ? await runTextLines(input, options: options)
+            : await runVision({ try await $0.perform(on: input) }, options: options)
         if let c = crop {
             for i in out.blocks.indices {
                 let b = out.blocks[i].bbox

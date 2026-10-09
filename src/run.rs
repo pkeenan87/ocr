@@ -24,6 +24,9 @@ use crate::suspect;
 use crate::verify;
 use crate::vision::{self, DocKind};
 
+/// Resolution of the second reading behind `--verify-json` on pages without embedded text.
+const SECOND_READER_DPI: u32 = 300;
+
 /// Files whose pages are in the pool at the same time.
 const MAX_OPEN_FILES: usize = 4;
 /// Prepared pages the producers may run ahead of the consumers, per consumer (at least 4).
@@ -407,7 +410,23 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
             &front.generated,
             &reviewed,
             mode,
-            &|page| vision::text_layer(&input, page - 1).unwrap_or_default(),
+            &|page| {
+                // For measuring the second reader on born-digital pages (docs/spike.md).
+                if std::env::var_os("OCR_VERIFY_IGNORE_EMBEDDED").is_some() {
+                    return String::new();
+                }
+                vision::text_layer(&input, page - 1).unwrap_or_default()
+            },
+            &|page| {
+                let options = vision::Options {
+                    reader: Some("text"),
+                    ..vision::Options::default()
+                };
+                vision::recognize_page(&input, page - 1, SECOND_READER_DPI, &options)
+                    .ok()
+                    .map(|p| p.lines)
+            },
+            backend.model_ids().is_some(),
         );
         let json = serde_json::to_string_pretty(&report).expect("report serializes");
         pipeline::write_atomic(&verify::sidecar(&e.b.output), &(json + "\n"))

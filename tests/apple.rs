@@ -389,8 +389,16 @@ fn columns_and_transcripts_take_the_embedded_characters() {
     assert!(!md.contains("guality"), "{md}");
     assert!(md.contains("$68,973.00"), "{md}");
     // Text drawn invisibly over a scan is another OCR's reading (`qction`): never taken.
-    let (md, _) = e.scan("ocr_layer.pdf", &[]);
+    let (md, _) = e.scan("ocr_layer.pdf", &["--verify-json"]);
     assert!(md.contains("embedded_text_fixes: {}"), "{md}");
+    // Nor does verify treat it as the document's own text.
+    let v = verify_json(&e, "ocr_layer");
+    assert_eq!(v["pages"][0]["ocr_text_layer"], true, "{v:#}");
+    assert_eq!(
+        v["pages"][0]["text_agreement"]["compared_with"],
+        "ocr_text_layer"
+    );
+    assert_eq!(v["pages"][0]["text_agreement"]["independent"], false);
     assert!(!md.contains("qction") && !md.contains("Cqurt"), "{md}");
     assert!(md.contains("cause of action"), "{md}");
 }

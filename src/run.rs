@@ -413,9 +413,13 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
             &|page| {
                 // For measuring the second reader on born-digital pages (docs/spike.md).
                 if std::env::var_os("OCR_VERIFY_IGNORE_EMBEDDED").is_some() {
-                    return String::new();
+                    return verify::Embedded::default();
                 }
-                vision::text_layer(&input, page - 1).unwrap_or_default()
+                verify::Embedded {
+                    text: vision::text_layer(&input, page - 1).unwrap_or_default(),
+                    ocr_layer: vision::invisible_text_share(&input, page - 1)
+                        .is_ok_and(|v| v > 0.5),
+                }
             },
             &|page| {
                 let options = vision::Options {

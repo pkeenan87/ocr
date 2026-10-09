@@ -705,3 +705,29 @@ The six fewer ordinary pages are on the two OCR-layer filings. Their layer was s
 **Fixtures:**
 - The 4-up transcript fixture goes from 741 to 743 of 745 expected words, with all line numbers still anchored. The fixes are `guality` → `quality` and `$68, 973.00` → `$68,973.00`.
 - A new fixture, `spike/fixtures/ocr_layer.pdf` (`spike/make_ocr_layer.py`), lays an invisible misspelled layer over a scanned image. Without the check the output takes `qction` and `Cqurt`; with it, nothing changes.
+
+## Invisible OCR layers in `--verify-json` (2026-10-09)
+
+The embedded-text correction already skips pages whose text is drawn invisibly. `--verify-json` now treats such pages the same way:
+- each page gets `ocr_text_layer`;
+- a value's agreement with the layer verifies nothing, while a disagreement is `not_in_ocr_text_layer` (`check`);
+- text agreement is reported as `compared_with: ocr_text_layer`, not independent;
+- a suspect page goes to Azure, never to "read the embedded text".
+
+**Public filings:**
+
+| | Before | Now |
+|---|---|---|
+| Values verified free | 619 | 499 |
+| Values on the two OCR-layer filings that were verified | 120 (56 + 64) | 0 |
+| `azure_pages`, `flagged` | 57 | 63 |
+| `azure_pages`, `all` | not measured | 94 (41%) |
+
+**Open refinement:** the dealer form's visible CM/ECF header stamp is real embedded text on a page that is otherwise an OCR layer. It is now treated as part of the layer, which is conservative. Separating visible from invisible characters per value would recover it.
+
+**The skill (`skills/ocr/SKILL.md`) is now the entry point for the whole workflow:**
+1. scan with `--verify-json --verify-fields all`;
+2. send only `azure_pages` to the second OCR service;
+3. compare by value;
+4. state only agreed values, and quote only agreed sentences;
+5. report both readings of any disagreement, and never pick one.

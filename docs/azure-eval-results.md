@@ -66,7 +66,7 @@ The whole 0.6% is page 1 of seeds 10 and 11. Azure tags the top-left attorney bl
 | dots-ocr | 10–12 | 9 | 1.2% | 100% | 68.1% |
 | olmocr | 10–12 | 9 | 11.2% | 96.9% | 30.4% |
 
-Azure reads the 4-up quadrants in order with the line numbers inline, so raw line accuracy is the best of any engine. The misses are wrapped continuations, where the next line number lands on its own line (`7` then the text). **All 22 missed tokens are dollar amounts:** Azure inserts a space after the thousands comma (`$288, 760.00` for `$288,760.00`) on every transcript page. The digits are right, but exact search for the amount fails. This did not happen in the contract, table or production families.
+Azure reads the 4-up quadrants in order with the line numbers inline, so raw line accuracy is the best of any engine. The misses are wrapped continuations, where the next line number lands on its own line (`7` then the text). **All 20 missed tokens (129 − 109) are dollar amounts:** Azure inserts a space after the thousands comma (`$288, 760.00` for `$288,760.00`) on every transcript page. The digits are right, but exact search for the amount fails. This did not happen in the contract, table or production families.
 
 ### fax
 

@@ -374,7 +374,12 @@ fn four_up_transcript_is_flagged() {
 #[test]
 fn columns_and_transcripts_take_the_embedded_characters() {
     // Two columns, read crop by crop: corrected like any page.
-    let e = Env::new(&["two_column.pdf", "transcript4up_seed0.pdf", "ocr_layer.pdf"]);
+    let e = Env::new(&[
+        "two_column.pdf",
+        "transcript4up_seed0.pdf",
+        "ocr_layer.pdf",
+        "ocr_layer_alpha.pdf",
+    ]);
     let (md, _) = e.scan("two_column.pdf", &[]);
     assert!(md.contains("column_split_pages: [1]"), "{md}");
     assert!(md.contains("embedded_text_fixes: {1: "), "{md}");
@@ -401,6 +406,12 @@ fn columns_and_transcripts_take_the_embedded_characters() {
     assert_eq!(v["pages"][0]["text_agreement"]["independent"], false);
     assert!(!md.contains("qction") && !md.contains("Cqurt"), "{md}");
     assert!(md.contains("cause of action"), "{md}");
+    // The same layer drawn fully transparent (`ca 0`, as iOS scanner apps write it).
+    let (md, _) = e.scan("ocr_layer_alpha.pdf", &["--verify-json"]);
+    assert!(md.contains("embedded_text_fixes: {}"), "{md}");
+    let v = verify_json(&e, "ocr_layer_alpha");
+    assert_eq!(v["pages"][0]["ocr_text_layer"], true, "{v:#}");
+    assert!(!md.contains("qction") && !md.contains("Cqurt"), "{md}");
 }
 
 #[test]

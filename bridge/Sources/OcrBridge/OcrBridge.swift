@@ -521,24 +521,29 @@ public func ocr_bridge_text_in_regions(
 struct InvisibleOut: Encodable {
     var ok: Bool
     var error: String? = nil
-    /// Text-showing operators drawn visibly, and with render mode 3 (invisible).
+    /// Text-showing operators drawn visibly, and invisibly (render mode 3 or 7, or a fill alpha of 0).
     var shown: Int = 0
     var invisible: Int = 0
 }
 
-/// Text state while scanning a content stream: the render mode, saved and restored with the
-/// graphics state.
+/// Text state while scanning a content stream: the render mode and fill alpha, saved and restored
+/// with the graphics state.
 private final class TextModes {
     var mode = 0
-    var saved: [Int] = []
+    var alpha = 1.0
+    var saved: [(Int, Double)] = []
     var shown = 0
     var invisible = 0
-    func show() { if mode == 3 { invisible += 1 } else { shown += 1 } }
+    /// The page's `/ExtGState` resources, where `gs` finds the fill alpha (`ca`).
+    var extGState: CGPDFDictionaryRef? = nil
+    func show() {
+        if mode == 3 || mode == 7 || alpha == 0 { invisible += 1 } else { shown += 1 }
+    }
 }
 
-/// How much of a page's text is drawn invisibly (render mode 3), as OCR tools lay a text layer
-/// over a scan. Such text is another OCR's reading, not the document's own characters. Form
-/// XObjects are not entered.
+/// How much of a page's text is drawn invisibly, as OCR tools lay a text layer over a scan:
+/// render mode 3 (or 7), or fully transparent (`ca 0`, as iOS scanner apps write it). Such text is
+/// another OCR's reading, not the document's own characters. Form XObjects are not entered.
 @_cdecl("ocr_bridge_invisible_text")
 public func ocr_bridge_invisible_text(_ path: UnsafePointer<CChar>, _ pageIndex: Int32) -> UnsafeMutablePointer<CChar>? {
     let p = String(cString: path)
@@ -547,6 +552,14 @@ public func ocr_bridge_invisible_text(_ path: UnsafePointer<CChar>, _ pageIndex:
         return json(InvisibleOut(ok: false, error: "page \(Int(pageIndex) + 1) not found"))
     }
     let state = TextModes()
+    if let dict = page.dictionary {
+        var resources: CGPDFDictionaryRef? = nil
+        var ext: CGPDFDictionaryRef? = nil
+        if CGPDFDictionaryGetDictionary(dict, "Resources", &resources), let resources,
+           CGPDFDictionaryGetDictionary(resources, "ExtGState", &ext) {
+            state.extGState = ext
+        }
+    }
     guard let table = CGPDFOperatorTableCreate() else {
         return json(InvisibleOut(ok: false, error: "no operator table"))
     }
@@ -557,15 +570,26 @@ public func ocr_bridge_invisible_text(_ path: UnsafePointer<CChar>, _ pageIndex:
             Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue().mode = Int(m)
         }
     }
+    CGPDFOperatorTableSetCallback(table, "gs") { s, info in
+        var name: UnsafePointer<CChar>? = nil
+        guard CGPDFScannerPopName(s, &name), let name, let info else { return }
+        let t = Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue()
+        var gs: CGPDFDictionaryRef? = nil
+        var ca: CGPDFReal = 1
+        if let ext = t.extGState, CGPDFDictionaryGetDictionary(ext, name, &gs), let gs,
+           CGPDFDictionaryGetNumber(gs, "ca", &ca) {
+            t.alpha = Double(ca)
+        }
+    }
     CGPDFOperatorTableSetCallback(table, "q") { _, info in
         guard let info else { return }
         let t = Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue()
-        t.saved.append(t.mode)
+        t.saved.append((t.mode, t.alpha))
     }
     CGPDFOperatorTableSetCallback(table, "Q") { _, info in
         guard let info else { return }
         let t = Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue()
-        t.mode = t.saved.popLast() ?? 0
+        (t.mode, t.alpha) = t.saved.popLast() ?? (0, 1)
     }
     for op in ["Tj", "TJ", "'", "\""] {
         CGPDFOperatorTableSetCallback(table, op) { _, info in

@@ -8,9 +8,9 @@
 //! dir, so a second `ocr scan` on the same server waits for its turn instead of queueing inside
 //! the server. A request's timeout clock starts only once it holds both.
 
+use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
-use std::os::fd::AsRawFd;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Condvar, Mutex};
 use std::time::{Duration, Instant};
@@ -114,7 +114,14 @@ impl ScanEngine for Paddle {
         Prompt::Ocr
     }
 
+    /// Off macOS the bitmap regions have no Vision table masks, so table columns and 4-up
+    /// transcript panels look like text columns, and splitting them garbled tables (52% CER) and
+    /// transcripts (44%) on accept seeds 10-12. The full page is read first instead, and the
+    /// region crops are kept for a loop or truncation, as for olmOCR (PLAN §9.7).
     fn plan(&self, side: &SidePass) -> (Vec<Spec>, bool) {
+        if cfg!(not(target_os = "macos")) {
+            return (vec![(Prompt::Ocr, None)], false);
+        }
         choose_plan(side)
     }
 
@@ -423,15 +430,27 @@ pub struct Ctx {
     permits: Mutex<usize>,
     permit_freed: Condvar,
     mlx_vlm: String,
+    /// Per document: Bates corner probes that found nothing, or `BATES_FOUND` (olmOCR off
+    /// macOS, `want_bates_corners`).
+    bates_misses: Mutex<HashMap<PathBuf, u32>>,
 }
 
-/// `--max-num-seqs` of the server, from its recorded argv (1 if absent).
+/// `bates_misses` value of a document known to carry Bates numbers.
+const BATES_FOUND: u32 = u32::MAX;
+/// Pages of a document probed for a Bates corner, with nothing found, before probing stops.
+const BATES_PROBE_PAGES: u32 = 3;
+
+/// Requests the server runs at once: its recorded `slots` (llama-server), else `--max-num-seqs`
+/// from its recorded argv (mlx-vlm), else 1.
 pub fn max_num_seqs(info: &ServerInfo) -> usize {
-    info.argv
-        .iter()
-        .position(|a| a == "--max-num-seqs")
-        .and_then(|i| info.argv.get(i + 1))
-        .and_then(|v| v.parse().ok())
+    info.slots
+        .or_else(|| {
+            info.argv
+                .iter()
+                .position(|a| a == "--max-num-seqs")
+                .and_then(|i| info.argv.get(i + 1))
+                .and_then(|v| v.parse().ok())
+        })
         .filter(|n| *n > 0)
         .unwrap_or(1)
 }
@@ -452,8 +471,8 @@ impl Drop for Slot<'_> {
     }
 }
 
-/// Locks one of `slots` files `server.lock`, `server.lock.1`, ... in the state dir with
-/// `flock`, waiting until one is free. With one slot this is a plain blocking exclusive lock.
+/// Locks one of `slots` files `server.lock`, `server.lock.1`, ... in the state dir (an
+/// exclusive `File::lock`), waiting until one is free. With one slot this is a plain blocking exclusive lock.
 /// `None` if the state dir is unusable (the run then relies on its own permits).
 fn lock_server(slots: usize) -> Option<File> {
     let dir = state_dir().ok()?;
@@ -474,18 +493,17 @@ fn lock_server(slots: usize) -> Option<File> {
     if slots <= 1 {
         let f = open(0)?;
         loop {
-            if unsafe { libc::flock(f.as_raw_fd(), libc::LOCK_EX) } == 0 {
-                return Some(f);
-            }
-            if std::io::Error::last_os_error().kind() != std::io::ErrorKind::Interrupted {
-                return None;
+            match f.lock() {
+                Ok(()) => return Some(f),
+                Err(e) if e.kind() == std::io::ErrorKind::Interrupted => {}
+                Err(_) => return None,
             }
         }
     }
     loop {
         for k in 0..slots {
             let f = open(k)?;
-            if unsafe { libc::flock(f.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } == 0 {
+            if f.try_lock().is_ok() {
                 return Some(f);
             }
         }
@@ -501,7 +519,13 @@ impl Ctx {
         jobs: usize,
     ) -> Self {
         let in_flight = jobs.min(max_num_seqs(&info)).max(1);
-        let lim = engines::limits(spec.engine());
+        let mut lim = engines::limits(spec.engine());
+        // The timeouts come from Apple Silicon rates; llama.cpp's CPU build (runtime id
+        // `llama.cpp <build> cpu`) gets four times as long (PLAN §9.7).
+        if mlx_vlm.ends_with(" cpu") {
+            lim.timeout_secs *= 4;
+            lim.retry_timeout_secs *= 4;
+        }
         let over: Option<u64> = std::env::var("OCR_REQUEST_TIMEOUT_SECS")
             .ok()
             .and_then(|v| v.parse().ok())
@@ -509,9 +533,14 @@ impl Ctx {
         Self {
             port: info.port,
             engine: format!(
-                "{} ({}, mlx-vlm {mlx_vlm})",
+                "{} ({}, {})",
                 spec.engine().name(),
-                info.repo
+                info.repo,
+                if mlx_vlm.starts_with("llama.cpp") {
+                    mlx_vlm.to_string()
+                } else {
+                    format!("mlx-vlm {mlx_vlm}")
+                }
             ),
             repo: info.repo.clone(),
             timeout: Duration::from_secs(over.unwrap_or(lim.timeout_secs)),
@@ -524,6 +553,28 @@ impl Ctx {
             permits: Mutex::new(in_flight),
             permit_freed: Condvar::new(),
             mlx_vlm: mlx_vlm.to_string(),
+            bates_misses: Mutex::new(HashMap::new()),
+        }
+    }
+
+    /// Whether a page of `path` without a Bates number in its text is worth extra corner
+    /// requests: yes while the document has shown Bates numbers, or until
+    /// `BATES_PROBE_PAGES` of its pages were probed for nothing.
+    pub(crate) fn want_bates_corners(&self, path: &Path) -> bool {
+        let misses = self.bates_misses.lock().unwrap_or_else(|e| e.into_inner());
+        misses
+            .get(path)
+            .is_none_or(|&n| n == BATES_FOUND || n < BATES_PROBE_PAGES)
+    }
+
+    /// Records whether a page of `path` had a Bates number (from its text or a corner probe).
+    pub(crate) fn note_bates(&self, path: &Path, found: bool) {
+        let mut misses = self.bates_misses.lock().unwrap_or_else(|e| e.into_inner());
+        let n = misses.entry(path.to_path_buf()).or_insert(0);
+        if found {
+            *n = BATES_FOUND;
+        } else if *n != BATES_FOUND {
+            *n += 1;
         }
     }
 
@@ -738,6 +789,8 @@ pub struct Output {
     pub(crate) body: String,
     pub(crate) table: bool,
     pub(crate) flagged: bool,
+    /// A Bates number the engine read itself (olmOCR's corner requests off macOS).
+    pub(crate) bates: Option<String>,
 }
 
 fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fail> {
@@ -745,6 +798,7 @@ fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fa
         body: String::new(),
         table: false,
         flagged: false,
+        bates: None,
     };
     let mut parts = Vec::new();
     for req in reqs {
@@ -776,6 +830,13 @@ pub struct Prepared {
     pub(crate) planned: Result<Vec<Planned>, String>,
     /// Region crops to try if the single full-page request loops or is cut off.
     pub(crate) alt: Option<Vec<Spec>>,
+}
+
+impl Prepared {
+    /// The Bates number the Apple side-pass found (macOS only).
+    pub(crate) fn bates(&self) -> Option<&str> {
+        self.bates.as_deref()
+    }
 }
 
 /// Renders the images of `specs` the way `spec` wants them (`--dpi`, or an exact longest side).
@@ -870,13 +931,29 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
                 (out.body, None)
             };
             PageResult {
+                // Off macOS there is no Vision side-pass: the Bates number comes from the
+                // model's own text, which keeps the footer, or from olmOCR's corner requests
+                // (PLAN §9.5).
+                bates: prep.bates.clone().or(out.bates).or_else(|| {
+                    cfg!(not(target_os = "macos"))
+                        .then(|| markdown::find_bates_in_text(&body))
+                        .flatten()
+                }),
                 body,
-                bates: prep.bates.clone(),
                 column_split: prep.column_split && !prep.transcript,
                 transcript: prep.transcript,
                 table: out.table,
                 flagged: out.flagged,
                 line_numbers,
+                ..blank(number)
+            }
+        }
+        Err(Fail::Failed(reason)) if cfg!(not(target_os = "macos")) => {
+            // No Apple Vision text to fall back to: the page fails, and a re-run retries it.
+            progress::line(format!("warning: page {number}: {reason}"));
+            PageResult {
+                transcript: prep.transcript,
+                error: Some(reason),
                 ..blank(number)
             }
         }

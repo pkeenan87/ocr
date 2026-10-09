@@ -3,6 +3,7 @@
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom};
 use std::net::TcpListener;
+#[cfg(unix)]
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -31,6 +32,10 @@ pub struct ServerInfo {
     pub argv: Vec<String>,
     #[serde(default)]
     pub env: Vec<(String, String)>,
+    /// Requests the server runs at once (llama-server `--parallel`). Absent in mlx-vlm
+    /// `server.json` files, which carry it as `--max-num-seqs` in `argv`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slots: Option<usize>,
     pub started_at: String,
 }
 
@@ -125,6 +130,7 @@ fn ensure_venv(uv: &Path, venv: &Path) -> Result<Runtime, CliError> {
     Ok(Runtime {
         python: py,
         mlx_vlm: mlx,
+        ..Default::default()
     })
 }
 
@@ -150,17 +156,28 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
                 engines::quants(engine, version).join(", ")
             ))
         })?;
-        if !fake {
+        // Off macOS the model lives in GPU memory; 7e checks VRAM instead.
+        if !fake && cfg!(target_os = "macos") {
             check_ram(engine, quant, args.force)?;
         }
         plan.push((engine, version, quant, repo));
     }
 
-    let runtime = if fake {
+    let runtime = if fake && cfg!(target_os = "macos") {
         Runtime {
             python: "fake".into(),
             mlx_vlm: MLX_VLM_PIN.into(),
+            ..Default::default()
         }
+    } else if fake {
+        Runtime {
+            llama_cpp: Some(engines::LLAMA_BUILD.into()),
+            llama_variant: Some("cpu".into()),
+            ..Default::default()
+        }
+    } else if cfg!(not(target_os = "macos")) {
+        let engines: Vec<_> = plan.iter().map(|p| (p.0, p.1, p.2)).collect();
+        install_llama_runtime(&engines, args.force)?
     } else {
         let uv = find_uv().ok_or_else(|| {
             CliError::Setup(format!(
@@ -173,12 +190,17 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
     cfg.runtime = Some(runtime);
 
     for (engine, version, quant, repo) in plan {
-        if !fake {
+        if !fake && cfg!(target_os = "macos") {
             println!("downloading {repo}");
             run_checked(
                 Command::new(venv_dir()?.join("bin/hf")).args(["download", repo]),
                 "hf download",
             )?;
+        }
+        #[cfg(not(target_os = "macos"))]
+        if !fake {
+            let gguf = engines::gguf(engine, version, quant).expect("resolved above");
+            crate::llama::install_weights(&gguf)?;
         }
         cfg.engines.insert(
             engine.name().into(),
@@ -193,6 +215,99 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
         println!("{} ready ({repo})", engine.name());
     }
     Ok(())
+}
+
+/// Off macOS (PLAN §9.2): probes the GPU, picks the llama.cpp build, checks that every engine
+/// being installed fits its memory (refusing without `--force` when it doesn't, and refusing
+/// olmocr and dots on the CPU build), then installs llama.cpp and pdfium.
+#[cfg(not(target_os = "macos"))]
+fn install_llama_runtime(
+    engines: &[(Engine, Option<&str>, Quant)],
+    force: bool,
+) -> Result<Runtime, CliError> {
+    use crate::llama::{self, Fit};
+    let hw = llama::probe()?;
+    let variant = hw.variant;
+    let gpu = hw
+        .gpu
+        .as_ref()
+        .map(|g| format!("{} ({} MiB)", g.name, g.memory_mib));
+    println!(
+        "llama.cpp {} ({} build: {})",
+        llama::LLAMA_BUILD,
+        variant.name(),
+        hw.reason
+    );
+    if let Some(g) = &gpu {
+        println!("GPU: {g}");
+    }
+    if !variant.uses_gpu() {
+        eprintln!("{}", llama::cpu_warning());
+    }
+    let (memory_gb, dedicated, what) = match (&hw.gpu, variant.uses_gpu()) {
+        (Some(g), true) => (
+            Some(g.memory_mib as f64 * 1048576.0 / 1e9),
+            true,
+            "GPU memory",
+        ),
+        _ => (llama::ram_gb(), false, "system memory"),
+    };
+    for &(engine, version, quant) in engines {
+        let name = engine.name();
+        if !variant.uses_gpu() && !llama::cpu_ok(engine) {
+            if !force {
+                return Err(CliError::Setup(format!(
+                    "error: {name} is too slow without a GPU; use paddleocr-vl, or pass --force to install it anyway"
+                )));
+            }
+            eprintln!("⚠ {name} without a GPU will be very slow; continuing because of --force");
+        }
+        let Some(gguf) = engines::gguf(engine, version, quant) else {
+            continue;
+        };
+        let need = llama::need_gb(&gguf);
+        let Some(have) = memory_gb else {
+            eprintln!("⚠ cannot determine {what}; skipping the memory check for {name}");
+            continue;
+        };
+        let q = quant.name();
+        let hint = if engine == Engine::Olmocr && quant != Quant::Q4 {
+            " Try `--quant 4bit`."
+        } else {
+            ""
+        };
+        match llama::fit(need, have, dedicated) {
+            Fit::Ok => {}
+            Fit::Tight => eprintln!(
+                "⚠ {name} {q} needs about {need:.1} GB and this machine has {have:.1} GB of {what}, so it may be tight.{hint}"
+            ),
+            Fit::TooBig if force => eprintln!(
+                "⚠ {name} {q} needs about {need:.1} GB but this machine has {have:.1} GB of {what}; continuing because of --force"
+            ),
+            Fit::TooBig => {
+                return Err(CliError::Setup(format!(
+                    "error: {name} {q} needs about {need:.1} GB but this machine has only {have:.1} GB of {what}.{hint} \
+                     Pass --force to install anyway."
+                )));
+            }
+        }
+    }
+    llama::install(variant)?;
+    llama::install_pdfium()?;
+    Ok(Runtime {
+        llama_cpp: Some(llama::LLAMA_BUILD.into()),
+        llama_variant: Some(variant.name().into()),
+        gpu,
+        ..Default::default()
+    })
+}
+
+#[cfg(target_os = "macos")]
+fn install_llama_runtime(
+    _: &[(Engine, Option<&str>, Quant)],
+    _: bool,
+) -> Result<Runtime, CliError> {
+    unreachable!("macOS runs mlx-vlm")
 }
 
 fn check_ram(engine: Engine, quant: Quant, force: bool) -> Result<(), CliError> {
@@ -232,12 +347,14 @@ fn check_ram(engine: Engine, quant: Quant, force: bool) -> Result<(), CliError> 
 
 // ------------------------------------------------------- process helpers
 
+#[cfg(unix)]
 fn pid_alive(pid: u32) -> bool {
     // SAFETY: signal 0 only checks existence.
     let r = unsafe { libc::kill(pid as i32, 0) };
     r == 0 || std::io::Error::last_os_error().raw_os_error() == Some(libc::EPERM)
 }
 
+#[cfg(unix)]
 fn killpg(pid: u32, sig: i32) {
     // SAFETY: plain signal delivery to the process group we created (pgid == pid).
     unsafe {
@@ -245,6 +362,19 @@ fn killpg(pid: u32, sig: i32) {
     }
 }
 
+/// Asks the server's process group to exit (SIGTERM).
+#[cfg(unix)]
+fn terminate(pid: u32) {
+    killpg(pid, libc::SIGTERM);
+}
+
+/// Kills the server's process group outright (SIGKILL).
+#[cfg(unix)]
+fn force_kill(pid: u32) {
+    killpg(pid, libc::SIGKILL);
+}
+
+#[cfg(unix)]
 fn process_command(pid: u32) -> Option<String> {
     let out = Command::new("ps")
         .args(["-o", "command=", "-p", &pid.to_string()])
@@ -252,6 +382,82 @@ fn process_command(pid: u32) -> Option<String> {
         .ok()?;
     let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
     (out.status.success() && !s.is_empty()).then_some(s)
+}
+
+/// The process `pid`, refreshed with its command line.
+#[cfg(windows)]
+fn process<T>(pid: u32, f: impl FnOnce(&sysinfo::Process) -> T) -> Option<T> {
+    use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
+    let pid = Pid::from_u32(pid);
+    let mut sys = System::new();
+    sys.refresh_processes_specifics(
+        ProcessesToUpdate::Some(&[pid]),
+        true,
+        ProcessRefreshKind::nothing().with_cmd(UpdateKind::Always),
+    );
+    sys.process(pid).map(f)
+}
+
+/// Whether process `info.pid` started within a few seconds of `info.started_at` (recorded right
+/// after the spawn).
+#[cfg(windows)]
+fn started_with(info: &ServerInfo) -> bool {
+    let Ok(t) = chrono::DateTime::parse_from_rfc3339(&info.started_at) else {
+        return false;
+    };
+    process(info.pid, |p| p.start_time())
+        .is_some_and(|start| (start as i64 - t.timestamp()).abs() <= 5)
+}
+
+#[cfg(not(windows))]
+fn started_with(_: &ServerInfo) -> bool {
+    false
+}
+
+#[cfg(windows)]
+fn pid_alive(pid: u32) -> bool {
+    process(pid, |_| ()).is_some()
+}
+
+/// Windows has no SIGTERM for a console-less child, so the server is stopped outright.
+#[cfg(windows)]
+fn terminate(pid: u32) {
+    force_kill(pid);
+}
+
+/// Kills the server and anything it started (`taskkill /T`; a `.cmd` wrapper runs its program
+/// as a child), falling back to TerminateProcess on the server alone.
+#[cfg(windows)]
+fn force_kill(pid: u32) {
+    let tree = Command::new("taskkill")
+        .args(["/PID", &pid.to_string(), "/T", "/F"])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success());
+    if !tree {
+        process(pid, |p| p.kill());
+    }
+}
+
+/// The process's command line, or, if Windows won't show it, its executable name (which
+/// `is_ours` then matches without the port).
+#[cfg(windows)]
+fn process_command(pid: u32) -> Option<String> {
+    let cmd = process(pid, |p| {
+        let line = p
+            .cmd()
+            .iter()
+            .map(|a| a.to_string_lossy().into_owned())
+            .collect::<Vec<_>>()
+            .join(" ");
+        if line.is_empty() {
+            p.name().to_string_lossy().into_owned()
+        } else {
+            line
+        }
+    })?;
+    (!cmd.is_empty()).then_some(cmd)
 }
 
 fn is_ours(info: &ServerInfo) -> bool {
@@ -266,8 +472,18 @@ fn is_ours(info: &ServerInfo) -> bool {
     else {
         return false;
     };
-    process_command(info.pid)
-        .is_some_and(|c| c.contains(prog) && c.contains(&format!("--port {}", info.port)))
+    let port = format!("--port {}", info.port);
+    process_command(info.pid).is_some_and(|c| {
+        if cfg!(windows) {
+            // Case-insensitive file system. A bare executable name (no command line) carries no
+            // port, so the process must also have started when `server.json` says ours did: a
+            // reused pid of some other llama-server is not ours.
+            let (c, prog) = (c.to_lowercase(), prog.to_lowercase());
+            c.contains(&prog) && (c.contains(&port) || (!c.contains(' ') && started_with(info)))
+        } else {
+            c.contains(prog) && c.contains(&port)
+        }
+    })
 }
 
 /// The verified running server, if any. A stale `server.json` is removed.
@@ -283,20 +499,21 @@ pub fn running() -> Option<ServerInfo> {
     }
 }
 
-/// Stops a verified server: removes `server.json`, then SIGTERM to its group and SIGKILL after 10 s.
+/// Stops a verified server: removes `server.json`, then SIGTERM to its group and SIGKILL after 10 s
+/// (on Windows, TerminateProcess).
 pub fn stop_server(info: &ServerInfo) {
     // Remove `server.json` first: a scan that loses its connection to this server must be able
     // to tell a user stop (file gone) from a crash (file left behind).
     if let Ok(p) = info_path() {
         let _ = fs::remove_file(p);
     }
-    killpg(info.pid, libc::SIGTERM);
+    terminate(info.pid);
     let deadline = Instant::now() + Duration::from_secs(10);
     while pid_alive(info.pid) && Instant::now() < deadline {
         std::thread::sleep(Duration::from_millis(100));
     }
     if pid_alive(info.pid) {
-        killpg(info.pid, libc::SIGKILL);
+        force_kill(info.pid);
         let end = Instant::now() + Duration::from_secs(3);
         while pid_alive(info.pid) && Instant::now() < end {
             std::thread::sleep(Duration::from_millis(50));
@@ -439,6 +656,37 @@ fn weights_missing(tail: &str) -> bool {
         || t.contains("offline mode")
         || t.contains("hf_hub_offline")
         || t.contains("cannot find the requested files in the local cache")
+        // llama-server
+        || t.contains("failed to load model")
+        || t.contains("error loading model")
+        || t.contains("failed to open gguf")
+}
+
+/// Windows starts children with every inheritable handle of the parent, so a detached server
+/// would also hold `ocr`'s own stdout and stderr: whatever reads `ocr`'s output (a pipe to `tee`,
+/// a test harness) then waits for the server to exit. Unix closes them in the child. The flag
+/// is cleared on the originals only; std hands a child its stdio as fresh duplicates, so
+/// `Stdio::inherit` keeps working for other children.
+#[cfg(windows)]
+fn keep_std_handles_from_children() {
+    use std::ffi::c_void;
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn GetStdHandle(which: u32) -> *mut c_void;
+        fn SetHandleInformation(handle: *mut c_void, mask: u32, flags: u32) -> i32;
+    }
+    const HANDLE_FLAG_INHERIT: u32 = 1;
+    // STD_INPUT_HANDLE, STD_OUTPUT_HANDLE, STD_ERROR_HANDLE: (DWORD)-10, -11, -12.
+    for which in [-10i32, -11, -12] {
+        // SAFETY: GetStdHandle has no preconditions; SetHandleInformation only changes a flag
+        // and fails harmlessly on a null or invalid handle.
+        unsafe {
+            let handle = GetStdHandle(which as u32);
+            if !handle.is_null() && handle as isize != -1 {
+                SetHandleInformation(handle, HANDLE_FLAG_INHERIT, 0);
+            }
+        }
+    }
 }
 
 /// Spawns the server described by `template` (pid and started_at are replaced) and waits for readiness.
@@ -456,10 +704,21 @@ fn launch(template: &ServerInfo) -> Result<ServerInfo, CliError> {
     let mut cmd = Command::new(&template.argv[0]);
     cmd.args(&template.argv[1..])
         .envs(template.env.iter().map(|(k, v)| (k, v)))
-        .process_group(0)
         .stdin(Stdio::null())
         .stdout(logfile.try_clone().map_err(anyhow::Error::from)?)
         .stderr(logfile);
+    // Own process group, so the terminal's Ctrl-C reaches the scan but not the server.
+    #[cfg(unix)]
+    cmd.process_group(0);
+    #[cfg(windows)]
+    keep_std_handles_from_children();
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW);
+    }
     let mut child = cmd
         .spawn()
         .map_err(|e| CliError::Server(format!("cannot start {}: {e}", template.argv[0])))?;
@@ -482,7 +741,7 @@ fn launch(template: &ServerInfo) -> Result<ServerInfo, CliError> {
             Ok(info)
         }
         Err(reason) => {
-            killpg(info.pid, libc::SIGKILL);
+            force_kill(info.pid);
             let _ = child.wait();
             let _ = fs::remove_file(&path);
             let tail = log_tail(&log, offset);
@@ -540,6 +799,94 @@ fn server_program(venv: &Path) -> String {
             .to_string_lossy()
             .into_owned()
     })
+}
+
+type ServerCommand = (Vec<String>, Vec<(String, String)>, Option<usize>);
+
+/// mlx-vlm's server argv and env (macOS).
+fn mlx_command(engine: &str, repo: &str, port: u16) -> Result<ServerCommand, CliError> {
+    let program = server_program(&venv_dir()?);
+    if std::env::var_os("OCR_SERVER_CMD").is_none() && !Path::new(&program).exists() {
+        return Err(CliError::Setup(format!(
+            "error: model runtime missing. Run `ocr server setup --model {engine}`."
+        )));
+    }
+    let argv = vec![
+        program,
+        "--host".into(),
+        "127.0.0.1".into(),
+        "--port".into(),
+        port.to_string(),
+        "--model".into(),
+        repo.into(),
+        "--max-num-seqs".into(),
+        "1".into(),
+    ];
+    Ok((argv, vec![("HF_HUB_OFFLINE".into(), "1".into())], None))
+}
+
+/// llama-server's argv and env off macOS, from the build and weights setup installed. One slot,
+/// as on the Mac. The build's library directories (llama.cpp's own and the CUDA runtime's) go
+/// first on `LD_LIBRARY_PATH` (Linux) or `PATH` (Windows).
+#[cfg(not(target_os = "macos"))]
+fn llama_command(
+    engine: Engine,
+    version: Option<&str>,
+    quant: Quant,
+    port: u16,
+) -> Result<ServerCommand, CliError> {
+    use crate::llama::{self, Variant};
+    let n = engine.name();
+    let missing = || {
+        CliError::Setup(format!(
+            "error: model runtime missing. Run `ocr server setup --model {n}`."
+        ))
+    };
+    let variant = Config::load()?
+        .and_then(|c| c.runtime)
+        .and_then(|r| r.llama_variant)
+        .and_then(|v| Variant::parse(&v))
+        .ok_or_else(missing)?;
+    if !variant.uses_gpu() {
+        eprintln!("{}", llama::cpu_warning());
+    }
+    let gguf = engines::gguf(engine, version, quant).ok_or_else(missing)?;
+    let model = llama::model_path(&gguf, gguf.model.name)?;
+    let mmproj = llama::model_path(&gguf, gguf.mmproj.name)?;
+    let fake = std::env::var("OCR_SERVER_CMD").ok();
+    if fake.is_none() && !(model.is_file() && mmproj.is_file()) {
+        return Err(CliError::Setup(format!(
+            "error: weights missing — re-run `ocr server setup --model {n}`"
+        )));
+    }
+    let program = match fake {
+        Some(p) => PathBuf::from(p),
+        None => llama::server_binary(variant).ok_or_else(missing)?,
+    };
+    let slots = 1;
+    let mut argv = vec![program.to_string_lossy().into_owned()];
+    argv.extend(llama::server_args(
+        &model, &mmproj, port, engine, slots, variant,
+    ));
+    let mut env = Vec::new();
+    let var = if cfg!(windows) {
+        "PATH"
+    } else {
+        "LD_LIBRARY_PATH"
+    };
+    let mut dirs = llama::library_dirs(variant);
+    dirs.extend(program.parent().map(Path::to_path_buf));
+    dirs.dedup();
+    dirs.extend(std::env::var_os(var).iter().flat_map(std::env::split_paths));
+    if let Ok(joined) = std::env::join_paths(dirs) {
+        env.push((var.into(), joined.to_string_lossy().into_owned()));
+    }
+    Ok((argv, env, Some(slots)))
+}
+
+#[cfg(target_os = "macos")]
+fn llama_command(_: Engine, _: Option<&str>, _: Quant, _: u16) -> Result<ServerCommand, CliError> {
+    unreachable!("macOS runs mlx-vlm")
 }
 
 /// Resolves the version/quant/repo to serve, defaulting to what setup recorded.
@@ -611,13 +958,11 @@ pub fn start(args: &StartArgs, engine: Engine) -> Result<(), CliError> {
         )));
     }
 
-    let venv = venv_dir()?;
-    let program = server_program(&venv);
-    if std::env::var_os("OCR_SERVER_CMD").is_none() && !Path::new(&program).exists() {
-        return Err(CliError::Setup(format!(
-            "error: model runtime missing. Run `ocr server setup --model {n}`."
-        )));
-    }
+    let (argv, env, slots) = if cfg!(target_os = "macos") {
+        mlx_command(n, repo, args.port)?
+    } else {
+        llama_command(engine, version.as_deref(), quant, args.port)?
+    };
     let template = ServerInfo {
         pid: 0,
         engine: n.into(),
@@ -625,18 +970,9 @@ pub fn start(args: &StartArgs, engine: Engine) -> Result<(), CliError> {
         quant: quant.name().into(),
         repo: repo.into(),
         port: args.port,
-        argv: vec![
-            program,
-            "--host".into(),
-            "127.0.0.1".into(),
-            "--port".into(),
-            args.port.to_string(),
-            "--model".into(),
-            repo.into(),
-            "--max-num-seqs".into(),
-            "1".into(),
-        ],
-        env: vec![("HF_HUB_OFFLINE".into(), "1".into())],
+        argv,
+        env,
+        slots,
         started_at: String::new(),
     };
     println!("starting {n} ({repo}) on port {}", args.port);
@@ -681,6 +1017,29 @@ pub fn stop() -> Result<(), CliError> {
     Ok(())
 }
 
+/// Resident memory of the server off macOS (Linux `/proc`, Windows via `sysinfo`). GPU memory
+/// is not included.
+#[cfg(not(target_os = "macos"))]
+fn footprint(pid: u32) -> Option<String> {
+    #[cfg(windows)]
+    let kib = process(pid, |p| p.memory() / 1024)?;
+    #[cfg(not(windows))]
+    let kib: u64 = fs::read_to_string(format!("/proc/{pid}/status"))
+        .ok()?
+        .lines()
+        .find_map(|l| l.strip_prefix("VmRSS:"))?
+        .trim()
+        .trim_end_matches("kB")
+        .trim()
+        .parse()
+        .ok()?;
+    Some(format!(
+        "{:.1} GB resident (CPU memory)",
+        kib as f64 / (1 << 20) as f64
+    ))
+}
+
+#[cfg(target_os = "macos")]
 fn footprint(pid: u32) -> Option<String> {
     let out = Command::new("vmmap")
         .args(["--summary", &pid.to_string()])
@@ -693,6 +1052,21 @@ fn footprint(pid: u32) -> Option<String> {
         .lines()
         .find_map(|l| l.trim().strip_prefix("Physical footprint:"))
         .map(|v| v.trim().to_string())
+}
+
+/// `used / total MiB` of the NVIDIA GPU(s), if `nvidia-smi` answers.
+fn nvidia_memory_used() -> Option<String> {
+    let out = Command::new("nvidia-smi")
+        .args([
+            "--query-gpu=memory.used,memory.total",
+            "--format=csv,noheader,nounits",
+        ])
+        .output()
+        .ok()?;
+    let text = String::from_utf8_lossy(&out.stdout);
+    let line = text.lines().next()?.trim().to_string();
+    let (used, total) = line.split_once(',')?;
+    (out.status.success()).then(|| format!("{} / {} MiB used", used.trim(), total.trim()))
 }
 
 fn format_uptime(secs: i64) -> String {
@@ -729,8 +1103,24 @@ pub fn status() -> Result<(), CliError> {
         "not reachable"
     };
     println!("health:  {health}");
+    // A broken config must not make `status` fail; the build lines are just skipped.
+    if let Some(rt) = Config::load().ok().flatten().and_then(|c| c.runtime)
+        && rt.llama_cpp.is_some()
+    {
+        println!("build:   {}", rt.id());
+        if let Some(gpu) = rt.gpu {
+            println!("gpu:     {gpu}");
+        }
+        if let Some(used) = nvidia_memory_used() {
+            println!("vram:    {used}");
+        }
+    }
     if let Some(fp) = footprint(info.pid) {
-        println!("memory:  {fp} physical footprint");
+        if cfg!(target_os = "macos") {
+            println!("memory:  {fp} physical footprint");
+        } else {
+            println!("memory:  {fp}");
+        }
     }
     Ok(())
 }

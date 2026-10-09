@@ -37,8 +37,16 @@ pub enum ServerCommand {
     Status,
 }
 
+/// `ocr scan --model` default: Apple Vision on macOS, PaddleOCR-VL elsewhere (PLAN §9).
+#[cfg(target_os = "macos")]
+pub const DEFAULT_ENGINE: &str = "apple";
+#[cfg(not(target_os = "macos"))]
+pub const DEFAULT_ENGINE: &str = "paddleocr-vl";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum Engine {
+    /// Apple Vision, in-process. macOS only.
+    #[cfg_attr(not(target_os = "macos"), value(skip))]
     Apple,
     Olmocr,
     PaddleocrVl,
@@ -57,12 +65,15 @@ impl Engine {
         }
     }
 
-    /// Valid `--model-version` values, newest (default) first.
+    /// Valid `--model-version` values, default first. Off macOS only the releases with a GGUF
+    /// build are offered, and dots defaults to `dots.ocr` (PLAN §9.5).
     pub fn versions(self) -> &'static [&'static str] {
         match self {
             Self::Apple | Self::Olmocr => &[],
-            Self::PaddleocrVl => &["1.6", "1.5", "1.0"],
-            Self::DotsOcr => &["dots.mocr", "dots.ocr"],
+            Self::PaddleocrVl if cfg!(target_os = "macos") => &["1.6", "1.5", "1.0"],
+            Self::PaddleocrVl => &["1.6", "1.5"],
+            Self::DotsOcr if cfg!(target_os = "macos") => &["dots.mocr", "dots.ocr"],
+            Self::DotsOcr => &["dots.ocr"],
         }
     }
 
@@ -197,7 +208,7 @@ pub struct ScanArgs {
         conflicts_with = "input_file"
     )]
     pub output_dir: Option<PathBuf>,
-    #[arg(long, value_enum, default_value = "apple")]
+    #[arg(long, value_enum, default_value = DEFAULT_ENGINE)]
     pub model: Engine,
     /// Pin an older model release (paddleocr-vl: 1.6|1.5|1.0, dots-ocr: dots.mocr|dots.ocr)
     #[arg(long, value_name = "V")]
@@ -295,8 +306,11 @@ fn parse_jobs(s: &str) -> Result<usize, String> {
     }
 }
 
-/// Performance-core count via sysctl, falling back to available parallelism.
+/// Performance-core count via sysctl (macOS), falling back to available parallelism.
 pub fn perf_cores() -> usize {
+    #[cfg(not(target_os = "macos"))]
+    return std::thread::available_parallelism().map_or(1, |n| n.get());
+    #[cfg(target_os = "macos")]
     std::process::Command::new("sysctl")
         .args(["-n", "hw.perflevel0.physicalcpu"])
         .output()
@@ -325,7 +339,21 @@ mod tests {
         assert_eq!(Engine::Olmocr.resolve_version(None).unwrap(), None);
         assert!(Engine::Olmocr.resolve_version(Some("1")).is_err());
         let e = Engine::PaddleocrVl.resolve_version(Some("2")).unwrap_err();
-        assert!(e.to_string().contains("1.6, 1.5, 1.0"));
+        let listed = if cfg!(target_os = "macos") {
+            "1.6, 1.5, 1.0"
+        } else {
+            "1.6, 1.5"
+        };
+        assert!(e.to_string().contains(listed));
+        let dots = Engine::DotsOcr.resolve_version(None).unwrap();
+        assert_eq!(
+            dots,
+            Some(if cfg!(target_os = "macos") {
+                "dots.mocr"
+            } else {
+                "dots.ocr"
+            })
+        );
     }
 
     #[test]

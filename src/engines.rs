@@ -2,8 +2,11 @@
 
 use crate::cli::{Engine, Quant};
 
-/// Pinned `mlx-vlm` release installed into the managed venv.
+/// Pinned `mlx-vlm` release installed into the managed venv (macOS).
 pub const MLX_VLM_PIN: &str = "0.7.6";
+
+/// Pinned llama.cpp release whose `llama-server` serves the models elsewhere (PLAN §9).
+pub const LLAMA_BUILD: &str = "b11510";
 
 impl Quant {
     pub fn name(self) -> &'static str {
@@ -24,8 +27,12 @@ pub fn default_quant(engine: Engine) -> Quant {
 }
 
 /// Hugging Face repo for an engine/version/quant; `None` if that combination doesn't exist.
-/// `version` must already be validated (`None` selects the engine's default).
+/// `version` must already be validated (`None` selects the engine's default). macOS serves
+/// MLX weights; elsewhere the GGUF builds in `gguf`.
 pub fn repo(engine: Engine, version: Option<&str>, quant: Quant) -> Option<&'static str> {
+    if cfg!(not(target_os = "macos")) {
+        return gguf(engine, version, quant).map(|g| g.repo);
+    }
     use Quant::{Bf16, Q4, Q8};
     let version = version.or_else(|| engine.versions().first().copied());
     Some(match (engine, version, quant) {
@@ -47,6 +54,145 @@ pub fn repo(engine: Engine, version: Option<&str>, quant: Quant) -> Option<&'sta
         (Engine::DotsOcr, Some("dots.ocr"), Q4) => "mlx-community/dots.ocr-4bit",
         (Engine::DotsOcr, Some("dots.ocr"), Bf16) => "mlx-community/dots.ocr-bf16",
         _ => return None,
+    })
+}
+
+/// One pinned file of a GGUF build.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GgufFile {
+    pub name: &'static str,
+    pub size: u64,
+    pub sha256: &'static str,
+}
+
+/// A GGUF build for llama-server (PLAN §9.3): model and vision projector (mmproj), pinned to a
+/// Hugging Face revision and checked by sha256.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Gguf {
+    pub repo: &'static str,
+    pub revision: &'static str,
+    pub model: GgufFile,
+    pub mmproj: GgufFile,
+}
+
+const fn f(name: &'static str, size: u64, sha256: &'static str) -> GgufFile {
+    GgufFile { name, size, sha256 }
+}
+
+const PADDLE_16: (&str, &str) = (
+    "PaddlePaddle/PaddleOCR-VL-1.6-GGUF",
+    "511b09642bb324401f15f97cc23bc67e8f0a291d",
+);
+const PADDLE_15: (&str, &str) = (
+    "PaddlePaddle/PaddleOCR-VL-1.5-GGUF",
+    "cc977c16989848c264d813ec1705cb181b7a21ee",
+);
+const OLMOCR: (&str, &str) = (
+    "bartowski/allenai_olmOCR-2-7B-1025-GGUF",
+    "42654d7abfe9a19d3cdb90b9a855ce26d265fd93",
+);
+const DOTS_OCR: (&str, &str) = (
+    "ggml-org/dots.ocr-GGUF",
+    "2c093a32ca360a396bc6d87d60408636130b9d9b",
+);
+
+/// The GGUF build of an engine/version/quant served by llama-server off macOS; `None` if that
+/// combination has none. The official PaddleOCR-VL GGUFs come in one precision, listed as bf16.
+pub fn gguf(engine: Engine, version: Option<&str>, quant: Quant) -> Option<Gguf> {
+    use Quant::{Bf16, Q4, Q8};
+    let version = version.or_else(|| engine.versions().first().copied());
+    let olmocr_mmproj = f(
+        "mmproj-allenai_olmOCR-2-7B-1025-f16.gguf",
+        1_354_163_296,
+        "78d1690a4d98051f527104c33796b79faa05f158d14645e19db91fac99bd1b04",
+    );
+    let ((repo, revision), model, mmproj) = match (engine, version, quant) {
+        (Engine::PaddleocrVl, Some("1.6"), Bf16) => (
+            PADDLE_16,
+            f(
+                "PaddleOCR-VL-1.6-GGUF.gguf",
+                935_769_056,
+                "f3ae46ec885050acf4b3d31944431e1fd90d50664fb09126af4a3c050ba14ee8",
+            ),
+            f(
+                "PaddleOCR-VL-1.6-GGUF-mmproj.gguf",
+                881_770_560,
+                "204d757d7610d9b3faab10d506d69e5b244e32bf765e2bab2d0167e65e0a058a",
+            ),
+        ),
+        (Engine::PaddleocrVl, Some("1.5"), Bf16) => (
+            PADDLE_15,
+            f(
+                "PaddleOCR-VL-1.5.gguf",
+                935_768_992,
+                "299051d54faa065abc505cc39b8383ea338fd3020c775ea3e0ba514a7022328c",
+            ),
+            f(
+                "PaddleOCR-VL-1.5-mmproj.gguf",
+                881_770_496,
+                "e7f1a72400fba517046f90d964e2fa0f4dac7781ee3b1bc5d2022f5f8cecbd87",
+            ),
+        ),
+        (Engine::Olmocr, _, Q8) => (
+            OLMOCR,
+            f(
+                "allenai_olmOCR-2-7B-1025-Q8_0.gguf",
+                8_098_524_320,
+                "72a15d2b7532ed3decf5ca8019009f4dd2d54006142bcee0721c888961a4673e",
+            ),
+            olmocr_mmproj,
+        ),
+        (Engine::Olmocr, _, Q4) => (
+            OLMOCR,
+            f(
+                "allenai_olmOCR-2-7B-1025-Q4_K_M.gguf",
+                4_683_072_672,
+                "347935fc4c16808cf97c7adc563da92c67ad90eeb0504a465ff9fa98d2794f3e",
+            ),
+            olmocr_mmproj,
+        ),
+        (Engine::Olmocr, _, Bf16) => (
+            OLMOCR,
+            f(
+                "allenai_olmOCR-2-7B-1025-bf16.gguf",
+                15_237_852_032,
+                "c02b509b658a75d68cb94cdd3674e31ad30a2bd914cd7c5614c52f28811ea699",
+            ),
+            olmocr_mmproj,
+        ),
+        (Engine::DotsOcr, Some("dots.ocr"), Q8) => (
+            DOTS_OCR,
+            f(
+                "dots.ocr-Q8_0.gguf",
+                1_894_530_272,
+                "6f2db1a75215893760b7c7185d52f11715d2e0cb7bff9cefd3f6d409fa1de7e9",
+            ),
+            f(
+                "mmproj-dots.ocr-Q8_0.gguf",
+                1_344_068_512,
+                "20d3d35bea3a64ead0b4b213f8db0de136e174bb5b75b8e85786c51e8e822423",
+            ),
+        ),
+        (Engine::DotsOcr, Some("dots.ocr"), Bf16) => (
+            DOTS_OCR,
+            f(
+                "dots.ocr-f16.gguf",
+                3_560_414_432,
+                "2bb30df3e055fb8cf9b643677d3e164f68f184a70b8c8c439ac67e9bd0b409e8",
+            ),
+            f(
+                "mmproj-dots.ocr-f16.gguf",
+                2_526_296_992,
+                "f462429dbf41729379df4252f84331c9646d80e53f092ccccfd2cb922a3b544e",
+            ),
+        ),
+        _ => return None,
+    };
+    Some(Gguf {
+        repo,
+        revision,
+        model,
+        mmproj,
     })
 }
 
@@ -149,6 +295,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(target_os = "macos")]
     fn repos() {
         assert_eq!(
             repo(Engine::PaddleocrVl, None, Quant::Bf16),
@@ -160,6 +307,23 @@ mod tests {
             Some("mlx-community/dots.ocr-4bit")
         );
         assert_eq!(quants(Engine::PaddleocrVl, None), ["4bit", "bf16"]);
+    }
+
+    #[test]
+    #[cfg(not(target_os = "macos"))]
+    fn gguf_repos() {
+        assert_eq!(
+            repo(Engine::PaddleocrVl, None, Quant::Bf16),
+            Some("PaddlePaddle/PaddleOCR-VL-1.6-GGUF")
+        );
+        assert_eq!(repo(Engine::PaddleocrVl, None, Quant::Q4), None);
+        assert_eq!(quants(Engine::PaddleocrVl, None), ["bf16"]);
+        assert_eq!(quants(Engine::Olmocr, None), ["4bit", "8bit", "bf16"]);
+        assert_eq!(quants(Engine::DotsOcr, None), ["8bit", "bf16"]);
+        let dots = gguf(Engine::DotsOcr, None, Quant::Q8).unwrap();
+        assert_eq!(dots.repo, "ggml-org/dots.ocr-GGUF");
+        assert_eq!(dots.model.name, "dots.ocr-Q8_0.gguf");
+        assert!(gguf(Engine::DotsOcr, Some("dots.mocr"), Quant::Q8).is_none());
     }
 
     #[test]

@@ -1,0 +1,48 @@
+# Linux and Windows builds and tests (PLAN §9, Phase 7f). macOS needs macOS 26 for Apple
+# Vision's document API and is tested on a Mac.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  PDFIUM_URL: https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/7881
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            pdfium: pdfium-linux-x64.tgz
+            pdfium_sha256: 1470e21b8b4a3b4ad7f85684e2da11d94f3b69a86d81dee11b9b6709d927ac1d
+            pdfium_lib: lib/libpdfium.so
+          - os: windows-latest
+            pdfium: pdfium-win-x64.tgz
+            pdfium_sha256: 73cc0de638ac2095e7445bf56a38200a5b7c7ca0e9f4ba144598f2457377ac08
+            pdfium_lib: bin/pdfium.dll
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: pdfium (pinned, checksum verified)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pdfium"
+          curl -fsSL "$PDFIUM_URL/${{ matrix.pdfium }}" -o "$RUNNER_TEMP/pdfium.tgz"
+          echo "${{ matrix.pdfium_sha256 }}  $RUNNER_TEMP/pdfium.tgz" | sha256sum -c -
+          # Relative paths: Git Bash's GNU tar reads `D:\...` as a remote host.
+          cd "$RUNNER_TEMP" && tar -xzf pdfium.tgz -C pdfium
+          echo "OCR_PDFIUM_LIB=$RUNNER_TEMP/pdfium/${{ matrix.pdfium_lib }}" >> "$GITHUB_ENV"
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test --no-fail-fast
+        timeout-minutes: 30

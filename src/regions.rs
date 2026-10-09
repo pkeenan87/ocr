@@ -402,9 +402,10 @@ fn x_cut(map: &Map, node: Rect) -> Option<Vec<Rect>> {
         let narrow = if weak.is_none() {
             let found: Vec<Rect> = pieces.iter().flatten().copied().collect();
             let margins = margin_flags(map, &found);
-            found.iter().zip(margins).position(|(r, m)| {
-                !m && ((r.x1 - r.x0) as f64) < MIN_COLUMN_WIDTH * map.w as f64
-            })
+            found
+                .iter()
+                .zip(margins)
+                .position(|(r, m)| !m && ((r.x1 - r.x0) as f64) < MIN_COLUMN_WIDTH * map.w as f64)
         } else {
             None
         };

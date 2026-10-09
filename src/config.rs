@@ -22,11 +22,35 @@ pub struct EngineEntry {
     pub quant: Option<String>,
 }
 
-/// Managed Python environment versions recorded by setup.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+/// Model runtime recorded by setup: the managed Python environment with mlx-vlm on macOS, or
+/// the llama.cpp build elsewhere (PLAN §9).
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 pub struct Runtime {
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub python: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub mlx_vlm: String,
+    /// llama.cpp release, e.g. `b11510`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub llama_cpp: Option<String>,
+    /// llama.cpp build: cuda12, cuda13, vulkan or cpu.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub llama_variant: Option<String>,
+    /// The GPU setup found for it, e.g. `NVIDIA GeForce RTX 3090 (24576 MiB)`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gpu: Option<String>,
+}
+
+impl Runtime {
+    /// The runtime identity recorded in checkpoints (their `mlx_vlm` key): the mlx-vlm version
+    /// on macOS, as before, and `llama.cpp <build> <variant>` elsewhere.
+    pub fn id(&self) -> String {
+        match (&self.llama_cpp, &self.llama_variant) {
+            (Some(build), Some(variant)) => format!("llama.cpp {build} {variant}"),
+            (Some(build), None) => format!("llama.cpp {build}"),
+            _ => self.mlx_vlm.clone(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -39,22 +63,28 @@ pub struct Config {
     pub runtime: Option<Runtime>,
 }
 
-/// Directory holding `config.toml`: `$OCR_CONFIG_DIR` or `~/.config/ocr`.
+/// Directory holding `config.toml`: `$OCR_CONFIG_DIR`, else `~/.config/ocr` (`%APPDATA%\ocr` on
+/// Windows).
 pub fn config_dir() -> Result<PathBuf> {
     if let Some(d) = std::env::var_os("OCR_CONFIG_DIR") {
         return Ok(d.into());
+    }
+    if cfg!(windows) {
+        let dir = dirs::config_dir().ok_or_else(|| anyhow!("cannot determine config directory"))?;
+        return Ok(dir.join("ocr"));
     }
     let home = dirs::home_dir().ok_or_else(|| anyhow!("cannot determine home directory"))?;
     Ok(home.join(".config/ocr"))
 }
 
-/// State directory: `$OCR_STATE_DIR` or `~/Library/Application Support/ocr`.
+/// State directory: `$OCR_STATE_DIR`, else the platform data dir plus `ocr`
+/// (`~/Library/Application Support/ocr`, `~/.local/share/ocr`, `%LOCALAPPDATA%\ocr`).
 pub fn state_dir() -> Result<PathBuf> {
     if let Some(d) = std::env::var_os("OCR_STATE_DIR") {
         return Ok(d.into());
     }
-    let home = dirs::home_dir().ok_or_else(|| anyhow!("cannot determine home directory"))?;
-    Ok(home.join("Library/Application Support/ocr"))
+    let data = dirs::data_local_dir().ok_or_else(|| anyhow!("cannot determine data directory"))?;
+    Ok(data.join("ocr"))
 }
 
 pub fn config_path() -> Result<PathBuf> {

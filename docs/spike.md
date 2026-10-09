@@ -385,3 +385,51 @@ Four new unit tests (a drifting typewriter river, a Q/A marker strip, six narrow
 | Synthetic fixtures and seeds 10-12 | 10 pages | the same 10 pages |
 
 Every remaining Margin on the public set was rendered and holds only line numbers, a form stamp or scan specks. The remaining splits are side-by-side caption, signature and index blocks and 4-up transcripts. The only synthetic change: on `four_up.pdf` each mini-page's line-number strip now stays with its text (before, the left one was a margin and the right one a column of its own). Apple transcript lines on held-out seeds 40-42 are unchanged at 682/700 (97.4%). All goldens are byte-identical. Lozano p3 now reads as whole lines; Knight p6 is no longer split, but it is still not detected as a transcript (separate follow-up).
+
+## llama-server spike (2026-10-08, Linux, PLAN §9 Phase 7a/7d-1)
+
+**Setup.** llama.cpp b11510 (`ubuntu-vulkan-x64` and `ubuntu-x64` CPU builds) on this Linux box: Ryzen 9950X, integrated Radeon (RADV RAPHAEL_MENDOCINO), 30 GB RAM, no NVIDIA. Model `PaddlePaddle/PaddleOCR-VL-1.6-GGUF` (BF16, plus mmproj). Pages were rendered through the production path (`examples/render_png`, pdfium). The request had the same shape as `model_engine::post`: image first, then text, temperature 0, `max_tokens` 4096.
+
+**Results.**
+- **Output matches the MLX output in kind.**
+  - `OCR:` on `legal.pdf` at 150 DPI found all 7 checked values exactly: case number, four amounts, Bates `SMITH000123`, and the footer.
+  - `legal_scan.pdf` gave the same text.
+  - Vulkan and CPU outputs were byte-identical.
+  - `Table Recognition:` returns OTSL (`<fcel>…<nl>`).
+  - `finish_reason` was `stop`, with no leftover template tokens.
+  - 1253 prompt tokens, 299 completion tokens.
+- **No template flag is needed.** Jinja is on by default, and llama-server maps `image_url` to its own media marker. `/health` answers in about 2 s.
+- **Speed on this machine:**
+
+  | Build | Per page | Notes |
+  |---|---|---|
+  | CPU | 7.5 s | Prompt about 320 tok/s, decode about 83 tok/s |
+  | Vulkan on the integrated GPU | 46 s | Image encoding takes 40–50 s of that |
+
+  **On integrated graphics the CPU build is about 6x faster.** 7e must prefer CPU there.
+- **`-np 2`:** both concurrent requests were correct. 1.25x faster on CPU, no gain on Vulkan.
+- **Memory:** with no `--ctx-size`, each slot gets the model's full 131072-token context, and the CPU build peaks at 4.5 GB (6.9 GB with 2 slots). `ocr` now sizes `--ctx-size` per engine x slots: **2.1 GB resident** with the CPU build.
+- **Archive layout:** everything is flat in `llama-b11510/`. `llama-server` is a small launcher with its `.so` files (symlink chains included) beside it; `ocr` adds that directory to `LD_LIBRARY_PATH`.
+- **Through `ocr` itself:** `ocr server setup --model paddleocr-vl` downloads, verifies and unpacks llama.cpp, pdfium and the GGUFs. `server start` is then ready in 3.4 s (Vulkan) or 0.8 s (CPU), and `status` and `stop` work.
+- **Not tested:** `repetition_penalty` (the loop retry), olmOCR, dots, CUDA.
+
+## olmOCR footer strip and Bates corners (2026-10-08, Linux CPU build, PLAN §9.5)
+
+**Setup.** olmOCR 2, Q4_K_M GGUF, llama.cpp b11510 CPU build. Prompt: the upstream v4 prompt, text first. Images: 1288 px on the longest side.
+
+**Footer strip: fails.** The bottom 10% or 15% of `legal.pdf` and `legal_scan.pdf` came back as front matter and nothing else (31 tokens), even though the strip clearly shows `COMPLAINT - Page 1 of 14` and `SMITH000123`. The front matter itself was valid (`is_rotation_valid: True`). A plain "transcribe everything" prompt returned the footer line but still dropped the Bates number. olmOCR treats the strip as page furniture.
+
+**Bottom-right corner alone (`0.7, 0.9, 0.3, 0.1`): works.** It returned `SMITH000123` with the normal prompt.
+
+**Implemented (your decision):** off the Mac, when the page text has no Bates number, olmOCR gets the bottom-right corner and then the bottom-left corner (`0.0, 0.9, 0.3, 0.1`). Each request is capped at 256 tokens, and the first Bates match wins. Results through `ocr scan`:
+
+| Test | Bates in marker |
+|---|---|
+| `legal.pdf` (bottom right) | `SMITH000123` |
+| `legal_scan.pdf` (scan, bottom right) | `SMITH000123` |
+| `three_pages.pdf` (page 2 has none) | 1 and 3: `SMITH000123`; 2: none. Matches the Mac golden |
+| `legal.pdf` restamped bottom left `DEF000456` | `DEF000456` |
+| `legal.pdf` restamped bottom centre `ABC000789`, under the footer | **none**. A known limit: a centred Bates is not covered |
+| eval `production` seed 10, pages 1–4 (bottom right, Helvetica) | `ACME0000001`–`ACME0000004`, all correct |
+
+**Cost:** about 52 s a page against about 40 s without the corners, on the CPU build. On a GPU each corner should take about a second. A page with no Bates number pays for both corners.

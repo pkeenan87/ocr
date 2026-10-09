@@ -2,6 +2,9 @@
 //! injected deterministically with `OCR_TEST_CRASH_AFTER=<checkpoints>` (and
 //! `OCR_TEST_CRASH_ATTEMPTS`, `OCR_TEST_CRASH_SIGNAL`).
 
+// Needs Apple Vision (PLAN §9).
+#![cfg(target_os = "macos")]
+
 mod common;
 
 use std::fs;

@@ -2,6 +2,9 @@
 //! corrupt and failed pages, directory mode, and the cap on in-flight model requests.
 //! The apple tests run real Apple Vision; the PDFs are built with the spike venv's pypdfium2.
 
+// Needs Apple Vision (PLAN §9).
+#![cfg(target_os = "macos")]
+
 mod common;
 
 use std::fs;

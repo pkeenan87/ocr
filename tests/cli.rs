@@ -6,7 +6,16 @@ use tempfile::{TempDir, tempdir};
 
 const PDF: &[u8] = b"%PDF-1.7\n";
 const PNG: &[u8] = &[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0];
-const WARNING: &str = "ocr is not set up yet. Run `ocr server setup` first.";
+const WARNING: &str = if cfg!(target_os = "macos") {
+    "ocr is not set up yet. Run `ocr server setup` first."
+} else {
+    "ocr is not set up yet. Run `ocr server setup --model paddleocr-vl` first."
+};
+
+/// Command output with Windows path separators shown as `/`, for comparing paths.
+fn slashes(out: &[u8]) -> String {
+    String::from_utf8_lossy(out).replace('\\', "/")
+}
 
 struct Env {
     config: TempDir,
@@ -31,8 +40,17 @@ impl Env {
         c
     }
 
+    /// `ocr server setup`. Off macOS there is no Apple engine, so a (fake) paddleocr-vl install.
     fn setup(&self) {
-        self.cmd().args(["server", "setup"]).assert().success();
+        if cfg!(target_os = "macos") {
+            self.cmd().args(["server", "setup"]).assert().success();
+        } else {
+            self.cmd()
+                .env("OCR_FAKE_INSTALL", "1")
+                .args(["server", "setup", "--model", "paddleocr-vl"])
+                .assert()
+                .success();
+        }
     }
 
     fn file(&self, rel: &str, bytes: &[u8]) {
@@ -41,19 +59,24 @@ impl Env {
         fs::write(p, bytes).unwrap();
     }
 
-    /// Runs a successful dry-run scan and returns stdout.
+    /// Runs a successful dry-run scan and returns stdout, with Windows `\` separators shown as
+    /// `/`. Off macOS the default engine (paddleocr-vl) must be set up first.
     fn dry_run(&self, args: &[&str]) -> String {
+        if cfg!(not(target_os = "macos")) {
+            self.setup();
+        }
         let a = self
             .cmd()
             .args(["scan", "--dry-run"])
             .args(args)
             .assert()
             .success();
-        String::from_utf8_lossy(&a.get_output().stdout).into_owned()
+        slashes(&a.get_output().stdout)
     }
 }
 
 #[test]
+#[cfg(target_os = "macos")]
 fn apple_before_setup_warns_and_continues() {
     let e = Env::new();
     e.file("a.pdf", PDF);
@@ -82,6 +105,7 @@ fn olmocr_before_setup_exits_2() {
 }
 
 #[test]
+#[cfg(target_os = "macos")]
 fn server_start_without_model_needs_one_installed() {
     let e = Env::new();
     e.setup();
@@ -133,7 +157,12 @@ fn setup_is_idempotent_and_writes_config() {
     e.setup();
     let path = e.config.path().join("config.toml");
     let first = fs::read_to_string(&path).unwrap();
-    assert!(first.contains("[engines.apple]") && first.contains("installed = true"));
+    let engine = if cfg!(target_os = "macos") {
+        "[engines.apple]"
+    } else {
+        "[engines.paddleocr-vl]"
+    };
+    assert!(first.contains(engine) && first.contains("installed = true"));
     e.setup();
     assert_eq!(first, fs::read_to_string(&path).unwrap());
 }
@@ -236,6 +265,7 @@ fn single_file_default_and_md_append() {
 #[test]
 fn single_file_errors() {
     let e = Env::new();
+    e.setup();
     e.file("a.pdf", PDF);
     e.file("a.md", b"old");
     e.cmd()
@@ -341,6 +371,7 @@ fn single_file_filter_uses_magic_bytes() {
 #[test]
 fn directory_without_matches_warns_and_exits_0() {
     let e = Env::new();
+    e.setup();
     e.file("d/notes.txt", b"hello");
     e.cmd()
         .args(["scan", "--input-dir", "d"])
@@ -354,13 +385,20 @@ fn invalid_model_version_exits_2() {
     let e = Env::new();
     e.file("a.pdf", PDF);
     e.setup();
+    let apple = cfg!(target_os = "macos");
+    // Off macOS only the releases with GGUF builds are offered (PLAN §9.3).
+    let (paddle, dots) = if apple {
+        ("1.6, 1.5, 1.0", "dots.mocr, dots.ocr")
+    } else {
+        ("1.6, 1.5", "dots.ocr")
+    };
     let cases = [
-        ("paddleocr-vl", "2.0", "1.6, 1.5, 1.0"),
-        ("dots-ocr", "x", "dots.mocr, dots.ocr"),
+        ("paddleocr-vl", "2.0", paddle),
+        ("dots-ocr", "x", dots),
         ("olmocr", "1", "no selectable"),
         ("apple", "1", "no selectable"),
     ];
-    for (model, ver, expect) in cases {
+    for (model, ver, expect) in cases.into_iter().filter(|c| apple || c.0 != "apple") {
         e.cmd()
             .args([
                 "scan",
@@ -388,9 +426,9 @@ fn valid_model_version_reaches_gate() {
             "--input-file",
             "a.pdf",
             "--model",
-            "paddleocr-vl",
+            "dots-ocr",
             "--model-version",
-            "1.5",
+            "dots.ocr",
         ])
         .assert()
         .code(2)
@@ -413,18 +451,21 @@ fn pages_validation() {
 #[test]
 fn directory_skips_existing_outputs() {
     let e = Env::new();
+    e.setup();
     e.file("d/a.pdf", PDF);
     e.file("d/b.pdf", PDF);
     e.file("d/ocr-output/a.md", b"done");
-    e.cmd()
+    let a = e
+        .cmd()
         .args(["scan", "--dry-run", "--input-dir", "d"])
         .assert()
         .success()
-        .stdout(
-            predicate::str::contains("b.md")
-                .and(predicate::str::contains("-> d/ocr-output/a.md").not()),
-        )
         .stderr(predicate::str::contains("skipped 1 file(s)"));
+    let out = slashes(&a.get_output().stdout);
+    assert!(
+        out.contains("b.md") && !out.contains("-> d/ocr-output/a.md"),
+        "{out}"
+    );
     let out = e.dry_run(&["--input-dir", "d", "--overwrite"]);
     assert!(out.contains("-> d/ocr-output/a.md"), "{out}");
 }

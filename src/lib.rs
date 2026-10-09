@@ -1,4 +1,4 @@
-//! `ocr` — local document OCR for macOS.
+//! `ocr` — local document OCR for macOS, and (PLAN §9) Linux and Windows with a GPU.
 
 pub mod anchor;
 pub mod checkpoint;
@@ -7,9 +7,13 @@ pub mod config;
 pub mod dots;
 pub mod engines;
 pub mod error;
+#[cfg(not(target_os = "macos"))]
+pub mod fetch;
 pub mod htmltable;
 pub mod input;
 pub mod layout;
+#[cfg(not(target_os = "macos"))]
+pub mod llama;
 pub mod markdown;
 pub mod model_engine;
 pub mod olmocr;

@@ -14,13 +14,33 @@ use ocr::server::{self, ServerInfo};
 use ocr::supervisor;
 use ocr::vision::Options;
 
-fn main() -> ExitCode {
-    let cli = Cli::parse();
-    if supervised(&cli) {
-        return supervisor::supervise();
+/// Windows consoles default to a legacy code page; switch the output to UTF-8 so `⚠` and `—`
+/// print as written.
+#[cfg(windows)]
+fn utf8_console() {
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn SetConsoleOutputCP(code_page: u32) -> i32;
     }
-    if supervisor::is_child() {
-        supervisor::exit_with_parent();
+    const CP_UTF8: u32 = 65001;
+    // SAFETY: plain Win32 call with no pointers; failure (no console) is harmless.
+    unsafe {
+        SetConsoleOutputCP(CP_UTF8);
+    }
+}
+
+fn main() -> ExitCode {
+    #[cfg(windows)]
+    utf8_console();
+    let cli = Cli::parse();
+    #[cfg(target_os = "macos")]
+    {
+        if supervised(&cli) {
+            return supervisor::supervise();
+        }
+        if supervisor::is_child() {
+            supervisor::exit_with_parent();
+        }
     }
     let result = run(cli);
     if std::env::var_os("OCR_TEST_VISION_STATS").is_some() {
@@ -38,7 +58,8 @@ fn main() -> ExitCode {
     }
 }
 
-/// Whether this scan runs as a supervised child (see `ocr::supervisor`).
+/// Whether this scan runs as a supervised child (see `ocr::supervisor`; macOS only).
+#[cfg(target_os = "macos")]
 fn supervised(cli: &Cli) -> bool {
     matches!(&cli.command, Command::Scan(a) if !a.dry_run) && !supervisor::is_child()
 }
@@ -59,7 +80,11 @@ fn run(cli: Cli) -> Result<(), CliError> {
 fn gate(engine: Engine) -> Result<(), CliError> {
     match Config::load()? {
         None => {
-            let warning = "⚠ ocr is not set up yet. Run `ocr server setup` first.";
+            let warning = if cfg!(target_os = "macos") {
+                "⚠ ocr is not set up yet. Run `ocr server setup` first."
+            } else {
+                "⚠ ocr is not set up yet. Run `ocr server setup --model paddleocr-vl` first."
+            };
             if engine == Engine::Apple {
                 eprintln!("{warning}");
                 Ok(())
@@ -79,10 +104,19 @@ fn gate(engine: Engine) -> Result<(), CliError> {
 
 fn setup(args: &SetupArgs) -> Result<(), CliError> {
     let mut cfg = Config::load()?.unwrap_or_default();
-    cfg.mark_apple_installed();
+    if cfg!(not(target_os = "macos")) && args.requested_models().is_empty() {
+        return Err(CliError::Usage(
+            "choose an engine to install, e.g. `ocr server setup --model paddleocr-vl` (Apple Vision is macOS only)".into(),
+        ));
+    }
+    if cfg!(target_os = "macos") {
+        cfg.mark_apple_installed();
+    }
     cfg.save()?;
     std::fs::create_dir_all(ocr::config::state_dir()?).map_err(anyhow::Error::from)?;
-    println!("apple engine ready (no download needed)");
+    if cfg!(target_os = "macos") {
+        println!("apple engine ready (no download needed)");
+    }
 
     server::setup_models(args, &mut cfg)
 }
@@ -224,11 +258,27 @@ fn settings(args: &ScanArgs) -> Settings {
 fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliError> {
     let mlx = Config::load()?
         .and_then(|c| c.runtime)
-        .map_or_else(|| MLX_VLM_PIN.to_string(), |r| r.mlx_vlm);
+        .map(|r| r.id())
+        .filter(|id| !id.is_empty())
+        .unwrap_or_else(|| {
+            if cfg!(target_os = "macos") {
+                MLX_VLM_PIN.to_string()
+            } else {
+                format!("llama.cpp {}", ocr::engines::LLAMA_BUILD)
+            }
+        });
     let spec = model_engine::scan_engine(args.model).expect("model engines have a scan engine");
     if args.model == Engine::Olmocr && args.dpi.is_some() && !args.quiet {
         eprintln!(
             "note: --dpi is ignored for olmocr; images are always 1288 px on the longest side"
+        );
+    }
+    #[cfg(not(target_os = "macos"))]
+    if args.model != Engine::Olmocr && args.effective_dpi() > ocr::llama::MAX_DPI && !args.quiet {
+        eprintln!(
+            "⚠ --dpi {} is above the {} DPI the model server's context is sized for; long pages may be cut short",
+            args.effective_dpi(),
+            ocr::llama::MAX_DPI
         );
     }
     let settings = settings(args);

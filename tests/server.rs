@@ -9,7 +9,11 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use tempfile::{TempDir, tempdir};
 
+/// The fake server; on Windows a `.cmd` wrapper, since a `.py` cannot be run directly.
+#[cfg(not(windows))]
 const FAKE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fake_server.py");
+#[cfg(windows)]
+const FAKE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fake_server.cmd");
 
 fn free_port() -> u16 {
     TcpListener::bind("127.0.0.1:0")
@@ -79,15 +83,14 @@ impl Env {
     }
 }
 
-/// True if a process whose command line has `--port N` and the fake server script is alive.
+/// True if something still accepts connections on the fake server's port (works on every
+/// platform, unlike scanning `ps` output).
 fn fake_alive(port: u16) -> bool {
-    let out = Proc::new("ps")
-        .args(["-ax", "-o", "command="])
-        .output()
-        .unwrap();
-    String::from_utf8_lossy(&out.stdout)
-        .lines()
-        .any(|l| l.contains("fake_server.py") && l.contains(&format!("--port {port}")))
+    std::net::TcpStream::connect_timeout(
+        &([127, 0, 0, 1], port).into(),
+        std::time::Duration::from_millis(500),
+    )
+    .is_ok()
 }
 
 #[test]
@@ -95,17 +98,32 @@ fn setup_writes_config_with_version_quant_repo() {
     let e = Env::new();
     e.setup(&["paddleocr-vl", "dots-ocr"]);
     let toml = fs::read_to_string(e.config.path().join("config.toml")).unwrap();
+    // macOS serves MLX weights through mlx-vlm; elsewhere GGUF builds through llama.cpp.
+    let platform = if cfg!(target_os = "macos") {
+        [
+            "repo = \"PaddlePaddle/PaddleOCR-VL-1.6\"",
+            "version = \"dots.mocr\"",
+            "repo = \"mlx-community/dots.mocr-8bit\"",
+            "mlx_vlm = \"0.7.6\"",
+        ]
+    } else {
+        [
+            "repo = \"PaddlePaddle/PaddleOCR-VL-1.6-GGUF\"",
+            "version = \"dots.ocr\"",
+            "repo = \"ggml-org/dots.ocr-GGUF\"",
+            "llama_cpp = \"b11510\"",
+        ]
+    };
     for needle in [
         "[engines.paddleocr-vl]",
         "version = \"1.6\"",
         "quant = \"bf16\"",
-        "repo = \"PaddlePaddle/PaddleOCR-VL-1.6\"",
         "[engines.dots-ocr]",
-        "version = \"dots.mocr\"",
-        "repo = \"mlx-community/dots.mocr-8bit\"",
         "[runtime]",
-        "mlx_vlm = \"0.7.6\"",
-    ] {
+    ]
+    .into_iter()
+    .chain(platform)
+    {
         assert!(toml.contains(needle), "missing {needle} in\n{toml}");
     }
     // Idempotent.
@@ -115,13 +133,18 @@ fn setup_writes_config_with_version_quant_repo() {
         fs::read_to_string(e.config.path().join("config.toml")).unwrap()
     );
     // Explicit version and quant.
+    let (quant, repo) = if cfg!(target_os = "macos") {
+        ("4bit", "mlx-community/PaddleOCR-VL-1.5-4bit")
+    } else {
+        ("bf16", "PaddlePaddle/PaddleOCR-VL-1.5-GGUF")
+    };
     e.cmd()
         .args(["server", "setup", "--model", "paddleocr-vl"])
-        .args(["--model-version", "1.5", "--quant", "4bit"])
+        .args(["--model-version", "1.5", "--quant", quant])
         .assert()
         .success();
     let toml = fs::read_to_string(e.config.path().join("config.toml")).unwrap();
-    assert!(toml.contains("repo = \"mlx-community/PaddleOCR-VL-1.5-4bit\""));
+    assert!(toml.contains(&format!("repo = \"{repo}\"")));
 }
 
 #[test]
@@ -133,7 +156,12 @@ fn start_status_stop() {
         .stdout(predicate::str::contains("ready"));
     let j = e.server_json();
     assert_eq!(j["engine"], "paddleocr-vl");
-    assert_eq!(j["repo"], "PaddlePaddle/PaddleOCR-VL-1.6");
+    let repo = if cfg!(target_os = "macos") {
+        "PaddlePaddle/PaddleOCR-VL-1.6"
+    } else {
+        "PaddlePaddle/PaddleOCR-VL-1.6-GGUF"
+    };
+    assert_eq!(j["repo"], repo);
     assert_eq!(j["port"], e.port);
     assert!(j["argv"].as_array().unwrap().len() >= 9);
     e.cmd()
@@ -300,11 +328,17 @@ fn stale_dead_pid_is_cleaned_up() {
 fn stale_foreign_live_pid_is_never_killed() {
     for sub in ["status", "stop"] {
         let e = Env::new();
-        let mut other = Proc::new("sleep")
-            .arg("60")
-            .stdout(Stdio::null())
-            .spawn()
-            .unwrap();
+        // A long-lived process that is not ours (`sleep` does not exist on Windows).
+        let mut other = if cfg!(windows) {
+            let mut p = Proc::new("ping");
+            p.args(["-n", "60", "127.0.0.1"]);
+            p
+        } else {
+            let mut p = Proc::new("sleep");
+            p.arg("60");
+            p
+        };
+        let mut other = other.stdout(Stdio::null()).spawn().unwrap();
         stale_json(&e, other.id());
         e.cmd()
             .args(["server", sub])

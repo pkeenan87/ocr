@@ -12,7 +12,11 @@ use assert_cmd::assert::Assert;
 use serde_json::Value;
 use tempfile::{TempDir, tempdir};
 
+#[cfg(not(windows))]
 pub const FAKE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fake_server.py");
+/// On Windows a `.cmd` wrapper, since a `.py` cannot be run directly.
+#[cfg(windows)]
+pub const FAKE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fake_server.cmd");
 pub const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/spike/fixtures");
 pub const HELDOUT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/spike/heldout");
 

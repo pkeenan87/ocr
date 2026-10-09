@@ -11,6 +11,8 @@ use crate::vision::{Block, ListItem};
 
 /// Bates numbers are looked for in blocks starting in this bottom fraction of the page.
 const BATES_ZONE: f64 = 0.08;
+/// Non-empty lines at the end of a page's text searched for a Bates number.
+const BATES_TAIL_LINES: usize = 4;
 /// Pleading line numbers live in this left fraction of the page.
 const MARGIN_ZONE: f64 = 0.12;
 /// Highest pleading line number Vision is expected to read.
@@ -99,6 +101,16 @@ pub fn find_bates(blocks: &[Block]) -> Option<String> {
         .filter(|b| b.bbox[1] >= 1.0 - BATES_ZONE)
         .flat_map(block_texts)
         .find_map(|t| BATES.find(&t).map(|m| m.as_str().to_string()))
+}
+
+/// A Bates number in the last lines of a page's text (model output, which keeps the footer),
+/// for pages without Vision blocks (off macOS). The bottom-most match wins.
+pub fn find_bates_in_text(body: &str) -> Option<String> {
+    body.lines()
+        .rev()
+        .filter(|l| !l.trim().is_empty())
+        .take(BATES_TAIL_LINES)
+        .find_map(|l| BATES.find_iter(l).last().map(|m| m.as_str().to_string()))
 }
 
 fn block_texts(b: &Block) -> Vec<String> {
@@ -206,7 +218,7 @@ pub fn text_layer_usable(text: &str) -> bool {
     }
     let bad = chars
         .iter()
-        .filter(|c| **c == '\u{FFFD}' || c.is_control() || ('\u{E000}'..='\u{F8FF}').contains(c))
+        .filter(|c| **c == '\u{FFFD}' || c.is_control() || ('\u{E000}'..='\u{F8FF}').contains(*c))
         .count();
     (bad as f64) / (chars.len() as f64) < 0.05
 }
@@ -586,6 +598,20 @@ mod tests {
             para("Body", [0.2, 0.2, 0.5, 0.01]),
         ]);
         assert_eq!(md, "Body");
+    }
+
+    #[test]
+    fn bates_from_model_text() {
+        let page =
+            "3. The total amount due is $122,525.50.\n\nCOMPLAINT - Page 1 of 14\nSMITH000123\n";
+        assert_eq!(find_bates_in_text(page).as_deref(), Some("SMITH000123"));
+        // Same line as the footer; the right-most number wins.
+        let page = "Body.\nCOMPLAINT - Page 2 ABC 00012 of 14   SMITH000124";
+        assert_eq!(find_bates_in_text(page).as_deref(), Some("SMITH000124"));
+        // Only the last few lines are searched, so an exhibit number in the body is ignored.
+        let page = "Exhibit DEF000001 attached.\nline\nline\nline\nline\nCOMPLAINT - Page 3 of 14";
+        assert_eq!(find_bates_in_text(page), None);
+        assert_eq!(find_bates_in_text(""), None);
     }
 
     #[test]

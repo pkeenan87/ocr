@@ -1,15 +1,15 @@
 """Residual risk of the verification workflow: `ocr --verify-json` plus Azure on the pages it flags.
 
 usage:
-    PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/apple-all
+    PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/macos27/apple-all
         [--azure eval/out/public/azure-di] [--pdfs eval/out/public/pdfs] [--set eval/public_set.json]
         [--route report|all] [--json out.json]
 
 Needs only Python (pypdfium2), so it runs off the Mac. Inputs:
-- `--bundle`: a Mac run of `eval/verify_eval.py`, copied from `eval/out/verify/<run>/` to
-  `eval/verify_bundle/<run>/`: `blind/<id>.verify.json` and `blind/<id>.md` (the embedded text
-  hidden from verify, so the readers decide alone), and `truth/<id>.verify.json` (values graded
-  by the embedded text).
+- `--bundle`: a Mac run of `eval/verify_eval.py`, copied by `eval/export_verify_bundle.py` to
+  `eval/verify_bundle/<os>/<run>/`: `blind/<id>.verify.json` and `blind/<id>.md` (the embedded
+  text hidden from verify, so the readers decide alone), and `truth/<id>.verify.json` (values
+  graded by the embedded text).
 - `--azure`: the raw Azure Document Intelligence responses, `<id>.azure.json` (prebuilt-layout,
   api-version 2024-11-30), covering every page in the set.
 - `--pdfs`: the public PDFs, whose embedded text grades the sentences.

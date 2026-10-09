@@ -5,11 +5,10 @@ Plan and prompt: [azure-verify-eval.md](azure-verify-eval.md). Script: `eval/azu
 ## 1. Environment
 
 - 2026-10-09, macOS 27.0.1, Python 3.12.13 (repo venv, `eval/requirements.txt`), master at `0a90ec4`.
-- **Mac runs regenerated with the latest build.** The committed `eval/verify_bundle/` was made with a `target/release/ocr` built at 10:58, before PR 14's source change (`src/verify.rs`, `src/run.rs`) was committed at 12:26. Its README also says macOS 26; this machine is now on 27.0.1.
-  - I rebuilt `ocr` from master (`cargo build --release`) and re-ran `eval/verify_eval.py` for `--verify-fields all` and `flagged`, into `eval/out/verify-latest/<run>/`, with the same layout as the bundle.
-  - The results below use those runs (`--bundle eval/out/verify-latest/<run>`).
-  - The new build's text is closer to the embedded text on 13 of the 14 documents with enough embedded text to compare (Uber-O'Connor is 2 points worse), by up to 12 points (Knight-Avery 31% to 20%, Ironworkers 32% to 22%, Nissan 40% to 29%, word-level distance).
-  - The committed bundle has not been replaced yet.
+- **Mac runs from this machine, macOS 27.** I re-ran `eval/verify_eval.py` for `--verify-fields all` and `flagged` with `ocr` built from master, into `eval/out/verify-latest/<run>/`. They are committed as `eval/verify_bundle/macos27/`, and the results below use them.
+  - *Correction (home Mac):* I first took the committed bundle for a stale build. It is not: its binary was built at 12:30:18, after PR 14 merged at 12:30:04, and its reports carry PR 14's `ocr_text_layer`. The difference is the OS. The bundle was made on macOS 26.6.2, this machine runs 27.0.1, and Apple Vision reads differently between them. That bundle is kept as `eval/verify_bundle/macos26/`.
+  - macOS 27's text is closer to the embedded text on 13 of the 14 documents with enough embedded text to compare (Uber-O'Connor is 2 points worse), by up to 12 points (Knight-Avery 31% to 20%, Ironworkers 32% to 22%, Nissan 40% to 29%, word-level distance). It also yields 15 graded wrong values where macOS 26 has 7.
+  - So these numbers hold for one macOS version. Re-measure after an OS update.
 - **No Azure call.** The 20 responses from the 2026-10-09 comparison (`eval/out/public/azure-di/`) were reused. All passed the check: no failed `status`, `apiVersion` `2024-11-30`, `modelId` `prebuilt-layout`, pages 1 to `n_pages_used` present. Cost: none.
 - The script ran unchanged. `azure_pages()` needed no fix.
 
@@ -104,4 +103,4 @@ The earlier build's worst case, depo-removed-1 p14, gives no spliced sentences n
 - Sentence grading depends on reading order: headers, footnotes and columns are placed differently by the OCR, Azure and the embedded text.
 - `ocr_text_layer` missed ctr-marital-settlement, so 15 pages (9 values) were graded against an old OCR.
 - The blind Markdown still lists `embedded_text_fixes` (the scan step uses the PDF's text even when verify ignores it), so the blind runs may be slightly better than a true scan.
-- The committed `eval/verify_bundle/` predates this build. Until it is replaced, someone re-running the plan elsewhere would get the older numbers.
+- The numbers are for macOS 27.0.1. The macOS 26 bundle has fewer wrong values (7), and Apple Vision may change again with any OS update.

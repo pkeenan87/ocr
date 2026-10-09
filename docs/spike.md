@@ -504,3 +504,32 @@ Measured on the 20 public filings (230 pages, Apple, 150 DPI), against the earli
 - straight quotes to the filing's curly quotes.
 
 **Goldens:** the pure-OCR goldens (`--use-text-layer never`) are byte-identical apart from the new empty `embedded_text_fixes: {}` line. A new test checks the default output on legal.pdf: the golden with `Case No.3:26-cv-04417` corrected to `Case No. 3:26-cv-04417`.
+
+## `--verify-json` compares values, not substrings (2026-10-09)
+
+A review found that `verified` meant "the squashed text occurs somewhere in the embedded text", so `$3,000` was verified by `$3,000,000` and `3:26-cv-0441` by `3:26-cv-04417`. Now each field and the embedded text are reduced to the same canonical keys:
+- amount in cents;
+- ISO date;
+- docket as office, year, kind and number;
+- squashed text for Bates numbers and citations.
+
+A field is `verified` only when its key is among the embedded text's keys. The embedded text is flattened first, so a date or amount broken across lines still matches. Docket keys also match without the office prefix.
+
+**Look-alike characters:** amounts, dates and dockets that mix digits with `O o I l S B Q` get `confusable_characters` and no `value`. They are never verified. An error-injection test plants 16 misreads into a page whose embedded text has the true values: look-alike letters, one-digit changes, and `$3,000` for `$3,000,000`. It checks that none comes back `verified`.
+
+**Scale words:** `$45` at the end of a line followed by `million` on the next (past one blank line or a pleading line number) is the amount `$45 million`. `K`/`M`/`B` suffixes are scales. `$1,50B` stays a malformed amount.
+
+Measured on the 20 public filings (Apple, default `auto`), against the substring check:
+
+| | Substrings | Values |
+|---|---|---|
+| Pages in `azure_pages` | 51 | 53 |
+| Values verified free | 601 | 602 |
+| No longer verified | - | 3 |
+| Newly verified | - | 4 |
+
+**The three values no longer verified:**
+- `CV-00886` twice: a false Bates match (the text is part of a docket number);
+- `$246.95` on a scanned loan form, where the embedded text has `246 95` with the cents in a separate box.
+
+Both outcomes are the safe direction. The newly verified values are amounts whose scale word was on the next line.

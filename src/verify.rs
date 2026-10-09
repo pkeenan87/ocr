@@ -9,7 +9,7 @@
 //! one, or embedded text that does not contain it). Otherwise it is `unchecked`; with
 //! `--verify-fields all` those become `check` too, for documents where nothing may be missed.
 
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -49,7 +49,8 @@ pub enum Status {
 #[derive(Debug, Clone, Serialize)]
 pub struct Field {
     pub kind: Kind,
-    /// Exactly as it appears in the Markdown.
+    /// Exactly as it appears in the Markdown, except that a scale word starting the next line
+    /// (`$45` / `million`) is joined on with a space.
     pub text: String,
     /// Amount in dollars, date as YYYY-MM-DD, when the text parses.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -104,12 +105,14 @@ const MONTHS: &str = "January|February|March|April|May|June|July|August|Septembe
 
 /// Anything that looks like money, malformed or not (`$4825,0.00`, `$ 1,00.00`).
 /// A scale word after the number (`$33.5 million`) is part of the amount.
+/// Letters OCR puts in place of digits (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`) are accepted, so a
+/// misread amount is still found and flagged instead of silently missed.
 static AMOUNT: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\$\s?\d[\d,]*(?:\.\d+)?(?:\s(?:thousand|million|billion|trillion)\b)?")
+    Regex::new(r"(?i)\$\s?[\dOolISB][\dOolISB,]*(?:\.[\dOolISB]+)?(?:\s(?:thousand|million|billion|trillion)\b|[KMB]\b)?")
         .unwrap()
 });
 static AMOUNT_OK: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)^\$\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,3})?(?:\s(?:thousand|million|billion|trillion))?$")
+    Regex::new(r"(?i)^\$\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,3})?(?:\s(?:thousand|million|billion|trillion)|[KMB])?$")
         .unwrap()
 });
 /// Numeric dates, with letters OCR puts in place of digits (`02/03/0Q`).
@@ -123,8 +126,15 @@ static DATE_WORDS: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 /// Federal docket numbers (`3:26-cv-04417`, `1:20-CV-05382-GBD-GWG`, `23-CV-886-PP`).
+/// Look-alike letters are accepted in the number parts (`3:26-cv-O4417`) and flagged.
 static DOCKET: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\b(?:\d{1,2}:)?\d{2}-(?:cv|cr|mc|md|bk|ap|mj|po|sw|civ|cvd)-\d{2,6}(?:-[A-Z]{1,4})*\b")
+    Regex::new(r"(?i)\b(?:[\dOIl]{1,2}:)?[\dOIl]{2}-(?:cv|cr|mc|md|bk|ap|mj|po|sw|civ|cvd)-[\dOIlSB]{2,6}(?:-[A-Z]{1,4})*\b")
+        .unwrap()
+});
+/// The parts of a docket number: office, year, type and number (judge initials are left out,
+/// since filings append them inconsistently).
+static DOCKET_PARTS: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)^(?:(?P<office>\d{1,2}):)?(?P<year>\d{2})-(?P<kind>[a-z]+)-(?P<num>\d+)")
         .unwrap()
 });
 /// Citations with a section or paragraph sign.
@@ -188,7 +198,13 @@ fn parse_amount(text: &str) -> Option<f64> {
         Some((n, "million")) => (n, 1e6),
         Some((n, "billion")) => (n, 1e9),
         Some((n, "trillion")) => (n, 1e12),
-        _ => (t.as_str(), 1.0),
+        // `$1.5B`, `$10M`, `$250K`.
+        _ => match t.char_indices().last() {
+            Some((i, 'k')) if t[..i].ends_with(|c: char| c.is_ascii_digit()) => (&t[..i], 1e3),
+            Some((i, 'm')) if t[..i].ends_with(|c: char| c.is_ascii_digit()) => (&t[..i], 1e6),
+            Some((i, 'b')) if t[..i].ends_with(|c: char| c.is_ascii_digit()) => (&t[..i], 1e9),
+            _ => (t.as_str(), 1.0),
+        },
     };
     number
         .replace(',', "")
@@ -206,10 +222,90 @@ fn squash(s: &str) -> String {
         .collect()
 }
 
+/// Whether a numeric value holds a letter OCR substitutes for a digit (`O4417`, `$l,000`, `2O24`).
+fn confusable(t: &str) -> bool {
+    let mut core: String = t
+        .trim_start_matches('$')
+        .split_whitespace()
+        .next()
+        .unwrap_or("")
+        .into();
+    // A scale letter after a digit (`$1.5B`, `$10M`) is not a misread digit.
+    if core.len() > 1
+        && core.ends_with(['K', 'M', 'B'])
+        && core[..core.len() - 1].ends_with(|c: char| c.is_ascii_digit())
+    {
+        core.pop();
+    }
+    core.chars().any(|c| c.is_ascii_digit()) && core.chars().any(|c| "OoIlSBQ".contains(c))
+}
+
+/// A field's value in canonical form, for comparing two readings: amounts in cents, dates as
+/// YYYY-MM-DD, docket numbers without padding or judge initials, other kinds as their
+/// characters. `None` when the text does not parse (it is then never verified).
+fn key(kind: Kind, text: &str) -> Option<String> {
+    match kind {
+        Kind::Amount => {
+            let t = text.trim_end_matches([',', '.']);
+            (AMOUNT_OK.is_match(t) && !confusable(t))
+                .then(|| parse_amount(t))
+                .flatten()
+                .map(|v| format!("amount:{}", (v * 100.0).round() as i64))
+        }
+        Kind::Date => parse_date(text).map(|d| format!("date:{d}")),
+        Kind::Docket => {
+            let c = DOCKET_PARTS.captures(text)?;
+            let n: u64 = c["num"].parse().ok()?;
+            let office = c.name("office").map_or("", |o| o.as_str());
+            Some(format!(
+                "docket:{office}:{}-{}-{n}",
+                &c["year"],
+                c["kind"].to_ascii_lowercase()
+            ))
+        }
+        Kind::Percent => text
+            .trim_end_matches('%')
+            .trim()
+            .parse::<f64>()
+            .ok()
+            .map(|v| format!("percent:{v}")),
+        Kind::Citation | Kind::Bates => Some(format!("{kind:?}:{}", squash(text))),
+    }
+}
+
+/// The canonical values found in a page's embedded text, by the same extraction as the OCR
+/// text, so `$3,000` never matches inside `$3,000,000`. Bates numbers are matched as whole
+/// tokens (one word, or two joined, for `ABC 0001234`).
+fn embedded_keys(text: &str) -> HashSet<String> {
+    // Embedded text breaks lines anywhere (`January \r\n21, 2026`): read it as one line.
+    let flat = text.split_whitespace().collect::<Vec<_>>().join(" ");
+    let mut keys: HashSet<String> = extract(&flat)
+        .iter()
+        .filter_map(|f| key(f.kind, &f.text))
+        .collect();
+    // A docket number read without its office prefix (`19-cv-09902`) matches the embedded
+    // one with it (`3:19-cv-09902`); a prefix that was read must still match exactly.
+    let without_office: Vec<String> = keys
+        .iter()
+        .filter_map(|k| k.strip_prefix("docket:"))
+        .filter_map(|k| k.split_once(':').map(|(_, rest)| format!("docket::{rest}")))
+        .collect();
+    keys.extend(without_office);
+    let tokens: Vec<String> = text.split_whitespace().map(squash).collect();
+    for (i, t) in tokens.iter().enumerate() {
+        keys.insert(format!("Bates:{t}"));
+        if let Some(next) = tokens.get(i + 1) {
+            keys.insert(format!("Bates:{t}{next}"));
+        }
+    }
+    keys
+}
+
 /// The fields of one page's Markdown, before any status is decided.
 fn extract(body: &str) -> Vec<Field> {
     let mut out = Vec::new();
-    for (i, line) in body.lines().enumerate() {
+    let lines: Vec<&str> = body.lines().collect();
+    for (i, &line) in lines.iter().enumerate() {
         if line.trim_start().starts_with("<!--") {
             continue;
         }
@@ -229,7 +325,41 @@ fn extract(body: &str) -> Vec<Field> {
                 ));
             };
         for m in AMOUNT.find_iter(line) {
-            let t = m.as_str().trim_end_matches([',', '.']);
+            let mut t = m.as_str().trim_end_matches([',', '.']).to_string();
+            // `$45` at the end of a line and `million` starting the next one (past a blank line
+            // and a pleading line number): one amount.
+            let next = lines[i + 1..]
+                .iter()
+                .take(2)
+                .find(|l| !l.trim().is_empty())
+                .and_then(|l| {
+                    let mut words = l.split_whitespace().peekable();
+                    words.next_if(|w| w.len() <= 2 && w.chars().all(|c| c.is_ascii_digit()));
+                    words.next()
+                });
+            if let Some(w) = next.map(|w| w.trim_end_matches(|c: char| !c.is_alphanumeric()))
+                && line[m.end()..].trim().is_empty()
+                && !t.ends_with(|c: char| c.is_alphabetic())
+                && ["thousand", "million", "billion", "trillion"]
+                    .contains(&w.to_ascii_lowercase().as_str())
+            {
+                t = format!("{t} {w}");
+            }
+            let t = t.as_str();
+            // `$Sales`, `$ISO`: no digit at all, not an amount.
+            if !t.chars().any(|c| c.is_ascii_digit()) {
+                continue;
+            }
+            if confusable(t) {
+                push(
+                    m.start(),
+                    Kind::Amount,
+                    t,
+                    None,
+                    vec!["confusable_characters"],
+                );
+                continue;
+            }
             let ok = AMOUNT_OK.is_match(t);
             let value = parse_amount(t)
                 .filter(|_| ok)
@@ -256,11 +386,20 @@ fn extract(body: &str) -> Vec<Field> {
         for (at, t) in dates {
             match parse_date(t) {
                 Some(iso) => push(at, Kind::Date, t, Some(iso.into()), vec![]),
+                None if DATE_NUMERIC.is_match(t) && confusable(t) => {
+                    push(at, Kind::Date, t, None, vec!["confusable_characters"])
+                }
                 None => push(at, Kind::Date, t, None, vec!["invalid_date"]),
             }
         }
         for m in DOCKET.find_iter(line) {
-            push(m.start(), Kind::Docket, m.as_str(), None, vec![]);
+            let numbers = m.as_str().split('-').enumerate().filter(|(i, _)| *i != 1);
+            let why = if numbers.take(2).any(|(_, p)| confusable(p)) {
+                vec!["confusable_characters"]
+            } else {
+                vec![]
+            };
+            push(m.start(), Kind::Docket, m.as_str(), None, why);
         }
         for m in CITATION.find_iter(line) {
             let t = m.as_str().trim_end_matches(['.', ',', '-']);
@@ -396,7 +535,11 @@ pub fn report<'a>(
             embedded(number)
         };
         let has_text = text.split_whitespace().count() >= 20;
-        let squashed = squash(&text);
+        let keys = if has_text {
+            embedded_keys(&text)
+        } else {
+            HashSet::new()
+        };
         for f in &mut fields {
             if f.kind == Kind::Docket && odd.contains(&f.text.to_ascii_lowercase()) {
                 f.why.push("differs_from_usual_docket");
@@ -407,7 +550,7 @@ pub fn report<'a>(
             if !page_check.is_empty() {
                 f.why.push("suspect_page");
             }
-            let found = has_text && squashed.contains(&squash(&f.text));
+            let found = key(f.kind, &f.text).is_some_and(|k| keys.contains(&k));
             if has_text && !found {
                 f.why.push("not_in_embedded_text");
             }
@@ -584,7 +727,7 @@ mod tests {
         assert_eq!(
             why,
             [
-                ("02/03/0Q", vec!["invalid_date"]),
+                ("02/03/0Q", vec!["confusable_characters"]),
                 ("$4825,0.00", vec!["malformed_amount"]),
                 ("02/30/2024", vec!["invalid_date"]),
                 ("February 31, 2023", vec!["invalid_date"]),
@@ -683,6 +826,19 @@ mod tests {
             ]
         );
         assert!(f.iter().all(|f| f.why.is_empty()));
+        let f = extract("Losses of $1.5B and $250K, but not $1,5OO.");
+        let got: Vec<(&str, Option<serde_json::Value>, Vec<&str>)> = f
+            .iter()
+            .map(|f| (f.text.as_str(), f.value.clone(), f.why.clone()))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                ("$1.5B", Some(serde_json::json!(1_500_000_000.0)), vec![]),
+                ("$250K", Some(serde_json::json!(250_000.0)), vec![]),
+                ("$1,5OO", None, vec!["confusable_characters"]),
+            ]
+        );
         assert_eq!(
             extract("Signed on 2 March 2023.")[0].value,
             Some(serde_json::json!("2023-03-02"))
@@ -709,6 +865,149 @@ mod tests {
             (r.azure_pages.as_str(), r.summary.embedded_text_pages),
             ("", 1)
         );
+    }
+
+    const LAYER: &str = "On March 3, 2024 the parties agreed to pay $3,000,000 under case \
+        3:26-cv-04417-SI, with 12.5% interest, invoice dated 04/15/2024 for $48,250.00, \
+        citing 28 U.S.C. § 1441(b), Bates ABC 0001234 on the first page of the production.";
+
+    #[test]
+    fn scale_word_on_the_next_line_is_part_of_the_amount() {
+        // A `B` scale after broken grouping stays malformed, never a value.
+        let f = extract("Loss of $1,50B.");
+        assert_eq!(
+            (f[0].value.clone(), f[0].why.clone()),
+            (None, vec!["malformed_amount"])
+        );
+        let f = extract("settled for $45\nMillion. Then $3\nmore.");
+        assert_eq!(f[0].text, "$45 Million");
+        assert_eq!(f[0].value, Some(serde_json::json!(45000000.0)));
+        assert_eq!(f[1].text, "$3");
+        assert_eq!(f[0].line, 1);
+        // Across a blank line, past a pleading line number, before a closing quote.
+        let f = extract("commitments to the entire $400\n\n26 million\u{201d} from investors");
+        assert_eq!(f[0].text, "$400 million");
+        // Not across a whole paragraph, and not from the middle of the next line.
+        assert_eq!(extract("for $400\n\n\nmillion")[0].text, "$400");
+        assert_eq!(extract("for $400\nthe million")[0].text, "$400");
+    }
+
+    #[test]
+    fn values_are_compared_not_substrings() {
+        // `$3,000` is inside `$3,000,000` as text, but it is a different amount.
+        let r = run(
+            &[page(1, "the parties agreed to pay $3,000 under")],
+            VerifyFields::Flagged,
+            LAYER,
+        );
+        assert_eq!(statuses(&r)[0].1, Status::Check, "{:?}", statuses(&r));
+        // Same values written differently are the same reading.
+        let r = run(
+            &[page(
+                1,
+                "case 3:26-CV-4417 on Mar. 3, 2024 for $3000000.00 and 12.50% per year",
+            )],
+            VerifyFields::Flagged,
+            LAYER,
+        );
+        let s = statuses(&r);
+        assert!(s.iter().all(|x| x.1 == Status::Verified), "{s:?}");
+    }
+
+    #[test]
+    fn embedded_line_breaks_and_office_prefixes_still_match() {
+        let layer = "Plaintiff filed on January\r\n21, 2026 in Case: 3:19-cv-09902-jdp Document 24 \
+                     which the court and the parties and counsel then reviewed in full detail.";
+        let r = run(
+            &[page(1, "filed on January 21, 2026 in 19-cv-09902-jdp")],
+            VerifyFields::Flagged,
+            layer,
+        );
+        assert!(
+            statuses(&r).iter().all(|s| s.1 == Status::Verified),
+            "{:?}",
+            statuses(&r)
+        );
+        // A wrongly read office prefix is not excused.
+        let r = run(
+            &[page(1, "Case 8:19-cv-09902-jdp")],
+            VerifyFields::Flagged,
+            layer,
+        );
+        assert_eq!(statuses(&r)[0].1, Status::Check);
+    }
+
+    #[test]
+    fn look_alike_characters_are_found_and_flagged() {
+        let f = extract(
+            "Case 3:26-cv-O4417 for $l,250.00 filed 04/15/2O24. $Sales and $ISO are words.",
+        );
+        let got: Vec<(Kind, &str, Vec<&str>)> = f
+            .iter()
+            .map(|f| (f.kind, f.text.as_str(), f.why.clone()))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                (Kind::Docket, "3:26-cv-O4417", vec!["confusable_characters"]),
+                (Kind::Amount, "$l,250.00", vec!["confusable_characters"]),
+                (Kind::Date, "04/15/2O24", vec!["confusable_characters"]),
+            ]
+        );
+        assert!(f.iter().all(|f| f.value.is_none()));
+    }
+
+    /// Error injection: each misread planted in an OCR page whose embedded text is correct must
+    /// come back `check`, never `verified`.
+    #[test]
+    fn planted_misreads_are_never_verified() {
+        let clean = "On March 3, 2024 the parties agreed to pay $3,000,000 under case \
+            3:26-cv-04417-SI, with 12.5% interest, invoice dated 04/15/2024 for $48,250.00, \
+            citing 28 U.S.C. § 1441(b).";
+        let plants = [
+            ("$48,250.00", "$48,256.00"),
+            ("$48,250.00", "$43,250.00"),
+            ("$48,250.00", "$48,250.80"),
+            ("$3,000,000", "$3,000"),
+            ("$3,000,000", "$8,000,000"),
+            ("$3,000,000", "$3,O00,000"),
+            ("04/15/2024", "04/16/2024"),
+            ("04/15/2024", "04/15/2021"),
+            ("04/15/2024", "04/15/2O24"),
+            ("March 3, 2024", "March 8, 2024"),
+            ("March 3, 2024", "May 3, 2024"),
+            ("3:26-cv-04417", "3:26-cv-04471"),
+            ("3:26-cv-04417", "3:28-cv-04417"),
+            ("3:26-cv-04417", "3:26-cv-O4417"),
+            ("12.5%", "12.6%"),
+            ("§ 1441(b)", "§ 1447(b)"),
+        ];
+        let mut caught = 0;
+        for (good, bad) in plants {
+            let ocr = clean.replacen(good, bad, 1);
+            let r = run(&[page(1, &ocr)], VerifyFields::Flagged, LAYER);
+            let planted: Vec<_> = r.pages[0]
+                .fields
+                .iter()
+                .filter(|f| f.text.contains(bad.trim_start_matches("§ ")))
+                .collect();
+            assert!(!planted.is_empty(), "{bad} not extracted");
+            for f in planted {
+                assert_ne!(f.status, Status::Verified, "{bad} was verified: {f:?}");
+                caught += 1;
+            }
+            // Everything else on the page is still verified.
+            assert!(
+                r.pages[0]
+                    .fields
+                    .iter()
+                    .filter(|f| !f.text.contains(bad.trim_start_matches("§ ")))
+                    .all(|f| f.status == Status::Verified),
+                "{bad}: {:?}",
+                statuses(&r)
+            );
+        }
+        assert_eq!(caught, plants.len());
     }
 
     #[test]

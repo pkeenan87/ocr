@@ -78,6 +78,9 @@ pub struct PageReport {
     /// Whether a second, local reading (Vision's line recognizer at 300 DPI) was compared with,
     /// on a page without embedded text.
     pub second_reader: bool,
+    /// Which sentences of the page the embedded text or the second reading has word for word.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text_agreement: Option<crate::agreement::TextAgreement>,
     /// How to get a second reading of this page, if it needs one: `embedded_text` (free: the
     /// PDF's own text, for a suspect page whose values all match it) or `azure`.
     pub second_reading: Option<&'static str>,
@@ -107,6 +110,10 @@ pub struct Summary {
     pub pages_to_check: usize,
     /// Suspect pages whose values all match the embedded text: read that text instead.
     pub embedded_text_pages: usize,
+    /// Sentences that an independent second reading (embedded text, or Vision against a model)
+    /// has word for word, and those it does not.
+    pub agreed_spans: usize,
+    pub unagreed_spans: usize,
 }
 
 const MONTHS: &str = "January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept|Sep|Oct|Nov|Dec";
@@ -481,6 +488,8 @@ fn close(a: &str, b: &str) -> bool {
 /// What a second reading of a page says about values: the keys it read, and the keys it was
 /// unsure of (a next-best reading of the line reads the value differently, or low confidence).
 struct SecondReading {
+    /// The reading's text, `§`/`¶` restored, line numbers dropped.
+    text: String,
     keys: HashSet<String>,
     doubtful: HashSet<String>,
 }
@@ -494,7 +503,8 @@ fn second_reading(lines: &[Line]) -> SecondReading {
         .collect::<Vec<_>>();
     // The first reading had its `§`/`¶` restored at assembly; restore the second one alike, so
     // `S 1983` is not taken for a disagreement with `§ 1983`.
-    let keys = embedded_keys(&crate::markdown::fix_legal_symbols(&all.join("\n")).0);
+    let text = crate::markdown::fix_legal_symbols(&all.join("\n")).0;
+    let keys = embedded_keys(&text);
     let mut doubtful = HashSet::new();
     for l in lines {
         let mine = embedded_keys(&crate::markdown::fix_legal_symbols(&l.text).0);
@@ -509,7 +519,11 @@ fn second_reading(lines: &[Line]) -> SecondReading {
             doubtful.extend(mine.difference(&theirs).cloned());
         }
     }
-    SecondReading { keys, doubtful }
+    SecondReading {
+        text,
+        keys,
+        doubtful,
+    }
 }
 
 /// Second readings of `which` (indexes into `pages`), two at a time: the bridge runs at most
@@ -603,16 +617,16 @@ pub fn report<'a>(
         .iter()
         .map(|t| t.split_whitespace().count() >= 20)
         .collect();
-    // Pages to re-read: no embedded text, and values a second reading could confirm.
+    // Pages to re-read: no embedded text, and text a second reading could confirm.
     let reread_pages: Vec<usize> = pages
         .iter()
         .zip(&extracted)
         .enumerate()
-        .filter(|(i, (p, (_, fields)))| {
+        .filter(|(i, (p, _))| {
             !has_text[*i]
                 && p.source != Source::TextLayer
                 && p.error.is_none()
-                && (p.bates.is_some() || fields.iter().any(|f| key(f.kind, &f.text).is_some()))
+                && (p.bates.is_some() || !p.body.trim().is_empty())
         })
         .map(|(i, _)| i)
         .collect();
@@ -707,12 +721,30 @@ pub fn report<'a>(
         } else {
             Some("azure")
         };
+        let text_agreement = if has_text {
+            Some(crate::agreement::compare(
+                &p.body,
+                &texts[i],
+                "embedded_text",
+                true,
+            ))
+        } else {
+            reread.map(|r| {
+                crate::agreement::compare(
+                    &p.body,
+                    &r.text,
+                    "second_reader",
+                    model_engine && !p.fallback,
+                )
+            })
+        };
         out.push(PageReport {
             page: number,
             bates: p.bates.clone(),
             page_check,
             embedded_text: has_text,
             second_reader: reread.is_some(),
+            text_agreement,
             second_reading,
             fields,
         });
@@ -731,6 +763,14 @@ pub fn report<'a>(
             .count(),
         ..Summary::default()
     };
+    for a in out
+        .iter()
+        .filter_map(|p| p.text_agreement.as_ref())
+        .filter(|a| a.independent)
+    {
+        summary.agreed_spans += a.agreed_spans;
+        summary.unagreed_spans += a.unagreed.len();
+    }
     for f in out.iter().flat_map(|p| &p.fields) {
         summary.fields += 1;
         match f.status {

@@ -58,6 +58,7 @@ Long scans write per-page checkpoints. If a run is interrupted, running the same
 When the user will rely on figures, dates, docket numbers or citations, scan with `--verify-json`. Use `--verify-fields all` when nothing may be missed, for example amounts in a settlement or deadlines. Then read `<stem>.verify.json`:
 
 - **Quote or compute only with values that are `verified`**, or that a second reader has confirmed. Always give the page, and the Bates number if there is one.
+- **Quote text word for word only when its sentence agrees.** A sentence agrees when it is absent from `unagreed` on a page whose `text_agreement.independent` is true. Otherwise, paraphrase and say the wording is unconfirmed, or check the PDF page.
 - **Treat `check` values as unconfirmed.** Never present them as fact. If a second OCR service is available (for example an Azure Document Intelligence tool), send it only the pages the question needs, taken from `azure_pages` or from the pages of the relevant fields. Use its reading where the two disagree, and say that you did.
 - **`unchecked` means nobody confirmed the value.** Say so if the value matters. On scanned pages with the Apple engine, `ocr` has already read the page a second time. An `unchecked` value there means the two Apple readings agree, but they share blind spots, so it is still unconfirmed. A `check` with `not_in_second_reading` means the two readings disagree.
 - **Never fill a gap from memory or by inference.** If a value cannot be confirmed, say that it needs checking against page N of the PDF.

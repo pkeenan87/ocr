@@ -543,6 +543,12 @@ fn verify_json_confirms_values_against_the_embedded_text() {
     assert_eq!(field(&v, "$48,250.00")["value"], 48250.0);
     assert_eq!(v["pages"][0]["embedded_text"], true);
     assert_eq!(v["azure_pages"], "", "{v:#}");
+    // Every sentence of the corrected page is in the embedded text word for word.
+    let a = &v["pages"][0]["text_agreement"];
+    assert_eq!(a["compared_with"], "embedded_text");
+    assert_eq!(a["independent"], true);
+    assert!(a["agreed_spans"].as_u64().unwrap() >= 8, "{a:#}");
+    assert!(a["agreed_words"].as_f64().unwrap() >= 0.9, "{a:#}");
 }
 
 #[test]
@@ -562,6 +568,11 @@ fn verify_json_on_an_image_uses_the_second_reader() {
         (&"check".into(), &"not_in_second_reading".into())
     );
     assert_eq!(v["azure_pages"], "1");
+    // Two Apple readings: their agreement is reported, but not as independent.
+    let a = &v["pages"][0]["text_agreement"];
+    assert_eq!(a["compared_with"], "second_reader");
+    assert_eq!(a["independent"], false);
+    assert_eq!(v["summary"]["agreed_spans"], 0);
     e.scan(
         "legal_200dpi.png",
         &["--verify-json", "--verify-fields", "all", "--overwrite"],

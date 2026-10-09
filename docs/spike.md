@@ -371,16 +371,17 @@ Three causes, measured with a temporary chain dump:
 - **Q/A marker strips.** Full-page transcripts have a 0.013-0.025-wide strip of Q and A markers that was split off as its own column (Knight, 12 pages).
 
 Fix (`src/regions.rs`):
-- a gutter must be a straight channel (`lo < hi`), cut at its middle;
-- `MARGIN_WIDTH` is now 0.14;
-- a piece narrower than 0.05 of the page width, outside the margin zones, joins its neighbour.
+- a gutter must be one straight channel through all four strips (`lo < hi`), cut at its middle;
+- `MIN_GUTTER` is 0.02 of the page width (was 0.012). Courier word spaces line up into straight rivers 11-14 px wide at 100 DPI; real gutters measured 17-167 px (a skewed one had a 7 px common channel with 22 px runs);
+- a margin strip (dropped when the page is split) must be under 0.14 of the page width (was 0.08), span at least half the page height, sit in the edge zone, and be under half as wide as the widest piece of the cut. The last two rules came from checking every Column-to-Margin flip: an absolute 0.14 alone dropped the first column of a landscape table (Nissan p27) and the first words of a Courier paragraph (Nissan p15);
+- a piece narrower than 0.05 of the page width that is not a margin joins its neighbour instead of becoming a column. Table columns at 0.053-0.054 (Nissan p27) are just above this; a table with narrower columns is read whole by Vision rather than split.
 
-Two new unit tests (a drifting typewriter river, and a marker strip) fail on the old logic and pass on the new.
+Four new unit tests (a drifting typewriter river, a Q/A marker strip, six narrow table columns, and a short narrow edge piece) each fail with their rule removed.
 
 | Set | Pages split before | After |
 |---|---|---|
-| Public filings, 25 documents (first 60 pages each) | 119 | 77 |
-| of which Knight transcript / Garland order / Ironworkers order | 13 / 13 / 10 | 1 / 0 / 1 |
+| Public filings, 25 documents (first 60 pages each) | 119 | 71 |
+| of which Knight transcript / Garland order / Ironworkers order / Lozano | 13 / 13 / 10 / 4 | 0 / 1 / 1 / 2 |
 | Synthetic fixtures and seeds 10-12 | 10 pages | the same 10 pages |
 
-The remaining splits are side-by-side caption, signature and index blocks and 4-up transcripts, which are true columns. The only synthetic change: on `four_up.pdf` the right mini-page's line-number strip (0.012 wide) now joins its text instead of becoming a column of its own. All goldens are byte-identical. Lozano p3 now reads as whole lines; Knight p6 is no longer split, but it is still not detected as a transcript (separate follow-up).
+Every remaining Margin on the public set was rendered and holds only line numbers, a form stamp or scan specks. The remaining splits are side-by-side caption, signature and index blocks and 4-up transcripts. The only synthetic change: on `four_up.pdf` each mini-page's line-number strip now stays with its text (before, the left one was a margin and the right one a column of its own). Apple transcript lines on held-out seeds 40-42 are unchanged at 682/700 (97.4%). All goldens are byte-identical. Lozano p3 now reads as whole lines; Knight p6 is no longer split, but it is still not detected as a transcript (separate follow-up).

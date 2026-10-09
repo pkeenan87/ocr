@@ -207,7 +207,7 @@ Every real crash happened within 0.81 s of launch. Log: `spike/out/cap4_crash_te
 
 ## Follow-ups, prioritized
 
-1. ~~Apple column split firing on single-column real filings~~ Fixed 2026-10-08: split pages on the public set 119 -> 77, the rest true columns (docs/spike.md, "Column split false positives on real filings"). The public set has not been re-judged yet.
+1. ~~Apple column split firing on single-column real filings~~ Fixed 2026-10-08: split pages on the public set 119 -> 71, the rest true columns (docs/spike.md, "Column split false positives on real filings"). The public set has not been re-judged yet.
 2. Paddle pleading-table margin column (full-width crop pulls margin numbers in; crop to the ruled box).
 3. Pilcrow and section-sign misreads (Apple).
 4. Paddle repetition below the loop-detector threshold on real pages (4% of pages).

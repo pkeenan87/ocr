@@ -24,7 +24,7 @@ MERGED with earlier runs of the same tag; outputs in RESULTS_DIR/<tag>/<set name
 The printed table aggregates over the sets given in THIS invocation (micro-averaged: total edit
 distance / total characters, total tokens found / total tokens, pages / total wall seconds).
 """
-import argparse, json, os, re, shlex, subprocess, sys, time
+import argparse, json, os, re, shlex, subprocess, sys, tempfile, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -80,13 +80,20 @@ def server_vram_mb(state_dir):
     return None
 
 
-def child_peak_mb():
-    """Largest resident peak of any child so far (off macOS, where BSD `time -l` is missing)."""
-    try:
-        import resource
-    except ImportError:  # Windows
-        return None
-    return round(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024, 1)  # Linux: KiB
+def run_measured(cmd, env):
+    """Runs `cmd` like `subprocess.run(capture_output=True, text=True)` and returns it with the
+    child's own resident peak in MB, from `wait4` (off macOS, where BSD `time -l` is missing;
+    RUSAGE_CHILDREN would be the peak of every child so far). None on Windows."""
+    if not hasattr(os, "wait4"):
+        return subprocess.run(cmd, env=env, capture_output=True, text=True), None
+    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
+        proc = subprocess.Popen(cmd, env=env, stdout=out, stderr=err)
+        _, status, usage = os.wait4(proc.pid, 0)
+        proc.returncode = os.waitstatus_to_exitcode(status)
+        out.seek(0), err.seek(0)
+        p = subprocess.CompletedProcess(cmd, proc.returncode, out.read().decode(errors="replace"),
+                                        err.read().decode(errors="replace"))
+    return p, round(usage.ru_maxrss / 1024, 1)  # Linux: KiB
 
 
 def aggregate(entries):
@@ -145,7 +152,7 @@ def main():
             gt = json.load(open(gtp))
             if a.first_pages:
                 gt["pages"] = gt["pages"][:a.first_pages]
-            # BSD `time -l` gives the peak footprint on macOS; elsewhere `child_peak_mb`.
+            # BSD `time -l` gives the peak footprint on macOS; elsewhere `run_measured`.
             timer = ["/usr/bin/time", "-l"] if sys.platform == "darwin" else []
             cmd = timer + [a.ocr_bin, "scan", "--input-file", str(pdf), "--output-file", str(md),
                    "--model", a.engine, "--overwrite", "--quiet"]
@@ -163,13 +170,16 @@ def main():
             crashes = 0
             while True:
                 t0 = time.perf_counter()
-                p = subprocess.run(cmd, env=env, capture_output=True, text=True)
+                if timer:
+                    p, child_peak = subprocess.run(cmd, env=env, capture_output=True, text=True), None
+                else:
+                    p, child_peak = run_measured(cmd, env)
                 wall = time.perf_counter() - t0
                 if p.returncode >= 0 or crashes >= 2:
                     break
                 crashes += 1
             m = re.search(r"(\d+)\s+peak memory footprint", p.stderr)
-            peak = round(int(m.group(1)) / 1048576, 1) if m else (None if timer else child_peak_mb())
+            peak = round(int(m.group(1)) / 1048576, 1) if m else child_peak
             entry = {"wall_s": round(wall, 2), "pages": len(gt["pages"]), "exit_code": p.returncode,
                      "pages_per_s": round(len(gt["pages"]) / wall, 3),
                      "ocr_peak_mb": peak, "crashes": crashes}

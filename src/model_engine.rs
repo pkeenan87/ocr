@@ -8,8 +8,9 @@
 //! dir, so a second `ocr scan` on the same server waits for its turn instead of queueing inside
 //! the server. A request's timeout clock starts only once it holds both.
 
+use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Condvar, Mutex};
 use std::time::{Duration, Instant};
@@ -429,7 +430,15 @@ pub struct Ctx {
     permits: Mutex<usize>,
     permit_freed: Condvar,
     mlx_vlm: String,
+    /// Per document: Bates corner probes that found nothing, or `BATES_FOUND` (olmOCR off
+    /// macOS, `want_bates_corners`).
+    bates_misses: Mutex<HashMap<PathBuf, u32>>,
 }
+
+/// `bates_misses` value of a document known to carry Bates numbers.
+const BATES_FOUND: u32 = u32::MAX;
+/// Pages of a document probed for a Bates corner, with nothing found, before probing stops.
+const BATES_PROBE_PAGES: u32 = 3;
 
 /// Requests the server runs at once: its recorded `slots` (llama-server), else `--max-num-seqs`
 /// from its recorded argv (mlx-vlm), else 1.
@@ -483,7 +492,13 @@ fn lock_server(slots: usize) -> Option<File> {
     };
     if slots <= 1 {
         let f = open(0)?;
-        return f.lock().is_ok().then_some(f);
+        loop {
+            match f.lock() {
+                Ok(()) => return Some(f),
+                Err(e) if e.kind() == std::io::ErrorKind::Interrupted => {}
+                Err(_) => return None,
+            }
+        }
     }
     loop {
         for k in 0..slots {
@@ -538,6 +553,28 @@ impl Ctx {
             permits: Mutex::new(in_flight),
             permit_freed: Condvar::new(),
             mlx_vlm: mlx_vlm.to_string(),
+            bates_misses: Mutex::new(HashMap::new()),
+        }
+    }
+
+    /// Whether a page of `path` without a Bates number in its text is worth extra corner
+    /// requests: yes while the document has shown Bates numbers, or until
+    /// `BATES_PROBE_PAGES` of its pages were probed for nothing.
+    pub(crate) fn want_bates_corners(&self, path: &Path) -> bool {
+        let misses = self.bates_misses.lock().unwrap_or_else(|e| e.into_inner());
+        misses
+            .get(path)
+            .is_none_or(|&n| n == BATES_FOUND || n < BATES_PROBE_PAGES)
+    }
+
+    /// Records whether a page of `path` had a Bates number (from its text or a corner probe).
+    pub(crate) fn note_bates(&self, path: &Path, found: bool) {
+        let mut misses = self.bates_misses.lock().unwrap_or_else(|e| e.into_inner());
+        let n = misses.entry(path.to_path_buf()).or_insert(0);
+        if found {
+            *n = BATES_FOUND;
+        } else if *n != BATES_FOUND {
+            *n += 1;
         }
     }
 

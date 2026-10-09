@@ -398,6 +398,22 @@ fn process<T>(pid: u32, f: impl FnOnce(&sysinfo::Process) -> T) -> Option<T> {
     sys.process(pid).map(f)
 }
 
+/// Whether process `info.pid` started within a few seconds of `info.started_at` (recorded right
+/// after the spawn).
+#[cfg(windows)]
+fn started_with(info: &ServerInfo) -> bool {
+    let Ok(t) = chrono::DateTime::parse_from_rfc3339(&info.started_at) else {
+        return false;
+    };
+    process(info.pid, |p| p.start_time())
+        .is_some_and(|start| (start as i64 - t.timestamp()).abs() <= 5)
+}
+
+#[cfg(not(windows))]
+fn started_with(_: &ServerInfo) -> bool {
+    false
+}
+
 #[cfg(windows)]
 fn pid_alive(pid: u32) -> bool {
     process(pid, |_| ()).is_some()
@@ -459,10 +475,11 @@ fn is_ours(info: &ServerInfo) -> bool {
     let port = format!("--port {}", info.port);
     process_command(info.pid).is_some_and(|c| {
         if cfg!(windows) {
-            // Case-insensitive file system; a bare executable name (no command line) is
-            // accepted without the port.
+            // Case-insensitive file system. A bare executable name (no command line) carries no
+            // port, so the process must also have started when `server.json` says ours did: a
+            // reused pid of some other llama-server is not ours.
             let (c, prog) = (c.to_lowercase(), prog.to_lowercase());
-            c.contains(&prog) && (c.contains(&port) || !c.contains(' '))
+            c.contains(&prog) && (c.contains(&port) || (!c.contains(' ') && started_with(info)))
         } else {
             c.contains(prog) && c.contains(&port)
         }

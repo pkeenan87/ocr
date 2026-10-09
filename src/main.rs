@@ -273,6 +273,14 @@ fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliEr
             "note: --dpi is ignored for olmocr; images are always 1288 px on the longest side"
         );
     }
+    #[cfg(not(target_os = "macos"))]
+    if args.model != Engine::Olmocr && args.effective_dpi() > ocr::llama::MAX_DPI && !args.quiet {
+        eprintln!(
+            "⚠ --dpi {} is above the {} DPI the model server's context is sized for; long pages may be cut short",
+            args.effective_dpi(),
+            ocr::llama::MAX_DPI
+        );
+    }
     let settings = settings(args);
     if args.jobs.is_some_and(|j| j > 1) {
         eprintln!(

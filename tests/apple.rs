@@ -484,3 +484,79 @@ fn heldout_seeds_are_read_in_order() {
     assert!(f >= 0.95, "found {found}/{total}");
     assert!(o >= 0.95, "in order {ordered}/{pairs}");
 }
+
+fn verify_json(e: &Env, stem: &str) -> serde_json::Value {
+    serde_json::from_str(&fs::read_to_string(e.path(&format!("{stem}.verify.json"))).unwrap())
+        .unwrap()
+}
+
+fn field<'a>(v: &'a serde_json::Value, text: &str) -> &'a serde_json::Value {
+    v["pages"][0]["fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|f| f["text"] == text)
+        .unwrap_or_else(|| panic!("{text} not in {v:#}"))
+}
+
+#[test]
+fn verify_json_confirms_values_against_the_embedded_text() {
+    let e = Env::new(&["legal.pdf"]);
+    let (md, _) = e.scan("legal.pdf", &["--verify-json"]);
+    let v = verify_json(&e, "legal");
+    assert_eq!(v["source"], "legal.pdf");
+    assert_eq!(v["verify_fields"], "flagged");
+    for text in [
+        "$48,250.00",
+        "$122,525.50",
+        "3:26-cv-04417",
+        "04/15/2024",
+        "SMITH000123",
+    ] {
+        let f = field(&v, text);
+        assert_eq!(f["status"], "verified", "{f:#}");
+        assert!(md.contains(text), "{text}");
+    }
+    assert_eq!(field(&v, "March 3, 2024")["value"], "2024-03-03");
+    assert_eq!(field(&v, "$48,250.00")["value"], 48250.0);
+    assert_eq!(v["pages"][0]["embedded_text"], true);
+    assert_eq!(v["azure_pages"], "", "{v:#}");
+}
+
+#[test]
+fn verify_json_on_an_image_sends_pages_only_in_all_mode() {
+    let e = Env::new(&["legal_200dpi.png"]);
+    e.scan("legal_200dpi.png", &["--verify-json"]);
+    let v = verify_json(&e, "legal_200dpi");
+    assert_eq!(v["pages"][0]["embedded_text"], false);
+    assert_eq!(field(&v, "$48,250.00")["status"], "unchecked");
+    assert_eq!(v["azure_pages"], "");
+    e.scan(
+        "legal_200dpi.png",
+        &["--verify-json", "--verify-fields", "all", "--overwrite"],
+    );
+    let v = verify_json(&e, "legal_200dpi");
+    let f = field(&v, "$48,250.00");
+    assert_eq!(
+        (&f["status"], &f["why"][0]),
+        (&"check".into(), &"unconfirmed".into())
+    );
+    assert_eq!(v["azure_pages"], "1");
+}
+
+#[test]
+fn verify_json_is_opt_in() {
+    let e = Env::new(&["legal.pdf"]);
+    e.scan("legal.pdf", &[]);
+    assert!(!e.path("legal.verify.json").exists());
+    e.cmd()
+        .args([
+            "scan",
+            "--input-file",
+            "legal.pdf",
+            "--verify-fields",
+            "all",
+        ])
+        .assert()
+        .code(2);
+}

@@ -255,6 +255,7 @@ fn settings(args: &ScanArgs) -> Settings {
         currency_fix: !args.no_currency_fix,
         symbol_fix: !args.no_symbol_fix,
         legal_cleanup: args.legal_cleanup,
+        verify: args.verify_json.then_some(args.verify_fields),
         quiet: args.quiet,
         verbose: args.verbose,
         options: Options::default(),

@@ -240,6 +240,21 @@ pub struct ScanArgs {
     /// Omit the YAML header
     #[arg(long)]
     pub no_front_matter: bool,
+    /// Also write `<stem>.verify.json`: amounts, dates, docket and Bates numbers, citations and
+    /// percentages with their page, line and status, and the pages to send to a second reader
+    /// (`azure_pages`)
+    #[arg(long)]
+    pub verify_json: bool,
+    /// Which fields not confirmed by the PDF's embedded text need a second reading: only those
+    /// with something against them (flagged), or every one (all)
+    #[arg(
+        long,
+        value_enum,
+        value_name = "MODE",
+        default_value_t,
+        requires = "verify_json"
+    )]
+    pub verify_fields: crate::verify::VerifyFields,
     /// Use a PDF's embedded text instead of OCR (default: never; the text-layer path has no
     /// layout handling, so margin numbers come out inline, tables are flattened and Bates is lost)
     #[arg(long, value_enum)]

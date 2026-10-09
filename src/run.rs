@@ -21,6 +21,7 @@ use crate::model_engine::{Fail, Prepared};
 use crate::pipeline::{self, Settings};
 use crate::progress::{self, Progress};
 use crate::suspect;
+use crate::verify;
 use crate::vision::{self, DocKind};
 
 /// Files whose pages are in the pool at the same time.
@@ -102,6 +103,7 @@ struct FileInfo {
 
 struct Begin {
     id: usize,
+    input: PathBuf,
     output: PathBuf,
     name: String,
     doc_pages: usize,
@@ -234,6 +236,7 @@ impl Queue<'_> {
         self.progress.file_start(id, &name, selected.len(), resumed);
         let _ = self.writer.send(Msg::Begin(Box::new(Begin {
             id,
+            input: item.input.clone(),
             output: item.output.clone(),
             name,
             doc_pages: info.pages,
@@ -395,6 +398,21 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
     };
     let md = markdown::assemble(s.front_matter.then_some(&front), &reviewed, s.page_markers);
     pipeline::write_atomic(&e.b.output, &md).map_err(|err| (id, format!("{err:#}")))?;
+    if let Some(mode) = s.verify {
+        let input = e.b.input.clone();
+        let report = verify::report(
+            &e.b.name,
+            e.b.output.display().to_string(),
+            front.engine,
+            &front.generated,
+            &reviewed,
+            mode,
+            &|page| vision::text_layer(&input, page - 1).unwrap_or_default(),
+        );
+        let json = serde_json::to_string_pretty(&report).expect("report serializes");
+        pipeline::write_atomic(&verify::sidecar(&e.b.output), &(json + "\n"))
+            .map_err(|err| (id, format!("{err:#}")))?;
+    }
 
     let failed: Vec<usize> = results
         .iter()

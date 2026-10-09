@@ -1,0 +1,469 @@
+{
+ "bundle": "eval/verify_bundle/apple",
+ "route": "report",
+ "counts": {
+  "pages": 230,
+  "azure_pages": 128,
+  "graded_pages": 139,
+  "azure_has_right": 471,
+  "right": 498,
+  "person_right": 273,
+  "confirmed_right": 207,
+  "sentences": 1642,
+  "sentences_confirmed_right": 1214,
+  "sentences_unconfirmed_unmatched": 153,
+  "sentences_confirmed_unmatched": 83,
+  "azure_has_wrong": 2,
+  "wrong": 5,
+  "confirmed_wrong": 2,
+  "disputed_wrong": 3,
+  "sentences_unconfirmed_right": 192,
+  "disputed_right": 18
+ },
+ "examples": {
+  "sentence Azure confirms, not in embedded text": [
+   [
+    "cmpl-irhythm",
+    9,
+    "available at: https://www.hipaajournal.com/what-is-considered-protected-health-information"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "Page ID :15 2 4 6 8 9 10 11 Factor in 2013 was unreasonable."
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "County of San Bernardino, case number 5-16-cv1128, Plaintiff argued that the involved San "
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "County of San Bernardino, case number 5-16-cv1128, Plaintiff argued that the involved San "
+   ],
+   [
+    "mot-janestreet-opp",
+    7,
+    "This Court should reject Plaintiff\u2019s invitation to hold Defendants to a non-existent and b"
+   ],
+   [
+    "mot-janestreet-opp",
+    7,
+    "Schadewald resigned from Jane Street2 and \u201calmost immediately\u201d Jane Street \u201clearned that a"
+   ],
+   [
+    "mot-janestreet-opp",
+    8,
+    "Schadewald] was executing Jane Street\u2019s Trading Strategy \u2026 directly harming Jane Street in"
+   ],
+   [
+    "mot-janestreet-opp",
+    8,
+    "\u201chave delivered [a] proprietary trading strategy and related confidential information to M"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "Plaintiff\u2019s papers also lack evidence demonstrating that the information at issue was actu"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "Parties routinely submit such evidence to the court (under seal and on an AEO basis), incl"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "Nanney (\u201cNanney Decl.\u201d) does not even mention, much less attempt to supply any evidence, s"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "The Complaint alleges that the \u201ctrade secrets\u201d include \u201cmultimodal signals leveraging mach"
+   ],
+   [
+    "mot-cimontubo-reply",
+    4,
+    "The basic dictionary definition of \u201coutstanding\u201d is \u201cunpaid.\u201d See https://www.merriamwebst"
+   ],
+   [
+    "mot-cimontubo-reply",
+    6,
+    "Notably absent from PDVSA\u2019s papers is any explanation of why a debtor who misses a payment"
+   ],
+   [
+    "mot-cimontubo-reply",
+    6,
+    "Cimontubo\u2019s calculation of interest, however, is grounded by the express terms of the Note"
+   ],
+   [
+    "mot-cimontubo-reply",
+    6,
+    "As such, Cimontubo\u2019s calculation of interest should be granted."
+   ],
+   [
+    "depo-removed-1",
+    2,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    3,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    11,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    14,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    14,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    14,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    14,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    14,
+    "[removed]"
+   ],
+   [
+    "depo-removed-1",
+    14,
+    "[removed]"
+   ]
+  ],
+  "Azure repeats a wrong value": [
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "docket",
+    "5-16-cv1128"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "docket",
+    "5-16-cv1128"
+   ]
+  ],
+  "confirmed but wrong": [
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "docket",
+    "5-16-cv1128"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "docket",
+    "5-16-cv1128"
+   ]
+  ],
+  "Azure lacks a right value": [
+   [
+    "mot-janestreet-opp",
+    1,
+    "date",
+    "04/18/24"
+   ],
+   [
+    "mot-janestreet-opp",
+    2,
+    "date",
+    "04/18/24"
+   ],
+   [
+    "mot-janestreet-opp",
+    3,
+    "date",
+    "04/18/24"
+   ],
+   [
+    "mot-janestreet-opp",
+    4,
+    "date",
+    "04/18/24"
+   ],
+   [
+    "mot-janestreet-opp",
+    5,
+    "date",
+    "04/18/24"
+   ],
+   [
+    "mot-janestreet-opp",
+    7,
+    "date",
+    "04/18/24"
+   ],
+   [
+    "mot-janestreet-opp",
+    8,
+    "date",
+    "04/18/24"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "date",
+    "04/18/24"
+   ],
+   [
+    "depo-knight-avery",
+    1,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    1,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    2,
+    "docket",
+    "2:23-CV-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    2,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    4,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    4,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    5,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    5,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    6,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    6,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    7,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    8,
+    "docket",
+    "2:23-CV-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    9,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    10,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    10,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "ord-garland-dunkin",
+    2,
+    "citation",
+    "\u00b6 60"
+   ],
+   [
+    "ord-garland-dunkin",
+    12,
+    "citation",
+    "\u00b6 46"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    2,
+    "citation",
+    "\u00b6 33"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    3,
+    "citation",
+    "\u00b6 30"
+   ]
+  ]
+ }
+}

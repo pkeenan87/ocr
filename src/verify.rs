@@ -134,6 +134,39 @@ static AMOUNT_OK: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^\$\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,3})?(?:\s(?:thousand|million|billion|trillion)|[KMB])?$")
         .unwrap()
 });
+/// Money without a dollar sign, in the three shapes that cannot be a count: `USD 5,000`,
+/// `5,000 dollars`, and `sum of 5,000.00` (cents required: `amount of 1,500 units` is not money).
+static BARE_AMOUNTS: LazyLock<[Regex; 3]> = LazyLock::new(|| {
+    const N: &str = r"(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})?(?:\s(?:thousand|million|billion))?";
+    [
+        Regex::new(&format!(r"(?i)\bUSD\s?{N}\b")).unwrap(),
+        Regex::new(&format!(r"(?i)\b{N}\s(?:U\.S\.\s)?dollars\b")).unwrap(),
+        Regex::new(
+            r"(?i)\b(?:sum|amount|total|price|fee|payment|balance) of\s(?P<n>(?:\d{1,3}(?:,\d{3})+|\d+)\.\d{2})\b",
+        )
+        .unwrap(),
+    ]
+});
+/// An amount written without `$` (`USD 5,000`, `5,000 dollars`, `5,000.00`) as `$5,000`.
+fn dollar_form(text: &str) -> String {
+    let t = text.trim();
+    let t = t
+        .strip_prefix("USD")
+        .or_else(|| t.strip_prefix("usd"))
+        .unwrap_or(t)
+        .trim();
+    let lower = t.to_ascii_lowercase();
+    let t = ["u.s. dollars", "dollars"]
+        .iter()
+        .find_map(|s| lower.strip_suffix(s).map(|_| &t[..t.len() - s.len()]))
+        .unwrap_or(t)
+        .trim();
+    if t.starts_with('$') {
+        t.to_string()
+    } else {
+        format!("${t}")
+    }
+}
 /// Numeric dates, with letters OCR puts in place of digits (`02/03/0Q`).
 static DATE_NUMERIC: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"\b[0-9OIlQ]{1,2}/[0-9OIlQ]{1,2}/[0-9OIlQ]{2,4}\b|\b\d{4}-\d{2}-\d{2}\b").unwrap()
@@ -144,6 +177,8 @@ static DATE_WORDS: LazyLock<Regex> = LazyLock::new(|| {
     ))
     .unwrap()
 });
+/// A hyphen ending a line, with the line break after it.
+static LINE_END_HYPHEN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"-[ \t]*\r?\n\s*").unwrap());
 /// An amount whose dollar sign was read as `S` (`S5,500`, `S12.50`).
 static S_AMOUNT: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
@@ -168,6 +203,15 @@ static DOCKET: LazyLock<Regex> = LazyLock::new(|| {
 static DOCKET_PARTS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)^(?:(?P<office>\d{1,2}):)?(?P<year>\d{2})-(?P<kind>[a-z]+)-(?P<num>\d+)")
         .unwrap()
+});
+/// A case number after its label, in any court's format (`Case No.: 11-4604 PSG`,
+/// `Case No. C-08-01337 MHP`, `C.A. No. 5215-VCG`, `Index No. 651234/2021`, `Case no. 20 Civ 1234`).
+/// `Docket No. 35` and `Dkt. No.` cite a docket entry, not a case, and are left out.
+static LABELED_DOCKET: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?i)\b(?:case|civil action|c\.a\.|index|cause|adv(?:ersary)?\.? (?:proc|no)\.?)\s*(?:no|number|#)\.?:?\s*(?P<n>(?-i:[A-Z]{0,3})[-:]?[\dOIl][\w:./-]*[\dOIl](?:\s(?:civ|cv|cr)\.?\s\d{1,6})?(?-i:[- ][A-Z]{2,4}\b)?)",
+    )
+    .unwrap()
 });
 /// Citations with a section or paragraph sign.
 static CITATION: LazyLock<Regex> =
@@ -278,7 +322,8 @@ fn confusable(t: &str) -> bool {
 fn key(kind: Kind, text: &str) -> Option<String> {
     match kind {
         Kind::Amount => {
-            let t = text.trim_end_matches([',', '.']);
+            let t = dollar_form(text.trim_end_matches([',', '.']));
+            let t = t.as_str();
             (AMOUNT_OK.is_match(t) && !confusable(t))
                 .then(|| parse_amount(t))
                 .flatten()
@@ -286,7 +331,10 @@ fn key(kind: Kind, text: &str) -> Option<String> {
         }
         Kind::Date => parse_date(text).map(|d| format!("date:{d}")),
         Kind::Docket => {
-            let c = DOCKET_PARTS.captures(text)?;
+            // Other courts' formats compare as their exact letters and digits.
+            let Some(c) = DOCKET_PARTS.captures(text) else {
+                return Some(format!("docket:other:{}", squash(text)));
+            };
             let n: u64 = c["num"].parse().ok()?;
             let office = c.name("office").map_or("", |o| o.as_str());
             Some(format!(
@@ -309,7 +357,10 @@ fn key(kind: Kind, text: &str) -> Option<String> {
 /// text, so `$3,000` never matches inside `$3,000,000`. Bates numbers are matched as whole
 /// tokens (one word, or two joined, for `ABC 0001234`).
 fn embedded_keys(text: &str) -> HashSet<String> {
-    // Embedded text breaks lines anywhere (`January \r\n21, 2026`): read it as one line.
+    // Embedded text breaks lines anywhere (`January \r\n21, 2026`): read it as one line. A
+    // line-end hyphen joins its halves (`5:15-` / `CV-01102`), and soft hyphens go.
+    let text = LINE_END_HYPHEN.replace_all(text, "-");
+    let text = text.replace(['\u{ad}', '\u{fffe}'], "");
     let flat = text.split_whitespace().collect::<Vec<_>>().join(" ");
     let mut keys: HashSet<String> = extract(&flat)
         .iter()
@@ -411,6 +462,27 @@ fn extract(body: &str) -> Vec<Field> {
                 if ok { vec![] } else { vec!["malformed_amount"] },
             );
         }
+        // Money without a dollar sign, where no `$` amount is.
+        let dollars: Vec<std::ops::Range<usize>> =
+            AMOUNT.find_iter(line).map(|m| m.range()).collect();
+        for (i, re) in BARE_AMOUNTS.iter().enumerate() {
+            for c in re.captures_iter(line) {
+                let m = if i == 2 {
+                    c.name("n").unwrap()
+                } else {
+                    c.get(0).unwrap()
+                };
+                if dollars
+                    .iter()
+                    .any(|r| r.start < m.end() && m.start() < r.end)
+                {
+                    continue;
+                }
+                let value = parse_amount(&dollar_form(m.as_str()))
+                    .and_then(|v| serde_json::Number::from_f64(v).map(serde_json::Value::Number));
+                push(m.start(), Kind::Amount, m.as_str(), value, vec![]);
+            }
+        }
         // `2 March 2023` at the start of a line is a pleading line number before `March 2023`.
         let indent = line.len() - line.trim_start().len();
         let mut dates: Vec<(usize, &str)> = DATE_WORDS
@@ -439,6 +511,37 @@ fn extract(body: &str) -> Vec<Field> {
                 vec![]
             };
             push(m.start(), Kind::Docket, m.as_str(), None, why);
+        }
+        // Case numbers by label, where the federal shape above did not already find them.
+        let federal: Vec<std::ops::Range<usize>> =
+            DOCKET.find_iter(line).map(|m| m.range()).collect();
+        for c in LABELED_DOCKET.captures_iter(line) {
+            let n = c.name("n").unwrap();
+            if federal
+                .iter()
+                .any(|r| r.start < n.end() && n.start() < r.end)
+            {
+                continue;
+            }
+            // Cut off at the line end (`Case No. 03:11-`): a fragment is not a case number.
+            if line[n.end()..].starts_with(['-', ':', '/']) && line[n.end() + 1..].trim().is_empty()
+            {
+                continue;
+            }
+            let t = n.as_str().trim_end_matches(['.', ',', '-', '/', ':']);
+            if t.chars().filter(|c| c.is_ascii_digit()).count() < 4 {
+                continue;
+            }
+            // A digit run with a look-alike letter in it (`C-O8-01337`).
+            let why = if t
+                .split(|c: char| !c.is_alphanumeric())
+                .any(|part| part.chars().any(|c| c.is_ascii_digit()) && confusable(part))
+            {
+                vec!["confusable_characters"]
+            } else {
+                vec![]
+            };
+            push(n.start(), Kind::Docket, t, None, why);
         }
         for m in CITATION.find_iter(line) {
             let t = m.as_str().trim_end_matches(['.', ',', '-']);
@@ -1276,6 +1379,89 @@ mod tests {
         assert!(status("$3,000.00").2.contains(&"words_numerals_mismatch"));
         assert!(status("$310.00").2.contains(&"arithmetic_mismatch"));
         assert_eq!(r.azure_pages, "1");
+    }
+
+    #[test]
+    fn case_numbers_in_other_formats_are_found_by_label() {
+        let body = "Case No.: 11-4604 PSG ORDER GRANTING\nCase No. C-08-01337 MHP\n\
+            C.A. No. 5215-VCG\nIndex No. 651234/2021\nCase no. 20 Civ 1234\n\
+            See Docket No. 35 at 9:20. Case No. 3:26-cv-04417. The case number ORDERS.\n\
+            case number 5:15CV-01102-JGB-SP and Case No. 03:11-\ncv-01234";
+        let got: Vec<String> = extract(body)
+            .into_iter()
+            .filter(|f| f.kind == Kind::Docket)
+            .map(|f| f.text)
+            .collect();
+        assert_eq!(
+            got,
+            [
+                "11-4604 PSG",
+                "C-08-01337 MHP",
+                "5215-VCG",
+                "651234/2021",
+                "20 Civ 1234",
+                "3:26-cv-04417",
+                "5:15CV-01102-JGB"
+            ]
+        );
+        // Compared as exact letters and digits: one digit off, or O for 0, is not verified.
+        let layer = "In Case No. C-08-01337 MHP the parties filed the joint statement that the \
+            Court requested, with every exhibit and declaration, on the date the order set.";
+        // Embedded text broken at a hyphen, or with a soft hyphen, still matches.
+        for layer in [
+            "In this matter, case number 5:15-\r\nCV-01102-JGB-SP, Plaintiff argued that the \
+             County was liable for every one of the injuries alleged in the complaint.",
+            "In this matter, case number 5:15-CV\u{fffe}-01102-JGB-SP, Plaintiff argued that the \
+             County was liable for every one of the injuries alleged in the complaint.",
+        ] {
+            let r = run(
+                &[page(1, "case number 5:15-CV-01102-JGB-SP, Plaintiff")],
+                VerifyFields::Flagged,
+                layer,
+            );
+            assert_eq!(statuses(&r)[0].1, Status::Verified, "{layer}");
+        }
+        for (ocr, status) in [
+            ("Case No. C-08-01337 MHP", Status::Verified),
+            ("Case No. C-08-01387 MHP", Status::Check),
+            ("Case No. C-O8-01337 MHP", Status::Check),
+        ] {
+            let r = run(&[page(1, ocr)], VerifyFields::Flagged, layer);
+            assert_eq!(statuses(&r)[0].1, status, "{ocr}");
+        }
+    }
+
+    #[test]
+    fn money_without_a_dollar_sign() {
+        let body = "a fee of USD 5,000 and 12,500 dollars, the sum of 48,250.00 in total, \
+            but an amount of 1,500 units, 30 days, and $2,000 dollars.";
+        let got: Vec<(String, Option<serde_json::Value>)> = extract(body)
+            .into_iter()
+            .filter(|f| f.kind == Kind::Amount)
+            .map(|f| (f.text, f.value))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                ("USD 5,000".to_string(), Some(serde_json::json!(5000.0))),
+                (
+                    "12,500 dollars".to_string(),
+                    Some(serde_json::json!(12500.0))
+                ),
+                ("48,250.00".to_string(), Some(serde_json::json!(48250.0))),
+                ("$2,000".to_string(), Some(serde_json::json!(2000.0))),
+            ]
+        );
+        // Compared by value with the embedded text, `$` or not.
+        let layer = "The Court awards the sum of $48,250.00 to the plaintiff, with interest from \
+            the date of filing, and costs as the clerk taxes them in the ordinary course.";
+        for (ocr, status) in [
+            ("the sum of 48,250.00 to the plaintiff", Status::Verified),
+            ("the sum of 43,250.00 to the plaintiff", Status::Check),
+        ] {
+            let r = run(&[page(1, ocr)], VerifyFields::Flagged, layer);
+            assert_eq!(statuses(&r)[0].1, status, "{ocr}");
+        }
     }
 
     #[test]

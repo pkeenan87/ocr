@@ -631,3 +631,21 @@ All of these are the safe direction: a sentence that does not agree is not quote
 - An injection test changes each line item, and then the total; each change is caught.
 
 **Public filings:** no mismatches. The two amounts in words in the set (`four million dollars ($4 million)` and `Three Hundred Ninety Two Dollars and Thirty One Cents ($392.31)`) agree with their numerals, and no table has a total row whose sum fails. Both checks are therefore exercised mostly by the synthetic tests.
+
+## More case-number formats, and money without `$` (2026-10-09)
+
+**Labelled case numbers:** the token after `Case No.`, `Civil Action No.`, `C.A. No.`, `Index No.`, `Cause No.` or `Adv. Proc. No.` is a docket field, in any court's format: `11-4604 PSG`, `C-08-01337 MHP`, `5215-VCG`, `20 Civ. 05382`, `651234/2021`.
+- **Excluded:** `Docket No. 35` (an entry citation).
+- **Matching:** these are compared as their exact letters and digits. A look-alike letter in a digit run (`C-O8-01337`) is still found, and gets `confusable_characters`.
+- **Fragments:** a number cut off at a line end (`Case No. 03:11-`) is dropped, and so is anything with fewer than four digits. On the public filings, such fragments (`03:11`, `5:19`) had matched equally cut-off fragments in the embedded text.
+
+**Money without `$`:** `USD 5,000`, `5,000 dollars`, and `sum|amount|total|price|fee|payment|balance of 5,000.00`. Cents are required in the last shape, because "amount of 1,500 units" is a count. These are compared by value with `$` amounts.
+
+**Embedded text:** a hyphen at a line end now joins its halves before values are read (`5:15-` / `CV-01102-JGB-SP`), and soft hyphens are dropped. Without this, two correctly read case numbers were flagged.
+
+**Public filings:**
+- 23 more docket fields: 15 verified, 3 `unchecked` (on scans), and 5 `check`.
+- One of the `check` values is a real disagreement: the OCR reads `5:15CV-01102-JGB` where the page has `5:15-CV-01102-JGB-SP`, a dropped hyphen.
+- No amounts without `$` occur in the set, so that shape is exercised by tests only.
+
+**Not done:** embedded-text correction on column-split and transcript pages. That changes the OCR text itself, and would need its own measurement against the Jev judge.

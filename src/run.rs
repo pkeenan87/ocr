@@ -20,6 +20,7 @@ use crate::markdown::{self, FrontMatter, PageResult};
 use crate::model_engine::{Fail, Prepared};
 use crate::pipeline::{self, Settings};
 use crate::progress::{self, Progress};
+use crate::suspect;
 use crate::vision::{self, DocKind};
 
 /// Files whose pages are in the pool at the same time.
@@ -63,8 +64,14 @@ pub trait Backend: Sync {
 pub struct FileOutcome {
     pub id: usize,
     pub pages: usize,
-    /// Pages with an error or a flag.
+    /// Pages with an error, an engine flag or a suspect finding (`flagged_pages`).
     pub flagged: Vec<usize>,
+    /// Pages whose OCR failed outright.
+    pub failed: Vec<usize>,
+    /// Pages the engine flagged (model fallbacks, bad tables).
+    pub engine_flagged: Vec<usize>,
+    /// Pages listed in `suspect_pages`.
+    pub suspect: Vec<usize>,
     pub resumed: usize,
     /// Pages recognized in this run (not from the text layer).
     pub ocr: usize,
@@ -365,6 +372,19 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         }
     }
     let cleaned = s.legal_cleanup.then(|| markdown::strip_running(&results));
+    let (reviewed, rewrites) = suspect::review(
+        cleaned.as_ref().map_or(&results, |c| &c.0),
+        s.symbol_fix,
+        backend.model_ids().is_some(),
+    );
+    if s.verbose && !s.quiet {
+        for (page, before, after) in &rewrites {
+            eprintln!(
+                "{}: page {page}: symbol fix {before:?} -> {after:?}",
+                e.b.name
+            );
+        }
+    }
     let front = FrontMatter {
         source: &e.b.name,
         pages: e.b.doc_pages,
@@ -373,8 +393,7 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         model: backend.model_ids().is_some(),
         legal_cleanup: cleaned.as_ref().map(|c| c.1),
     };
-    let pages = cleaned.as_ref().map_or(&results, |c| &c.0);
-    let md = markdown::assemble(s.front_matter.then_some(&front), pages, s.page_markers);
+    let md = markdown::assemble(s.front_matter.then_some(&front), &reviewed, s.page_markers);
     pipeline::write_atomic(&e.b.output, &md).map_err(|err| (id, format!("{err:#}")))?;
 
     let failed: Vec<usize> = results
@@ -387,7 +406,7 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
     } else {
         // Keep the good pages so a re-run only redoes the failed ones.
         let mut m = e.b.manifest.clone();
-        m.failed_pages = failed;
+        m.failed_pages = failed.clone();
         if let Err(err) = checkpoint::write_manifest(&dir, &m) {
             progress::line(format!("warning: {err:#}"));
         }
@@ -395,9 +414,20 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
     Ok(FileOutcome {
         id,
         pages: results.len(),
-        flagged: results
+        flagged: reviewed
             .iter()
-            .filter(|r| r.error.is_some() || r.flagged)
+            .filter(|r| r.needs_check())
+            .map(|r| r.number)
+            .collect(),
+        failed,
+        engine_flagged: reviewed
+            .iter()
+            .filter(|r| r.flagged && r.error.is_none())
+            .map(|r| r.number)
+            .collect(),
+        suspect: reviewed
+            .iter()
+            .filter(|r| !r.suspect.is_empty())
             .map(|r| r.number)
             .collect(),
         resumed: e.b.resumed,

@@ -233,6 +233,10 @@ pub struct ScanArgs {
     /// Keep `S` where Vision misread `$` in amounts such as S22,375.50
     #[arg(long)]
     pub no_currency_fix: bool,
+    /// Keep Vision's readings where it misread `¶` and `§` in citations (`Compl. 9 60`,
+    /// `U.S.C. $ 1441`)
+    #[arg(long)]
+    pub no_symbol_fix: bool,
     /// Omit the YAML header
     #[arg(long)]
     pub no_front_matter: bool,

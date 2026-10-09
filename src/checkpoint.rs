@@ -279,6 +279,8 @@ mod tests {
             fallback: false,
             flagged: true,
             line_numbers: Some(true),
+            symbol_fixes: 0,
+            suspect: Vec::new(),
             error: None,
         }
     }

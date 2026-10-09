@@ -59,8 +59,10 @@ Each `.md` file starts with YAML front matter. Then every page begins with a mar
 
 Front matter fields to watch:
 - `flagged_pages`: pages to check by hand.
+- `suspect_pages`: `{page: [reasons]}` for pages whose text looks wrong although OCR succeeded (`garbled`, `misreads`, `junk_lines`, `duplicated`, `pleading_table`, `transcript_table`, `page_order`, `mixed_case`). Tell the user which pages and why, and do not quote or cite from them without checking the PDF page.
+- `symbol_fixes`: pages where `¶`/`§` were restored in Apple Vision citations (`Compl. 9 60` became `Compl. ¶ 60`); `--verbose` prints each rewrite.
 - `fallback_pages`: the model failed on these pages, and Apple Vision text was used instead.
 - `line_numbers.unverified`: transcript pages whose line numbers could not be checked against the page geometry.
 - `column_split_pages`: pages read column by column.
 
-OCR text can be wrong in ways that look plausible: digits in amounts, ¶ read as 9 or T, § read as S or $. When an exact figure, quotation or citation matters, say that it came from OCR and suggest checking it against the PDF page.
+OCR text can be wrong in ways that look plausible, and these are not caught by `suspect_pages`: digits in amounts, a dropped sentence, ¶ or § misread outside the citation shapes that `ocr` repairs. When an exact figure, quotation or citation matters, say that it came from OCR and suggest checking it against the PDF page.

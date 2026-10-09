@@ -150,6 +150,7 @@ Usage (`ocr scan --help`):
     --page-markers             Start each page with an HTML comment marker (default)
     --no-page-markers          Omit per-page markers
     --no-currency-fix          Keep `S` where Vision misread `$` in amounts such as S22,375.50
+    --no-symbol-fix            Keep Vision's readings of `¶` and `§` in citations (`Compl. 9 60`)
     --no-front-matter          Omit the YAML header
     --use-text-layer <MODE>    auto, never, always (default: never)
     --legal-cleanup            Strip running headers and footers repeated across pages (opt-in)
@@ -184,6 +185,7 @@ Notes on the options:
 - **`--dpi`** has a per-engine default tuned in Phase 6: Apple 150 (switched from 200 on 2026-10-08 by user decision: 150 scored better on the synthetic fixtures, mostly on fax scans; pleading CER and Bates were slightly worse, so use `--dpi 200` on clean pleadings if that matters), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so.
 - **`--legal-cleanup`** is opt-in because it changes citable text. A line is stripped when it sits in the top or bottom three lines of at least half the pages (minimum 3 pages); lines of 20 or more characters match fuzzily. Transcript pages, table rows, Bates numbers and page markers are never stripped. It runs at assembly time, so toggling it never redoes OCR.
 - **`--no-currency-fix`**: Vision sometimes reads `$` as `S`. By default `S22,375.50` becomes `$22,375.50` on Apple pages (counted per page in the front matter). Model-engine output is not touched.
+- **`--no-symbol-fix`**: Vision never outputs `¶` and sometimes reads `§` as `S` or `$`. By default, on Apple Vision text (and, with a model engine, only on pages that fell back to Apple), `Compl. 9 60` and `Id. T18` become `Compl. ¶ 60` and `Id. ¶ 18` (`99` becomes `¶¶`), and `U.S.C. $1441(b)` and `U.S.C. S 1367` become `U.S.C. § 1441(b)` and `U.S.C. § 1367`. Only these shapes are rewritten: the paragraph sign after a citation form such as `Id.`, `Compl.` or `Decl.` and before a number on the same line (never after `Ex.`), and the section sign after `U.S.C.`/`C.F.R.` (never before an amount such as `$75,000` or `$50.00`), `S` before a section with a subsection (`S1983(a)`), or `$` before one with two (`$1983(a)(1)`). A bare `$1441(b)` is left alone because it looks exactly like an amount with a list marker (`$150(a)`). Text-layer pages are not touched. The fix runs at assembly, so toggling it never redoes OCR; replacements are counted in `symbol_fixes`, and `--verbose` prints each one (`before -> after`).
 - **`--file-type`**: pdf is `.pdf`; image is `.png .jpg .jpeg .tif .tiff .heic .bmp .gif .webp` (multi-page TIFF is a multi-page document). In directory mode it filters which files are picked up.
 
 ### Output naming
@@ -194,14 +196,14 @@ Notes on the options:
 
 ### Resume
 
-Each finished page is checkpointed to `<out>.md.ocr-partial/` next to the output file. If a run is interrupted (Ctrl-C, kill, crash, server loss), run the same command again and it resumes where it stopped; finished files in a directory run are skipped. A changed input, engine or setting (or `--overwrite`) starts fresh. The final `.md` is assembled from the checkpoints and written atomically. Page markers, front matter, `--pages` and `--legal-cleanup` are applied at assembly, so changing them does not invalidate checkpoints. A file that ends with failed pages keeps its partial directory; re-running retries only those pages.
+Each finished page is checkpointed to `<out>.md.ocr-partial/` next to the output file. If a run is interrupted (Ctrl-C, kill, crash, server loss), run the same command again and it resumes where it stopped; finished files in a directory run are skipped. A changed input, engine or setting (or `--overwrite`) starts fresh. The final `.md` is assembled from the checkpoints and written atomically. Page markers, front matter, `--pages`, `--legal-cleanup`, the `¶`/`§` repair and the suspect-page checks are applied at assembly, so changing them does not invalidate checkpoints. A file that ends with failed pages keeps its partial directory; re-running retries only those pages.
 
 ### Exit codes
 
 | Code | Meaning |
 |---|---|
 | 0 | Success |
-| 1 | Partial: some pages were flagged or failed |
+| 1 | Partial: some pages failed, were flagged by the engine, or look wrong (`flagged_pages`) |
 | 2 | Setup or usage error (including a model engine that is not installed) |
 | 3 | Model server unavailable, or it crashed mid-run. Checkpoints are kept; re-run to resume |
 
@@ -217,6 +219,8 @@ Each finished page is checkpointed to `<out>.md.ocr-partial/` next to the output
     transcript_pages: []
     table_pages: [40]
     fallback_pages: []
+    symbol_fixes: {14: 3}
+    suspect_pages: {141: [garbled]}
     flagged_pages: [88, 141]
     ---
 
@@ -234,8 +238,25 @@ Front matter fields (`--no-front-matter` omits the header):
 - `line_numbers: {anchored: [...], unverified: [...]}` (only when there are transcript pages): pages whose line numbers were re-anchored to the page geometry, and pages where that failed and the engine's own numbering is kept. Check the unverified ones against the PDF.
 - `table_pages` and `fallback_pages` (model engines): pages with a table recognized separately, and pages where the model failed and Apple Vision text was used instead.
 - `currency_fixes` (Apple engine, instead of the two above): `{page: count}` of `S` to `$` corrections.
+- `symbol_fixes`: `{page: count}` of `¶`/`§` restorations (see `--no-symbol-fix`).
+- `suspect_pages`: `{page: [reasons]}` for pages whose text looks wrong although OCR succeeded (see below).
 - `legal_cleanup` (with `--legal-cleanup`): number of stripped lines.
-- `flagged_pages`: pages to check by hand: failed pages, fallbacks that lost quality, and so on.
+- `flagged_pages`: pages to check by hand: failed pages, fallbacks that lost quality, and every suspect page.
+
+`suspect_pages` comes from checks on each finished page, for every engine. They were added because `flagged_pages` was empty on all 20 real court filings of [eval/PUBLIC_SET.md](eval/PUBLIC_SET.md) while about half their pages had visible damage. The reasons:
+
+| Reason | Meaning |
+|---|---|
+| `garbled` | A run of mostly non-words, such as a line Vision turned into gibberish |
+| `misreads` | Many scattered non-words on the page (at least 6, and 4% of checked words), such as a font Vision reads badly |
+| `junk_lines` | Three or more lines of mostly symbols, such as a rotated sidebar or speckle |
+| `duplicated` | A passage of 60 or more words appears twice on the page |
+| `pleading_table` | A table whose first column is pleading line numbers: prose read as a table, or margin numbers pulled into a real table |
+| `transcript_table` | Transcript lines (line numbers, Q. and A.) that came out inside a table; a real table on a transcript page, such as an exhibit list, does not count |
+| `page_order` | A multi-up transcript's `Page N` headers are out of order |
+| `mixed_case` | Three or more words with case flipping inside them (`MAeLoN`, `WeST`, `SMiTH`), typical of handwriting or fax noise in capitals; brand names such as `DocuSign` or `McDonald` do not count |
+
+Words are checked against an English word list with legal terms added ([data/words-en.txt](data/words-en.txt), built by `scripts/make_wordlist.py`). Only lowercase words of four or more letters are checked, so names, citations, numbers and identifiers never count. Pages mostly in Spanish, French or Portuguese skip the word checks. Transcript pages whose line numbers could not be re-anchored are not suspect: they are listed in `line_numbers.unverified` with their own hint. On simulated misreads, a page is flagged as `misreads` reliably when about 8% of its words are misread, sometimes at 4%, and not at 1-2%; clean synthetic legal text has at most 1% non-words. The checks cannot see a wrong but plausible word or number (`8,000` read as `3,000`), a dropped sentence, or text in the wrong order that is still readable. An empty `suspect_pages` is not proof that a page is right.
 
 Every page starts with a marker, `<!-- page 42 -->`, or with the Bates number when one is found at the bottom of the page: `<!-- page 3 · Bates ABC0000123 -->`. A page that failed outright appears as `<!-- page N: OCR failed: ... -->`. Page numbers are 1-based and always match the source document, also with `--pages`. When a model fails on a page (timeout, runaway repetition, empty or truncated output) it is retried and then falls back to Apple Vision text; that page is listed in `fallback_pages` and `flagged_pages`.
 
@@ -273,6 +294,7 @@ Guidance:
 - Fixtures and evaluation data are synthetic, not real filings. Apple Bates accuracy on pleadings was 88.6% on the accept seeds.
 - Apple Vision crashed intermittently at process start in the evaluation binary (an Apple framework init race); the current build caps Vision at 2 concurrent requests and re-runs a crashed child from its checkpoints.
 - Handwriting is not evaluated; there is no trustworthy ground truth for it.
+- `suspect_pages` catches gibberish, duplicated passages, prose read as a table and transcript pages out of order, but not wrong-but-plausible numbers, dropped text or readable text in the wrong order. Its thresholds were set on synthetic text and simulated misreads, not yet re-checked on the real filings of eval/PUBLIC_SET.md.
 - Model engines are slower than they look: a 300-page scan takes minutes to hours depending on the engine, so use the progress bar ETA and rely on resume.
 
 ## Using ocr from an agent (Claude Code skill)

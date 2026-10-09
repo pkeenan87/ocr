@@ -253,6 +253,7 @@ fn settings(args: &ScanArgs) -> Settings {
         page_markers: args.page_markers(),
         front_matter: !args.no_front_matter,
         currency_fix: !args.no_currency_fix,
+        symbol_fix: !args.no_symbol_fix,
         legal_cleanup: args.legal_cleanup,
         quiet: args.quiet,
         verbose: args.verbose,
@@ -297,18 +298,23 @@ fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliEr
     }
     let ctx = model_engine::Ctx::new(spec, info, &mlx, settings.jobs);
     let report = run::run(&plan.items, &ctx, &settings, args.input_dir.is_some());
-    finish(plan, report, true)
+    finish(plan, report, true, !args.no_front_matter)
 }
 
 /// Runs the apple pipeline over every planned file; failed pages or files make the run partial.
 fn run_apple(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
     let settings = settings(args);
     let report = run::run(&plan.items, &Apple, &settings, args.input_dir.is_some());
-    finish(plan, report, false)
+    finish(plan, report, false, !args.no_front_matter)
 }
 
 /// Exit status of a finished run.
-fn finish(plan: &Plan, report: run::RunReport, model: bool) -> Result<(), CliError> {
+fn finish(
+    plan: &Plan,
+    report: run::RunReport,
+    model: bool,
+    front_matter: bool,
+) -> Result<(), CliError> {
     if let Some(msg) = report.stopped {
         return Err(CliError::Server(format!("{msg}; re-run to resume")));
     }
@@ -319,22 +325,46 @@ fn finish(plan: &Plan, report: run::RunReport, model: bool) -> Result<(), CliErr
         .collect();
     for o in report.outcomes.iter().filter(|o| !o.flagged.is_empty()) {
         let input = plan.items[o.id].input.display();
-        let line = if model {
-            format!(
-                "{input}: {} of {} pages flagged (pages {:?}); see fallback_pages in the front matter",
-                o.flagged.len(),
-                o.pages,
-                o.flagged
-            )
-        } else {
-            format!(
-                "{input}: {} of {} pages failed OCR (pages {:?})",
-                o.flagged.len(),
-                o.pages,
-                o.flagged
-            )
-        };
-        problems.push((o.id, line));
+        // Model engines report failed and fallback pages together, as before.
+        let mut engine_flagged: Vec<usize> =
+            o.failed.iter().chain(&o.engine_flagged).copied().collect();
+        engine_flagged.sort_unstable();
+        if model && !engine_flagged.is_empty() {
+            problems.push((
+                o.id,
+                format!(
+                    "{input}: {} of {} pages flagged (pages {engine_flagged:?}); see fallback_pages in the front matter",
+                    engine_flagged.len(),
+                    o.pages,
+                ),
+            ));
+        } else if !o.failed.is_empty() {
+            problems.push((
+                o.id,
+                format!(
+                    "{input}: {} of {} pages failed OCR (pages {:?})",
+                    o.failed.len(),
+                    o.pages,
+                    o.failed
+                ),
+            ));
+        }
+        if !o.suspect.is_empty() {
+            problems.push((
+                o.id,
+                format!(
+                    "{input}: {} of {} pages look wrong (pages {:?}); {}check them against the PDF",
+                    o.suspect.len(),
+                    o.pages,
+                    o.suspect,
+                    if front_matter {
+                        "see suspect_pages in the front matter and "
+                    } else {
+                        ""
+                    }
+                ),
+            ));
+        }
     }
     problems.sort();
     if problems.is_empty() {

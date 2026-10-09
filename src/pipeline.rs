@@ -40,6 +40,8 @@ pub struct Settings {
     pub page_markers: bool,
     pub front_matter: bool,
     pub currency_fix: bool,
+    /// Restore misread `¶`/`§` at assembly (`--no-symbol-fix` turns it off).
+    pub symbol_fix: bool,
     /// `--legal-cleanup`: strip running headers and footers at assembly.
     pub legal_cleanup: bool,
     pub quiet: bool,
@@ -149,6 +151,8 @@ fn blank_page(number: usize) -> PageResult {
         fallback: false,
         flagged: false,
         line_numbers: None,
+        symbol_fixes: 0,
+        suspect: Vec::new(),
         error: None,
     }
 }

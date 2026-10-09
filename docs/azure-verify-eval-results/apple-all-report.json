@@ -1,30 +1,35 @@
 {
- "bundle": "eval/verify_bundle/apple-all",
+ "bundle": "eval/out/verify-latest/apple-all",
  "route": "report",
  "counts": {
   "pages": 230,
-  "azure_pages": 222,
+  "azure_pages": 218,
   "graded_pages": 139,
-  "azure_has_right": 471,
-  "right": 498,
-  "confirmed_right": 471,
-  "sentences": 2550,
-  "sentences_confirmed_unmatched": 113,
-  "sentences_confirmed_right": 2042,
-  "sentences_unconfirmed_unmatched": 186,
-  "sentences_unconfirmed_right": 209,
-  "azure_has_wrong": 2,
-  "wrong": 5,
-  "confirmed_wrong": 2,
-  "disputed_wrong": 3,
-  "disputed_right": 27
+  "azure_has_right": 496,
+  "right": 513,
+  "confirmed_right": 496,
+  "sentences": 2556,
+  "sentences_confirmed_right": 2118,
+  "sentences_confirmed_unmatched": 58,
+  "sentences_unconfirmed_unmatched": 144,
+  "sentences_unconfirmed_right": 236,
+  "azure_has_wrong": 3,
+  "wrong": 15,
+  "confirmed_wrong": 3,
+  "disputed_wrong": 12,
+  "disputed_right": 17
  },
  "examples": {
   "sentence Azure confirms, not in embedded text": [
    [
     "cmpl-sec-kuzdas",
     1,
-    "Page 1 of 18 MICHAEL C."
+    "(305) 982-6300 UNITED STATES DISTRICT COURT"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    1,
+    "NORTHERN DISTRICT OF CALIFORNIA SECURITIES AND EXCHANGE COMMISSION, Plaintiff, vs."
    ],
    [
     "cmpl-sec-kuzdas",
@@ -34,12 +39,7 @@
    [
     "cmpl-sec-kuzdas",
     5,
-    "Filed 07/23/26 Page 5 of 18 RELEVANT ENTITIES"
-   ],
-   [
-    "cmpl-sec-kuzdas",
-    6,
-    "Page 6 of 18 Petersburg, Florida."
+    "Page 5 of 18 RELEVANT ENTITIES"
    ],
    [
     "cmpl-sec-kuzdas",
@@ -54,22 +54,12 @@
    [
     "cmpl-sec-kuzdas",
     7,
-    "Page 7 of 18 LLCs\u2019 funds into one company:"
-   ],
-   [
-    "cmpl-sec-kuzdas",
-    8,
-    "Page 8 of 18 voting shares in that Investment LLC."
+    "Once investors selected a specific Investment LLC and MegaFactory to fund, they signed a s"
    ],
    [
     "cmpl-sec-kuzdas",
     8,
     "informed investors and prospective investors in PPMs, online presentations, and written CO"
-   ],
-   [
-    "cmpl-sec-kuzdas",
-    9,
-    "Page 9 of 18 materials that investor funds would be used only for the respective Investmen"
    ],
    [
     "cmpl-sec-kuzdas",
@@ -93,18 +83,28 @@
    ],
    [
     "cmpl-irhythm",
-    9,
-    "available at: https://www.hipaajournal.com/what-is-considered-protected-health-information"
+    6,
+    "Consistent with these security protocols, we recently identified a cybersecurity incident "
    ],
    [
-    "cmpl-ab-sanbernardino",
-    2,
-    "arising under state law pursuant to 28 U.S.C. \u00a7 1367(a) because those claims COMPLAINT FOR"
+    "cmpl-irhythm",
+    9,
+    "HIPAA JOURNAL, What is Considered Protected Health Information Under HIPAA?, available at:"
+   ],
+   [
+    "cmpl-irhythm",
+    10,
+    "Failing to effectively train all members of their workforce (including independent contrac"
    ],
    [
     "cmpl-ab-sanbernardino",
     4,
     "Plaintiff is informed and believes, and on that basis alleges, that each Defendant, includ"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    5,
+    "Upon information and belief, DOE DEPUTIES failed to provide a clear verbal warning that de"
    ],
    [
     "cmpl-ab-sanbernardino",
@@ -118,33 +118,23 @@
    ],
    [
     "cmpl-ab-sanbernardino",
-    13,
-    "Page ID :13 4 8 9 10 e."
-   ],
-   [
-    "cmpl-ab-sanbernardino",
-    13,
-    "Maintaining a policy of inaction and an attitude of indifference towards soaring numbers o"
-   ],
-   [
-    "cmpl-ab-sanbernardino",
     14,
     "County of San Bernardino, et al., case number 5:14-cv-01289-DMG-AGR(x), Plaintiffs argued "
    ],
    [
     "cmpl-ab-sanbernardino",
     15,
-    "Page ID :15 2 4 6 8 9 10 11 Factor in 2013 was unreasonable."
-   ],
-   [
-    "cmpl-ab-sanbernardino",
-    15,
     "County of San Bernardino, case number 5-16-cv1128, Plaintiff argued that the involved San "
    ],
    [
     "cmpl-ab-sanbernardino",
     15,
-    "County of San Bernardino, case number 5-16-cv1128, Plaintiff argued that the involved San "
+    "County of San Bernardino, et al., case number 5:19-cv01023-JGB-SP, Plaintiffs argued at tr"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "(Case Nos. 5:15-cv02515-JGB-DTB) Johnny Alcala and 14 other inmates sued the COMPLAINT FOR"
    ],
    [
     "mot-janestreet-opp",
@@ -154,12 +144,12 @@
    [
     "mot-janestreet-opp",
     7,
-    "Schadewald resigned from Jane Street2 and \u201calmost immediately\u201d Jane Street \u201clearned that a"
+    "the India options market,\u201d Complaint (\u201cCompl.\u201d) 1 8, 152."
    ],
    [
     "mot-janestreet-opp",
     8,
-    "Schadewald] was executing Jane Street\u2019s Trading Strategy \u2026 directly harming Jane Street in"
+    "Schadewald] was executing Jane Street\u2019s Trading Strategy directly harming Jane Street in t"
    ],
    [
     "mot-janestreet-opp",
@@ -170,11 +160,6 @@
     "mot-janestreet-opp",
     9,
     "Plaintiff\u2019s papers also lack evidence demonstrating that the information at issue was actu"
-   ],
-   [
-    "mot-janestreet-opp",
-    9,
-    "Parties routinely submit such evidence to the court (under seal and on an AEO basis), incl"
    ],
    [
     "mot-janestreet-opp",
@@ -194,6 +179,11 @@
    [
     "mot-cimontubo-reply",
     6,
+    "The Note Agreement is, after all, the negotiated contract between the parties; the Note is"
+   ],
+   [
+    "mot-cimontubo-reply",
+    6,
     "Notably absent from PDVSA\u2019s papers is any explanation of why a debtor who misses a payment"
    ],
    [
@@ -209,75 +199,91 @@
    [
     "mot-cimontubo-reply",
     7,
-    "and subsequently incurred attorneys\u2019 fees to be added to the judgment amount; and (d) post"
+    "and expenses for the subsequent period through April 2, 2021 to be provided as soon as ava"
    ],
    [
     "depo-removed-1",
+    8,
+    "[removed]"
+   ],
+   [
+    "depo-uber-oconnor",
+    5,
+    "Page 45 Page 47 different based on location, and time as well."
+   ],
+   [
+    "depo-uber-oconnor",
+    6,
+    "You may attend essentially an on-boarding session where they would, you know, learn how to"
+   ],
+   [
+    "depo-uber-oconnor",
+    7,
+    "And over time there becomes this average of how riders rate the services provided, and ess"
+   ],
+   [
+    "depo-uber-oconnor",
+    8,
+    "Page 115 side of the story?"
+   ],
+   [
+    "depo-uber-oconnor",
+    11,
+    "And not only is there no need for cash, drivers are instructed they are not to accept cash"
+   ],
+   [
+    "depo-uber-oconnor",
+    12,
+    "are made from Uber to the partner and then Uber issues 1099s to the partner, right? 1 in h"
+   ],
+   [
+    "depo-uber-oconnor",
+    13,
+    "Uber -- and this may be a question that's Q."
+   ],
+   [
+    "depo-uber-oconnor",
+    14,
+    "I don't want you to guess or speculate, but Page 242"
+   ],
+   [
+    "ctr-holt-settlement",
     2,
+    "Employer will issue Holt a W2 for this portion of the settlement proceeds."
+   ],
+   [
+    "ctr-holt-settlement",
+    3,
+    "Rather, Holt understands that this language is standard and designed to bring closure to a"
+   ],
+   [
+    "ctr-marital-settlement",
+    5,
     "[removed]"
    ],
    [
-    "depo-removed-1",
-    3,
+    "ctr-marital-settlement",
+    5,
     "[removed]"
    ],
    [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
-    "[removed]"
-   ],
-   [
-    "depo-removed-1",
-    3,
+    "ctr-marital-settlement",
+    14,
     "[removed]"
    ]
   ],
   "Azure repeats a wrong value": [
    [
-    "cmpl-ab-sanbernardino",
-    15,
-    "docket",
-    "5-16-cv1128"
+    "cmpl-irhythm",
+    8,
+    "amount",
+    "$45"
+   ],
+   [
+    "cmpl-irhythm",
+    9,
+    "citation",
+    "\u00a7 5"
    ],
    [
     "cmpl-ab-sanbernardino",
@@ -288,10 +294,16 @@
   ],
   "confirmed but wrong": [
    [
-    "cmpl-ab-sanbernardino",
-    15,
-    "docket",
-    "5-16-cv1128"
+    "cmpl-irhythm",
+    8,
+    "amount",
+    "$45"
+   ],
+   [
+    "cmpl-irhythm",
+    9,
+    "citation",
+    "\u00a7 5"
    ],
    [
     "cmpl-ab-sanbernardino",
@@ -302,80 +314,32 @@
   ],
   "Azure lacks a right value": [
    [
-    "mot-janestreet-opp",
+    "depo-knight-avery",
+    1,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
     1,
     "date",
-    "04/18/24"
+    "08/01/24"
    ],
    [
-    "mot-janestreet-opp",
+    "depo-knight-avery",
     2,
-    "date",
-    "04/18/24"
+    "docket",
+    "2:23-cv-00886-NJ"
    ],
    [
-    "mot-janestreet-opp",
+    "depo-knight-avery",
     3,
     "date",
-    "04/18/24"
-   ],
-   [
-    "mot-janestreet-opp",
-    4,
-    "date",
-    "04/18/24"
-   ],
-   [
-    "mot-janestreet-opp",
-    5,
-    "date",
-    "04/18/24"
-   ],
-   [
-    "mot-janestreet-opp",
-    7,
-    "date",
-    "04/18/24"
-   ],
-   [
-    "mot-janestreet-opp",
-    8,
-    "date",
-    "04/18/24"
-   ],
-   [
-    "mot-janestreet-opp",
-    9,
-    "date",
-    "04/18/24"
-   ],
-   [
-    "depo-knight-avery",
-    1,
-    "docket",
-    "2:23-cv-00886-NJ"
-   ],
-   [
-    "depo-knight-avery",
-    1,
-    "date",
     "08/01/24"
    ],
    [
     "depo-knight-avery",
-    2,
-    "docket",
-    "2:23-CV-00886-NJ"
-   ],
-   [
-    "depo-knight-avery",
-    2,
-    "date",
-    "08/01/24"
-   ],
-   [
-    "depo-knight-avery",
-    4,
+    3,
     "docket",
     "2:23-cv-00886-NJ"
    ],
@@ -389,19 +353,13 @@
     "depo-knight-avery",
     5,
     "docket",
-    "2:23-cv-00886-NJ"
+    "2:23-cV-00886-NJ"
    ],
    [
     "depo-knight-avery",
     5,
     "date",
     "08/01/24"
-   ],
-   [
-    "depo-knight-avery",
-    6,
-    "docket",
-    "2:23-cv-00886-NJ"
    ],
    [
     "depo-knight-avery",
@@ -419,25 +377,13 @@
     "depo-knight-avery",
     8,
     "docket",
-    "2:23-CV-00886-NJ"
+    "2:23-cv-00886-NJ"
    ],
    [
     "depo-knight-avery",
     9,
     "docket",
-    "2:23-cv-00886-NJ"
-   ],
-   [
-    "depo-knight-avery",
-    10,
-    "docket",
-    "2:23-cv-00886-NJ"
-   ],
-   [
-    "depo-knight-avery",
-    10,
-    "date",
-    "08/01/24"
+    "2:23-cV-00886-NJ"
    ],
    [
     "ord-garland-dunkin",
@@ -456,6 +402,12 @@
     2,
     "citation",
     "\u00b6 33"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    3,
+    "citation",
+    "\u00b6 35"
    ],
    [
     "ord-ironworkers-bogart",

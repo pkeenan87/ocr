@@ -154,7 +154,7 @@ Usage (`ocr scan --help`):
     --no-front-matter          Omit the YAML header
     --verify-json              Also write <stem>.verify.json: values to double-check, and pages for a second reader
     --verify-fields <MODE>     flagged (default) or all: which unconfirmed values need a second reading
-    --use-text-layer <MODE>    auto, never, always (default: never)
+    --use-text-layer <MODE>    auto, never, always (default: auto for apple, never for model engines)
     --legal-cleanup            Strip running headers and footers repeated across pages (opt-in)
     --dpi <N>                  Render resolution, 72-600 (default 150; dots-ocr 100)
     --jobs <N>                 Total pages in flight across the whole run [alias: --parallel]
@@ -176,14 +176,20 @@ Examples:
     ocr scan --input-file big.pdf --overwrite                    # discard output and checkpoints
     ocr scan --input-file big.pdf --legal-cleanup                # strip repeated headers/footers
     ocr scan --input-file big.pdf --dpi 150
-    ocr scan --input-file big.pdf --use-text-layer auto          # use embedded text where it is good
+    ocr scan --input-file big.pdf --use-text-layer always        # raw embedded text, no OCR (fastest, no layout)
     ocr scan --input-file big.pdf --no-page-markers --no-front-matter --no-currency-fix
 
 Notes on the options:
 
 - **`--model-version`** pins an older model release; it applies to `paddleocr-vl` and `dots-ocr` only.
 - **`--jobs` / `--parallel`** is the total number of pages in flight. The default is the number of performance cores for Apple and 1 for model engines. A model server handles one request at a time (`--max-num-seqs 1`), so `--jobs` above 1 on a model engine only overlaps rendering, the Apple side-pass and assembly, and prints a note. Output is the same for `--jobs 1` and `--jobs 8`.
-- **`--use-text-layer`** defaults to `never` for every engine. The text-layer path has no layout handling: margin line numbers come out inline, tables are flattened and the Bates number is lost. Use `auto` or `always` only for clean born-digital PDFs where speed matters.
+- **`--use-text-layer`**: with the apple engine the default is `auto`. Vision reads the page as usual (layout, tables, margin numbers, Bates), and then every block's words are aligned with the PDF's embedded text inside the block's box, so a born-digital page keeps Vision's structure with the PDF's exact characters (`Case No.3:26-cv-04417` becomes `Case No. 3:26-cv-04417`, `$3,000` read for `$8,000` becomes `$8,000`). The changes are counted per page in `embedded_text_fixes`. The safeguards:
+  - A page is corrected only when at least 90% of its words agree with the embedded text, so a hidden layer that does not match the printed page (another draft, a bad scanner OCR layer) changes nothing.
+  - A differing word is replaced only when it looks like a misread of the embedded word: at most a third of its characters differ. `thirty` never becomes `sixty`.
+  - **Text in the layer that Vision did not see on the page is never inserted.** This covers words under a drawn redaction box, white or invisible text, and neighbouring text caught by a box.
+  - Column-split pages and transcript pages keep Vision's text for now.
+
+  `never` is pure OCR (the default for model engines). `always` takes the raw embedded text instead of OCR and has no layout handling: margin line numbers come out inline, tables are flattened and the Bates number is lost.
 - **`--dpi`** has a per-engine default tuned in Phase 6: Apple 150 (switched from 200 on 2026-10-08 by user decision: 150 scored better on the synthetic fixtures, mostly on fax scans; pleading CER and Bates were slightly worse, so use `--dpi 200` on clean pleadings if that matters), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so.
 - **`--legal-cleanup`** is opt-in because it changes citable text. A line is stripped when it sits in the top or bottom three lines of at least half the pages (minimum 3 pages); lines of 20 or more characters match fuzzily. Transcript pages, table rows, Bates numbers and page markers are never stripped. It runs at assembly time, so toggling it never redoes OCR.
 - **`--no-currency-fix`**: Vision sometimes reads `$` as `S`. By default `S22,375.50` becomes `$22,375.50` on Apple pages (counted per page in the front matter). Model-engine output is not touched.
@@ -234,7 +240,8 @@ Front matter fields (`--no-front-matter` omits the header):
 - `source`: input file name. `pages`: page count.
 - `engine`: engine, with the model repo for model engines.
 - `generated`: UTC timestamp. The only line that differs between otherwise identical runs.
-- `text_layer_pages`: pages taken from the embedded PDF text instead of OCR.
+- `text_layer_pages`: pages taken from the raw embedded PDF text instead of OCR (`--use-text-layer always`).
+- `embedded_text_fixes`: `{page: words}` for Apple pages corrected against the embedded text (`--use-text-layer auto`, the default); `0` means the page was checked and agreed.
 - `column_split_pages`: pages where multi-column regions were detected and recognized column by column.
 - `transcript_pages`: pages that look like deposition transcripts (numbered Q./A. lines).
 - `line_numbers: {anchored: [...], unverified: [...]}` (only when there are transcript pages): pages whose line numbers were re-anchored to the page geometry, and pages where that failed and the engine's own numbering is kept. Check the unverified ones against the PDF.
@@ -355,7 +362,7 @@ Guidance:
 ## Limitations
 
 - Transcript line numbers are re-anchored to page geometry for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr and olmOCR). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
-- The text-layer path (`--use-text-layer auto|always`) has no layout handling, which is why it is off by default.
+- The raw text-layer path (`--use-text-layer always`) has no layout handling. The default `auto` corrects characters but not yet on column-split or transcript pages.
 - Pleading margin line numbers (1-2 digits in the left margin) are dropped by Apple Vision, dots and olmOCR but kept by `paddleocr-vl`, where they can be glued to paragraph numbers and land in table crops on pleading paper. Recovering `page:line` citations is not implemented.
 - With olmOCR, a rotated page loses its Bates number in the marker, because the Apple side-pass cannot read a sideways page.
 - Column detection was tuned on synthetic fixtures; it found about 97.6% of lines on held-out synthetic layouts, and unusual layouts can still be mis-ordered.

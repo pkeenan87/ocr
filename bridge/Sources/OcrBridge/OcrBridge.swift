@@ -393,6 +393,46 @@ public func ocr_bridge_text_layer(_ path: UnsafePointer<CChar>, _ pageIndex: Int
     return json(TextOut(ok: true, text: page.string ?? ""))
 }
 
+struct RegionsOut: Encodable {
+    var ok: Bool
+    var error: String? = nil
+    var texts: [String] = []
+}
+
+/// Embedded text inside each region of a PDF page. `regionsJSON` is `[[x, y, w, h], ...]`,
+/// normalized with a top-left origin on the page as it is rendered (crop box, rotation applied),
+/// the same frame as Vision's boxes. Each region is mapped back to PDF page space with the
+/// inverse of the render transform. Images and failures give `ok: false`.
+@_cdecl("ocr_bridge_text_in_regions")
+public func ocr_bridge_text_in_regions(
+    _ path: UnsafePointer<CChar>, _ pageIndex: Int32, _ regionsJSON: UnsafePointer<CChar>
+) -> UnsafeMutablePointer<CChar>? {
+    let p = String(cString: path)
+    guard isPDF(p) else { return json(RegionsOut(ok: false, error: "not a PDF")) }
+    guard let data = String(cString: regionsJSON).data(using: .utf8),
+          let regions = try? JSONDecoder().decode([[Double]].self, from: data) else {
+        return json(RegionsOut(ok: false, error: "bad regions"))
+    }
+    guard let page = PDFDocument(url: URL(fileURLWithPath: p))?.page(at: Int(pageIndex)),
+          let ref = page.pageRef else {
+        return json(RegionsOut(ok: false, error: "page \(Int(pageIndex) + 1) not found"))
+    }
+    let box = ref.getBoxRect(.cropBox)
+    let rotated = ref.rotationAngle % 180 != 0
+    let (pw, ph) = rotated ? (box.height, box.width) : (box.width, box.height)
+    guard pw > 0, ph > 0 else { return json(RegionsOut(ok: false, error: "empty page box")) }
+    // The render maps page space to a pw x ph display rect (origin bottom-left); invert it.
+    let toDisplay = ref.getDrawingTransform(.cropBox, rect: CGRect(x: 0, y: 0, width: pw, height: ph), rotate: 0, preserveAspectRatio: true)
+    let toPage = toDisplay.inverted()
+    var texts: [String] = []
+    for r in regions where r.count == 4 {
+        let display = CGRect(x: r[0] * pw, y: (1 - r[1] - r[3]) * ph, width: r[2] * pw, height: r[3] * ph)
+        let rect = display.applying(toPage)
+        texts.append(page.selection(for: rect)?.string ?? "")
+    }
+    return json(RegionsOut(ok: true, texts: texts))
+}
+
 /// Renders a page exactly as `recognize_page` does and returns it as 8-bit DeviceGray, one byte
 /// per pixel, row 0 at the top. Release with ocr_bridge_free_bytes. Null on failure.
 @_cdecl("ocr_bridge_render_gray")

@@ -288,10 +288,16 @@ pub const PADDLE_DPI: u32 = 150;
 pub const DOTS_DPI: u32 = 100;
 
 impl ScanArgs {
-    /// The text-layer path skips all layout handling (columns, tables, margin numbers, Bates),
-    /// so OCR is the default for every engine; `auto` and `always` are opt-in.
+    /// Apple defaults to `auto`: Vision's layout with the exact characters of a PDF's embedded
+    /// text where the page agrees with it (src/embedded.rs). Model engines default to `never`.
+    /// `always` is the raw embedded text with no layout handling.
     pub fn effective_text_layer(&self) -> TextLayer {
-        self.use_text_layer.unwrap_or(TextLayer::Never)
+        self.use_text_layer
+            .unwrap_or(if self.model == Engine::Apple {
+                TextLayer::Auto
+            } else {
+                TextLayer::Never
+            })
     }
 
     pub fn page_markers(&self) -> bool {

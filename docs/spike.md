@@ -472,3 +472,35 @@ This run measures the values-to-check report on the 20 public court filings (230
 The first run sent 105 pages to Azure (46%) and verified 440 values; the table shows the result after the fixes.
 
 **Scanned pages are the remaining Azure load.** A free local second reader is queued next to address it (docs/overnight-report.md, follow-ups).
+
+## Exact characters from embedded text, with Vision's layout (2026-10-09)
+
+Apple's default `--use-text-layer auto` keeps Vision's blocks (layout, tables, margin numbers, Bates) and aligns each block's words with the PDF's embedded text inside the block's box. A new bridge call, `ocr_bridge_text_in_regions`, inverts the render transform and works on rotated pages. The alignment is in `src/embedded.rs`. Its safeguards:
+- **Page gate:** at least 90% word agreement on the page, or nothing changes.
+- **Per-word check:** a differing word is replaced only when it looks like a misread, with at most a third of its characters different.
+- **No inserted text:** embedded text that Vision did not see is never added. This covers redactions, hidden text, and neighbours caught by a box.
+- **Skipped for now:** column-split and transcript pages.
+
+Measured on the 20 public filings (230 pages, Apple, 150 DPI), against the earlier pure-OCR run:
+
+| | Pure OCR | Default `auto` |
+|---|---|---|
+| Born-digital pages corrected | - | 95 of 139 |
+| Partly born-digital pages corrected | - | 13 of 28 |
+| Words changed to the embedded form | - | 1,350 |
+| Output words found in the embedded text (born-digital) | 90.1% | 90.7% |
+| Output words found in the embedded text (partial) | 98.0% | 98.4% |
+| `--verify-json` pages in `azure_pages` | 61 | 51 |
+| Of which e-filed / partial / scanned | 18 / 9 / 34 | 15 / 2 / 34 |
+| Values verified free | 576 | 601 |
+
+**The word-match share is a weak metric here,** because it rises only a little. Vision's own output carries margin numbers and headers that the embedded text orders or spells differently, and the 44 uncorrected born-digital pages are either column-split or transcript pages, or below the 90% page gate.
+
+**Sample corrections:**
+- `Califomia` to `California`;
+- `SZA` to `S2A` (a company name);
+- `S10` and `S8` to `$10` and `$8`;
+- `mıkulicm(@)sec.gov` to `mikulicm@sec.gov`;
+- straight quotes to the filing's curly quotes.
+
+**Goldens:** the pure-OCR goldens (`--use-text-layer never`) are byte-identical apart from the new empty `embedded_text_fixes: {}` line. A new test checks the default output on legal.pdf: the golden with `Case No.3:26-cv-04417` corrected to `Case No. 3:26-cv-04417`.

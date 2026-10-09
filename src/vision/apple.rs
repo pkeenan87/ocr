@@ -16,6 +16,11 @@ unsafe extern "C" {
     fn ocr_bridge_max_concurrent() -> i32;
     fn ocr_bridge_document_info(path: *const c_char) -> *mut c_char;
     fn ocr_bridge_text_layer(path: *const c_char, page_index: i32) -> *mut c_char;
+    fn ocr_bridge_text_in_regions(
+        path: *const c_char,
+        page_index: i32,
+        regions_json: *const c_char,
+    ) -> *mut c_char;
     fn ocr_bridge_recognize_page(
         path: *const c_char,
         page_index: i32,
@@ -65,6 +70,14 @@ struct InfoOut {
     pages: usize,
 }
 
+#[derive(Deserialize)]
+struct RegionsOut {
+    ok: bool,
+    error: Option<String>,
+    #[serde(default)]
+    texts: Vec<String>,
+}
+
 #[derive(Debug, Deserialize)]
 struct TextOut {
     ok: bool,
@@ -107,6 +120,29 @@ pub fn document_info(path: &Path) -> Result<DocInfo> {
 }
 
 /// Embedded text of a PDF page (0-based index); empty for images.
+/// Embedded PDF text inside each region (normalized `[x, y, w, h]`, top-left origin on the
+/// rendered page: the frame of Vision's boxes), in order.
+pub fn text_in_regions(
+    path: &Path,
+    page_index: usize,
+    regions: &[[f64; 4]],
+) -> Result<Vec<String>> {
+    let c_path = cstr(&path.to_string_lossy())?;
+    let c_regions = cstr(&serde_json::to_string(regions)?)?;
+    let json = unsafe {
+        take(ocr_bridge_text_in_regions(
+            c_path.as_ptr(),
+            page_index as i32,
+            c_regions.as_ptr(),
+        ))?
+    };
+    let out: RegionsOut = serde_json::from_str(&json).context("bad JSON from vision bridge")?;
+    if !out.ok {
+        bail!("text in regions: {}", out.error.unwrap_or_default());
+    }
+    Ok(out.texts)
+}
+
 pub fn text_layer(path: &Path, page_index: usize) -> Result<String> {
     let c_path = cstr(&path.to_string_lossy())?;
     let json = unsafe { take(ocr_bridge_text_layer(c_path.as_ptr(), page_index as i32))? };

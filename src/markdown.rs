@@ -149,6 +149,10 @@ pub struct PageResult {
     /// geometry, `Some(false)` if the engine's own numbering is kept (unverified).
     #[serde(default)]
     pub line_numbers: Option<bool>,
+    /// Apple pages corrected against the PDF's embedded text (src/embedded.rs): the number of
+    /// words whose characters changed. `None` when the page was not corrected.
+    #[serde(default)]
+    pub embedded_fixes: Option<usize>,
     /// Number of `¶`/`§` restorations made at assembly (not checkpointed).
     #[serde(skip)]
     pub symbol_fixes: usize,
@@ -612,7 +616,8 @@ pub fn assemble(front: Option<&FrontMatter>, pages: &[PageResult], markers: bool
                 .join(", ")
         };
         head.push_str(&format!(
-            "symbol_fixes: {{{}}}\nsuspect_pages: {{{}}}\n",
+            "embedded_text_fixes: {{{}}}\nsymbol_fixes: {{{}}}\nsuspect_pages: {{{}}}\n",
+            per_page(&|p| p.embedded_fixes.map(|n| n.to_string())),
             per_page(&|p| (p.symbol_fixes > 0).then(|| p.symbol_fixes.to_string())),
             per_page(&|p| (!p.suspect.is_empty()).then(|| format!("[{}]", p.suspect.join(", ")))),
         ));
@@ -844,6 +849,7 @@ mod tests {
             flagged: false,
             line_numbers: None,
             symbol_fixes: 0,
+            embedded_fixes: None,
             suspect: Vec::new(),
             error: error.map(String::from),
         };
@@ -887,6 +893,7 @@ mod tests {
             flagged: false,
             line_numbers: None,
             symbol_fixes: 0,
+            embedded_fixes: None,
             suspect: Vec::new(),
             error: None,
         }

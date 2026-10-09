@@ -419,6 +419,7 @@ mod tests {
             error: None,
             line_numbers: None,
             symbol_fixes: 0,
+            embedded_fixes: None,
             suspect: Vec::new(),
         }
     }

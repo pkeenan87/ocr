@@ -996,6 +996,8 @@ fn blank(number: usize) -> PageResult {
         fallback: false,
         flagged: false,
         line_numbers: None,
+        symbol_fixes: 0,
+        suspect: Vec::new(),
         error: None,
     }
 }

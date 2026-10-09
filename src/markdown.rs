@@ -34,6 +34,59 @@ pub fn fix_currency(text: &str) -> (String, usize) {
     (fixed.into_owned(), n)
 }
 
+/// Citation forms that are followed by a paragraph cite (`Compl. ¶ 60`, `Id. ¶¶ 15-17`). Exhibit
+/// forms are left out: `Ex. 9 15` is an exhibit number, not a paragraph.
+const PARA_CITE: &str = r"(?:Id\.|id\.|Compl\.|Complaint|FAC|SAC|TAC|Decl\.|Aff\.|Answer|Ans\.|Countercl\.|Pet\.|Stip\.|SUF|SUMF|SOF)";
+
+/// Vision never outputs `¶` (0 of 48 on the public court filings): it reads `9`, `99` or `T`.
+/// Only rewritten after a citation form and before the paragraph number, where the misread is
+/// unambiguous.
+static PILCROW: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(&format!(
+        r"\b(?P<cite>{PARA_CITE})\s+(?P<sym>99\s|9\s|TT\s?|T\s?)(?P<num>\d)"
+    ))
+    .unwrap()
+});
+
+/// `§` read as `$` or `S` after a code citation (`28 U.S.C. $ 1441`, `U.S.C. S1367`).
+static SECTION_AFTER_CODE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?P<code>U\.\s?S\.\s?C\.(?:\s?A\.)?|C\.\s?F\.\s?R\.)\s*(?P<sym>\$\$|SS|\$|S)\s*(?P<num>\d)")
+        .unwrap()
+});
+
+/// `§` read as `$` or `S` directly before a section number with a subsection (`$1441(b)`); a
+/// money amount is never followed by `(b)`.
+static SECTION_WITH_SUBSECTION: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?m)(?:^|[\s(\[])(?P<sym>\$|S)(?P<num>\d{2,5}\([a-z0-9]{1,4}\))").unwrap()
+});
+
+/// Restores `¶` and `§` in legal citations where Vision misreads them, and returns the new text
+/// with the number of replacements. Only shapes that cannot be anything else are rewritten.
+pub fn fix_legal_symbols(text: &str) -> (String, usize) {
+    let mut n = 0;
+    let text = PILCROW.replace_all(text, |c: &regex::Captures| {
+        n += 1;
+        let mark = if c["sym"].starts_with("99") || c["sym"].starts_with("TT") {
+            "¶¶"
+        } else {
+            "¶"
+        };
+        format!("{} {mark} {}", &c["cite"], &c["num"])
+    });
+    let text = SECTION_AFTER_CODE.replace_all(&text, |c: &regex::Captures| {
+        n += 1;
+        let mark = if c["sym"].len() == 2 { "§§" } else { "§" };
+        format!("{} {mark} {}", &c["code"], &c["num"])
+    });
+    let text = SECTION_WITH_SUBSECTION.replace_all(&text, |c: &regex::Captures| {
+        n += 1;
+        let whole = &c[0];
+        let lead = &whole[..whole.len() - c["sym"].len() - c["num"].len()];
+        format!("{lead}§{}", &c["num"])
+    });
+    (text.into_owned(), n)
+}
+
 /// Where a page's text came from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Source {
@@ -67,6 +120,20 @@ pub struct PageResult {
     /// geometry, `Some(false)` if the engine's own numbering is kept (unverified).
     #[serde(default)]
     pub line_numbers: Option<bool>,
+    /// Number of `¶`/`§` restorations made at assembly (not checkpointed).
+    #[serde(skip)]
+    pub symbol_fixes: usize,
+    /// Why the page's text looks wrong although OCR succeeded, found at assembly by
+    /// `suspect::review` (not checkpointed).
+    #[serde(skip)]
+    pub suspect: Vec<&'static str>,
+}
+
+impl PageResult {
+    /// Failed, flagged by its engine, or suspect: listed in `flagged_pages`.
+    pub fn needs_check(&self) -> bool {
+        self.error.is_some() || self.flagged || !self.suspect.is_empty()
+    }
 }
 
 /// Values for the YAML header.
@@ -508,12 +575,24 @@ pub fn assemble(front: Option<&FrontMatter>, pages: &[PageResult], markers: bool
                 .collect();
             head.push_str(&format!("currency_fixes: {{{}}}\n", fixes.join(", ")));
         }
+        let per_page = |f: &dyn Fn(&PageResult) -> Option<String>| {
+            pages
+                .iter()
+                .filter_map(|p| f(p).map(|v| format!("{}: {v}", p.number)))
+                .collect::<Vec<_>>()
+                .join(", ")
+        };
+        head.push_str(&format!(
+            "symbol_fixes: {{{}}}\nsuspect_pages: {{{}}}\n",
+            per_page(&|p| (p.symbol_fixes > 0).then(|| p.symbol_fixes.to_string())),
+            per_page(&|p| (!p.suspect.is_empty()).then(|| format!("[{}]", p.suspect.join(", ")))),
+        ));
         if let Some(n) = f.legal_cleanup {
             head.push_str(&format!("legal_cleanup: {{stripped_lines: {n}}}\n"));
         }
         head.push_str(&format!(
             "flagged_pages: {}\n---\n\n",
-            list(&|p| p.error.is_some() || p.flagged)
+            list(&|p| p.needs_check())
         ));
         out.push_str(&head);
     }
@@ -632,6 +711,37 @@ mod tests {
     }
 
     #[test]
+    fn legal_symbol_fix_restores_cites_only() {
+        // Misreads seen on the public court filings (eval/PUBLIC_SET.md).
+        for (bad, good) in [
+            ("Id. 9 15-17.", "Id. ¶ 15-17."),
+            ("(Compl. 9 60.)", "(Compl. ¶ 60.)"),
+            ("Id. T18", "Id. ¶ 18"),
+            ("See Smith Decl. 99 4-6;", "See Smith Decl. ¶¶ 4-6;"),
+            ("28 U.S.C. $1441(b)", "28 U.S.C. § 1441(b)"),
+            ("28 U.S.C. S1367", "28 U.S.C. § 1367"),
+            ("28 U.S.C. SS 1331, 1332", "28 U.S.C. §§ 1331, 1332"),
+            ("under $1441(b) and", "under §1441(b) and"),
+            ("(S1983(a))", "(§1983(a))"),
+        ] {
+            assert_eq!(fix_legal_symbols(bad), (good.to_string(), 1), "{bad}");
+        }
+        for keep in [
+            "Id. at 9.",
+            "Ex. 9 15",
+            "Order 9 2",
+            "paid $1441 in fees",
+            "$22,375.50 (a)",
+            "Compl. ¶ 60",
+            "28 U.S.C. § 1441(b)",
+            "See Id. 9",
+            "Section S2.1",
+        ] {
+            assert_eq!(fix_legal_symbols(keep), (keep.to_string(), 0), "{keep}");
+        }
+    }
+
+    #[test]
     fn currency_fix_matches_only_money() {
         let (t, n) = fix_currency("| S22,375.50 | S122,525.50 | S1234.00 |");
         assert_eq!(t, "| $22,375.50 | $122,525.50 | $1234.00 |");
@@ -691,6 +801,8 @@ mod tests {
             fallback: false,
             flagged: false,
             line_numbers: None,
+            symbol_fixes: 0,
+            suspect: Vec::new(),
             error: error.map(String::from),
         };
         let pages = [
@@ -732,6 +844,8 @@ mod tests {
             fallback: false,
             flagged: false,
             line_numbers: None,
+            symbol_fixes: 0,
+            suspect: Vec::new(),
             error: None,
         }
     }

@@ -885,6 +885,8 @@ mod tests {
         Line {
             text: text.into(),
             bbox: [x, y, 0.2, 0.01],
+            confidence: None,
+            alternatives: vec![],
         }
     }
 

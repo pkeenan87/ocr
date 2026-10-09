@@ -308,7 +308,12 @@ An example (abridged):
   - `malformed_amount`: broken digit grouping, such as `$4825,0.00`.
   - `differs_from_usual_docket`: one digit off the docket number the document repeats.
   - `bates_out_of_sequence`: the Bates number breaks the page sequence.
+  - `not_in_second_reading`: a scanned page (no embedded text) was read a second time, and that reading does not have the value.
+  - `doubtful_in_second_reading`: the second reading has the value, but Vision marks that line as doubtful or offers a different next-best reading.
   - `unconfirmed`: with `--verify-fields all`, nothing confirmed the value.
+- **Second reading of scanned pages (macOS):** pages without embedded text that have values are read again with Vision's line recognizer at 300 DPI (`second_reader: true` on the page).
+  - **Model engines:** when the second reading has the same value, the value is `verified` (`matches_second_reading`). A model and Vision are independent readers.
+  - **Apple engine:** agreement verifies nothing, because two Apple readings share blind spots. On one filing both read two overprinted stamps, `04/24/24` and `04/18/24`, as `04/28/24`. A disagreement still turns the value into `check`.
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
 - **Values:** amounts include a scale word (`$33.5 million` has the value 33500000), also when the word starts the next line, and a `K`/`M`/`B` suffix (`$1.5B`). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
 - **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.

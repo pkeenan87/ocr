@@ -16,6 +16,11 @@ use regex::Regex;
 use serde::Serialize;
 
 use crate::markdown::{PageResult, Source};
+use crate::vision::Line;
+
+/// Below this Vision confidence a second-reader line confirms nothing. Accurate-mode confidence
+/// is coarse (mostly 0.5 or 1.0), so this only drops the lines Vision itself marks as doubtful.
+const SECOND_READER_MIN_CONFIDENCE: f64 = 0.5;
 
 /// Which unconfirmed fields need a second reading.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum, Default)]
@@ -70,6 +75,9 @@ pub struct PageReport {
     pub page_check: Vec<String>,
     /// Whether the page has embedded PDF text that fields were compared with.
     pub embedded_text: bool,
+    /// Whether a second, local reading (Vision's line recognizer at 300 DPI) was compared with,
+    /// on a page without embedded text.
+    pub second_reader: bool,
     /// How to get a second reading of this page, if it needs one: `embedded_text` (free: the
     /// PDF's own text, for a suspect page whose values all match it) or `azure`.
     pub second_reading: Option<&'static str>,
@@ -121,10 +129,13 @@ static DATE_NUMERIC: LazyLock<Regex> = LazyLock::new(|| {
 });
 static DATE_WORDS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(&format!(
-        r"\b(?:(?P<m1>{MONTHS})\.?\s+(?P<d1>[0-9OIl]{{1,2}}),?\s+(?P<y1>[0-9OIlQ]{{4}})|(?P<d2>\d{{1,2}})\s+(?P<m2>{MONTHS})\.?,?\s+(?P<y2>\d{{4}}))\b"
+        r"\b(?:(?P<m1>{MONTHS})\.?\s+(?P<d1>[0-9OIl]{{1,2}})(?:,\s*|\s+)(?P<y1>[0-9OIlQ]{{4}})|(?P<d2>\d{{1,2}})\s+(?P<m2>{MONTHS})\.?,?\s+(?P<y2>\d{{4}}))\b"
     ))
     .unwrap()
 });
+/// An amount whose dollar sign was read as `S` (`S5,500`, `S12.50`).
+static S_AMOUNT: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\bS(\d{1,3}(?:,\d{3})+(?:\.\d{2})?|\d+\.\d{2})\b").unwrap());
 /// Federal docket numbers (`3:26-cv-04417`, `1:20-CV-05382-GBD-GWG`, `23-CV-886-PP`).
 /// Look-alike letters are accepted in the number parts (`3:26-cv-O4417`) and flagged.
 static DOCKET: LazyLock<Regex> = LazyLock::new(|| {
@@ -291,6 +302,13 @@ fn embedded_keys(text: &str) -> HashSet<String> {
         .filter_map(|k| k.split_once(':').map(|(_, rest)| format!("docket::{rest}")))
         .collect();
     keys.extend(without_office);
+    // `S5,500`: a dollar sign read as `S`. Only with digit grouping or cents, so `S5` (a
+    // section or exhibit) is not money.
+    for c in S_AMOUNT.captures_iter(&flat) {
+        if let Some(k) = key(Kind::Amount, &format!("${}", &c[1])) {
+            keys.insert(k);
+        }
+    }
     let tokens: Vec<String> = text.split_whitespace().map(squash).collect();
     for (i, t) in tokens.iter().enumerate() {
         keys.insert(format!("Bates:{t}"));
@@ -460,7 +478,73 @@ fn close(a: &str, b: &str) -> bool {
         })
 }
 
+/// What a second reading of a page says about values: the keys it read, and the keys it was
+/// unsure of (a next-best reading of the line reads the value differently, or low confidence).
+struct SecondReading {
+    keys: HashSet<String>,
+    doubtful: HashSet<String>,
+}
+
+fn second_reading(lines: &[Line]) -> SecondReading {
+    // Pleading line numbers come between a page's text lines (`May 7,` `6` `10` `2007.`).
+    let all = lines
+        .iter()
+        .map(|l| l.text.as_str())
+        .filter(|t| !(t.len() <= 2 && t.chars().all(|c| c.is_ascii_digit())))
+        .collect::<Vec<_>>();
+    // The first reading had its `§`/`¶` restored at assembly; restore the second one alike, so
+    // `S 1983` is not taken for a disagreement with `§ 1983`.
+    let keys = embedded_keys(&crate::markdown::fix_legal_symbols(&all.join("\n")).0);
+    let mut doubtful = HashSet::new();
+    for l in lines {
+        let mine = embedded_keys(&crate::markdown::fix_legal_symbols(&l.text).0);
+        if l.confidence
+            .is_some_and(|c| c < SECOND_READER_MIN_CONFIDENCE)
+        {
+            doubtful.extend(mine);
+            continue;
+        }
+        for alt in &l.alternatives {
+            let theirs = embedded_keys(&crate::markdown::fix_legal_symbols(alt).0);
+            doubtful.extend(mine.difference(&theirs).cloned());
+        }
+    }
+    SecondReading { keys, doubtful }
+}
+
+/// Second readings of `which` (indexes into `pages`), two at a time: the bridge runs at most
+/// two Vision requests at once.
+fn reread_all(
+    which: &[usize],
+    pages: &[PageResult],
+    second: &(dyn Fn(usize) -> Option<Vec<Line>> + Sync),
+) -> HashMap<usize, SecondReading> {
+    let next = std::sync::atomic::AtomicUsize::new(0);
+    let done = std::sync::Mutex::new(HashMap::new());
+    std::thread::scope(|scope| {
+        for _ in 0..2.min(which.len()) {
+            scope.spawn(|| {
+                loop {
+                    let n = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    let Some(&i) = which.get(n) else { break };
+                    if let Some(lines) = second(pages[i].number) {
+                        let r = second_reading(&lines);
+                        done.lock().unwrap().insert(i, r);
+                    }
+                }
+            });
+        }
+    });
+    done.into_inner().unwrap()
+}
+
 /// Builds the report. `embedded(page)` returns the page's embedded PDF text (empty for none).
+/// `second(page)` returns a second, independent line-level reading of the page, if one can be
+/// made; it is asked for only on pages without embedded text that have values to confirm.
+/// The second reader is Apple Vision. Its agreement verifies a value only when the first reading
+/// came from a model (`model_engine`, page not fallen back to Apple): two Apple readings share
+/// blind spots (docs/spike.md), so on Apple pages it can only find disagreements.
+#[allow(clippy::too_many_arguments)]
 pub fn report<'a>(
     source: &'a str,
     markdown: String,
@@ -469,6 +553,8 @@ pub fn report<'a>(
     pages: &[PageResult],
     mode: VerifyFields,
     embedded: &dyn Fn(usize) -> String,
+    second: &(dyn Fn(usize) -> Option<Vec<Line>> + Sync),
+    model_engine: bool,
 ) -> Report<'a> {
     let extracted: Vec<(usize, Vec<Field>)> = pages
         .iter()
@@ -503,8 +589,36 @@ pub fn report<'a>(
         .filter(|(_, n)| **n >= 2)
         .map(|(o, _)| (*o).clone());
 
+    let texts: Vec<String> = pages
+        .iter()
+        .map(|p| {
+            if p.source == Source::TextLayer || p.error.is_some() {
+                String::new()
+            } else {
+                embedded(p.number)
+            }
+        })
+        .collect();
+    let has_text: Vec<bool> = texts
+        .iter()
+        .map(|t| t.split_whitespace().count() >= 20)
+        .collect();
+    // Pages to re-read: no embedded text, and values a second reading could confirm.
+    let reread_pages: Vec<usize> = pages
+        .iter()
+        .zip(&extracted)
+        .enumerate()
+        .filter(|(i, (p, (_, fields)))| {
+            !has_text[*i]
+                && p.source != Source::TextLayer
+                && p.error.is_none()
+                && (p.bates.is_some() || fields.iter().any(|f| key(f.kind, &f.text).is_some()))
+        })
+        .map(|(i, _)| i)
+        .collect();
+    let rereads = reread_all(&reread_pages, pages, second);
     let mut out = Vec::new();
-    for (p, (number, mut fields)) in pages.iter().zip(extracted) {
+    for (i, (p, (number, mut fields))) in pages.iter().zip(extracted).enumerate() {
         let mut page_check: Vec<String> = p.suspect.iter().map(|s| s.to_string()).collect();
         if let Some(e) = &p.error {
             page_check.push(format!("failed: {e}"));
@@ -529,17 +643,13 @@ pub fn report<'a>(
                 },
             );
         }
-        let text = if p.source == Source::TextLayer || p.error.is_some() {
-            String::new()
-        } else {
-            embedded(number)
-        };
-        let has_text = text.split_whitespace().count() >= 20;
+        let has_text = has_text[i];
         let keys = if has_text {
-            embedded_keys(&text)
+            embedded_keys(&texts[i])
         } else {
             HashSet::new()
         };
+        let reread = rereads.get(&i);
         for f in &mut fields {
             if f.kind == Kind::Docket && odd.contains(&f.text.to_ascii_lowercase()) {
                 f.why.push("differs_from_usual_docket");
@@ -550,21 +660,35 @@ pub fn report<'a>(
             if !page_check.is_empty() {
                 f.why.push("suspect_page");
             }
-            let found = key(f.kind, &f.text).is_some_and(|k| keys.contains(&k));
+            let k = key(f.kind, &f.text);
+            let mut found = k.as_ref().is_some_and(|k| keys.contains(k));
             if has_text && !found {
                 f.why.push("not_in_embedded_text");
+            }
+            let mut matched = "matches_embedded_text";
+            if let (Some(r), Some(k)) = (reread, &k) {
+                if r.doubtful.contains(k) {
+                    f.why.push("doubtful_in_second_reading");
+                } else if r.keys.contains(k) {
+                    if model_engine && !p.fallback {
+                        found = true;
+                        matched = "matches_second_reading";
+                    }
+                } else {
+                    f.why.push("not_in_second_reading");
+                }
             }
             // Two independent readings of the exact value agree: that outweighs a suspect page.
             let page_only = f.why.iter().all(|w| *w == "suspect_page");
             let against = f.why.iter().any(|w| *w != "from_embedded_text");
             f.status = if found && page_only {
                 f.why.clear();
-                f.why.push("matches_embedded_text");
+                f.why.push(matched);
                 Status::Verified
             } else if against {
                 Status::Check
             } else if found {
-                f.why.push("matches_embedded_text");
+                f.why.push(matched);
                 Status::Verified
             } else if mode == VerifyFields::All && p.source != Source::TextLayer {
                 f.why.push("unconfirmed");
@@ -588,6 +712,7 @@ pub fn report<'a>(
             bates: p.bates.clone(),
             page_check,
             embedded_text: has_text,
+            second_reader: reread.is_some(),
             second_reading,
             fields,
         });
@@ -682,9 +807,17 @@ mod tests {
 
     fn run(pages: &[PageResult], mode: VerifyFields, text: &str) -> Report<'static> {
         let text = text.to_string();
-        report("x.pdf", "x.md".into(), "apple", "now", pages, mode, &|_| {
-            text.clone()
-        })
+        report(
+            "x.pdf",
+            "x.md".into(),
+            "apple",
+            "now",
+            pages,
+            mode,
+            &|_| text.clone(),
+            &|_| None,
+            false,
+        )
     }
 
     fn statuses(r: &Report) -> Vec<(String, Status, Vec<&'static str>)> {
@@ -890,6 +1023,130 @@ mod tests {
         // Not across a whole paragraph, and not from the middle of the next line.
         assert_eq!(extract("for $400\n\n\nmillion")[0].text, "$400");
         assert_eq!(extract("for $400\nthe million")[0].text, "$400");
+    }
+
+    fn read(text: &str) -> Line {
+        Line {
+            text: text.into(),
+            bbox: [0.0; 4],
+            confidence: Some(1.0),
+            alternatives: vec![],
+        }
+    }
+
+    #[test]
+    fn a_second_reading_confirms_or_contradicts_values_on_scans() {
+        let body = "Paid $5,500 on January 11, 2008 and $48,250.00 on May 7, 2007 in \
+            3:08-cv-09901. See 42 U.S.C. § 1983.";
+        let pages = [page(1, body)];
+        let lines = vec![
+            read("Paid S5,500 on January 11,2008 and $48,256.00 on May 7,"),
+            read("6"),
+            read("10"),
+            read("2007. in 3:08-cv-09901. See 42 U.S.C. S 1983."),
+        ];
+        let r = report(
+            "x.pdf",
+            "x.md".into(),
+            "apple",
+            "now",
+            &pages,
+            VerifyFields::Flagged,
+            &|_| String::new(),
+            &|_| Some(lines.clone()),
+            true,
+        );
+        assert!(r.pages[0].second_reader);
+        let got = statuses(&r);
+        let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
+        for t in [
+            "$5,500",
+            "January 11, 2008",
+            "May 7, 2007",
+            "3:08-cv-09901",
+            "§ 1983",
+        ] {
+            assert_eq!(status(t).1, Status::Verified, "{t}");
+            assert_eq!(status(t).2, vec!["matches_second_reading"], "{t}");
+        }
+        assert_eq!(
+            status("$48,250.00"),
+            (
+                "$48,250.00".into(),
+                Status::Check,
+                vec!["not_in_second_reading"]
+            )
+        );
+        assert_eq!(r.azure_pages, "1");
+
+        // A line Vision doubts confirms nothing; nor does a next-best reading that differs.
+        let doubtful = vec![
+            Line {
+                confidence: Some(0.3),
+                ..read("Paid $5,500 on January 11, 2008")
+            },
+            Line {
+                alternatives: vec!["and $48,256.00 on May 7, 2007 in 3:08-cv-09901.".into()],
+                ..read("and $48,250.00 on May 7, 2007 in 3:08-cv-09901.")
+            },
+        ];
+        let r = report(
+            "x.pdf",
+            "x.md".into(),
+            "apple",
+            "now",
+            &pages,
+            VerifyFields::Flagged,
+            &|_| String::new(),
+            &|_| Some(doubtful.clone()),
+            true,
+        );
+        let got = statuses(&r);
+        let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
+        for t in ["$5,500", "January 11, 2008", "$48,250.00"] {
+            assert_eq!(status(t).1, Status::Check, "{t}");
+            assert_eq!(status(t).2, vec!["doubtful_in_second_reading"], "{t}");
+        }
+        assert_eq!(status("May 7, 2007").1, Status::Verified);
+
+        // Pages with embedded text are not re-read.
+        let r = report(
+            "x.pdf",
+            "x.md".into(),
+            "apple",
+            "now",
+            &pages,
+            VerifyFields::Flagged,
+            &|_| body.repeat(3),
+            &|_| panic!("re-read a page with embedded text"),
+            true,
+        );
+        assert!(!r.pages[0].second_reader);
+
+        // Apple read the page: a second Apple reading that agrees verifies nothing (shared blind
+        // spots), but one that disagrees still flags the value. Same for a model page that fell
+        // back to Apple.
+        let mut fell_back = page(1, body);
+        fell_back.fallback = true;
+        for (pages, model) in [([page(1, body)], false), ([fell_back], true)] {
+            let r = report(
+                "x.pdf",
+                "x.md".into(),
+                "apple",
+                "now",
+                &pages,
+                VerifyFields::Flagged,
+                &|_| String::new(),
+                &|_| Some(lines.clone()),
+                model,
+            );
+            let got = statuses(&r);
+            let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
+            assert_eq!(status("$5,500").1, Status::Unchecked);
+            assert!(status("$5,500").2.is_empty());
+            assert_eq!(status("$48,250.00").1, Status::Check);
+            assert_eq!(status("$48,250.00").2, vec!["not_in_second_reading"]);
+        }
     }
 
     #[test]

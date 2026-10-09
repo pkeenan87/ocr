@@ -1,0 +1,398 @@
+{
+ "tag": "azure-di",
+ "engine": "azure-di prebuilt-layout (2024-11-30)",
+ "api_version": "2024-11-30",
+ "keep_furniture": false,
+ "runs": {
+  "pleading": {
+   "seed10": {
+    "wall_s": 9.82,
+    "pages": 4,
+    "pages_per_s": 0.407,
+    "cer": 0.008,
+    "dist_sum": 51,
+    "len_sum": 6360,
+    "tokens_found": 77,
+    "tokens_total": 77,
+    "bates_ok": 4,
+    "bates_total": 4,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 4,
+    "cer_pages": [
+     0.0333,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "seed11": {
+    "wall_s": 11.1,
+    "pages": 3,
+    "pages_per_s": 0.27,
+    "cer": 0.0118,
+    "dist_sum": 49,
+    "len_sum": 4161,
+    "tokens_found": 37,
+    "tokens_total": 37,
+    "bates_ok": 3,
+    "bates_total": 3,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 3,
+    "cer_pages": [
+     0.0326,
+     0.0,
+     0.0
+    ]
+   },
+   "seed12": {
+    "wall_s": 6.08,
+    "pages": 4,
+    "pages_per_s": 0.658,
+    "cer": 0.0,
+    "dist_sum": 0,
+    "len_sum": 6119,
+    "tokens_found": 69,
+    "tokens_total": 69,
+    "bates_ok": 4,
+    "bates_total": 4,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 4,
+    "cer_pages": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "contract": {
+   "seed10": {
+    "wall_s": 13.74,
+    "pages": 5,
+    "pages_per_s": 0.364,
+    "cer": 0.0,
+    "dist_sum": 0,
+    "len_sum": 12992,
+    "tokens_found": 11,
+    "tokens_total": 11,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 5,
+    "cer_pages": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "seed11": {
+    "wall_s": 9.91,
+    "pages": 4,
+    "pages_per_s": 0.404,
+    "cer": 0.0,
+    "dist_sum": 0,
+    "len_sum": 10032,
+    "tokens_found": 10,
+    "tokens_total": 10,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 4,
+    "cer_pages": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "seed12": {
+    "wall_s": 7.55,
+    "pages": 5,
+    "pages_per_s": 0.662,
+    "cer": 0.0,
+    "dist_sum": 0,
+    "len_sum": 13064,
+    "tokens_found": 11,
+    "tokens_total": 11,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 5,
+    "cer_pages": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "transcript4up": {
+   "seed10": {
+    "wall_s": 11.06,
+    "pages": 3,
+    "pages_per_s": 0.271,
+    "cer": 0.0094,
+    "dist_sum": 107,
+    "len_sum": 11353,
+    "tokens_found": 35,
+    "tokens_total": 42,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 232,
+    "tl_total": 300,
+    "pages_in_output": 3,
+    "cer_pages": [
+     0.0076,
+     0.0129,
+     0.0078
+    ]
+   },
+   "seed11": {
+    "wall_s": 6.03,
+    "pages": 3,
+    "pages_per_s": 0.498,
+    "cer": 0.0128,
+    "dist_sum": 146,
+    "len_sum": 11374,
+    "tokens_found": 37,
+    "tokens_total": 43,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 244,
+    "tl_total": 300,
+    "pages_in_output": 3,
+    "cer_pages": [
+     0.0164,
+     0.0108,
+     0.0113
+    ]
+   },
+   "seed12": {
+    "wall_s": 8.73,
+    "pages": 3,
+    "pages_per_s": 0.344,
+    "cer": 0.0085,
+    "dist_sum": 96,
+    "len_sum": 11229,
+    "tokens_found": 37,
+    "tokens_total": 44,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 244,
+    "tl_total": 300,
+    "pages_in_output": 3,
+    "cer_pages": [
+     0.009,
+     0.0078,
+     0.0088
+    ]
+   }
+  },
+  "fax": {
+   "seed10": {
+    "wall_s": 6.25,
+    "pages": 2,
+    "pages_per_s": 0.32,
+    "cer": 0.0269,
+    "dist_sum": 52,
+    "len_sum": 1931,
+    "tokens_found": 14,
+    "tokens_total": 14,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 2,
+    "cer_pages": [
+     0.0344,
+     0.0
+    ]
+   },
+   "seed11": {
+    "wall_s": 7.66,
+    "pages": 2,
+    "pages_per_s": 0.261,
+    "cer": 0.0144,
+    "dist_sum": 28,
+    "len_sum": 1941,
+    "tokens_found": 14,
+    "tokens_total": 14,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 2,
+    "cer_pages": [
+     0.0,
+     0.0654
+    ]
+   },
+   "seed12": {
+    "wall_s": 7.64,
+    "pages": 2,
+    "pages_per_s": 0.262,
+    "cer": 0.0258,
+    "dist_sum": 51,
+    "len_sum": 1975,
+    "tokens_found": 15,
+    "tokens_total": 15,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 2,
+    "cer_pages": [
+     0.0335,
+     0.0
+    ]
+   }
+  },
+  "table": {
+   "seed10": {
+    "wall_s": 9.04,
+    "pages": 2,
+    "pages_per_s": 0.221,
+    "cer": 0.0,
+    "dist_sum": 0,
+    "len_sum": 3177,
+    "tokens_found": 97,
+    "tokens_total": 97,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 2,
+    "cer_pages": [
+     0.0,
+     0.0
+    ]
+   },
+   "seed11": {
+    "wall_s": 6.6,
+    "pages": 2,
+    "pages_per_s": 0.303,
+    "cer": 0.0,
+    "dist_sum": 0,
+    "len_sum": 3035,
+    "tokens_found": 90,
+    "tokens_total": 90,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 2,
+    "cer_pages": [
+     0.0,
+     0.0
+    ]
+   },
+   "seed12": {
+    "wall_s": 12.64,
+    "pages": 2,
+    "pages_per_s": 0.158,
+    "cer": 0.0,
+    "dist_sum": 0,
+    "len_sum": 3318,
+    "tokens_found": 90,
+    "tokens_total": 90,
+    "bates_ok": 0,
+    "bates_total": 0,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 2,
+    "cer_pages": [
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "production": {
+   "seed10": {
+    "wall_s": 16.62,
+    "pages": 60,
+    "pages_per_s": 3.61,
+    "cer": 0.0001,
+    "dist_sum": 3,
+    "len_sum": 40964,
+    "tokens_found": 419,
+    "tokens_total": 419,
+    "bates_ok": 60,
+    "bates_total": 60,
+    "tl_ok": 0,
+    "tl_total": 0,
+    "pages_in_output": 60,
+    "cer_pages": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0018,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0016,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0017,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  }
+ }
+}

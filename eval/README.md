@@ -39,3 +39,18 @@ Tune on seeds 0-9 only. Accept on seeds 10-39, which are never looked at while t
 ## No handwriting family
 Trustworthy ground truth for handwriting cannot be generated, so handwritten annotation pages
 (PLAN.md section 7) are checked by hand and are not part of this harness.
+
+## Verification eval (`--verify-json`)
+    spike/.venv/bin/python -I eval/verify_eval.py --engine apple [--skip-run] [--use-real-config]
+
+This grades the values and statuses of `--verify-json` against the PDFs' embedded text, on the public set's pages that have it. It scans three times: as users run it, with the embedded text hidden from verify (`OCR_VERIFY_IGNORE_EMBEDDED=1`), and the text layer itself.
+
+It reports:
+- field precision, recall and F1;
+- word error rate;
+- how often `verified` is wrong;
+- how often `check` is a false alarm, from the value itself or from a page check;
+- how many misread values `check` catches;
+- sentences that independent readers agreed on but the embedded text lacks.
+
+The embedded text is not perfect ground truth (old scans carry bad OCR layers), so read the listed examples before trusting a number. Results are in docs/spike.md, "Verification eval".

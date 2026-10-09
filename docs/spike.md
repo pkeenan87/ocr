@@ -649,3 +649,31 @@ All of these are the safe direction: a sentence that does not agree is not quote
 - No amounts without `$` occur in the set, so that shape is exercised by tests only.
 
 **Not done:** embedded-text correction on column-split and transcript pages. That changes the OCR text itself, and would need its own measurement against the Jev judge.
+
+## Verification eval: Apple and paddleocr-vl (2026-10-09)
+
+`eval/verify_eval.py` grades `--verify-json` on the 167 public-filing pages that have embedded text. The PDF's own text is the reference, and each engine is scanned twice: as users run it, and with the embedded text hidden from verify. paddleocr-vl numbers are from the build before the `¶` look-alike fix below. Apple numbers include it.
+
+| | Apple | paddleocr-vl |
+|---|---|---|
+| Field precision / recall / F1 vs embedded text | 93.3% / 78.3% / 85.1% | 85.9% / 89.8% / 87.8% |
+| Word error rate vs embedded text (order-sensitive) | 38.2% | 36.9% |
+| Pages to Azure, normal run | 58 | 64 |
+| Hidden-text run: `verified` by the second reader | 0 (agreement not independent) | 590, 23 wrong (3.9%) |
+| Hidden-text run: misread values caught as `check` | 27 of 29 (93%) | 54 of 77 (70%) |
+| Hidden-text run: false alarms from the value itself | 5.7% | 20.3% |
+| Hidden-text run: false alarms including page checks | 34.5% | 20.3% |
+| Sentences agreed by model and Vision, not in the embedded text | n/a | 126 of 3,531 (3.6%) |
+
+**The 23 wrong `verified` values for paddleocr-vl:**
+- **The embedded text is wrong or misparsed in 15.** These are on the 1985 note, the handwritten Nissan form, and the footnote marker in `$1,000,000.8`.
+- **The other 8 are one real shared error.** The overprinted Jane Street stamp (`04/24/24` over `04/18/24`) reads `04/28/24` to the model and to Vision alike. In normal use, that page's embedded text catches it (`not_in_embedded_text`). On a true scan nothing would: overprinted or doubled stamps are a residual risk that no pair of image readers removes.
+
+**The 126 sentences agreed but not in the embedded text** are, in the sample read, comparison artifacts rather than wrong wording:
+- a running header (`SEC v. KUZDAS ET AL.`) that the PDF text places mid-line;
+- leading pleading numbers;
+- transcript cells.
+
+So 3.6% is an upper bound.
+
+**False alarms:** paddleocr-vl's are mostly a scanner stamp that Vision garbles (45 on one filing), and `¶` read as `"1`, `9|` or `11` (34). The `¶` look-alikes are now matched in the second reading. The number must still be equal. Apple's page-level false alarms come from `missing_text` between two Apple readings, whose line coverage differs.

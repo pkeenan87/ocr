@@ -192,6 +192,11 @@ static SECOND_CITATION: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?:^|[\s(\[])([S8$]{1,2})\s?(\d+[a-z]?(?:[.\-]\d+)*(?:\([0-9a-zA-Z]{1,4}\))*)")
         .unwrap()
 });
+/// A paragraph sign that Vision's line recognizer read as `"1`, `9|`, `11`, `I` or `T`
+/// (`Compl. "1 25-34`, `Id. 9| 34`); second readings only. The number must still match.
+static SECOND_PILCROW: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"(?:^|[\s(\[])"?(?:[19IlT\]]{1,2})\|?\s(\d{1,4}(?:[-–]\d{1,4})?)\b"#).unwrap()
+});
 /// Federal docket numbers (`3:26-cv-04417`, `1:20-CV-05382-GBD-GWG`, `23-CV-886-PP`).
 /// Look-alike letters are accepted in the number parts (`3:26-cv-O4417`) and flagged.
 static DOCKET: LazyLock<Regex> = LazyLock::new(|| {
@@ -620,7 +625,8 @@ fn second_reading(lines: &[Line]) -> SecondReading {
         .map(|l| l.text.trim())
         .filter(|t| !number(t))
         .map(|t| match t.split_once(' ') {
-            Some((first, rest)) if number(first) => rest,
+            // `14 | 2022, Kuzdas`: a line number, and the bar of the margin rule.
+            Some((first, rest)) if number(first) => rest.strip_prefix("| ").unwrap_or(rest),
             _ => t,
         })
         .collect::<Vec<_>>();
@@ -632,6 +638,11 @@ fn second_reading(lines: &[Line]) -> SecondReading {
     for c in SECOND_CITATION.captures_iter(&flat) {
         let signs = "§".repeat(c[1].len());
         keys.insert(format!("{:?}:{signs}{}", Kind::Citation, squash(&c[2])));
+    }
+    for c in SECOND_PILCROW.captures_iter(&flat) {
+        for signs in ["¶", "¶¶"] {
+            keys.insert(format!("{:?}:{signs}{}", Kind::Citation, squash(&c[1])));
+        }
     }
     let mut doubtful = HashSet::new();
     for l in lines {
@@ -1247,7 +1258,8 @@ mod tests {
     fn a_second_reading_confirms_or_contradicts_values_on_scans() {
         let body = "Paid $5,500 on January 11, 2008 and $48,250.00 on May 7, 2007 in \
             3:08-cv-09901. See 42 U.S.C. § 1983.\nFourth Amendment (§ 1985) and $1 million in \
-            shares on March 4, 2021.";
+            shares on March 4, 2021. Compl. ¶¶ 25-34. Id. ¶ 34. In another letter dated \
+            August 16, 2022, Kuzdas reminded investors.";
         let pages = [page(1, body)];
         let lines = vec![
             read("Paid S5,500 on January 11,2008 and $48,256.00 on May 7,"),
@@ -1255,7 +1267,8 @@ mod tests {
             read("10"),
             read("2007. in 3:08-cv-09901. See 42 U.S.C. S 1983."),
             read("11 Fourth Amendment (8 1985) and S1 million in shares on March"),
-            read("12 4, 2021."),
+            read("12 4, 2021. Compl. \"1 25-34. Id. 9| 34. In another letter dated August 16,"),
+            read("14 | 2022, Kuzdas reminded investors."),
         ];
         let r = report(
             "x.pdf",
@@ -1280,6 +1293,9 @@ mod tests {
             "§ 1985",
             "$1 million",
             "March 4, 2021",
+            "¶¶ 25-34",
+            "¶ 34",
+            "August 16, 2022",
         ] {
             assert_eq!(status(t).1, Status::Verified, "{t} {:?}", status(t));
             assert_eq!(status(t).2, vec!["matches_second_reading"], "{t}");

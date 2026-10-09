@@ -336,16 +336,19 @@ An example (abridged):
   - **What is compared:** letters and digits, case-insensitively, and in order. A changed, dropped or doubled word breaks agreement. Line breaks, hyphenation and pleading line numbers don't, and neither does a margin legend that the PDF text puts between a paragraph's lines.
   - **Edges:** a sentence must also start and end where a sentence or line does in the other reading, so a dropped first or last word is caught. Headers and table cells are matched within longer lines.
 
-Measured on the 20 public court filings (230 pages, Apple engine, eval/PUBLIC_SET.md):
+Measured on the 20 public court filings (230 pages, Apple engine, eval/PUBLIC_SET.md; binary `87f0ac6`, 2026-10-09). A filing counts as e-filed when every page has embedded text, scanned when none has.
 
 | | `flagged` (default) | `all` |
 |---|---|---|
-| Pages in `azure_pages` | 61 (27%) | 88 (38%) |
-| E-filed filings (139 pages) | 18 | 18 |
-| Partly e-filed filings (32 pages) | 9 | 12 |
-| Scanned filings, no embedded text (59 pages) | 34 | 58 |
-| Values `verified` free against the embedded text | 576 of 846 (68%) | 576 of 846 |
-| Suspect pages answered by the embedded text instead | 40 | 40 |
+| Pages in `azure_pages` | 57 (25%) | 80 (35%) |
+| E-filed filings (146 pages) | 17 | 17 |
+| Partly e-filed filings (25 pages) | 2 | 5 |
+| Scanned filings, no embedded text (59 pages) | 38 | 58 |
+| Values `verified` free against the embedded text | 603 of 860 (70%) | 603 of 860 |
+| Values left `unchecked` | 137 | 0 |
+| Suspect pages answered by the embedded text instead | 69 | 69 |
+
+11 of the 17 e-filed pages are one 1985 filing whose embedded text is an old OCR layer; the other 133 e-filed pages sent 6. The set is weighted toward scans, so the share of pages sent to Azure depends mostly on how many scans a caseload has.
 
 Real misreads it caught:
 - impossible dates (`04/02/2908` for 2008, `81/17/1995`, `02/03/0Q`);

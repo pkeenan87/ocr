@@ -113,7 +113,8 @@ fn server_start_without_model_needs_one_installed() {
         .args(["server", "start"])
         .assert()
         .code(2)
-        .stderr(predicate::str::contains("no model engine is installed"));
+        .stderr(predicate::str::contains("no model engine is installed"))
+        .stderr(predicate::str::contains("apple engine needs no server"));
     let config = e.config.path().join("config.toml");
     let mut toml = fs::read_to_string(&config).unwrap();
     toml.push_str("\n[engines.olmocr]\ninstalled = true\n\n[engines.dots-ocr]\ninstalled = true\n");

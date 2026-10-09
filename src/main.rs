@@ -115,7 +115,9 @@ fn setup(args: &SetupArgs) -> Result<(), CliError> {
     cfg.save()?;
     std::fs::create_dir_all(ocr::config::state_dir()?).map_err(anyhow::Error::from)?;
     if cfg!(target_os = "macos") {
-        println!("apple engine ready (no download needed)");
+        println!(
+            "apple engine ready: no download and no server needed. Scan with `ocr scan --input-file <file>`."
+        );
     }
 
     server::setup_models(args, &mut cfg)
@@ -148,9 +150,14 @@ fn default_server_model() -> Result<Engine, CliError> {
         .unwrap_or_default();
     match installed.as_slice() {
         [only] => Ok(*only),
-        [] => Err(CliError::Setup(
-            "no model engine is installed. Run `ocr server setup --model <engine>`.".into(),
-        )),
+        [] => Err(CliError::Setup(if cfg!(target_os = "macos") {
+            "no model engine is installed. The default apple engine needs no server: run \
+             `ocr scan` directly. To use a model engine, run `ocr server setup --model <engine>` \
+             (paddleocr-vl, olmocr or dots-ocr)."
+                .into()
+        } else {
+            "no model engine is installed. Run `ocr server setup --model <engine>`.".into()
+        })),
         many => Err(CliError::Usage(format!(
             "several model engines are installed; choose one with --model ({})",
             many.iter().map(|m| m.name()).collect::<Vec<_>>().join(", ")

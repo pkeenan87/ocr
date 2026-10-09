@@ -1082,7 +1082,11 @@ fn format_uptime(secs: i64) -> String {
 
 pub fn status() -> Result<(), CliError> {
     let Some(info) = running() else {
-        println!("no server running");
+        if cfg!(target_os = "macos") {
+            println!("no server running (the apple engine needs none)");
+        } else {
+            println!("no server running");
+        }
         return Ok(());
     };
     let uptime = chrono::DateTime::parse_from_rfc3339(&info.started_at)

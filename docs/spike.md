@@ -359,3 +359,28 @@ Sheets unverified (fallback rate): 0 of 7 on seeds 40-42 for every engine. On se
 - Every real crash happened within 0.81 s of process launch.
 - The supervisor retries from checkpoints.
 - Decision (user, 2026-10-08, second time): keep the limit at 2 after seeing the corrected 3x cost.
+
+## Column split false positives on real filings (2026-10-08)
+
+The public court-filing set (eval/PUBLIC_SET.md) showed Apple splitting single-column pages into columns and cutting lines mid-word. `examples/split_survey.rs` runs the side pass (150 DPI, regions at 100 DPI) on every page (first 60 per document) and lists the pages with two or more column regions.
+
+Three causes, measured with a temporary chain dump:
+
+- **Drifting cuts.** A gutter candidate is tracked strip to strip with 5 px of drift allowed. On typewriter text and ragged captions, word spaces and line ends overlap pairwise but no straight channel runs through all four strips (Lozano p3: `lo=455 hi=127`; Knight p1: `lo=417 hi=217`). The old code then cut at the mean midpoint, which runs through words. Every true split measured had a straight channel (7-167 px).
+- **Pleading margins wider than 0.08.** Line numbers plus sideways court-name text or form numbers reach 0.085-0.134 of the page width (Garland, Ironworkers, Lozano p1), so the strip became a column.
+- **Q/A marker strips.** Full-page transcripts have a 0.013-0.025-wide strip of Q and A markers that was split off as its own column (Knight, 12 pages).
+
+Fix (`src/regions.rs`):
+- a gutter must be a straight channel (`lo < hi`), cut at its middle;
+- `MARGIN_WIDTH` is now 0.14;
+- a piece narrower than 0.05 of the page width, outside the margin zones, joins its neighbour.
+
+Two new unit tests (a drifting typewriter river, and a marker strip) fail on the old logic and pass on the new.
+
+| Set | Pages split before | After |
+|---|---|---|
+| Public filings, 25 documents (first 60 pages each) | 119 | 77 |
+| of which Knight transcript / Garland order / Ironworkers order | 13 / 13 / 10 | 1 / 0 / 1 |
+| Synthetic fixtures and seeds 10-12 | 10 pages | the same 10 pages |
+
+The remaining splits are side-by-side caption, signature and index blocks and 4-up transcripts, which are true columns. The only synthetic change: on `four_up.pdf` the right mini-page's line-number strip (0.012 wide) now joins its text instead of becoming a column of its own. All goldens are byte-identical. Lozano p3 now reads as whole lines; Knight p6 is no longer split, but it is still not detected as a transcript (separate follow-up).

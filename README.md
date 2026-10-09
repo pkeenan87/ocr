@@ -215,6 +215,14 @@ Guidance:
 - Handwriting is not evaluated; there is no trustworthy ground truth for it.
 - Model engines are slower than they look: a 300-page scan takes minutes to hours depending on the engine, so use the progress bar ETA and rely on resume.
 
+## Using ocr from an agent (Claude Code skill)
+
+[skills/ocr/SKILL.md](skills/ocr/SKILL.md) is a Claude Code skill. It tells an agent when to reach for `ocr`, how to check setup, which engine to pick, how to read exit codes, front matter and Bates markers, and to keep documents local. Install it for your user account:
+
+    mkdir -p ~/.claude/skills && cp -R skills/ocr ~/.claude/skills/
+
+or for one project only, copy it to `<project>/.claude/skills/ocr/`. The skill does not install the `ocr` binary itself.
+
 ## Privacy
 
 Everything runs on your machine. Model servers bind to 127.0.0.1 only, there is no telemetry, and the only network access is the Hugging Face and Python package downloads during `ocr server setup`. At run time the servers are started with `HF_HUB_OFFLINE=1`.
@@ -232,3 +240,7 @@ Documents:
 - [docs/spike.md](docs/spike.md): measurements to date.
 - [docs/eval.md](docs/eval.md): evaluation method, per-engine results, targets and known gaps.
 - [docs/azure-eval.md](docs/azure-eval.md): prompt for an Azure Document Intelligence comparison on another machine.
+
+## License
+
+MIT; see [LICENSE](LICENSE). Model weights are not bundled: `ocr server setup` downloads them from Hugging Face under each model's own license.

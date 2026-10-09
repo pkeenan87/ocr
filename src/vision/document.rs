@@ -397,6 +397,16 @@ pub fn document_info(path: &Path) -> Result<DocInfo> {
 
 /// Embedded text of a PDF page (0-based index); empty for images. pdfium's spacing and order
 /// can differ from PDFKit's `page.string`.
+/// Embedded text by region is only used on the Mac (with Apple Vision's layout); elsewhere the
+/// layout-preserving text-layer path is not available.
+pub fn text_in_regions(
+    _path: &Path,
+    _page_index: usize,
+    _regions: &[[f64; 4]],
+) -> Result<Vec<String>> {
+    anyhow::bail!("text by region needs Apple Vision layout (macOS)")
+}
+
 pub fn text_layer(path: &Path, page_index: usize) -> Result<String> {
     if !is_pdf(path) {
         return Ok(String::new());

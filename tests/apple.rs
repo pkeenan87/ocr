@@ -183,15 +183,37 @@ fn jobs_do_not_change_output() {
     assert_eq!(one, eight);
 }
 
+/// The default (`auto`) keeps Vision's layout and takes the exact characters of the embedded
+/// text: Vision's `Case No.3:26-cv-04417` becomes the PDF's `Case No. 3:26-cv-04417`, and the
+/// rest of the page is the pure-OCR golden. `always` is the raw embedded text.
 #[test]
-fn apple_defaults_to_vision_and_auto_uses_the_text_layer() {
+fn apple_defaults_to_vision_layout_with_embedded_characters() {
     let e = Env::new(&["legal.pdf"]);
     let (md, _) = e.scan("legal.pdf", &[]);
     assert!(md.contains("text_layer_pages: []"), "{md}");
-    assert!(md.contains("Bates SMITH000123"), "{md}");
-    let (md, _) = e.scan("legal.pdf", &["--overwrite", "--use-text-layer", "auto"]);
+    assert!(md.contains("embedded_text_fixes: {1: 1}"), "{md}");
+    assert_eq!(
+        without_generated(&md),
+        golden("legal")
+            .replace("Case No.3:26-cv-04417", "Case No. 3:26-cv-04417")
+            .replace("embedded_text_fixes: {}", "embedded_text_fixes: {1: 1}")
+    );
+    let (md, _) = e.scan("legal.pdf", &["--overwrite", "--use-text-layer", "always"]);
     assert!(md.contains("text_layer_pages: [1]"), "{md}");
     assert!(md.contains("3:26-cv-04417"), "{md}");
+}
+
+/// An image has no embedded text: `auto` changes nothing.
+#[test]
+fn embedded_text_correction_needs_a_pdf() {
+    let e = Env::new(&["legal_200dpi.png"]);
+    let (auto, _) = e.scan("legal_200dpi.png", &[]);
+    let (never, _) = e.scan(
+        "legal_200dpi.png",
+        &["--overwrite", "--use-text-layer", "never"],
+    );
+    assert!(auto.contains("embedded_text_fixes: {}"), "{auto}");
+    assert_eq!(without_generated(&auto), without_generated(&never));
 }
 
 #[test]

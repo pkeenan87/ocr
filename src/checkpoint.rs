@@ -280,6 +280,7 @@ mod tests {
             flagged: true,
             line_numbers: Some(true),
             symbol_fixes: 0,
+            embedded_fixes: None,
             suspect: Vec::new(),
             error: None,
         }

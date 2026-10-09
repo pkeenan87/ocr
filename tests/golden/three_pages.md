@@ -6,6 +6,7 @@ text_layer_pages: []
 column_split_pages: [2]
 transcript_pages: []
 currency_fixes: {3: 2}
+embedded_text_fixes: {}
 symbol_fixes: {}
 suspect_pages: {}
 flagged_pages: []

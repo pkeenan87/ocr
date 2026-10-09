@@ -5,6 +5,7 @@ pub mod checkpoint;
 pub mod cli;
 pub mod config;
 pub mod dots;
+pub mod embedded;
 pub mod engines;
 pub mod error;
 #[cfg(not(target_os = "macos"))]

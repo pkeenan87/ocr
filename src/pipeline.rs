@@ -7,6 +7,7 @@ use anyhow::{Context, Result};
 
 use crate::anchor::{self, MiniPage};
 use crate::cli::TextLayer;
+use crate::embedded;
 use crate::input::PageRanges;
 use crate::layout;
 use crate::markdown::{self, PageResult, Source};
@@ -125,7 +126,8 @@ pub(crate) fn text_layer_page(
     index: usize,
     s: &Settings,
 ) -> Option<PageResult> {
-    if kind != DocKind::Pdf || s.text_layer == TextLayer::Never {
+    // `auto` keeps Vision's layout and corrects its characters instead (vision_page).
+    if kind != DocKind::Pdf || s.text_layer != TextLayer::Always {
         return None;
     }
     let text = vision::text_layer(path, index).ok()?;
@@ -154,6 +156,7 @@ fn blank_page(number: usize) -> PageResult {
         flagged: false,
         line_numbers: None,
         symbol_fixes: 0,
+        embedded_fixes: None,
         suspect: Vec::new(),
         error: None,
     }
@@ -163,7 +166,20 @@ fn blank_page(number: usize) -> PageResult {
 pub(crate) fn vision_page(path: &Path, index: usize, s: &Settings) -> PageResult {
     let mut result = blank_page(index + 1);
     match recognize_with_columns(path, index, s.dpi, &s.options) {
-        Ok(page) => {
+        Ok(mut page) => {
+            // Exact characters from the embedded text where the page agrees with it. Column
+            // pages and transcripts keep Vision's text for now.
+            if s.text_layer == TextLayer::Auto && !page.split && !page.transcript {
+                let boxes: Vec<[f64; 4]> = page
+                    .blocks
+                    .iter()
+                    .map(|b| embedded::padded(b.bbox))
+                    .collect();
+                if let Ok(texts) = vision::text_in_regions(path, index, &boxes) {
+                    let o = embedded::correct_blocks(&mut page.blocks, &texts);
+                    result.embedded_fixes = o.applied.then_some(o.fixed);
+                }
+            }
             let (body, bates) = if page.split {
                 markdown::render_ordered(&page.blocks)
             } else {

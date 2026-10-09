@@ -623,3 +623,7 @@ The options as they were put:
   - **Git Bash's GNU `tar`** in the CI step (not in `ocr`).
   
   **Still open:** a scan on a real Windows machine with an NVIDIA GPU. You have none yet.
+
+- 2026-10-08, **after merging master.** The Mac PaddleOCR-VL accept numbers (docs/eval.md, seeds 10–19) settle two questions:
+  - **4-up transcripts:** 51.1% CER on the Mac, against 56.6% here (seeds 10–12). A shared limit, not a regression of the port, so it is closed as documented; use dots for transcripts. Master's line-number re-anchoring needs the Vision line geometry: off the Mac no page is detected as a transcript, so it does not run.
+  - **Tables:** 0.0% on the Mac, against 12.3% here. A real regression off the Mac: there are no Vision table boxes to crop for `Table Recognition:`. **Follow-up:** find table regions from the bitmap (rule lines are already detected in `regions.rs`), or use dots' layout boxes.

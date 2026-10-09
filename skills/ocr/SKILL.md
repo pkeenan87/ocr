@@ -1,11 +1,11 @@
 ---
 name: ocr
-description: OCR PDFs and images to Markdown locally on a Mac with the `ocr` command-line tool (Apple Vision, PaddleOCR-VL, olmOCR 2, dots.ocr). Use when the user wants text out of a scanned or image-only document, a folder of documents, a deposition transcript, or a legal filing with Bates numbers, and the work must stay on their machine.
+description: OCR PDFs and images to Markdown locally on a Mac with the `ocr` command-line tool (Apple Vision, PaddleOCR-VL, olmOCR 2, dots.ocr), and check the values and quotes in them before anyone relies on them. Use when the user wants text out of a scanned or image-only document, a folder of documents, a deposition transcript, or a legal filing with Bates numbers, and when amounts, dates, docket numbers, citations or quotations from such documents will be relied on. It is the entry point for the verification workflow with a second OCR service such as Azure Document Intelligence.
 ---
 
 # ocr: local document OCR to Markdown
 
-`ocr` turns PDFs and images into Markdown on Apple Silicon Macs (macOS 26 or later). Nothing is uploaded. Treat the user's documents as confidential: never send them, or the Markdown made from them, to any web service unless the user asks.
+`ocr` turns PDFs and images into Markdown on Apple Silicon Macs (macOS 26 or later). Nothing is uploaded. Treat the user's documents as confidential: never send them, or the Markdown made from them, to any web service, unless the user asks or has set up a second-OCR tool for exactly this (step 3 of the verification workflow below).
 
 ## Before scanning
 
@@ -53,17 +53,64 @@ Long scans write per-page checkpoints. If a run is interrupted, running the same
 | 2 | Setup or usage error, such as an engine that isn't installed | Read the message; usually `ocr server setup` is needed |
 | 3 | Model server not running or crashed | `ocr server start --model <engine>`, then re-run the same command to resume |
 
-## Values that must be right (amounts, dates, docket and Bates numbers, citations)
+## Values and quotes that will be relied on: the verification workflow
 
-When the user will rely on figures, dates, docket numbers or citations, scan with `--verify-json`. Use `--verify-fields all` when nothing may be missed, for example amounts in a settlement or deadlines. Then read `<stem>.verify.json`:
+Use this workflow whenever the user will rely on figures, dates, docket or Bates numbers, citations or quotations: legal work by default. OCR misreads look plausible (`$3,000` for `$8,000`), and a wrong value is worse than a missing one. A value counts as confirmed only when two independent readings agree on it.
 
-- **Quote or compute only with values that are `verified`**, or that a second reader has confirmed. Always give the page, and the Bates number if there is one.
-- **`words_numerals_mismatch` or `arithmetic_mismatch`:** an amount in words disagrees with its numerals, or a table total with its rows. Present neither value as fact; say they disagree and give the page.
-- **`missing_text` in a page's `page_check`:** the OCR lacks whole lines another reading has. The lines are in `text_agreement.missing_lines`. Do not say a page doesn't mention something based on its OCR alone; check those lines or the PDF page.
-- **Quote text word for word only when its sentence agrees.** A sentence agrees when it is absent from `unagreed` on a page whose `text_agreement.independent` is true. Otherwise, paraphrase and say the wording is unconfirmed, or check the PDF page.
-- **Treat `check` values as unconfirmed.** Never present them as fact. If a second OCR service is available (for example an Azure Document Intelligence tool), send it only the pages the question needs, taken from `azure_pages` or from the pages of the relevant fields. Use its reading where the two disagree, and say that you did.
-- **`unchecked` means nobody confirmed the value.** Say so if the value matters. On scanned pages with the Apple engine, `ocr` has already read the page a second time. An `unchecked` value there means the two Apple readings agree, but they share blind spots, so it is still unconfirmed. A `check` with `not_in_second_reading` means the two readings disagree.
+### 1. Scan with the verification report
+
+```bash
+ocr scan --input-file filing.pdf --verify-json --verify-fields all
+```
+
+Always use `--verify-fields all` for this workflow. The default, `flagged`, leaves values on scanned pages `unchecked` and keeps their pages out of `azure_pages`, so they would never get a second reading. The report is written to `<stem>.verify.json` next to the Markdown.
+
+### 2. Read the report
+
+- `summary`: how many values are `verified`, `check` and `unchecked`.
+- `azure_pages`: the pages that need a second reading, in Azure's `pages` syntax (`3,7-9`). It is empty when the PDF's own text already confirmed everything.
+- Per page: `fields` (each with `kind`, `text`, `value`, `line`, `status`, `why`), `page_check`, `second_reading`, `text_agreement`, `ocr_text_layer`.
+- `verified` values were matched by an independent reading: the PDF's own characters, or Vision against a model engine. Nothing else is `verified`.
+
+### 3. Get the second reading, only for `azure_pages`
+
+- **If a second OCR tool is available** (an Azure Document Intelligence tool, for example), send it only the pages listed in `azure_pages`, using its `pages` parameter. Never send the whole document when only some pages are listed. This is what keeps the cost down.
+- **Confidentiality:** sending pages to a cloud service publishes them to that service. Do it only through a tool the user or their organisation has set up for this purpose. If you cannot tell whether these documents may go to it, ask first.
+- **If no second reading is available**, nothing in step 4 can be confirmed. Tell the user which pages need checking against the PDF (`azure_pages`), and treat every `check` and `unchecked` value as unconfirmed.
+- Pages whose `second_reading` is `embedded_text` need no service: their values already match the PDF's own text. Read the page's text from the PDF instead of the OCR if you need its wording.
+
+### 4. Reconcile each unconfirmed value with the second reading
+
+For every `check` or `unchecked` field on a page that was re-read, find the same value in the second reading of that page, and compare it **by value, not as text**:
+- amounts in cents, so `$3,000` is not `$3,000,000`;
+- dates as YYYY-MM-DD;
+- docket and Bates numbers as their letters and digits;
+- citations by section number.
+
+Then:
+- **Same value:** confirmed by two independent readings. You may state it as fact, with its page.
+- **Different value:** a disagreement. Never pick one. Report both readings and the page, and say the PDF page must be checked.
+- **Not found in the second reading:** still unconfirmed.
+- **Special reasons win.** A value with `words_numerals_mismatch` or `arithmetic_mismatch` stays in dispute even if the second reading agrees, because the document contradicts itself (`Five Thousand Dollars ($3,000.00)`). Say so.
+- **Stamps, handwriting and margin notes:** say where the value came from even when it is confirmed. Overprinted or doubled stamps fooled every pair of image readers tested (`04/24/24` over `04/18/24` read as `04/28/24` by all of them).
+
+### 5. What you may state, quote and compute
+
+- **State or compute only with values that are `verified`, or confirmed in step 4.** Always give the page, and the Bates number if there is one.
+- **Quote word for word only agreed sentences.** A sentence agrees when it is not in its page's `text_agreement.unagreed` and `text_agreement.independent` is true. A sentence that the second reading in step 3 has word for word also agrees. Otherwise paraphrase, and say the exact wording is unconfirmed.
+- **`missing_text` in `page_check`:** the OCR lacks whole lines that another reading has (`text_agreement.missing_lines`). Never say a page does not mention something from its OCR alone. Use the second reading's text, or check the PDF.
+- **`ocr_text_layer: true`:** the page is a scan carrying an older OCR's invisible text layer. That layer counts as one more reading, not as the document's own characters, so agreement with it confirms nothing. Treat the page as a scan.
+- **`check` and `unchecked` values that step 4 did not confirm are unconfirmed.** Never present them as fact.
 - **Never fill a gap from memory or by inference.** If a value cannot be confirmed, say that it needs checking against page N of the PDF.
+
+### 6. Tell the user where things stand
+
+End with a short account:
+- how many values were confirmed, and by what (the PDF's own text, the second reading);
+- which values disagree, with both readings and their pages;
+- which pages still need a person to check them, and why.
+
+Name pages and Bates numbers so the user can find them.
 
 ## Reading the output
 

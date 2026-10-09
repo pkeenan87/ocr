@@ -312,6 +312,7 @@ An example (abridged):
 - **`check`:** something speaks against the value. `why` says what:
   - `suspect_page`: the page is in `suspect_pages`, failed, or has `missing_text`.
   - `not_in_embedded_text`: the page has embedded text and the value is not in it.
+  - `not_in_ocr_text_layer`: the page's embedded text is an invisible OCR layer (see `ocr_text_layer`), and the value is not in it.
   - `confusable_characters`: a letter that looks like a digit (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`), such as `3:26-cv-O4417` or `$1,O00`. Such a field has no `value`.
   - `invalid_date`: an impossible date, such as `02/30` or `0Q`.
   - `malformed_amount`: broken digit grouping, such as `$4825,0.00`.
@@ -328,6 +329,11 @@ An example (abridged):
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
 - **Values:** amounts include a scale word (`$33.5 million` has the value 33500000), also when the word starts the next line, and a `K`/`M`/`B` suffix (`$1.5B`). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
 - **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.
+- **`ocr_text_layer`:** the page's embedded text is drawn invisibly over a scan (text render mode 3). That is how OCR tools add a text layer, so the text is another OCR's reading, not the document's own characters.
+  - **Values:** agreement with it verifies nothing. A disagreement still turns a value into `check`.
+  - **Text agreement:** `text_agreement` is `compared_with: ocr_text_layer`, `independent: false`.
+  - **Second reading:** the page never gets `second_reading: embedded_text`.
+  - On the public filings this applies to a 1985 note and a handwritten dealer form, whose 120 values were verified against their old layers before.
 - **`page_check`:** the suspect reasons, `failed: …`, `missing_text`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
   - **`missing_text`:** the other reading (embedded text or second reader) has whole lines the OCR lacks: at least 5 words in lines with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the OCR. They are listed in `text_agreement.missing_lines`.
   - On the public filings this caught Apple Vision dropping a whole visible paragraph ("ARTICLE NINTH: Execution of Agreement") and a footnote.

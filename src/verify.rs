@@ -79,6 +79,9 @@ pub struct PageReport {
     pub page_check: Vec<String>,
     /// Whether the page has embedded PDF text that fields were compared with.
     pub embedded_text: bool,
+    /// Whether that text is drawn invisibly (an OCR layer laid over a scan): another OCR's
+    /// reading, not the document's own characters. Agreement with it verifies nothing.
+    pub ocr_text_layer: bool,
     /// Whether a second, local reading (Vision's line recognizer at 300 DPI) was compared with,
     /// on a page without embedded text.
     pub second_reader: bool,
@@ -607,6 +610,13 @@ fn close(a: &str, b: &str) -> bool {
         })
 }
 
+/// A page's embedded PDF text, and whether it is drawn invisibly (an OCR layer over a scan).
+#[derive(Debug, Clone, Default)]
+pub struct Embedded {
+    pub text: String,
+    pub ocr_layer: bool,
+}
+
 /// What a second reading of a page says about values: the keys it read, and the keys it was
 /// unsure of (a next-best reading of the line reads the value differently, or low confidence).
 struct SecondReading {
@@ -705,7 +715,7 @@ pub fn report<'a>(
     generated: &'a str,
     pages: &[PageResult],
     mode: VerifyFields,
-    embedded: &dyn Fn(usize) -> String,
+    embedded: &dyn Fn(usize) -> Embedded,
     second: &(dyn Fn(usize) -> Option<Vec<Line>> + Sync),
     model_engine: bool,
 ) -> Report<'a> {
@@ -742,16 +752,17 @@ pub fn report<'a>(
         .filter(|(_, n)| **n >= 2)
         .map(|(o, _)| (*o).clone());
 
-    let texts: Vec<String> = pages
+    let layers: Vec<Embedded> = pages
         .iter()
         .map(|p| {
             if p.source == Source::TextLayer || p.error.is_some() {
-                String::new()
+                Embedded::default()
             } else {
                 embedded(p.number)
             }
         })
         .collect();
+    let texts: Vec<&str> = layers.iter().map(|l| l.text.as_str()).collect();
     let has_text: Vec<bool> = texts
         .iter()
         .map(|t| t.split_whitespace().count() >= 20)
@@ -797,19 +808,19 @@ pub fn report<'a>(
             );
         }
         let has_text = has_text[i];
+        let ocr_layer = has_text && layers[i].ocr_layer;
         let keys = if has_text {
-            embedded_keys(&texts[i])
+            embedded_keys(texts[i])
         } else {
             HashSet::new()
         };
         let reread = rereads.get(&i);
         let text_agreement = if has_text {
-            Some(crate::agreement::compare(
-                &p.body,
-                &texts[i],
-                "embedded_text",
-                true,
-            ))
+            Some(if ocr_layer {
+                crate::agreement::compare(&p.body, texts[i], "ocr_text_layer", false)
+            } else {
+                crate::agreement::compare(&p.body, texts[i], "embedded_text", true)
+            })
         } else {
             reread.map(|r| {
                 crate::agreement::compare(
@@ -859,7 +870,13 @@ pub fn report<'a>(
             }
             let k = key(f.kind, &f.text);
             let mut found = k.as_ref().is_some_and(|k| keys.contains(k));
-            if has_text && !found {
+            if ocr_layer {
+                // Another OCR's reading: a disagreement counts, an agreement verifies nothing.
+                if !found && k.is_some() {
+                    f.why.push("not_in_ocr_text_layer");
+                }
+                found = false;
+            } else if has_text && !found {
                 f.why.push("not_in_embedded_text");
             }
             let mut matched = "matches_embedded_text";
@@ -899,7 +916,7 @@ pub fn report<'a>(
             Some("azure")
         } else if page_check.is_empty() {
             None
-        } else if has_text {
+        } else if has_text && !ocr_layer {
             Some("embedded_text")
         } else {
             Some("azure")
@@ -909,6 +926,7 @@ pub fn report<'a>(
             bates: p.bates.clone(),
             page_check,
             embedded_text: has_text,
+            ocr_text_layer: ocr_layer,
             second_reader: reread.is_some(),
             text_agreement,
             second_reading,
@@ -1020,7 +1038,10 @@ mod tests {
             "now",
             pages,
             mode,
-            &|_| text.clone(),
+            &|_| Embedded {
+                text: text.clone(),
+                ocr_layer: false,
+            },
             &|_| None,
             false,
         )
@@ -1277,7 +1298,7 @@ mod tests {
             "now",
             &pages,
             VerifyFields::Flagged,
-            &|_| String::new(),
+            &|_| Embedded::default(),
             &|_| Some(lines.clone()),
             true,
         );
@@ -1328,7 +1349,7 @@ mod tests {
             "now",
             &pages,
             VerifyFields::Flagged,
-            &|_| String::new(),
+            &|_| Embedded::default(),
             &|_| Some(doubtful.clone()),
             true,
         );
@@ -1348,7 +1369,10 @@ mod tests {
             "now",
             &pages,
             VerifyFields::Flagged,
-            &|_| body.repeat(3),
+            &|_| Embedded {
+                text: body.repeat(3),
+                ocr_layer: false,
+            },
             &|_| panic!("re-read a page with embedded text"),
             true,
         );
@@ -1367,7 +1391,7 @@ mod tests {
                 "now",
                 &pages,
                 VerifyFields::Flagged,
-                &|_| String::new(),
+                &|_| Embedded::default(),
                 &|_| Some(lines.clone()),
                 model,
             );
@@ -1477,6 +1501,50 @@ mod tests {
         ] {
             let r = run(&[page(1, ocr)], VerifyFields::Flagged, layer);
             assert_eq!(statuses(&r)[0].1, status, "{ocr}");
+        }
+    }
+
+    #[test]
+    fn an_ocr_text_layer_flags_disagreements_but_verifies_nothing() {
+        let rest = " More words of the old scanner layer so the page has enough text to compare.";
+        let body = format!("Paid $5,500 on January 11, 2008 under Case No. 3:08-cv-09901.{rest}");
+        let layer = format!("Paid $5,500 on January 11, 2003 under Case No. 3:08-cv-09901.{rest}");
+        let body = body.as_str();
+        let pages = [page(1, body)];
+        for (mode, agreed) in [
+            (VerifyFields::Flagged, Status::Unchecked),
+            (VerifyFields::All, Status::Check),
+        ] {
+            let r = report(
+                "x.pdf",
+                "x.md".into(),
+                "apple",
+                "now",
+                &pages,
+                mode,
+                &|_| Embedded {
+                    text: layer.clone(),
+                    ocr_layer: true,
+                },
+                &|_| None,
+                false,
+            );
+            assert!(r.pages[0].ocr_text_layer);
+            let got = statuses(&r);
+            let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
+            assert_eq!(status("$5,500").1, agreed, "{mode:?}");
+            assert_eq!(
+                status("January 11, 2008"),
+                (
+                    "January 11, 2008".into(),
+                    Status::Check,
+                    vec!["not_in_ocr_text_layer"]
+                )
+            );
+            assert_eq!(r.summary.verified, 0);
+            assert_eq!(r.pages[0].second_reading, Some("azure"));
+            let a = r.pages[0].text_agreement.as_ref().unwrap();
+            assert_eq!((a.compared_with, a.independent), ("ocr_text_layer", false));
         }
     }
 

@@ -299,17 +299,18 @@ An example (abridged):
 ```
 
 - **Fields:** `amount`, `date` (with `value` as YYYY-MM-DD), `docket` (federal shapes such as `3:26-cv-04417`), `bates`, `citation` (with `§` or `¶`) and `percent`. Each field has the exact text as it appears in the Markdown, its page, and its line within the page.
-- **`verified`:** the same value appears in the page's embedded PDF text, a second, independent reading. Born-digital filings are mostly verified for free.
+- **`verified`:** the same value appears in the page's embedded PDF text, a second, independent reading. Values are compared, not substrings: `$3,000` does not match `$3,000,000` in the embedded text, and `3:26-cv-4417` matches `3:26-cv-04417`. Born-digital filings are mostly verified for free.
 - **`check`:** something speaks against the value. `why` says what:
   - `suspect_page`: the page is in `suspect_pages`, or it failed.
   - `not_in_embedded_text`: the page has embedded text and the value is not in it.
+  - `confusable_characters`: a letter that looks like a digit (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`), such as `3:26-cv-O4417` or `$1,O00`. Such a field has no `value`.
   - `invalid_date`: an impossible date, such as `02/30` or `0Q`.
   - `malformed_amount`: broken digit grouping, such as `$4825,0.00`.
   - `differs_from_usual_docket`: one digit off the docket number the document repeats.
   - `bates_out_of_sequence`: the Bates number breaks the page sequence.
   - `unconfirmed`: with `--verify-fields all`, nothing confirmed the value.
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
-- **Values:** amounts include a scale word (`$33.5 million` has the value 33500000). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
+- **Values:** amounts include a scale word (`$33.5 million` has the value 33500000), also when the word starts the next line, and a `K`/`M`/`B` suffix (`$1.5B`). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
 - **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.
 - **`page_check`:** the suspect reasons, or `failed: …`, when the whole page needs a second reading.
 - **`second_reading`:** how to get the page's second reading, if it needs one.

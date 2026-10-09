@@ -298,7 +298,10 @@ An example (abridged):
 }
 ```
 
-- **Fields:** `amount`, `date` (with `value` as YYYY-MM-DD), `docket` (federal shapes such as `3:26-cv-04417`), `bates`, `citation` (with `§` or `¶`) and `percent`. Each field has the exact text as it appears in the Markdown, its page, and its line within the page.
+- **Fields:** `amount`, `date` (with `value` as YYYY-MM-DD), `docket`, `bates`, `citation` (with `§` or `¶`) and `percent`.
+  - **Dockets:** federal shapes such as `3:26-cv-04417` anywhere, and any court's format after a label (`Case No.: 11-4604 PSG`, `C.A. No. 5215-VCG`, `Index No. 651234/2021`). `Docket No. 35` cites an entry, not a case, and is left out.
+  - **Amounts:** with `$`, and without it in three shapes that cannot be a count: `USD 5,000`, `5,000 dollars`, and `sum of 5,000.00` (cents required).
+- Each field has the exact text as it appears in the Markdown, its page, and its line within the page.
 - **`verified`:** the same value appears in the page's embedded PDF text, a second, independent reading. Values are compared, not substrings: `$3,000` does not match `$3,000,000` in the embedded text, and `3:26-cv-4417` matches `3:26-cv-04417`. Born-digital filings are mostly verified for free.
 - **`check`:** something speaks against the value. `why` says what:
   - `suspect_page`: the page is in `suspect_pages`, failed, or has `missing_text`.

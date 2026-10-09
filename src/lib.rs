@@ -2,6 +2,7 @@
 
 pub mod agreement;
 pub mod anchor;
+pub mod arithmetic;
 pub mod checkpoint;
 pub mod cli;
 pub mod config;

@@ -22,6 +22,10 @@ use crate::vision::Line;
 /// is coarse (mostly 0.5 or 1.0), so this only drops the lines Vision itself marks as doubtful.
 const SECOND_READER_MIN_CONFIDENCE: f64 = 0.5;
 
+/// Words in lines that another reading has and the OCR lacks entirely, from which a page gets
+/// `missing_text` (docs/spike.md).
+const MISSING_TEXT_MIN_WORDS: usize = 5;
+
 /// Which unconfirmed fields need a second reading.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum, Default)]
 pub enum VerifyFields {
@@ -685,6 +689,31 @@ pub fn report<'a>(
             HashSet::new()
         };
         let reread = rereads.get(&i);
+        let text_agreement = if has_text {
+            Some(crate::agreement::compare(
+                &p.body,
+                &texts[i],
+                "embedded_text",
+                true,
+            ))
+        } else {
+            reread.map(|r| {
+                crate::agreement::compare(
+                    &p.body,
+                    &r.text,
+                    "second_reader",
+                    model_engine && !p.fallback,
+                )
+            })
+        };
+        // The other reading has whole lines the OCR lacks: dropped text, or text not visible on
+        // the page. Either way the page needs a look.
+        if text_agreement
+            .as_ref()
+            .is_some_and(|a| a.missing_words >= MISSING_TEXT_MIN_WORDS)
+        {
+            page_check.push("missing_text".into());
+        }
         for f in &mut fields {
             if f.kind == Kind::Docket && odd.contains(&f.text.to_ascii_lowercase()) {
                 f.why.push("differs_from_usual_docket");
@@ -741,23 +770,6 @@ pub fn report<'a>(
             Some("embedded_text")
         } else {
             Some("azure")
-        };
-        let text_agreement = if has_text {
-            Some(crate::agreement::compare(
-                &p.body,
-                &texts[i],
-                "embedded_text",
-                true,
-            ))
-        } else {
-            reread.map(|r| {
-                crate::agreement::compare(
-                    &p.body,
-                    &r.text,
-                    "second_reader",
-                    model_engine && !p.fallback,
-                )
-            })
         };
         out.push(PageReport {
             page: number,
@@ -943,13 +955,27 @@ mod tests {
         assert_eq!(r.azure_pages, "");
         // Embedded text says 8,000; OCR read 3,000.
         let r = run(
-            &[page(1, "Showroom guide: $3,000 per year.")],
+            &[page(1, &layer.replace("$122,525.50", "$3,000"))],
             VerifyFields::Flagged,
             &layer.replace("$122,525.50", "$8,000"),
         );
         assert_eq!(statuses(&r)[0].1, Status::Check);
         assert_eq!(statuses(&r)[0].2, ["not_in_embedded_text"]);
         assert_eq!(r.azure_pages, "1");
+        // The OCR lacks a whole line of the embedded text: the page is checked.
+        let r = run(
+            &[page(
+                1,
+                "The total due is $122,525.50, plus interest, as of 06/01/2024.",
+            )],
+            VerifyFields::Flagged,
+            "The total due is $122,525.50, plus interest, as of 06/01/2024.\nThe parties \
+             shall appear for a case management conference on the date the Court sets.",
+        );
+        assert_eq!(r.pages[0].page_check, ["missing_text"]);
+        assert_eq!(statuses(&r)[0].1, Status::Verified);
+        assert_eq!(r.azure_pages, "");
+        assert_eq!(r.pages[0].second_reading, Some("embedded_text"));
     }
 
     #[test]

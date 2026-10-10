@@ -283,7 +283,7 @@ fn dpi_is_validated() {
 /// The markdown without its `generated:` timestamp line.
 fn without_generated(md: &str) -> String {
     md.lines()
-        .filter(|l| !l.starts_with("generated:"))
+        .filter(|l| !l.starts_with("generated:") && !l.starts_with("scan_record:"))
         .map(|l| format!("{l}\n"))
         .collect()
 }
@@ -374,7 +374,14 @@ fn four_up_transcript_is_flagged() {
 #[test]
 fn columns_and_transcripts_take_the_embedded_characters() {
     // Two columns, read crop by crop: corrected like any page.
-    let e = Env::new(&["two_column.pdf", "transcript4up_seed0.pdf", "ocr_layer.pdf"]);
+    let e = Env::new(&[
+        "two_column.pdf",
+        "transcript4up_seed0.pdf",
+        "ocr_layer.pdf",
+        "ocr_layer_alpha.pdf",
+        "ocr_layer_form.pdf",
+        "ocr_layer_mixed.pdf",
+    ]);
     let (md, _) = e.scan("two_column.pdf", &[]);
     assert!(md.contains("column_split_pages: [1]"), "{md}");
     assert!(md.contains("embedded_text_fixes: {1: "), "{md}");
@@ -401,6 +408,30 @@ fn columns_and_transcripts_take_the_embedded_characters() {
     assert_eq!(v["pages"][0]["text_agreement"]["independent"], false);
     assert!(!md.contains("qction") && !md.contains("Cqurt"), "{md}");
     assert!(md.contains("cause of action"), "{md}");
+    // The same layer drawn fully transparent (`ca 0`, as iOS scanner apps write it).
+    let (md, _) = e.scan("ocr_layer_alpha.pdf", &["--verify-json"]);
+    assert!(md.contains("embedded_text_fixes: {}"), "{md}");
+    let v = verify_json(&e, "ocr_layer_alpha");
+    assert_eq!(v["pages"][0]["ocr_text_layer"], true, "{v:#}");
+    assert!(!md.contains("qction") && !md.contains("Cqurt"), "{md}");
+    assert_eq!(v["pages"][0]["text_layer_visibility"], "ocr_layer", "{v:#}");
+    // The layer inside a Form XObject, and a hidden layer beside a visible header with more
+    // text-showing operators but fewer characters than the layer.
+    for name in ["ocr_layer_form", "ocr_layer_mixed"] {
+        let (md, _) = e.scan(&format!("{name}.pdf"), &["--verify-json"]);
+        assert!(md.contains("embedded_text_fixes: {}"), "{name}: {md}");
+        let v = verify_json(&e, name);
+        assert_eq!(v["pages"][0]["ocr_text_layer"], true, "{name}: {v:#}");
+        assert_eq!(
+            v["pages"][0]["text_layer_visibility"], "ocr_layer",
+            "{name}"
+        );
+        assert_eq!(v["pages"][0]["text_agreement"]["independent"], false);
+        assert!(
+            !md.contains("qction") && !md.contains("Cqurt"),
+            "{name}: {md}"
+        );
+    }
 }
 
 #[test]
@@ -590,14 +621,31 @@ fn verify_json_on_an_image_uses_the_second_reader() {
     let v = verify_json(&e, "legal_200dpi");
     assert_eq!(v["pages"][0]["embedded_text"], false);
     assert_eq!(v["pages"][0]["second_reader"], true);
-    // Both Apple readings agree: that verifies nothing (shared blind spots).
+    // Both Apple readings agree: that verifies nothing (shared blind spots). The second reading's
+    // `48.250.00` is a number the OCR has nowhere, so the whole page is checked.
+    let p = &v["pages"][0];
+    assert!(
+        p["page_check"]
+            .as_array()
+            .unwrap()
+            .contains(&"missing_number".into()),
+        "{p:#}"
+    );
     let f = field(&v, "$122,525.50");
-    assert_eq!(f["status"], "unchecked", "{f:#}");
-    // The second reading has `$48.250.00`: the readings disagree, so the value is checked.
-    let f = field(&v, "$48,250.00");
     assert_eq!(
         (&f["status"], &f["why"][0]),
-        (&"check".into(), &"not_in_second_reading".into())
+        (&"check".into(), &"suspect_page".into()),
+        "{f:#}"
+    );
+    // The second reading has `$48.250.00`: the readings disagree, so the value is checked.
+    let f = field(&v, "$48,250.00");
+    assert_eq!(f["status"], "check", "{f:#}");
+    assert!(
+        f["why"]
+            .as_array()
+            .unwrap()
+            .contains(&"not_in_second_reading".into()),
+        "{f:#}"
     );
     assert_eq!(v["azure_pages"], "1");
     // Two Apple readings: their agreement is reported, but not as independent.
@@ -610,11 +658,9 @@ fn verify_json_on_an_image_uses_the_second_reader() {
         &["--verify-json", "--verify-fields", "all", "--overwrite"],
     );
     let v = verify_json(&e, "legal_200dpi");
+    // `all` checks it anyway (here already for the page's missing number).
     let f = field(&v, "$122,525.50");
-    assert_eq!(
-        (&f["status"], &f["why"][0]),
-        (&"check".into(), &"unconfirmed".into())
-    );
+    assert_eq!(f["status"], "check", "{f:#}");
 }
 
 #[test]
@@ -632,4 +678,45 @@ fn verify_json_is_opt_in() {
         ])
         .assert()
         .code(2);
+}
+
+#[test]
+fn annotations_the_renderers_never_draw_flag_the_page() {
+    let e = Env::new(&["annotations.pdf"]);
+    // A flagged page makes the run exit 1 ("completed with problems").
+    e.cmd()
+        .args(["scan", "--input-file", "annotations.pdf", "--verify-json"])
+        .assert()
+        .code(1);
+    let md = fs::read_to_string(e.path("annotations.md")).unwrap();
+    let v = verify_json(&e, "annotations");
+    // Page 1: a filled form field and a FreeText note, drawn only as annotations.
+    let p1 = &v["pages"][0];
+    let check: Vec<_> = p1["page_check"].as_array().unwrap().iter().collect();
+    assert!(
+        check.contains(&&serde_json::json!("annotations_not_read")),
+        "{v:#}"
+    );
+    let kinds: Vec<_> = p1["annotations"].as_array().unwrap().iter().collect();
+    assert!(kinds.contains(&&serde_json::json!("widget")), "{v:#}");
+    assert!(kinds.contains(&&serde_json::json!("freetext")), "{v:#}");
+    assert_eq!(p1["second_reading"], "azure", "{v:#}");
+    assert!(
+        v["azure_pages"]
+            .as_str()
+            .unwrap()
+            .split(',')
+            .any(|r| r == "1"),
+        "{v:#}"
+    );
+    // Page 2 has only a link: not flagged for annotations.
+    let p2 = &v["pages"][1];
+    assert!(p2.get("annotations").is_none(), "{v:#}");
+    assert!(
+        !p2["page_check"].to_string().contains("annotations"),
+        "{v:#}"
+    );
+    // The Markdown says so without the sidecar.
+    assert!(md.contains("flagged_pages: [1]\n"), "{md}");
+    assert!(md.contains("annotations_not_read"), "{md}");
 }

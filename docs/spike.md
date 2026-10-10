@@ -731,3 +731,159 @@ The embedded-text correction already skips pages whose text is drawn invisibly. 
 3. compare by value;
 4. state only agreed values, and quote only agreed sentences;
 5. report both readings of any disagreement, and never pick one.
+
+## Fixes from the Azure residual-risk measurement (2026-10-09)
+
+The work-machine measurement ([azure-verify-eval-results.md](azure-verify-eval-results.md), macOS 27) found one value relied on that was really wrong, and four weaknesses. Fixed here:
+
+1. **An amount and its scale word across a line break.** `ocr` already joins `$45` / `million`, but only past one blank line and a pleading number on the same line. On macOS 26 the same page is joined (`$45 million`), so the macOS 27 layout differs; its Markdown is not on this machine yet. The likeliest cause, a line number on a line of its own, is now handled: the join skips line numbers on their own lines (`26`, `26 |`), still at most one blank line between text lines. **To confirm with the macOS 27 bundle.**
+2. **A page-end hyphen joined to the footer** (`nonCOMPLAINT`). `ocr` keeps them apart; the joining was in the scoring script. The script now joins a broken word only when the next line starts in lower case, and the skill says a word broken at the foot of a page continues on the next page.
+3. **An OCR layer drawn transparent.** ctr-marital-settlement (an iPhone scan, "Created with Scanner Pro") draws its old OCR text in render mode 0 with fill alpha 0, so `ocr_text_layer` missed it and verify trusted 9 values from it. The bridge now also counts text drawn with `ca 0` (and render mode 7) as invisible. New fixture: `spike/fixtures/ocr_layer_alpha.pdf`.
+4. **The scoring script was loose** (`eval/azure_verify_eval.py`): it now requires `$ % § ¶` to match (`¶ 60` is not `160`, nor `§ 5` `§§ 1301`), reads U+FFFE as a line-end hyphen, and removes pleading line numbers by position instead of skipping every 1-2 digit token, which hid `¶` misreads.
+5. **The skill** says to compare citations with their sign: a `¶` missing or different in either reading is a disagreement. And to compare an amount with its scale word.
+
+**Public filings, `--verify-fields all` (macOS 26):**
+
+| | Before | Now |
+|---|---|---|
+| Values verified free | 499 | 490 |
+| `azure_pages` | 94 | 109 |
+| Pages detected as an OCR layer | 2 filings | 3 filings (+15 pages) |
+
+The 9 values and 15 pages are the marital settlement, now sent to Azure instead of trusted.
+
+**Not fixed:** a docket that PDFKit gives as `5-16-cv-` / `1128` is graded against `5-16-cv-1128`, so `ocr`'s `5-16-cv1128` (letters and digits the same) is a `check`. That is a false alarm, the safe direction.
+
+## Trustworthy measurement (2026-10-09)
+
+From the adversarial review (Notion, "OCR Astra Adversarial Review"), validated against `91c278f`:
+
+- **E03, the blind run was not blind.** `OCR_VERIFY_IGNORE_EMBEDDED=1` hid the embedded text from verify, but the OCR was still corrected from it, so the blind run saw fewer wrong values than a real scan. `eval/verify_eval.py` now reads `truth` and `blind` with `--use-text-layer never` (no correction), and only `truth`'s verify sees the embedded text. A fourth run, `user`, is the scan as users run it, for the headline numbers. Pages whose text is an invisible OCR layer are no longer graded.
+- **E04:** `eval/azure_verify_eval.py` confirmed `$1.00` against `$100`. A `.` or `,` between two digits must now be the same.
+- **E01:** `eval/score.py` raises on repeated or backward page markers, and counts text before the first marker and on pages the reference lacks as insertions.
+- **E02:** token recall is boundary- and occurrence-aware (`$3,000` is not in `$3,000,000`). Transcript-line accuracy is ordered and one-to-one.
+- **E06:** `run.py` charges every attempt's wall time. `agg.py` computes throughput only over runs that produced a result, and reports failed runs.
+
+**Rescoring the earlier accept outputs with the new scorer.** CER is unchanged (no output had extra pages):
+
+| Engine | Token recall, old → new | Transcript lines (raw), old → new |
+|---|---|---|
+| apple (200 DPI) | 95.0% → 94.1% | 38.3% → 28.6% |
+| paddleocr-vl | 96.6% → 95.9% | 25.2% → 22.8% |
+| dots-ocr | 100% → 100% | 68.1% → 68.1% |
+| olmocr | 98.8% → 98.5% | 30.4% → 29.3% |
+
+**New verify baseline** (Apple, `all`, macOS 26, master `91c278f`): 230 pages, 124 graded (embedded text, no OCR layer).
+
+| | Before (half-blind) | Now (blind) |
+|---|---|---|
+| Graded wrong values in the blind run | 7 | 21 |
+| Caught as `check` | 7 | 21 |
+| Verified in the blind run | 0 | 0 |
+
+So a real scan has about three times the wrong values the old measurement suggested. All 21 are still caught. As users run it: 490 of 883 values verified, 109 pages to Azure.
+
+## Field instances and signs in `--verify-json` (2026-10-09)
+
+From the adversarial review, findings F01, F02 and F09, all reproduced on master:
+- **Swapped values verified.** Embedded `Principal: $8,000. Interest: $3,000.` against OCR `Principal: $3,000. Interest: $8,000.` verified both: the check was "is the value anywhere on the page". So did a value read twice where the page has it once.
+- **Signs dropped.** `-$100.00` and `($100.00)` extracted as `$100.00`, and `$100.00` verified against `-$100.00`. The same for `-25%`.
+- **Truncation.** `USD 1,00.00` gave a valid `USD 1`, and `§ 1983(A)` lost its subsection.
+
+**Now:**
+- Each value in the reference reading backs one OCR value, matched in reading order. It must follow the same label word, one of the two words before it, allowing one misread letter in a long word. Otherwise the value is `check`, with `label_differs` or `more_often_than_in_reference`.
+- Minus signs and table accounting brackets are part of the value and its key. Brackets in prose (`Five Thousand Dollars ($5,000.00)`) are not.
+- `USD 1,00.00` is `malformed_amount`, and capital subsections are kept.
+
+**Public filings, `all`, macOS 26:**
+
+| | Before | Now |
+|---|---|---|
+| Values verified free | 490 | 478 |
+| `azure_pages` | 109 | 118 |
+| Blind wrong values caught | 21 / 21 | 21 / 21 |
+
+The 12 values that no longer verify:
+- 10 are depo-removed-1's running header (docket, date). The OCR misread the header label (`Case:` as `Erik D. Krs`), and PDFKit's text puts the date after `et al.` instead of after the deponent's name.
+- 1 is an Ironworkers date with the same reading-order difference.
+- 1 is San Bernardino's `$33.5 million`, which the OCR has twice because it repeated a paragraph. Flagging the duplicate is right.
+
+All 12 are false alarms in the safe direction. Taking label words from after a reference value as well would recover them, but it lets a swap through (the next value's label is taken), so it was not done.
+
+**Not changed:** a date at the start of a line (`2 March 2023`) is still not extracted, by design. It is indistinguishable from a pleading line number before `March 2023`.
+
+## Text agreement that keeps numbers (2026-10-09)
+
+From the adversarial review, findings F03 and F10, reproduced on master. Each of these agreed word for word:
+- `Payment is $1.00.` against `$100.`;
+- `-25%` against `25%`;
+- a `30` dropped from `Pay within` / `30` / `days of notice`;
+- two sentences in reverse order;
+- a sentence read twice where the page has it once.
+
+A value the other reading has and the OCR dropped was never reported.
+
+**Now:**
+- In a number, a `.` or `,` between digits, a minus sign and `%` are compared.
+- Each word of the other reading backs one sentence, and the sentences of one line agree only in their order. Separate lines may still differ in order (headers, columns).
+- A number on a short line of the other reading that the OCR has nowhere is listed in `missing_numbers`, and puts `missing_number` in `page_check`. Only real numbers count: `exhibi1s` is a misread word. A pleading's line numbers (five or more lone numbers) are skipped.
+- Values the other reading has and the OCR lacks are listed per page in `expected_fields_missing`. In `all` mode the page gets `fields_missing`.
+
+**Public filings, macOS 26, as users run it:**
+
+| | Before | Now |
+|---|---|---|
+| Values verified (`all`) | 478 | 478 |
+| `azure_pages`, `all` | 118 | 118 |
+| `azure_pages`, `flagged` | 87 | 90 |
+| Agreed sentences (`all`, user run) | 6,998 of 9,118 | 6,925 of 9,132 |
+| Pages with `missing_number` | – | 40 |
+| Pages with `fields_missing` (`all`) | – | 59 |
+
+The blind run still catches 21 of 21 wrong values.
+
+## Second reader and routing (2026-10-09)
+
+From the adversarial review, findings F05, F06 (Bates), F07, A02 and A05:
+- **F05:** a date split over two second-reader lines of confidence 0.1 verified, because doubt was decided line by line. Now a value spanning two lines is doubtful if either line is, and a line without confidence counts as doubtful.
+- **F06:** on model pages the Bates number comes from Apple's side pass, so the Apple second reading was the same reader again. It no longer verifies Bates numbers.
+- **F07:** fallback, engine-flagged and unanchored transcript pages had no `page_check` reason and were never sent to Azure. They now get `engine_fallback`, `engine_flagged` or `line_numbers_unverified`.
+- **A02:** a crop that stays empty after its retry while other crops have text now flags the page (Paddle and olmOCR).
+- **A05:** a dots reply whose element has a non-string `text` or `category`, or that wraps the array in an object, is incomplete. It is retried, and flagged if it stays so.
+
+**Public filings (Apple):** values verified 478, `azure_pages` 118 (`all`) and 90 (`flagged`), all unchanged. 27 transcript pages now carry `line_numbers_unverified`, but they were already sent. The other changes concern model engines, which were not run for this measurement; unit tests cover them.
+
+## Arithmetic: subtotals and signed amounts (2026-10-09)
+
+From the adversarial review, finding F11, reproduced on master:
+- A table with `$10 + $20`, a wrong subtotal `$40`, tax `$5` and total `$45` raised nothing, because a subtotal reset the sum without being checked.
+- A refund `($20.00)` was skipped. That gave a false alarm on a correct table with two items, and let a wrong total after a refund pass.
+- A mismatch marked only the total's line, though any item above it may be the misread one.
+
+**Now:**
+- Subtotals are checked against their items.
+- `($20.00)`, `-$20.00` and `$-20.00` count as negative.
+- A mismatch marks every amount in the sum (`Mismatch.cells`).
+
+**Measured:**
+- **Public filings:** no table triggers it, before or after (478 verified, 118 `azure_pages`).
+- **Synthetic `table` family, seeds 10–14:** the same page is flagged before and after (page 2 of each). Only the number of amounts marked on it grows, from the total alone to the whole sum.
+
+## Annotations the renderers never draw (2026-10-09)
+
+From the adversarial review, finding A01, confirmed on master. Both renderers draw page content only (pdfium without annotations or form data, `CGContext.drawPDFPage` on the Mac). So filled form fields, stamps, FreeText amendments, ink and redaction boxes never reach any OCR engine. A probe's filled field `$9,999.00` vanished without a flag. Text under an annotation-style redaction box is still read.
+
+Rendering is unchanged, since that would change every engine's output and needs its own measurement. Pages with annotations that draw something are now flagged instead:
+- They get `annotations_not_read` (`annotations_unknown` if the check fails), with the kinds listed in the page's `annotations`.
+- They appear in the Markdown's flagged pages and always go to Azure.
+- Links, popups and empty form fields are ignored. The pdfium build cannot read form values, so it counts every widget.
+
+**Public filings, macOS 26, as users run it:**
+
+| | Before | Now |
+|---|---|---|
+| Values verified | 478 | 459 |
+| `azure_pages`, `all` / `flagged` | 118 / 90 | 126 / 98 |
+| Pages with `annotations_not_read` | – | 10 |
+
+All 10 are depo-knight-avery, whose pages carry a `watermark` annotation: the filing whose court header stamps Apple misreads and Azure leaves out (docs/azure-verify-eval-results.md). The 19 values that no longer verify are on those pages.

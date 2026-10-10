@@ -9,7 +9,7 @@
 
 use std::collections::{BTreeMap, HashMap, VecDeque};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::mpsc::{self, Receiver, Sender, sync_channel};
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::{Duration, Instant};
@@ -96,6 +96,8 @@ pub struct RunReport {
     pub failed: Vec<(usize, String)>,
     /// Set when the model server stopped; unfinished files keep their checkpoints.
     pub stopped: Option<String>,
+    /// Files whose existing output matched their input and settings, and were skipped.
+    pub unchanged: usize,
 }
 
 struct FileInfo {
@@ -141,6 +143,8 @@ struct Queue<'a> {
     progress: &'a Progress,
     writer: Sender<Msg>,
     failed: Mutex<Vec<(usize, String)>>,
+    /// Files skipped because their output is up to date.
+    unchanged: AtomicUsize,
     state: Mutex<QState>,
     cv: Condvar,
 }
@@ -215,7 +219,28 @@ impl Queue<'_> {
                 return None;
             }
         };
+        let selected: Vec<usize> = pages.iter().map(|p| p + 1).collect();
         let manifest = manifest(self.backend, s, fingerprint);
+        let sidecar = verify::sidecar(&item.output);
+        if let Some(old) = &item.recorded {
+            // Directory mode, output already there: keep it only if it was made from this input
+            // with these settings, and the sidecar it needs is there.
+            let now = checkpoint::scan_record(&manifest, &selected, s.verify);
+            let why = if *old != now {
+                "the input file or the scan settings changed"
+            } else if s.verify.is_some() && !sidecar.exists() {
+                "--verify-json needs a sidecar and there is none"
+            } else {
+                let _ = std::fs::remove_dir_all(checkpoint::partial_dir(&item.output));
+                self.unchanged.fetch_add(1, Ordering::SeqCst);
+                return None;
+            };
+            progress::line(format!("{}: rescanning, {why}", item.input.display()));
+        }
+        if s.overwrite || item.recorded.is_some() {
+            // An old sidecar must never sit beside new output.
+            let _ = std::fs::remove_file(&sidecar);
+        }
         if s.overwrite {
             let _ = std::fs::remove_file(&item.output);
         }
@@ -223,7 +248,6 @@ impl Queue<'_> {
         for w in &loaded.warnings {
             progress::line(w);
         }
-        let selected: Vec<usize> = pages.iter().map(|p| p + 1).collect();
         let pending: VecDeque<usize> = pages
             .iter()
             .copied()
@@ -378,11 +402,35 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         }
     }
     let cleaned = s.legal_cleanup.then(|| markdown::strip_running(&results));
-    let (reviewed, rewrites) = suspect::review(
+    let (mut reviewed, rewrites) = suspect::review(
         cleaned.as_ref().map_or(&results, |c| &c.0),
         s.symbol_fix,
         backend.model_ids().is_some(),
     );
+    // Annotations (filled form fields, stamps, notes, redaction boxes) are never rendered, so no
+    // OCR engine saw them: flag the page. A detector error flags it too (fail closed).
+    let annotations: std::collections::HashMap<usize, Result<Vec<String>, ()>> =
+        if std::env::var_os("OCR_VERIFY_IGNORE_EMBEDDED").is_some() {
+            Default::default()
+        } else {
+            reviewed
+                .iter()
+                .filter(|p| p.error.is_none())
+                .map(|p| {
+                    (
+                        p.number,
+                        vision::annotations(&e.b.input, p.number - 1).map_err(|_| ()),
+                    )
+                })
+                .collect()
+        };
+    for p in &mut reviewed {
+        match annotations.get(&p.number) {
+            Some(Ok(k)) if !k.is_empty() => p.suspect.push("annotations_not_read"),
+            Some(Err(())) => p.suspect.push("annotations_unknown"),
+            _ => {}
+        }
+    }
     if s.verbose && !s.quiet {
         for (page, before, after) in &rewrites {
             eprintln!(
@@ -396,6 +444,7 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         pages: e.b.doc_pages,
         engine: &backend.engine(),
         generated: chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+        scan_record: checkpoint::scan_record(&e.b.manifest, &e.b.selected, s.verify),
         model: backend.model_ids().is_some(),
         legal_cleanup: cleaned.as_ref().map(|c| c.1),
     };
@@ -417,8 +466,12 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
                 }
                 verify::Embedded {
                     text: vision::text_layer(&input, page - 1).unwrap_or_default(),
-                    ocr_layer: vision::invisible_text_share(&input, page - 1)
-                        .is_ok_and(|v| v > 0.5),
+                    visibility: vision::text_visibility(&input, page - 1),
+                    annotations: annotations
+                        .get(&page)
+                        .and_then(|a| a.as_ref().ok().cloned())
+                        .unwrap_or_default(),
+                    annotations_unknown: matches!(annotations.get(&page), Some(Err(()))),
                 }
             },
             &|page| {
@@ -435,6 +488,8 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         let json = serde_json::to_string_pretty(&report).expect("report serializes");
         pipeline::write_atomic(&verify::sidecar(&e.b.output), &(json + "\n"))
             .map_err(|err| (id, format!("{err:#}")))?;
+    } else {
+        let _ = std::fs::remove_file(verify::sidecar(&e.b.output));
     }
 
     let failed: Vec<usize> = results
@@ -504,6 +559,7 @@ pub fn run(items: &[Item], backend: &dyn Backend, s: &Settings, per_file_bars: b
         progress: &progress,
         writer: wtx.clone(),
         failed: Mutex::new(Vec::new()),
+        unchanged: AtomicUsize::new(0),
         state: Mutex::new(QState {
             next_item: 0,
             open: 0,
@@ -601,7 +657,14 @@ pub fn run(items: &[Item], backend: &dyn Backend, s: &Settings, per_file_bars: b
         outcomes,
         failed,
         stopped,
+        unchanged: queue.unchanged.into_inner(),
     };
+    if report.unchanged > 0 {
+        progress::line(format!(
+            "skipped {} file(s) whose output is up to date (use --overwrite to redo them)",
+            report.unchanged
+        ));
+    }
     if !s.quiet {
         progress::line(summary(&report, started.elapsed()));
     }

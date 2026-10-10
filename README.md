@@ -187,7 +187,7 @@ Notes on the options:
   - A page is corrected only when at least 90% of its words agree with the embedded text, so a hidden layer that does not match the printed page (another draft, a bad scanner OCR layer) changes nothing.
   - A differing word is replaced only when it looks like a misread of the embedded word: at most a third of its characters differ. `thirty` never becomes `sixty`.
   - **Text in the layer that Vision did not see on the page is never inserted.** This covers words under a drawn redaction box, white or invisible text, and neighbouring text caught by a box.
-  - **Text drawn invisibly (render mode 3) is never a correction.** That is how OCR tools lay a text layer over a scan. Such text is another OCR's reading, not the document's characters (a 1985 note's layer reads `qction`).
+  - **Text drawn invisibly (render mode 3, or fully transparent) is never a correction, nor is text whose drawing cannot be read.** Invisible text is found by counting characters, also inside form XObjects: a fifth of the page's characters, or 200, makes it an OCR layer. That is how OCR tools lay a text layer over a scan. Such text is another OCR's reading, not the document's characters (a 1985 note's layer reads `qction`).
   - **Column-split pages and transcripts are corrected too**, with stricter rules:
     - each box takes exactly the characters inside it, rather than PDFKit's drag-like selection, which takes in the neighbouring column's lines;
     - words of one or two characters change only between look-alike characters, so a misaligned line number `7` never becomes `6`.
@@ -210,7 +210,9 @@ Notes on the options:
 
 ### Resume
 
-Each finished page is checkpointed to `<out>.md.ocr-partial/` next to the output file. If a run is interrupted (Ctrl-C, kill, crash, server loss), run the same command again and it resumes where it stopped; finished files in a directory run are skipped. A changed input, engine or setting (or `--overwrite`) starts fresh. The final `.md` is assembled from the checkpoints and written atomically. Page markers, front matter, `--pages`, `--legal-cleanup`, the `¶`/`§` repair and the suspect-page checks are applied at assembly, so changing them does not invalidate checkpoints. A file that ends with failed pages keeps its partial directory; re-running retries only those pages.
+Each finished page is checkpointed to `<out>.md.ocr-partial/` next to the output file. If a run is interrupted (Ctrl-C, kill, crash, server loss), run the same command again and it resumes where it stopped; finished files in a directory run are skipped only if they are still current (next paragraph). A changed input, engine or setting (or `--overwrite`) starts fresh. The final `.md` is assembled from the checkpoints and written atomically. Page markers, front matter, `--pages`, `--legal-cleanup`, the `¶`/`§` repair and the suspect-page checks are applied at assembly, so changing them does not invalidate checkpoints. A file that ends with failed pages keeps its partial directory; re-running retries only those pages.
+
+Every Markdown output has a `scan_record: <16 hex digits>` front-matter line: a hash of the input file (size, modification time, head and tail), the engine and its version, `--dpi`, `--use-text-layer`, the currency fix, the selected pages, the `ocr` version and the `--verify-json` mode. In directory mode an existing output is skipped only if its record equals the one the current run would write and, with `--verify-json`, its `<stem>.verify.json` exists. Otherwise the file is rescanned, one line says so, and the old `.verify.json` is deleted first. A `.verify.json` therefore never sits beside an output it was not made with, and an output written without `--verify-json` removes an existing sidecar. Outputs without a record (made by an older `ocr`, or with `--no-front-matter`) are skipped as before and counted in one line: "N output(s) were made by an older ocr and were not checked against their inputs; use --overwrite to redo them." Use `--overwrite` to redo those. Options applied at assembly (page markers, `--legal-cleanup`, the symbol fix) are not part of the record.
 
 ### Exit codes
 
@@ -269,6 +271,8 @@ Front matter fields (`--no-front-matter` omits the header):
 | `pleading_table` | A table whose first column is pleading line numbers: prose read as a table, or margin numbers pulled into a real table |
 | `transcript_table` | Transcript lines (line numbers, Q. and A.) that came out inside a table; a real table on a transcript page, such as an exhibit list, does not count |
 | `page_order` | A multi-up transcript's `Page N` headers are out of order |
+| `annotations_not_read` | PDF pages only. The page has visible annotations (filled form fields, stamps, FreeText amendments, ink signatures, notes, highlights, redaction boxes) that the renderers do not draw, so no OCR engine saw them. Text under an annotation-style redaction box is still read and must not be quoted. Links and popups, and empty form fields, do not count |
+| `annotations_unknown` | The annotation check itself failed on the page: treated as not read |
 | `mixed_case` | Three or more words with case flipping inside them (`MAeLoN`, `WeST`, `SMiTH`), typical of handwriting or fax noise in capitals; brand names such as `DocuSign` or `McDonald` do not count |
 
 Words are checked against an English word list with legal terms added ([data/words-en.txt](data/words-en.txt), built by `scripts/make_wordlist.py`). Only lowercase words of four or more letters are checked, so names, citations, numbers and identifiers never count. Pages mostly in Spanish, French or Portuguese skip the word checks. Transcript pages whose line numbers could not be re-anchored are not suspect: they are listed in `line_numbers.unverified` with their own hint. On simulated misreads, a page is flagged as `misreads` reliably when about 8% of its words are misread, sometimes at 4%, and not at 1-2%; clean synthetic legal text has at most 1% non-words. The checks cannot see a wrong but plausible word or number (`8,000` read as `3,000`), a dropped sentence, or text in the wrong order that is still readable. An empty `suspect_pages` is not proof that a page is right.
@@ -311,31 +315,39 @@ An example (abridged):
 - **`verified`:** the same value appears in the page's embedded PDF text, a second, independent reading. Values are compared, not substrings: `$3,000` does not match `$3,000,000` in the embedded text, and `3:26-cv-4417` matches `3:26-cv-04417`. Born-digital filings are mostly verified for free.
 - **`check`:** something speaks against the value. `why` says what:
   - `suspect_page`: the page is in `suspect_pages`, failed, or has `missing_text`.
+  - `annotations_not_read`: the page has visible annotations OCR never saw. Agreement of two readings does not clear it.
   - `not_in_embedded_text`: the page has embedded text and the value is not in it.
+  - `label_differs`: the value is in the other reading, but only after other words: each occurrence there backs one OCR value, after the same label (`Principal: $3,000` is not confirmed by `Interest: $3,000`). Header values that the PDF's text puts in another order can get this too, which only sends them for a check.
+  - `more_often_than_in_reference`: the OCR has the value more times than the other reading (`$3,000` twice where the page has it once).
   - `not_in_ocr_text_layer`: the page's embedded text is an invisible OCR layer (see `ocr_text_layer`), and the value is not in it.
+  - `text_layer_unknown`: the page's embedded text could not be classified as visible or not (`text_layer_visibility: unknown`), and the value is not in it.
   - `confusable_characters`: a letter that looks like a digit (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`), such as `3:26-cv-O4417` or `$1,O00`. Such a field has no `value`.
   - `invalid_date`: an impossible date, such as `02/30` or `0Q`.
   - `malformed_amount`: broken digit grouping, such as `$4825,0.00`.
   - `differs_from_usual_docket`: one digit off the docket number the document repeats.
   - `bates_out_of_sequence`: the Bates number breaks the page sequence.
   - `not_in_second_reading`: a scanned page (no embedded text) was read a second time, and that reading does not have the value.
-  - `doubtful_in_second_reading`: the second reading has the value, but Vision marks that line as doubtful or offers a different next-best reading.
+  - `doubtful_in_second_reading`: the second reading has the value, but Vision marks that line as doubtful (or gives no confidence) or offers a different next-best reading. A value split over two lines is as doubtful as either line.
   - `words_numerals_mismatch`: an amount in words disagrees with its numerals. `Five Thousand Dollars ($3,000.00)` means one side was misread, or the document itself is wrong.
   - `arithmetic_mismatch`: a table's total row disagrees with the sum of the amounts above it. A `Subtotal` row and what follows it, such as tax, are allowed for.
   - `unconfirmed`: with `--verify-fields all`, nothing confirmed the value.
 - **Second reading of scanned pages (macOS):** pages without embedded text that have values are read again with Vision's line recognizer at 300 DPI (`second_reader: true` on the page).
-  - **Model engines:** when the second reading has the same value, the value is `verified` (`matches_second_reading`). A model and Vision are independent readers.
+  - **Model engines:** when the second reading has the same value, the value is `verified` (`matches_second_reading`). A model and Vision are independent readers. Bates numbers are the exception: on model pages they come from Apple Vision's side pass, so the Apple second reading cannot verify them.
   - **Apple engine:** agreement verifies nothing, because two Apple readings share blind spots. On one filing both read two overprinted stamps, `04/24/24` and `04/18/24`, as `04/28/24`. A disagreement still turns the value into `check`.
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
 - **Values:** amounts include a scale word (`$33.5 million` has the value 33500000), also when the word starts the next line, and a `K`/`M`/`B` suffix (`$1.5B`). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
 - **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.
-- **`ocr_text_layer`:** the page's embedded text is drawn invisibly over a scan (text render mode 3). That is how OCR tools add a text layer, so the text is another OCR's reading, not the document's own characters.
+- **`text_layer_visibility`:** `visible`, `ocr_layer` or `unknown`, for a page with embedded text. It counts characters drawn invisibly (render mode 3 or 7, or fill alpha 0), also inside form XObjects. `ocr_layer` is a fifth of the characters or 200 of them. `unknown` (the drawing could not be read, including any scan error, and every platform without the scan) is treated like `ocr_layer`: nothing is verified against that text, a disagreement still counts, and the text agreement is `compared_with: unknown_text_layer`, `independent: false`.
+- **`ocr_text_layer`:** `true` when `text_layer_visibility` is `ocr_layer`: the page's embedded text is drawn invisibly over a scan (text render mode 3, or fully transparent as iOS scanner apps draw it). That is how OCR tools add a text layer, so the text is another OCR's reading, not the document's own characters.
   - **Values:** agreement with it verifies nothing. A disagreement still turns a value into `check`.
   - **Text agreement:** `text_agreement` is `compared_with: ocr_text_layer`, `independent: false`.
   - **Second reading:** the page never gets `second_reading: embedded_text`.
   - On the public filings this applies to a 1985 note and a handwritten dealer form, whose 120 values were verified against their old layers before.
-- **`page_check`:** the suspect reasons, `failed: …`, `missing_text`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
+- **`page_check`:** the suspect reasons, `failed: …`, `engine_fallback` (the model failed and Apple's text stands in), `engine_flagged` (a crop came back empty, a reply was malformed or cut short, a table could not be converted), `line_numbers_unverified` (a transcript's numbers could not be re-anchored), `missing_text`, `missing_number`, `fields_missing`, `words_numerals_mismatch`, `arithmetic_mismatch`, `annotations_not_read` or `annotations_unknown`, when the whole page needs a second reading.
+  - **`annotations_not_read`:** the page has annotations that draw something (form values, stamps, notes, redaction boxes) which OCR never saw; their kinds are listed in the page's `annotations`. The page always gets `second_reading: azure`: the PDF's own text does not include them. The pdfium build (Linux, Windows) cannot read form values and counts every form widget.
   - **`missing_text`:** the other reading (embedded text or second reader) has whole lines the OCR lacks: at least 5 words in lines with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the OCR. They are listed in `text_agreement.missing_lines`.
+  - **`fields_missing`** (`all` mode only): the other reading has values the OCR has nowhere on the page, listed in the page's `expected_fields_missing` (as that reading writes them). A dropped total or deadline is a missing value, not a wrong one, but it still needs a look.
+  - **`missing_number`:** the other reading has a number on a short line that the OCR has nowhere (`30` in `Pay within` / `30` / `days of notice`): a dropped deadline, amount or date. Listed in `text_agreement.missing_numbers`. A pleading's line numbers (five or more lone numbers) are not counted.
   - On the public filings this caught Apple Vision dropping a whole visible paragraph ("ARTICLE NINTH: Execution of Agreement") and a footnote.
   - On embedded text it can also mean text that is not visible on the page, such as text under a drawn redaction box.
   - A born-digital page with `missing_text` gets `second_reading: embedded_text` when its values match, so reading the PDF's own text covers it at no cost.
@@ -348,7 +360,7 @@ An example (abridged):
   - `independent` is true for embedded text, and for Vision against a model engine. Quote as agreed only from independent comparisons, because two Apple readings share blind spots.
   - `unagreed` lists the sentences that do not agree, each with its line within the page's Markdown and the words the other reading lacks entirely.
   - `agreed_spans` and `agreed_words` count what agrees. `summary.agreed_spans` and `summary.unagreed_spans` total the independent comparisons.
-  - **What is compared:** letters and digits, case-insensitively, and in order. A changed, dropped or doubled word breaks agreement. Line breaks, hyphenation and pleading line numbers don't, and neither does a margin legend that the PDF text puts between a paragraph's lines.
+  - **What is compared:** letters and digits, case-insensitively, and in order; in a number also a `.` or `,` between digits, a minus sign and `%`, so `$1.00` does not agree with `$100`, nor `-25%` with `25%`. A changed, dropped or doubled word breaks agreement. Each word of the other reading backs one sentence only, so a sentence read twice where the page has it once agrees once; the sentences of one line agree only in their order. Line breaks, hyphenation and pleading line numbers don't, and neither does a margin legend that the PDF text puts between a paragraph's lines.
   - **Edges:** a sentence must also start and end where a sentence or line does in the other reading, so a dropped first or last word is caught. Headers and table cells are matched within longer lines.
 
 Measured on the 20 public court filings (230 pages, Apple engine, eval/PUBLIC_SET.md; binary `87f0ac6`, 2026-10-09). A filing counts as e-filed when every page has embedded text, scanned when none has.
@@ -399,7 +411,7 @@ Guidance:
 ## Limitations
 
 - Transcript line numbers are re-anchored to page geometry for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr and olmOCR). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
-- The raw text-layer path (`--use-text-layer always`) has no layout handling. The default `auto` does not correct pages whose text layer is invisible OCR, because that layer is another reading, not the document's characters.
+- The raw text-layer path (`--use-text-layer always`) has no layout handling. The default `auto` does not correct pages whose text layer is invisible OCR or whose visibility cannot be read, because that layer is another reading, not the document's characters.
 - Pleading margin line numbers (1-2 digits in the left margin) are dropped by Apple Vision, dots and olmOCR but kept by `paddleocr-vl`, where they can be glued to paragraph numbers and land in table crops on pleading paper. Recovering `page:line` citations is not implemented.
 - With olmOCR, a rotated page loses its Bates number in the marker, because the Apple side-pass cannot read a sideways page.
 - Column detection was tuned on synthetic fixtures; it found about 97.6% of lines on held-out synthetic layouts, and unusual layouts can still be mis-ordered.

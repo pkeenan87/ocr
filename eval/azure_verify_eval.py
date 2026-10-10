@@ -22,17 +22,21 @@ The workflow it simulates is the one `skills/ocr/SKILL.md` describes:
 Only pages with an exact embedded text (no invisible OCR layer) are graded. A value is right when
 the truth run found it in the embedded text, wrong when the truth run did not.
 
-"Azure has the value": the value's letters and digits appear in order in Azure's lines for that
-page, with at most 3 other characters between two of them and not inside a longer word or number
-(`$5,000.00` matches `$ 5,000.00.`; a docket cut short does not match the full one; `§` and `$`
-are ignored). A value that is also printed
+"Azure has the value": the value's letters, digits and signs (`$ % § ¶`) appear in order in
+Azure's lines for that page, with at most 3 other characters between two of them and not inside
+a longer word or number, with the same `.` or `,` between two digits (`$5,000.00` matches
+`$ 5,000.00.`; `$1.00` does not match `$100`; a docket cut short does not match the full one; `¶ 60` does not match `160`, nor `§ 5` `§§ 1301`). A value that is also printed
 elsewhere on the page can be confirmed by coincidence, so read every "confirmed but wrong" case.
 
 Sentences: every sentence of at least 6 words on a graded page of the OCR. It is confirmed when
 Azure has it word for word, right when the embedded text has it word for word, in both cases
-letters and digits only, with pleading line numbers (any 1-2 digit token) skipped. So a sentence
-wrong only in a 1-2 digit number counts as right. Reading order differs between the three
-(headers, footnotes, columns), so read the examples.
+letters, digits, `§` and `¶` only. Pleading line numbers are removed from all three where they
+stand at the start of a line. Reading order differs between the three (headers, footnotes,
+columns), so read the examples.
+
+In all three texts a hyphen (or the U+FFFE some PDFs store for one) at a line end joins the word
+only when the next line starts in lower case: `non-` at the foot of a page is not joined to the
+footer `COMPLAINT`.
 """
 
 import argparse
@@ -49,30 +53,59 @@ PAGE = re.compile(r"<!-- page (\d+)[^>]*-->")
 SENTENCE_WORDS = 6
 
 
+# A line-end hyphen (U+FFFE is what some PDFs store for one) before a lower-case letter.
+HYPHEN_BREAK = re.compile(r"[-\u00ad\u2010\u2011\ufffe][ \t]*\r?\n\s*(?=[a-z])")
+# A pleading line number at the start of a line (`26 `, `26 | `), or alone on its line.
+LINE_NUMBER = re.compile(r"(?m)^[ \t]*\d{1,2}(?:[ \t]*\|)?(?:[ \t]+|$)")
+
+
+def clean(text):
+    """NFKC, soft hyphens out, broken words joined, pleading line numbers out."""
+    text = unicodedata.normalize("NFKC", text).replace("\u00ad\n", "-\n")
+    text = HYPHEN_BREAK.sub("", text).replace("\ufffe", "-")
+    return LINE_NUMBER.sub("", text)
+
+
 def tokens(text):
-    """Lower-case letter and digit runs; a hyphen at a line end joins the word."""
-    text = unicodedata.normalize("NFKC", text)
-    text = re.sub(r"[-\u00ad\u2010\u2011]\s*\n\s*", "", text)
-    return re.findall(r"[0-9a-z§¶]+", text.lower())
+    """Lower-case runs of letters and digits, and the signs `§` and `¶`, each a token."""
+    return re.findall(r"[0-9a-z]+|[§¶]", clean(text).lower())
 
 
 def value_text(text):
-    """Lower case, NFKC; a line-end hyphen joins the word and keeps the hyphen."""
-    text = unicodedata.normalize("NFKC", text).lower()
-    text = re.sub(r"\u00ad|\ufffe", "", text)
-    return re.sub(r"([-\u2010\u2011])\s*\n\s*", r"\1", text)
+    return clean(text).lower()
+
+
+SIGNIFICANT = "0-9a-z$%§¶"
 
 
 def has_value(hay, kind, text):
-    """Whether `hay` (from `value_text`) has the value: its letters and digits in order, at most
-    3 other characters between two of them, not inside a longer word or number, and for a docket
-    or Bates number not cut short (`...-JGB` does not match `...-JGB-SP`)."""
-    chars = re.findall(r"[0-9a-z]", value_text(text))
-    if not chars:
+    """Whether `hay` (from `value_text`) has the value: its letters, digits and signs in order,
+    at most 3 other characters between two of them, not inside a longer word or number, and for
+    a docket or Bates number not cut short (`...-JGB` does not match `...-JGB-SP`). Between two
+    digits a `.` or `,` must be the same in both (`$1.00` is not `$100`, nor `1,500` `1.500`)."""
+    t = unicodedata.normalize("NFKC", text).lower()
+    parts = []  # (significant char, separator before it)
+    sep = ""
+    for ch in t:
+        if re.fullmatch(f"[{SIGNIFICANT}]", ch):
+            parts.append((ch, sep))
+            sep = ""
+        else:
+            sep += ch
+    if not parts:
         return False
+    gap = f"[^{SIGNIFICANT}]{{0,3}}"
+    digit_gap = f"[^{SIGNIFICANT}.,]{{0,3}}"
+    pat = r"(?<![0-9a-z§¶])" + re.escape(parts[0][0])
+    for (prev, _), (ch, before) in zip(parts, parts[1:]):
+        if prev.isdigit() and ch.isdigit():
+            punct = [c for c in before if c in ".,"]
+            pat += (r"\s?" + re.escape(punct[0]) + r"\s?") if punct else digit_gap
+        else:
+            pat += gap
+        pat += re.escape(ch)
     end = r"(?![-_.:/]?[0-9a-z])" if kind in ("docket", "bates") else r"(?![0-9a-z])(?![.,]\d)"
-    pat = r"(?<![0-9a-z])" + r"[^0-9a-z]{0,3}".join(map(re.escape, chars)) + end
-    return re.search(pat, hay) is not None
+    return re.search(pat + end, hay) is not None
 
 
 def joined(toks):
@@ -80,10 +113,7 @@ def joined(toks):
 
 
 def sentence_pattern(toks):
-    """Tokens in order, allowing pleading line numbers (1-2 digit tokens) between them on either
-    side. A sentence that differs only in a 1-2 digit number therefore still matches."""
-    parts = [f"(?:{t} )?" if re.fullmatch(r"\d{1,2}", t) else f"{re.escape(t)} " for t in toks]
-    return re.compile(" " + "(?:\\d{1,2} )*".join(parts))
+    return re.compile(re.escape(joined(toks)))
 
 
 def page_set(spec, n_pages):
@@ -114,9 +144,8 @@ def md_pages(path):
 
 def sentences(md):
     """Sentences of a page's Markdown, without pleading line numbers or table rules."""
-    text = re.sub(r"<[^>]+>|\|[-: |]+\||[|#*_`>]", " ", md)
-    text = re.sub(r"(?m)^\s*\d{1,2}\s+", "", text)
-    text = re.sub(r"[-\u00ad\u2010\u2011]\s*\n\s*", "", text)
+    text = clean(re.sub(r"<[^>]+>|\|[-: |]+\|", " ", md))
+    text = re.sub(r"[|#*_`>]", " ", text)
     for line in text.split("\n\n"):
         for s in re.split(r"(?<=[.!?;:])\s+(?=[A-Z(\"'“])", " ".join(line.split())):
             if len(tokens(s)) >= SENTENCE_WORDS:

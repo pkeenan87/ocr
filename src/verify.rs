@@ -80,6 +80,9 @@ pub struct PageReport {
     pub bates: Option<String>,
     /// Why the whole page needs a second reading (suspect reasons, `failed`), if it does.
     pub page_check: Vec<String>,
+    /// Kinds of annotation on the page that OCR never saw (`annotations_not_read`).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub annotations: Vec<String>,
     /// Whether the page has embedded PDF text that fields were compared with.
     pub embedded_text: bool,
     /// Whether that text is drawn invisibly (an OCR layer laid over a scan): another OCR's
@@ -871,6 +874,11 @@ fn assign(pool: &mut [Occurrence], k: &str, context: &[String]) -> Result<(), &'
 pub struct Embedded {
     pub text: String,
     pub visibility: TextVisibility,
+    /// Kinds of the visible annotations (form values, stamps, notes, redaction boxes). No OCR
+    /// engine sees them: the renderers draw page content only.
+    pub annotations: Vec<String>,
+    /// The annotation detector failed: unknown, treated as not read.
+    pub annotations_unknown: bool,
 }
 
 /// What a second reading of a page says about values: the keys it read, and the keys it was
@@ -1075,6 +1083,18 @@ pub fn report<'a>(
         if let Some(e) = &p.error {
             page_check.push(format!("failed: {e}"));
         }
+        let annotations = layers[i].annotations.clone();
+        let mut annotation_reason = None;
+        if !annotations.is_empty() {
+            annotation_reason = Some("annotations_not_read");
+        } else if layers[i].annotations_unknown {
+            annotation_reason = Some("annotations_unknown");
+        }
+        if let Some(r) = annotation_reason
+            && !page_check.iter().any(|c| c == r)
+        {
+            page_check.push(r.into());
+        }
         // What the engine itself flagged: the model failed and Apple's text stands in, a crop
         // came back empty or a reply was cut short, or a transcript's line numbers could not be
         // re-anchored to the page.
@@ -1215,6 +1235,10 @@ pub fn report<'a>(
             if !page_check.is_empty() {
                 f.why.push("suspect_page");
             }
+            // Agreement of two readings cannot clear a page whose annotations neither saw.
+            if let Some(r) = annotation_reason {
+                f.why.push(r);
+            }
             let k = key(f.kind, &f.text);
             let mut found = k.as_ref().is_some_and(|k| keys.contains(k));
             if not_own {
@@ -1281,7 +1305,8 @@ pub fn report<'a>(
             };
         }
         let field_check = fields.iter().any(|f| f.status == Status::Check);
-        let second_reading = if field_check {
+        // The PDF's own text does not include annotations: only a reader of the page image does.
+        let second_reading = if field_check || annotation_reason.is_some() {
             Some("azure")
         } else if page_check.is_empty() {
             None
@@ -1294,6 +1319,7 @@ pub fn report<'a>(
             page: number,
             bates: p.bates.clone(),
             page_check,
+            annotations,
             embedded_text: has_text,
             ocr_text_layer: ocr_layer,
             text_layer_visibility: visibility.as_str(),
@@ -1412,6 +1438,7 @@ mod tests {
             &|_| Embedded {
                 text: text.clone(),
                 visibility: TextVisibility::Visible,
+                ..Embedded::default()
             },
             &|_| None,
             false,
@@ -1834,6 +1861,7 @@ mod tests {
             &|_| Embedded {
                 text: body.repeat(3),
                 visibility: TextVisibility::Visible,
+                ..Embedded::default()
             },
             &|_| panic!("re-read a page with embedded text"),
             true,
@@ -1875,6 +1903,56 @@ mod tests {
             assert_eq!(status("$48,250.00").1, Status::Check);
             assert!(status("$48,250.00").2.contains(&"not_in_second_reading"));
         }
+    }
+
+    #[test]
+    fn annotations_make_the_page_unread_and_unknown_fails_closed() {
+        let body = "Pay $9,999.00 by May 7, 2024.";
+        let go = |annotations: Vec<String>, annotations_unknown: bool| {
+            report(
+                "x.pdf",
+                "x.md".into(),
+                "apple",
+                "now",
+                &[page(1, body)],
+                VerifyFields::Flagged,
+                &|_| Embedded {
+                    annotations: annotations.clone(),
+                    annotations_unknown,
+                    ..Embedded::default()
+                },
+                &|_| None,
+                false,
+            )
+        };
+        let r = go(vec!["stamp".into(), "widget".into()], false);
+        assert_eq!(r.pages[0].page_check, ["annotations_not_read"]);
+        assert_eq!(r.pages[0].annotations, ["stamp", "widget"]);
+        assert_eq!(r.azure_pages, "1");
+        assert!(
+            r.pages[0]
+                .fields
+                .iter()
+                .all(|f| f.why.contains(&"suspect_page") && f.status == Status::Check)
+        );
+        assert!(
+            serde_json::to_string(&r)
+                .unwrap()
+                .contains("\"annotations\":[\"stamp\"")
+        );
+
+        let r = go(vec![], true);
+        assert_eq!(r.pages[0].page_check, ["annotations_unknown"]);
+        assert_eq!(r.azure_pages, "1");
+
+        let r = go(vec![], false);
+        assert!(r.pages[0].page_check.is_empty());
+        assert!(r.pages[0].annotations.is_empty());
+        assert!(
+            !serde_json::to_string(&r)
+                .unwrap()
+                .contains("\"annotations\"")
+        );
     }
 
     #[test]
@@ -2002,6 +2080,7 @@ mod tests {
                 &|_| Embedded {
                     text: layer.clone(),
                     visibility: TextVisibility::OcrLayer,
+                    ..Embedded::default()
                 },
                 &|_| None,
                 false,
@@ -2155,6 +2234,7 @@ mod tests {
                 &|_| Embedded {
                     text: layer.clone(),
                     visibility: TextVisibility::Unknown,
+                    ..Embedded::default()
                 },
                 &|_| None,
                 false,

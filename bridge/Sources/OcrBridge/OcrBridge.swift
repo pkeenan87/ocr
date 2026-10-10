@@ -516,6 +516,49 @@ public func ocr_bridge_text_in_regions(
     return json(RegionsOut(ok: true, texts: texts))
 }
 
+struct AnnotationsOut: Encodable {
+    var ok: Bool
+    var error: String? = nil
+    /// Lowercase kinds of the annotations that show something (see `ocr_bridge_annotations`).
+    var kinds: [String] = []
+}
+
+/// The annotations on a page that draw something the renderers (page content only) never show to
+/// an OCR engine: filled form fields, stamps, free text, ink, redaction boxes, notes, and the
+/// like. `Link` and `Popup` are ignored; a form widget counts only when it shows a value or is
+/// switched on. Kinds are lowercase and deduplicated.
+@_cdecl("ocr_bridge_annotations")
+public func ocr_bridge_annotations(_ path: UnsafePointer<CChar>, _ pageIndex: Int32) -> UnsafeMutablePointer<CChar>? {
+    let p = String(cString: path)
+    guard isPDF(p), let doc = PDFDocument(url: URL(fileURLWithPath: p)),
+          pageIndex >= 0, let page = doc.page(at: Int(pageIndex)) else {
+        return json(AnnotationsOut(ok: false, error: "page \(Int(pageIndex) + 1) not found"))
+    }
+    var kinds = Set<String>()
+    for a in page.annotations {
+        // PDFKit reports the subtype with or without a leading slash, depending on the SDK.
+        let raw = a.type ?? ""
+        let kind = (raw.hasPrefix("/") ? String(raw.dropFirst()) : raw).lowercased()
+        switch kind {
+        case "link", "popup":
+            continue
+        case "widget":
+            let shown: Bool
+            switch a.widgetFieldType {
+            case .button: shown = a.buttonWidgetState != .offState
+            case .text, .choice: shown = !(a.widgetStringValue ?? "").isEmpty
+            default: shown = true // a signature field, or a type we cannot read
+            }
+            if shown { kinds.insert("widget") }
+        case "":
+            kinds.insert("unknown")
+        default:
+            kinds.insert(kind)
+        }
+    }
+    return json(AnnotationsOut(ok: true, kinds: kinds.sorted()))
+}
+
 /// Renders a page exactly as `recognize_page` does and returns it as 8-bit DeviceGray, one byte
 /// per pixel, row 0 at the top. Release with ocr_bridge_free_bytes. Null on failure.
 struct InvisibleOut: Encodable {

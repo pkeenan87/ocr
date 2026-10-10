@@ -169,6 +169,17 @@ pub fn text_visibility(path: &Path, page_index: usize) -> TextVisibility {
     }
 }
 
+/// Kinds of the visible annotations on page `page_index` (0-based) of a PDF, lowercase and
+/// deduplicated: filled form fields, stamps, free text, ink, redaction boxes, notes. The
+/// renderers draw page content only, so no OCR engine saw these. Links and popups are not listed.
+/// Images have none.
+pub fn annotations(path: &Path, page_index: usize) -> Result<Vec<String>> {
+    if !is_pdf_path(path) {
+        return Ok(Vec::new());
+    }
+    annotation_kinds(path, page_index)
+}
+
 /// By content, not extension: a PDF under another name still has a text layer.
 fn is_pdf_path(path: &Path) -> bool {
     use std::io::Read;

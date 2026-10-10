@@ -420,6 +420,28 @@ pub(super) fn char_counts(path: &Path, page_index: usize) -> Result<CharCounts> 
     Ok(counts)
 }
 
+/// Kinds of the annotations on a PDF page that draw something (lowercase, deduplicated). `Link`
+/// and `Popup` are ignored. Widgets are counted as visible whatever their value: conservative,
+/// since the field value is not read here.
+pub(super) fn annotation_kinds(path: &Path, page_index: usize) -> Result<Vec<String>> {
+    let pdfium = pdfium()?;
+    let doc = open_pdf(&pdfium, path)?;
+    let page = pdf_page(&doc, page_index)?;
+    let annotations = page.annotations();
+    let mut kinds = std::collections::BTreeSet::new();
+    for i in 0..annotations.len() {
+        let a = annotations
+            .get(i)
+            .map_err(|e| anyhow!("annotation {i}: {e}"))?;
+        let kind = match a.annotation_type() {
+            PdfPageAnnotationType::Link | PdfPageAnnotationType::Popup => continue,
+            t => format!("{t:?}").to_lowercase(),
+        };
+        kinds.insert(kind);
+    }
+    Ok(kinds.into_iter().collect())
+}
+
 /// Deepest nesting of form XObjects entered.
 const MAX_FORM_DEPTH: usize = 8;
 

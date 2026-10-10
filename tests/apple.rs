@@ -679,3 +679,44 @@ fn verify_json_is_opt_in() {
         .assert()
         .code(2);
 }
+
+#[test]
+fn annotations_the_renderers_never_draw_flag_the_page() {
+    let e = Env::new(&["annotations.pdf"]);
+    // A flagged page makes the run exit 1 ("completed with problems").
+    e.cmd()
+        .args(["scan", "--input-file", "annotations.pdf", "--verify-json"])
+        .assert()
+        .code(1);
+    let md = fs::read_to_string(e.path("annotations.md")).unwrap();
+    let v = verify_json(&e, "annotations");
+    // Page 1: a filled form field and a FreeText note, drawn only as annotations.
+    let p1 = &v["pages"][0];
+    let check: Vec<_> = p1["page_check"].as_array().unwrap().iter().collect();
+    assert!(
+        check.contains(&&serde_json::json!("annotations_not_read")),
+        "{v:#}"
+    );
+    let kinds: Vec<_> = p1["annotations"].as_array().unwrap().iter().collect();
+    assert!(kinds.contains(&&serde_json::json!("widget")), "{v:#}");
+    assert!(kinds.contains(&&serde_json::json!("freetext")), "{v:#}");
+    assert_eq!(p1["second_reading"], "azure", "{v:#}");
+    assert!(
+        v["azure_pages"]
+            .as_str()
+            .unwrap()
+            .split(',')
+            .any(|r| r == "1"),
+        "{v:#}"
+    );
+    // Page 2 has only a link: not flagged for annotations.
+    let p2 = &v["pages"][1];
+    assert!(p2.get("annotations").is_none(), "{v:#}");
+    assert!(
+        !p2["page_check"].to_string().contains("annotations"),
+        "{v:#}"
+    );
+    // The Markdown says so without the sidecar.
+    assert!(md.contains("flagged_pages: [1]\n"), "{md}");
+    assert!(md.contains("annotations_not_read"), "{md}");
+}

@@ -868,3 +868,22 @@ From the adversarial review, finding F11, reproduced on master:
 **Measured:**
 - **Public filings:** no table triggers it, before or after (478 verified, 118 `azure_pages`).
 - **Synthetic `table` family, seeds 10–14:** the same page is flagged before and after (page 2 of each). Only the number of amounts marked on it grows, from the total alone to the whole sum.
+
+## Annotations the renderers never draw (2026-10-09)
+
+From the adversarial review, finding A01, confirmed on master. Both renderers draw page content only (pdfium without annotations or form data, `CGContext.drawPDFPage` on the Mac). So filled form fields, stamps, FreeText amendments, ink and redaction boxes never reach any OCR engine. A probe's filled field `$9,999.00` vanished without a flag. Text under an annotation-style redaction box is still read.
+
+Rendering is unchanged, since that would change every engine's output and needs its own measurement. Pages with annotations that draw something are now flagged instead:
+- They get `annotations_not_read` (`annotations_unknown` if the check fails), with the kinds listed in the page's `annotations`.
+- They appear in the Markdown's flagged pages and always go to Azure.
+- Links, popups and empty form fields are ignored. The pdfium build cannot read form values, so it counts every widget.
+
+**Public filings, macOS 26, as users run it:**
+
+| | Before | Now |
+|---|---|---|
+| Values verified | 478 | 459 |
+| `azure_pages`, `all` / `flagged` | 118 / 90 | 126 / 98 |
+| Pages with `annotations_not_read` | – | 10 |
+
+All 10 are depo-knight-avery, whose pages carry a `watermark` annotation: the filing whose court header stamps Apple misreads and Azure leaves out (docs/azure-verify-eval-results.md). The 19 values that no longer verify are on those pages.

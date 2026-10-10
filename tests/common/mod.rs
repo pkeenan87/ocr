@@ -189,7 +189,7 @@ impl Env {
 
 pub fn without_generated(md: &str) -> String {
     md.lines()
-        .filter(|l| !l.starts_with("generated:"))
+        .filter(|l| !l.starts_with("generated:") && !l.starts_with("scan_record:"))
         .collect::<Vec<_>>()
         .join("\n")
 }

@@ -176,6 +176,8 @@ pub struct FrontMatter<'a> {
     pub pages: usize,
     pub engine: &'a str,
     pub generated: String,
+    /// `scan_record` (checkpoint::scan_record): what the output was made from.
+    pub scan_record: String,
     /// Model engine: adds `table_pages` and `fallback_pages` and has no `currency_fixes`.
     pub model: bool,
     /// `--legal-cleanup` was given: the number of lines it stripped.
@@ -578,11 +580,12 @@ pub fn assemble(front: Option<&FrontMatter>, pages: &[PageResult], markers: bool
             number_list(pages.iter().filter(|p| keep(p)).map(|p| p.number))
         };
         let mut head = format!(
-            "---\nsource: {}\npages: {}\nengine: {}\ngenerated: {}\ntext_layer_pages: {}\ncolumn_split_pages: {}\ntranscript_pages: {}\n",
+            "---\nsource: {}\npages: {}\nengine: {}\ngenerated: {}\nscan_record: {}\ntext_layer_pages: {}\ncolumn_split_pages: {}\ntranscript_pages: {}\n",
             yaml_str(f.source),
             f.pages,
             yaml_str(f.engine),
             f.generated,
+            f.scan_record,
             list(&|p| p.source == Source::TextLayer && p.error.is_none()),
             list(&|p| p.column_split),
             list(&|p| p.transcript),
@@ -869,6 +872,7 @@ mod tests {
             pages: 2,
             engine: "apple (Vision RecognizeDocuments)",
             generated: "t".into(),
+            scan_record: "0123456789abcdef".into(),
             model: false,
             legal_cleanup: None,
         };
@@ -1066,6 +1070,7 @@ mod tests {
             pages: 5,
             engine: "e",
             generated: "t".into(),
+            scan_record: "0123456789abcdef".into(),
             model: false,
             legal_cleanup: Some(10),
         };

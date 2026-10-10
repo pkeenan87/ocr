@@ -68,6 +68,9 @@ pub struct Field {
     pub line: usize,
     pub status: Status,
     pub why: Vec<&'static str>,
+    /// Byte offset of the value in its line, for its context (the label before it).
+    #[serde(skip)]
+    pub(crate) col: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -99,6 +102,10 @@ pub struct PageReport {
     /// PDF's own text, for a suspect page whose values all match it) or `azure`.
     pub second_reading: Option<&'static str>,
     pub fields: Vec<Field>,
+    /// Values the other reading has that the OCR has nowhere on the page, as that reading
+    /// writes them.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub expected_fields_missing: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -137,11 +144,11 @@ const MONTHS: &str = "January|February|March|April|May|June|July|August|Septembe
 /// Letters OCR puts in place of digits (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`) are accepted, so a
 /// misread amount is still found and flagged instead of silently missed.
 static AMOUNT: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\$\s?[\dOolISB][\dOolISB,]*(?:\.[\dOolISB]+)?(?:\s(?:thousand|million|billion|trillion)\b|[KMB]\b)?")
+    Regex::new(r"(?i)\$\s?-?[\dOolISB][\dOolISB,]*(?:\.[\dOolISB]+)?(?:\s(?:thousand|million|billion|trillion)\b|[KMB]\b)?")
         .unwrap()
 });
 static AMOUNT_OK: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)^\$\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,3})?(?:\s(?:thousand|million|billion|trillion)|[KMB])?$")
+    Regex::new(r"(?i)^-?\$?\s?-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,3})?(?:\s(?:thousand|million|billion|trillion)|[KMB])?$")
         .unwrap()
 });
 /// Money without a dollar sign, in the three shapes that cannot be a count: `USD 5,000`,
@@ -230,7 +237,7 @@ static LABELED_DOCKET: LazyLock<Regex> = LazyLock::new(|| {
 });
 /// Citations with a section or paragraph sign.
 static CITATION: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?:§§?|¶¶?)\s?\d[\w.\-]*(?:\([a-z0-9]{1,4}\))*").unwrap());
+    LazyLock::new(|| Regex::new(r"(?:§§?|¶¶?)\s?\d[\w.\-]*(?:\([A-Za-z0-9]{1,4}\))*").unwrap());
 static PERCENT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\b\d{1,3}(?:\.\d+)?\s?%").unwrap());
 /// Bates prefix and number (`SMITH000123`, `ABC 0001234`).
 static BATES_PARTS: LazyLock<Regex> =
@@ -282,7 +289,27 @@ fn parse_date(text: &str) -> Option<String> {
     valid_ymd(y, m, d).then(|| format!("{y:04}-{m:02}-{d:02}"))
 }
 
+/// An amount's sign and the rest: `-$100.00`, `$-100.00` and `($100.00)` are negative.
+fn unsigned(text: &str) -> (bool, &str) {
+    let t = text.trim();
+    if let Some(inner) = t.strip_prefix('(').and_then(|r| r.strip_suffix(')')) {
+        return (true, inner.trim());
+    }
+    if let Some(rest) = t.strip_prefix('-').or_else(|| t.strip_prefix('\u{2212}')) {
+        return (true, rest);
+    }
+    if let Some(rest) = t.strip_prefix("$-") {
+        return (true, rest.trim_start_matches(' '));
+    }
+    if let Some(rest) = t.strip_prefix("$ -") {
+        return (true, rest);
+    }
+    (false, t)
+}
+
 fn parse_amount(text: &str) -> Option<f64> {
+    let (negative, text) = unsigned(text);
+    let sign = if negative { -1.0 } else { 1.0 };
     let t = text.trim_start_matches('$').trim().to_ascii_lowercase();
     let (number, scale) = match t.split_once(' ') {
         Some((n, "thousand")) => (n, 1e3),
@@ -301,7 +328,7 @@ fn parse_amount(text: &str) -> Option<f64> {
         .replace(',', "")
         .parse::<f64>()
         .ok()
-        .map(|v| v * scale)
+        .map(|v| sign * v * scale)
 }
 
 /// Letters and digits only, lowercased: how a value is looked for in embedded text, so spacing
@@ -315,8 +342,10 @@ fn squash(s: &str) -> String {
 
 /// Whether a numeric value holds a letter OCR substitutes for a digit (`O4417`, `$l,000`, `2O24`).
 fn confusable(t: &str) -> bool {
-    let mut core: String = t
+    let mut core: String = unsigned(t)
+        .1
         .trim_start_matches('$')
+        .trim_start_matches('-')
         .split_whitespace()
         .next()
         .unwrap_or("")
@@ -337,12 +366,18 @@ fn confusable(t: &str) -> bool {
 fn key(kind: Kind, text: &str) -> Option<String> {
     match kind {
         Kind::Amount => {
-            let t = dollar_form(text.trim_end_matches([',', '.']));
+            let (negative, t) = unsigned(text.trim_end_matches([',', '.']));
+            let t = dollar_form(t);
             let t = t.as_str();
+            // Cents beyond 2^53 are not exact in a float: never compared.
             (AMOUNT_OK.is_match(t) && !confusable(t))
                 .then(|| parse_amount(t))
                 .flatten()
-                .map(|v| format!("amount:{}", (v * 100.0).round() as i64))
+                .filter(|v| (v * 100.0).abs() < 9.0e15)
+                .map(|v| {
+                    let c = (v * 100.0).round() as i64;
+                    format!("amount:{}", if negative { -c } else { c })
+                })
         }
         Kind::Date => parse_date(text).map(|d| format!("date:{d}")),
         Kind::Docket => {
@@ -361,6 +396,7 @@ fn key(kind: Kind, text: &str) -> Option<String> {
         Kind::Percent => text
             .trim_end_matches('%')
             .trim()
+            .replace('\u{2212}', "-")
             .parse::<f64>()
             .ok()
             .map(|v| format!("percent:{v}")),
@@ -436,6 +472,38 @@ fn next_words<'a>(lines: &[&'a str]) -> impl Iterator<Item = &'a str> {
     found.into_iter().flatten()
 }
 
+/// Whether the text just before `at` makes the value there negative: a minus sign directly
+/// before it (`-$100.00`, `-25%`) that is not part of a word or range (`10-25%`, `pre-$50`).
+fn minus_before(line: &str, at: usize) -> bool {
+    let before = &line[..at];
+    let Some(c) = before.chars().next_back() else {
+        return false;
+    };
+    if c != '-' && c != '\u{2212}' {
+        return false;
+    }
+    !before[..before.len() - c.len_utf8()]
+        .chars()
+        .next_back()
+        .is_some_and(|p| p.is_alphanumeric())
+}
+
+/// Whether the value spanning `range` fills a table cell in accounting brackets (`| ($20.00) |`),
+/// a negative amount. Brackets in prose (`Five Thousand Dollars ($5,000.00)`) are not a sign.
+fn accounting_cell(line: &str, range: std::ops::Range<usize>) -> bool {
+    if !line.trim_start().starts_with('|') {
+        return false;
+    }
+    let (before, after) = (
+        line[..range.start].trim_end(),
+        line[range.end..].trim_start(),
+    );
+    before.ends_with('(')
+        && after.starts_with(')')
+        && before[..before.len() - 1].trim_end().ends_with('|')
+        && after[1..].trim_start().starts_with('|')
+}
+
 fn extract(body: &str) -> Vec<Field> {
     let mut out = Vec::new();
     let lines: Vec<&str> = body.lines().collect();
@@ -455,11 +523,21 @@ fn extract(body: &str) -> Vec<Field> {
                         line: i + 1,
                         status: Status::Unchecked,
                         why,
+                        col: at,
                     },
                 ));
             };
         for m in AMOUNT.find_iter(line) {
             let mut t = m.as_str().trim_end_matches([',', '.']).to_string();
+            // A sign belongs to the amount: `-$100.00` and `($100.00)` in a table are a debit,
+            // never the same value as `$100.00`.
+            let mut start = m.start();
+            if minus_before(line, start) {
+                start -= line[..start].chars().next_back().map_or(0, char::len_utf8);
+                t.insert(0, '-');
+            } else if accounting_cell(line, m.start()..m.start() + t.len()) {
+                t = format!("({t})");
+            }
             // `$45` at the end of a line and `million` starting the next one (past a blank line
             // and a pleading line number, on the line or a line of its own): one amount.
             let next = next_words(&lines[i + 1..]).next();
@@ -477,21 +555,15 @@ fn extract(body: &str) -> Vec<Field> {
                 continue;
             }
             if confusable(t) {
-                push(
-                    m.start(),
-                    Kind::Amount,
-                    t,
-                    None,
-                    vec!["confusable_characters"],
-                );
+                push(start, Kind::Amount, t, None, vec!["confusable_characters"]);
                 continue;
             }
-            let ok = AMOUNT_OK.is_match(t);
+            let ok = AMOUNT_OK.is_match(unsigned(t).1);
             let value = parse_amount(t)
                 .filter(|_| ok)
                 .and_then(|v| serde_json::Number::from_f64(v).map(serde_json::Value::Number));
             push(
-                m.start(),
+                start,
                 Kind::Amount,
                 t,
                 value,
@@ -512,6 +584,20 @@ fn extract(body: &str) -> Vec<Field> {
                     .iter()
                     .any(|r| r.start < m.end() && m.start() < r.end)
                 {
+                    continue;
+                }
+                // `USD 1,00.00`: the number goes on past the match. Not `USD 1`, a malformed
+                // amount.
+                let rest = &line[m.end()..];
+                let more = rest
+                    .find(|c: char| !(c.is_ascii_digit() || c == ',' || c == '.'))
+                    .unwrap_or(rest.len());
+                if rest.starts_with([',', '.'])
+                    && rest[1..].starts_with(|c: char| c.is_ascii_digit())
+                {
+                    let t = &line[m.start()..m.end() + more];
+                    let t = t.trim_end_matches([',', '.']);
+                    push(m.start(), Kind::Amount, t, None, vec!["malformed_amount"]);
                     continue;
                 }
                 let value = parse_amount(&dollar_form(m.as_str()))
@@ -584,7 +670,22 @@ fn extract(body: &str) -> Vec<Field> {
             push(m.start(), Kind::Citation, t, None, vec![]);
         }
         for m in PERCENT.find_iter(line) {
-            push(m.start(), Kind::Percent, m.as_str(), None, vec![]);
+            if minus_before(line, m.start()) {
+                let start = m.start()
+                    - line[..m.start()]
+                        .chars()
+                        .next_back()
+                        .map_or(1, char::len_utf8);
+                push(
+                    start,
+                    Kind::Percent,
+                    &format!("-{}", m.as_str()),
+                    None,
+                    vec![],
+                );
+            } else {
+                push(m.start(), Kind::Percent, m.as_str(), None, vec![]);
+            }
         }
         found.sort_by_key(|(at, _)| *at);
         out.extend(found.into_iter().map(|(_, f)| f));
@@ -638,6 +739,136 @@ fn close(a: &str, b: &str) -> bool {
         })
 }
 
+/// One value in a reference reading (embedded text, second reading): its keys and the words
+/// before it, so each OCR value is matched to its own occurrence, not to any on the page.
+#[derive(Debug, Clone)]
+struct Occurrence {
+    keys: Vec<String>,
+    context: Vec<String>,
+    used: bool,
+    /// The value as the reference writes it.
+    text: String,
+}
+
+/// Up to two words before a value, back to the value before it, letters only and lowercased
+/// (`| Principal: |` gives `principal`); pleading line numbers and punctuation are skipped.
+fn context_words(before: &str) -> Vec<String> {
+    let number = |w: &str| (1..=2).contains(&w.len()) && w.chars().all(|c| c.is_ascii_digit());
+    before
+        .split_whitespace()
+        .rev()
+        .filter(|w| !number(w))
+        .take_while(|w| !w.chars().any(|c| c.is_ascii_digit()))
+        .map(|w| {
+            w.chars()
+                .filter(|c| c.is_alphabetic())
+                .flat_map(char::to_lowercase)
+                .collect::<String>()
+        })
+        .filter(|w| w.chars().count() >= 2)
+        .take(2)
+        .collect()
+}
+
+/// The words before an OCR value: on its line, or the line above when it starts its line.
+fn field_context(lines: &[&str], f: &Field) -> Vec<String> {
+    let Some(line) = f.line.checked_sub(1).and_then(|i| lines.get(i)) else {
+        return vec![];
+    };
+    let words = context_words(&line[..f.col.min(line.len())]);
+    if !words.is_empty() {
+        return words;
+    }
+    lines[..f.line - 1]
+        .iter()
+        .rev()
+        .find(|l| !context_words(l).is_empty())
+        .map(|l| context_words(l))
+        .unwrap_or_default()
+}
+
+/// Two context words that are the same, allowing one misread letter in a long word.
+fn similar(a: &str, b: &str) -> bool {
+    if a == b {
+        return true;
+    }
+    let (a, b): (Vec<char>, Vec<char>) = (a.chars().collect(), b.chars().collect());
+    if a.len().min(b.len()) < 5 || a.len().abs_diff(b.len()) > 1 {
+        return false;
+    }
+    if a.len() == b.len() {
+        return a.iter().zip(&b).filter(|(x, y)| x != y).count() <= 1;
+    }
+    close(&a.iter().collect::<String>(), &b.iter().collect::<String>())
+}
+
+/// The values of a reference text, in reading order, by the same extraction as the OCR.
+fn occurrences(text: &str) -> Vec<Occurrence> {
+    let text = LINE_END_HYPHEN.replace_all(text, "-");
+    let text = text.replace(['\u{ad}', '\u{fffe}'], "");
+    let flat = text.split_whitespace().collect::<Vec<_>>().join(" ");
+    let mut out: Vec<Occurrence> = extract(&flat)
+        .iter()
+        .filter_map(|f| {
+            let k = key(f.kind, &f.text)?;
+            let mut keys = vec![k.clone()];
+            // A docket read without its office prefix matches this one with it.
+            if let Some((_, rest)) = k.strip_prefix("docket:").and_then(|r| r.split_once(':')) {
+                keys.push(format!("docket::{rest}"));
+            }
+            Some(Occurrence {
+                keys,
+                context: context_words(&flat[..f.col]),
+                used: false,
+                text: f.text.clone(),
+            })
+        })
+        .collect();
+    for c in S_AMOUNT.captures_iter(&flat) {
+        if let Some(k) = key(Kind::Amount, &format!("${}", &c[1])) {
+            out.push(Occurrence {
+                keys: vec![k],
+                context: context_words(&flat[..c.get(0).unwrap().start()]),
+                used: false,
+                text: c[0].to_string(),
+            });
+        }
+    }
+    out
+}
+
+/// Matches an OCR value to an unused occurrence of the same value in the reference, with the
+/// same words before it. `Err` says why not: the reference has the value fewer times than the
+/// OCR (`$3,000` twice against once), or only after other words (`Principal: $3,000` against
+/// `Interest: $3,000`, values swapped between labels). A value the reference has only by a
+/// rule outside the extraction (a look-alike sign) is not checked here.
+fn assign(pool: &mut [Occurrence], k: &str, context: &[String]) -> Result<(), &'static str> {
+    if !pool.iter().any(|o| o.keys.iter().any(|x| x == k)) {
+        return Ok(());
+    }
+    let agree = |o: &Occurrence| {
+        context.is_empty()
+            || o.context.is_empty()
+            || context
+                .iter()
+                .any(|a| o.context.iter().any(|b| similar(a, b)))
+    };
+    let mut free = pool
+        .iter_mut()
+        .filter(|o| !o.used && o.keys.iter().any(|x| x == k))
+        .peekable();
+    if free.peek().is_none() {
+        return Err("more_often_than_in_reference");
+    }
+    match free.find(|o| agree(o)) {
+        Some(o) => {
+            o.used = true;
+            Ok(())
+        }
+        None => Err("label_differs"),
+    }
+}
+
 /// A page's embedded PDF text, and whether it is drawn invisibly (an OCR layer over a scan).
 #[derive(Debug, Clone, Default)]
 pub struct Embedded {
@@ -657,6 +888,7 @@ struct SecondReading {
     text: String,
     keys: HashSet<String>,
     doubtful: HashSet<String>,
+    occurrences: Vec<Occurrence>,
 }
 
 fn second_reading(lines: &[Line]) -> SecondReading {
@@ -688,23 +920,54 @@ fn second_reading(lines: &[Line]) -> SecondReading {
         }
     }
     let mut doubtful = HashSet::new();
+    let keys_of = |t: &str| embedded_keys(&crate::markdown::fix_legal_symbols(t).0);
+    // No confidence is no better than a low one.
+    let unsure = |l: &Line| {
+        l.confidence
+            .is_none_or(|c| c < SECOND_READER_MIN_CONFIDENCE)
+    };
     for l in lines {
-        let mine = embedded_keys(&crate::markdown::fix_legal_symbols(&l.text).0);
-        if l.confidence
-            .is_some_and(|c| c < SECOND_READER_MIN_CONFIDENCE)
-        {
+        let mine = keys_of(&l.text);
+        if unsure(l) {
             doubtful.extend(mine);
             continue;
         }
         for alt in &l.alternatives {
-            let theirs = embedded_keys(&crate::markdown::fix_legal_symbols(alt).0);
-            doubtful.extend(mine.difference(&theirs).cloned());
+            doubtful.extend(mine.difference(&keys_of(alt)).cloned());
         }
     }
+    // A value split over two lines (`January 1,` / `2024`) is as doubtful as either line.
+    for pair in lines.windows(2) {
+        let (a, b) = (&pair[0], &pair[1]);
+        let joined = keys_of(&format!("{}\n{}", a.text, b.text));
+        let (ka, kb) = (keys_of(&a.text), keys_of(&b.text));
+        let spanning: Vec<String> = joined
+            .into_iter()
+            .filter(|k| !ka.contains(k) && !kb.contains(k))
+            .collect();
+        if spanning.is_empty() {
+            continue;
+        }
+        if unsure(a) || unsure(b) {
+            doubtful.extend(spanning);
+            continue;
+        }
+        let alts = a
+            .alternatives
+            .iter()
+            .map(|x| format!("{x}\n{}", b.text))
+            .chain(b.alternatives.iter().map(|x| format!("{}\n{x}", a.text)));
+        for alt in alts {
+            let theirs = keys_of(&alt);
+            doubtful.extend(spanning.iter().filter(|k| !theirs.contains(*k)).cloned());
+        }
+    }
+    let occurrences = occurrences(&text);
     SecondReading {
         text,
         keys,
         doubtful,
+        occurrences,
     }
 }
 
@@ -832,6 +1095,17 @@ pub fn report<'a>(
         {
             page_check.push(r.into());
         }
+        // What the engine itself flagged: the model failed and Apple's text stands in, a crop
+        // came back empty or a reply was cut short, or a transcript's line numbers could not be
+        // re-anchored to the page.
+        if p.fallback {
+            page_check.push("engine_fallback".into());
+        } else if p.flagged && p.error.is_none() {
+            page_check.push("engine_flagged".into());
+        }
+        if p.line_numbers == Some(false) {
+            page_check.push("line_numbers_unverified".into());
+        }
         if let Some(b) = &p.bates {
             let mut why = vec![];
             if usual
@@ -849,6 +1123,7 @@ pub fn report<'a>(
                     line: 0,
                     status: Status::Unchecked,
                     why,
+                    col: 0,
                 },
             );
         }
@@ -864,6 +1139,14 @@ pub fn report<'a>(
             HashSet::new()
         };
         let reread = rereads.get(&i);
+        // Each reference occurrence verifies one OCR value, after the same label.
+        let mut embedded_pool = if has_text && !ocr_layer && !unknown_layer {
+            occurrences(texts[i])
+        } else {
+            Vec::new()
+        };
+        let mut second_pool = reread.map(|r| r.occurrences.clone()).unwrap_or_default();
+        let body_lines: Vec<&str> = p.body.lines().collect();
         let text_agreement = if has_text {
             Some(if not_own {
                 let name = if ocr_layer {
@@ -896,10 +1179,11 @@ pub fn report<'a>(
                 page_check.push(m.reason.into());
             }
         }
+        // Every amount in a disagreeing sum, the items above a total too.
         for f in fields.iter_mut().filter(|f| f.kind == Kind::Amount) {
             if let Some(m) = mismatches
                 .iter()
-                .find(|m| m.line == f.line && m.amounts.contains(&f.text))
+                .find(|m| m.cells.iter().any(|(l, a)| *l == f.line && *a == f.text))
             {
                 f.why.push(m.reason);
             }
@@ -911,6 +1195,35 @@ pub fn report<'a>(
             .is_some_and(|a| a.missing_words >= MISSING_TEXT_MIN_WORDS)
         {
             page_check.push("missing_text".into());
+        }
+        // A number the other reading has and the OCR lacks: a dropped deadline, amount or date,
+        // however short its line.
+        if text_agreement
+            .as_ref()
+            .is_some_and(|a| !a.missing_numbers.is_empty())
+        {
+            page_check.push("missing_number".into());
+        }
+        // Values the other reading has and the OCR has nowhere on the page: a dropped total or
+        // deadline is not a wrong value, it is a missing one. Listed always; in `all` mode the
+        // page is checked.
+        let ocr_keys: HashSet<String> =
+            fields.iter().filter_map(|f| key(f.kind, &f.text)).collect();
+        let reference = if embedded_pool.is_empty() {
+            &second_pool
+        } else {
+            &embedded_pool
+        };
+        let mut expected_fields_missing: Vec<String> = Vec::new();
+        for o in reference {
+            if !o.keys.iter().any(|k| ocr_keys.contains(k))
+                && !expected_fields_missing.contains(&o.text)
+            {
+                expected_fields_missing.push(o.text.clone());
+            }
+        }
+        if mode == VerifyFields::All && !expected_fields_missing.is_empty() {
+            page_check.push("fields_missing".into());
         }
         for f in &mut fields {
             if f.kind == Kind::Docket && odd.contains(&f.text.to_ascii_lowercase()) {
@@ -947,12 +1260,29 @@ pub fn report<'a>(
                 if r.doubtful.contains(k) {
                     f.why.push("doubtful_in_second_reading");
                 } else if r.keys.contains(k) {
-                    if model_engine && !p.fallback {
+                    // A model page's Bates number comes from Apple Vision's side pass, so the
+                    // Apple second reading is the same reader again: it confirms nothing.
+                    if model_engine && !p.fallback && f.kind != Kind::Bates {
                         found = true;
                         matched = "matches_second_reading";
                     }
                 } else {
                     f.why.push("not_in_second_reading");
+                }
+            }
+            // The value is in the reference, but is it this occurrence of it?
+            if found
+                && f.kind != Kind::Bates
+                && let Some(k) = &k
+            {
+                let pool = if matched == "matches_embedded_text" {
+                    &mut embedded_pool
+                } else {
+                    &mut second_pool
+                };
+                if let Err(why) = assign(pool, k, &field_context(&body_lines, f)) {
+                    found = false;
+                    f.why.push(why);
                 }
             }
             // Two independent readings of the exact value agree: that outweighs a suspect page.
@@ -997,6 +1327,7 @@ pub fn report<'a>(
             text_agreement,
             second_reading,
             fields,
+            expected_fields_missing,
         });
     }
 
@@ -1347,6 +1678,92 @@ mod tests {
         }
     }
 
+    fn read_at(text: &str, confidence: Option<f64>) -> Line {
+        Line {
+            confidence,
+            ..read(text)
+        }
+    }
+
+    fn second(pages: &[PageResult], lines: Vec<Line>) -> Report<'static> {
+        report(
+            "x.pdf",
+            "x.md".into(),
+            "model",
+            "now",
+            pages,
+            VerifyFields::Flagged,
+            &|_| Embedded::default(),
+            &|_| Some(lines.clone()),
+            true,
+        )
+    }
+
+    #[test]
+    fn a_value_split_over_doubtful_lines_is_doubtful() {
+        let pages = [page(1, "The note is due on January 1, 2024 at noon.")];
+        let r = second(
+            &pages,
+            vec![
+                read_at("The note is due on January 1,", Some(0.1)),
+                read_at("2024 at noon.", Some(0.1)),
+            ],
+        );
+        let s = statuses(&r);
+        assert_eq!(s[0].1, Status::Check, "{s:?}");
+        assert!(s[0].2.contains(&"doubtful_in_second_reading"), "{s:?}");
+        // Sure on both lines, it verifies.
+        let r = second(
+            &pages,
+            vec![
+                read_at("The note is due on January 1,", Some(1.0)),
+                read_at("2024 at noon.", Some(1.0)),
+            ],
+        );
+        assert_eq!(statuses(&r)[0].1, Status::Verified, "{:?}", statuses(&r));
+        // No confidence is not sure.
+        let r = second(
+            &pages,
+            vec![read_at("The note is due on January 1, 2024 at noon.", None)],
+        );
+        assert_eq!(statuses(&r)[0].1, Status::Check, "{:?}", statuses(&r));
+    }
+
+    #[test]
+    fn a_model_page_bates_number_is_not_verified_by_apple_again() {
+        let mut p = page(1, "Exhibit A to the declaration of counsel.");
+        p.bates = Some("ABC0001234".into());
+        let r = second(
+            &[p],
+            vec![
+                read("Exhibit A to the declaration of counsel."),
+                read("ABC0001234"),
+            ],
+        );
+        let s = statuses(&r);
+        assert_eq!(s[0].0, "ABC0001234");
+        assert_ne!(s[0].1, Status::Verified, "{s:?}");
+    }
+
+    #[test]
+    fn engine_flags_send_the_page_for_a_second_reading() {
+        for (fallback, flagged, line_numbers, why) in [
+            (true, true, None, "engine_fallback"),
+            (false, true, None, "engine_flagged"),
+            (false, false, Some(false), "line_numbers_unverified"),
+        ] {
+            let mut p = page(1, "Readable prose with no values in it at all.");
+            (p.fallback, p.flagged, p.line_numbers) = (fallback, flagged, line_numbers);
+            let r = run(&[p], VerifyFields::All, "");
+            assert!(
+                r.pages[0].page_check.iter().any(|c| c == why),
+                "{why}: {:?}",
+                r.pages[0].page_check
+            );
+            assert_eq!(r.azure_pages, "1", "{why}");
+        }
+    }
+
     #[test]
     fn a_second_reading_confirms_or_contradicts_values_on_scans() {
         let body = "Paid $5,500 on January 11, 2008 and $48,250.00 on May 7, 2007 in \
@@ -1470,10 +1887,21 @@ mod tests {
             );
             let got = statuses(&r);
             let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
-            assert_eq!(status("$5,500").1, Status::Unchecked);
-            assert!(status("$5,500").2.is_empty());
+            // Nothing is verified. A fallen-back page is checked as a whole (`engine_fallback`).
+            if model {
+                assert_eq!(status("$5,500").1, Status::Check);
+                assert_eq!(status("$5,500").2, vec!["suspect_page"]);
+                assert!(
+                    r.pages[0]
+                        .page_check
+                        .contains(&"engine_fallback".to_string())
+                );
+            } else {
+                assert_eq!(status("$5,500").1, Status::Unchecked);
+                assert!(status("$5,500").2.is_empty());
+            }
             assert_eq!(status("$48,250.00").1, Status::Check);
-            assert_eq!(status("$48,250.00").2, vec!["not_in_second_reading"]);
+            assert!(status("$48,250.00").2.contains(&"not_in_second_reading"));
         }
     }
 
@@ -1541,6 +1969,10 @@ mod tests {
         assert_eq!(status("$3,000.00").1, Status::Check);
         assert!(status("$3,000.00").2.contains(&"words_numerals_mismatch"));
         assert!(status("$310.00").2.contains(&"arithmetic_mismatch"));
+        // The items above the total are in the disagreeing sum too: any of them may be the
+        // misread one.
+        assert!(status("$100.00").2.contains(&"arithmetic_mismatch"));
+        assert!(status("$200.00").2.contains(&"arithmetic_mismatch"));
         assert_eq!(r.azure_pages, "1");
     }
 
@@ -1673,6 +2105,114 @@ mod tests {
         }
     }
 
+    /// Padding so a page passes the 20-word embedded-text threshold.
+    const PAD: &str = " The parties and their counsel reviewed the whole payment schedule in full \
+        detail before signing it on the first page.";
+
+    #[test]
+    fn each_value_matches_its_own_occurrence() {
+        // Swapped between labels: both amounts are on the page, neither where the OCR has it.
+        let layer = format!("Principal: $8,000. Interest: $3,000.{PAD}");
+        let body = format!("Principal: $3,000. Interest: $8,000.{PAD}");
+        let r = run(&[page(1, &body)], VerifyFields::Flagged, &layer);
+        let s = statuses(&r);
+        assert!(s.iter().all(|x| x.1 == Status::Check), "{s:?}");
+        assert!(s.iter().all(|x| x.2.contains(&"label_differs")), "{s:?}");
+        // Read twice where the page has it once: the second is not verified.
+        let layer = format!("Fee: $3,000. Tax: $8,000.{PAD}");
+        let body = format!("Fee: $3,000. Tax: $3,000.{PAD}");
+        let r = run(&[page(1, &body)], VerifyFields::Flagged, &layer);
+        let s = statuses(&r);
+        assert_eq!(s[0].1, Status::Verified, "{s:?}");
+        assert_eq!(s[1].1, Status::Check, "{s:?}");
+        // The same values in the same places still verify, in a table too.
+        let layer = format!("| Principal | $8,000.00 |\n| Interest | $3,000.00 |\n{PAD}");
+        let r = run(&[page(1, &layer)], VerifyFields::Flagged, &layer);
+        assert!(
+            statuses(&r).iter().all(|x| x.1 == Status::Verified),
+            "{:?}",
+            statuses(&r)
+        );
+        // One misread letter in a label is still the same label.
+        let r = run(
+            &[page(
+                1,
+                &format!("Principa1: $8,000. Interest: $3,000.{PAD}"),
+            )],
+            VerifyFields::Flagged,
+            &format!("Principal: $8,000. Interest: $3,000.{PAD}"),
+        );
+        assert!(
+            statuses(&r).iter().all(|x| x.1 == Status::Verified),
+            "{:?}",
+            statuses(&r)
+        );
+    }
+
+    #[test]
+    fn signs_are_part_of_the_value() {
+        for (body, layer) in [
+            (
+                "A credit of $100.00 applies.",
+                "A credit of -$100.00 applies.",
+            ),
+            (
+                "A credit of -$100.00 applies.",
+                "A credit of $100.00 applies.",
+            ),
+            ("| Refund | $100.00 |", "| Refund | ($100.00) |"),
+            (
+                "The rate fell by 25% this year.",
+                "The rate fell by -25% this year.",
+            ),
+        ] {
+            let r = run(
+                &[page(1, &format!("{body}{PAD}"))],
+                VerifyFields::Flagged,
+                &format!("{layer}{PAD}"),
+            );
+            assert_eq!(
+                statuses(&r)[0].1,
+                Status::Check,
+                "{body}: {:?}",
+                statuses(&r)
+            );
+        }
+        let f = extract("Refunds: -$100.00, $-50.00 and \u{2212}$7.00; rate -25%; range 10-25%.");
+        let got: Vec<_> = f
+            .iter()
+            .map(|f| (f.text.as_str(), f.value.clone()))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                ("-$100.00", Some(serde_json::json!(-100.0))),
+                ("$-50.00", Some(serde_json::json!(-50.0))),
+                ("-$7.00", Some(serde_json::json!(-7.0))),
+                ("-25%", None),
+                ("25%", None),
+            ]
+        );
+        // Brackets around an amount in prose are not a sign.
+        let f = extract("Five Thousand Dollars ($5,000.00)");
+        assert_eq!(f[0].value, Some(serde_json::json!(5000.0)));
+        let f = extract("| Refund | ($20.00) |");
+        assert_eq!(
+            (f[0].text.as_str(), f[0].value.clone()),
+            ("($20.00)", Some(serde_json::json!(-20.0)))
+        );
+    }
+
+    #[test]
+    fn a_malformed_bare_amount_is_not_cut_short() {
+        let f = extract("Paid USD 1,00.00 today, per § 1983(A).");
+        assert_eq!(
+            (f[0].text.as_str(), f[0].value.clone(), f[0].why.clone()),
+            ("USD 1,00.00", None, vec!["malformed_amount"])
+        );
+        assert_eq!(f[1].text, "§ 1983(A)");
+    }
+
     #[test]
     fn an_unknown_text_layer_verifies_nothing() {
         let rest = " More words of the old scanner layer so the page has enough text to compare.";
@@ -1723,6 +2263,34 @@ mod tests {
     }
 
     #[test]
+    fn a_value_the_ocr_dropped_is_listed() {
+        let layer = format!("Fee: $3,000. Total: $8,000. Due May 7, 2024.{PAD}");
+        let body = format!("Fee: $3,000. Due May 7, 2024.{PAD}");
+        let r = run(&[page(1, &body)], VerifyFields::Flagged, &layer);
+        assert_eq!(r.pages[0].expected_fields_missing, ["$8,000"]);
+        assert!(
+            !r.pages[0]
+                .page_check
+                .contains(&"fields_missing".to_string())
+        );
+        let r = run(&[page(1, &body)], VerifyFields::All, &layer);
+        assert!(
+            r.pages[0]
+                .page_check
+                .contains(&"fields_missing".to_string())
+        );
+        // Born-digital: the PDF's own text has the value, at no cost.
+        assert_eq!(r.pages[0].second_reading, Some("embedded_text"));
+        // Nothing dropped: nothing listed.
+        let r = run(&[page(1, &layer)], VerifyFields::All, &layer);
+        assert!(
+            r.pages[0].expected_fields_missing.is_empty(),
+            "{:?}",
+            r.pages[0]
+        );
+    }
+
+    #[test]
     fn values_are_compared_not_substrings() {
         // `$3,000` is inside `$3,000,000` as text, but it is a different amount.
         let r = run(
@@ -1735,7 +2303,7 @@ mod tests {
         let r = run(
             &[page(
                 1,
-                "case 3:26-CV-4417 on Mar. 3, 2024 for $3000000.00 and 12.50% per year",
+                "case 3:26-CV-4417 on Mar. 3, 2024 agreed to pay $3000000.00 with 12.50% per year",
             )],
             VerifyFields::Flagged,
             LAYER,

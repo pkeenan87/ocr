@@ -808,6 +808,10 @@ fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fa
         out.flagged |= flagged;
         if !md.trim().is_empty() {
             parts.push(md);
+        } else if reqs.len() > 1 {
+            // A crop that stays empty after its retry while others have text: a column or
+            // table band may be missing from the page.
+            out.flagged = true;
         }
     }
     out.body = parts.join("\n\n");

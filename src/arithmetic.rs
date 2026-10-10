@@ -15,6 +15,8 @@ pub struct Mismatch {
     pub reason: &'static str,
     /// The numerals whose value disagrees, as written (`$392.31`).
     pub amounts: Vec<String>,
+    /// The same numerals with their 1-based lines: a table's items stand above its total.
+    pub cells: Vec<(usize, String)>,
 }
 
 /// Numerals in brackets after an amount in words: `($392.31)`, `($4 million)`.
@@ -169,6 +171,7 @@ fn words_and_numerals(body: &str) -> Vec<Mismatch> {
                     line: i + 1,
                     reason: "words_numerals_mismatch",
                     amounts: vec![m[1].to_string()],
+                    cells: vec![(i + 1, m[1].to_string())],
                 });
             }
         }
@@ -176,10 +179,22 @@ fn words_and_numerals(body: &str) -> Vec<Mismatch> {
     out
 }
 
-/// An amount in a table cell: `$48,250.00`, `48,250.00`, `(1,200.00)` is not summed.
-fn cell_amount(cell: &str) -> Option<u64> {
-    let t = cell.trim();
-    let digits = t.trim_start_matches('$').trim();
+/// An amount in a table cell in signed cents: `$48,250.00`, `48,250.00`, and negative
+/// `-$20.00`, `$-20.00`, `($20.00)` (accounting brackets, a refund or credit).
+fn cell_amount(cell: &str) -> Option<i64> {
+    let mut t = cell.trim();
+    let mut negative = false;
+    if let Some(inner) = t.strip_prefix('(').and_then(|r| r.strip_suffix(')')) {
+        (t, negative) = (inner.trim(), true);
+    }
+    if let Some(rest) = t.strip_prefix('-').or_else(|| t.strip_prefix('\u{2212}')) {
+        (t, negative) = (rest.trim_start(), !negative);
+    }
+    let dollar = t.starts_with('$');
+    let mut digits = t.trim_start_matches('$').trim();
+    if dollar && let Some(rest) = digits.strip_prefix('-') {
+        (digits, negative) = (rest, !negative);
+    }
     if digits.is_empty()
         || !digits
             .chars()
@@ -188,16 +203,18 @@ fn cell_amount(cell: &str) -> Option<u64> {
         return None;
     }
     // Money has cents or digit grouping; `2024` or `12` in a table is not money.
-    if !(digits.contains(',') || digits.contains('.') || t.starts_with('$')) {
+    if !(digits.contains(',') || digits.contains('.') || dollar) {
         return None;
     }
-    cents(&format!("${digits}"))
+    let v = i64::try_from(cents(&format!("${digits}"))?).ok()?;
+    Some(if negative { -v } else { v })
 }
 
 /// Table rows labelled total (`Total`, `TOTAL DUE`, `Grand Total`) against the sum of the
 /// amounts above them in the same column, back to the header or the previous total. A
-/// `Subtotal` row ends a run like a total, and the next total may then equal the subtotals
-/// plus what follows them (tax, fees).
+/// `Subtotal` row is checked the same way against the items before it, then ends a run like a
+/// total; the next total may then equal the stated subtotals plus what follows them (tax,
+/// fees). Negative amounts (refunds, credits) count with their sign.
 fn table_totals(body: &str) -> Vec<Mismatch> {
     let mut out = Vec::new();
     let lines: Vec<&str> = body.lines().collect();
@@ -224,8 +241,10 @@ fn table_totals(body: &str) -> Vec<Mismatch> {
         let width = rows.iter().map(|(_, c)| c.len()).max().unwrap_or(0);
         for col in 0..width {
             // Running sums since the last total, and the subtotals within it.
-            let (mut run, mut items, mut subtotal_sum) = (0u64, 0usize, None::<u64>);
-            let mut amounts: Vec<String> = Vec::new();
+            let (mut run, mut items, mut subtotal_sum) = (0i64, 0usize, None::<i64>);
+            let mut amounts: Vec<(usize, String)> = Vec::new();
+            // The subtotal cells since the last total, reported with a total that disagrees.
+            let mut subtotals: Vec<(usize, String)> = Vec::new();
             for (n, cells) in &rows {
                 let Some(v) = cells.get(col).and_then(|c| cell_amount(c)) else {
                     continue;
@@ -240,31 +259,45 @@ fn table_totals(body: &str) -> Vec<Mismatch> {
                 let is_sub = label.contains("subtotal") || label.contains("sub-total");
                 let is_total = !is_sub && label.contains("total");
                 if is_sub {
+                    let cell = (n + 1, cells[col].trim().to_string());
+                    if items >= 2 && run != v {
+                        amounts.push(cell.clone());
+                        out.push(mismatch(n + 1, std::mem::take(&mut amounts)));
+                    }
                     subtotal_sum = Some(subtotal_sum.unwrap_or(0) + v);
+                    subtotals.push(cell);
                     run = 0;
                     items = 0;
                     amounts.clear();
                 } else if is_total {
                     let expected = subtotal_sum.map_or(run, |s| s + run);
                     if (items >= 2 || subtotal_sum.is_some()) && expected != v {
-                        amounts.push(cells[col].trim().to_string());
-                        out.push(Mismatch {
-                            line: n + 1,
-                            reason: "arithmetic_mismatch",
-                            amounts: std::mem::take(&mut amounts),
-                        });
+                        let mut all = std::mem::take(&mut subtotals);
+                        all.append(&mut amounts);
+                        all.push((n + 1, cells[col].trim().to_string()));
+                        out.push(mismatch(n + 1, all));
                     }
                     (run, items, subtotal_sum) = (0, 0, None);
                     amounts.clear();
+                    subtotals.clear();
                 } else {
                     run += v;
                     items += 1;
-                    amounts.push(cells[col].trim().to_string());
+                    amounts.push((n + 1, cells[col].trim().to_string()));
                 }
             }
         }
     }
     out
+}
+
+fn mismatch(line: usize, cells: Vec<(usize, String)>) -> Mismatch {
+    Mismatch {
+        line,
+        reason: "arithmetic_mismatch",
+        amounts: cells.iter().map(|(_, a)| a.clone()).collect(),
+        cells,
+    }
 }
 
 /// Both checks on a page's Markdown.
@@ -340,5 +373,36 @@ mod tests {
             assert_eq!(m[0].reason, "arithmetic_mismatch");
             assert_eq!(m[0].line, 6);
         }
+    }
+
+    #[test]
+    fn a_wrong_subtotal_is_caught() {
+        // $10 + $20 is not $40, even though $40 + $5 is the stated total.
+        let table = "| Item | Amount |\n|---|---|\n| A | $10.00 |\n| B | $20.00 |\n\
+            | Subtotal | $40.00 |\n| Tax | $5.00 |\n| Total | $45.00 |";
+        let m = check(table);
+        assert_eq!(m.len(), 1, "{m:?}");
+        assert_eq!((m[0].line, m[0].reason), (5, "arithmetic_mismatch"));
+        assert_eq!(m[0].amounts, ["$10.00", "$20.00", "$40.00"]);
+        assert_eq!(m[0].cells[0], (3, "$10.00".to_string()));
+        // A wrong total after a right subtotal names the subtotal too.
+        let m = check(&table.replace("$40.00", "$30.00"));
+        assert_eq!(m.len(), 1, "{m:?}");
+        assert_eq!(m[0].line, 7);
+        assert_eq!(m[0].amounts, ["$30.00", "$5.00", "$45.00"]);
+    }
+
+    #[test]
+    fn refunds_and_credits_count_with_their_sign() {
+        let ok = "| Item | Amount |\n|---|---|\n| A | $30.00 |\n| B | $20.00 |\n\
+            | Refund | ($20.00) |\n| Total | $30.00 |";
+        assert_eq!(check(ok), vec![]);
+        for refund in ["-$20.00", "$-20.00", "(20.00)", "\u{2212}$20.00"] {
+            assert_eq!(check(&ok.replace("($20.00)", refund)), vec![], "{refund}");
+        }
+        // The same refund with a wrong total is caught, not skipped.
+        let m = check(&ok.replace("| Total | $30.00 |", "| Total | $50.00 |"));
+        assert_eq!(m.len(), 1, "{m:?}");
+        assert_eq!(m[0].line, 6);
     }
 }

@@ -283,7 +283,7 @@ fn dpi_is_validated() {
 /// The markdown without its `generated:` timestamp line.
 fn without_generated(md: &str) -> String {
     md.lines()
-        .filter(|l| !l.starts_with("generated:"))
+        .filter(|l| !l.starts_with("generated:") && !l.starts_with("scan_record:"))
         .map(|l| format!("{l}\n"))
         .collect()
 }
@@ -621,14 +621,31 @@ fn verify_json_on_an_image_uses_the_second_reader() {
     let v = verify_json(&e, "legal_200dpi");
     assert_eq!(v["pages"][0]["embedded_text"], false);
     assert_eq!(v["pages"][0]["second_reader"], true);
-    // Both Apple readings agree: that verifies nothing (shared blind spots).
+    // Both Apple readings agree: that verifies nothing (shared blind spots). The second reading's
+    // `48.250.00` is a number the OCR has nowhere, so the whole page is checked.
+    let p = &v["pages"][0];
+    assert!(
+        p["page_check"]
+            .as_array()
+            .unwrap()
+            .contains(&"missing_number".into()),
+        "{p:#}"
+    );
     let f = field(&v, "$122,525.50");
-    assert_eq!(f["status"], "unchecked", "{f:#}");
-    // The second reading has `$48.250.00`: the readings disagree, so the value is checked.
-    let f = field(&v, "$48,250.00");
     assert_eq!(
         (&f["status"], &f["why"][0]),
-        (&"check".into(), &"not_in_second_reading".into())
+        (&"check".into(), &"suspect_page".into()),
+        "{f:#}"
+    );
+    // The second reading has `$48.250.00`: the readings disagree, so the value is checked.
+    let f = field(&v, "$48,250.00");
+    assert_eq!(f["status"], "check", "{f:#}");
+    assert!(
+        f["why"]
+            .as_array()
+            .unwrap()
+            .contains(&"not_in_second_reading".into()),
+        "{f:#}"
     );
     assert_eq!(v["azure_pages"], "1");
     // Two Apple readings: their agreement is reported, but not as independent.
@@ -641,11 +658,9 @@ fn verify_json_on_an_image_uses_the_second_reader() {
         &["--verify-json", "--verify-fields", "all", "--overwrite"],
     );
     let v = verify_json(&e, "legal_200dpi");
+    // `all` checks it anyway (here already for the page's missing number).
     let f = field(&v, "$122,525.50");
-    assert_eq!(
-        (&f["status"], &f["why"][0]),
-        (&"check".into(), &"unconfirmed".into())
-    );
+    assert_eq!(f["status"], "check", "{f:#}");
 }
 
 #[test]

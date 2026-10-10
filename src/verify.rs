@@ -879,6 +879,14 @@ pub fn report<'a>(
         {
             page_check.push("missing_text".into());
         }
+        // A number the other reading has and the OCR lacks: a dropped deadline, amount or date,
+        // however short its line.
+        if text_agreement
+            .as_ref()
+            .is_some_and(|a| !a.missing_numbers.is_empty())
+        {
+            page_check.push("missing_number".into());
+        }
         for f in &mut fields {
             if f.kind == Kind::Docket && odd.contains(&f.text.to_ascii_lowercase()) {
                 f.why.push("differs_from_usual_docket");

@@ -100,7 +100,7 @@ Then:
 - **State or compute only with values that are `verified`, or confirmed in step 4.** Always give the page, and the Bates number if there is one.
 - **Quote word for word only agreed sentences.** A sentence agrees when it is not in its page's `text_agreement.unagreed` and `text_agreement.independent` is true. A sentence that the second reading in step 3 has word for word also agrees. Otherwise paraphrase, and say the exact wording is unconfirmed.
 - **A word broken at the foot of a page** (`non-`) continues on the next page, past the footer and header (`voting shares`). Never join it to the footer (`nonCOMPLAINT`).
-- **`missing_text` in `page_check`:** the OCR lacks whole lines that another reading has (`text_agreement.missing_lines`). Never say a page does not mention something from its OCR alone. Use the second reading's text, or check the PDF.
+- **`missing_text` or `missing_number` in `page_check`:** the OCR lacks whole lines, or a number, that another reading has (`text_agreement.missing_lines`, `missing_numbers`): a dropped deadline or amount can change what a sentence says. Never say a page does not mention something from its OCR alone. Use the second reading's text, or check the PDF.
 - **`ocr_text_layer: true`:** the page is a scan carrying an older OCR's invisible text layer. That layer counts as one more reading, not as the document's own characters, so agreement with it confirms nothing. Treat the page as a scan.
 - **`check` and `unchecked` values that step 4 did not confirm are unconfirmed.** Never present them as fact.
 - **Never fill a gap from memory or by inference.** If a value cannot be confirmed, say that it needs checking against page N of the PDF.

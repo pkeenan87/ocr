@@ -334,8 +334,9 @@ An example (abridged):
   - **Text agreement:** `text_agreement` is `compared_with: ocr_text_layer`, `independent: false`.
   - **Second reading:** the page never gets `second_reading: embedded_text`.
   - On the public filings this applies to a 1985 note and a handwritten dealer form, whose 120 values were verified against their old layers before.
-- **`page_check`:** the suspect reasons, `failed: …`, `missing_text`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
+- **`page_check`:** the suspect reasons, `failed: …`, `missing_text`, `missing_number`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
   - **`missing_text`:** the other reading (embedded text or second reader) has whole lines the OCR lacks: at least 5 words in lines with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the OCR. They are listed in `text_agreement.missing_lines`.
+  - **`missing_number`:** the other reading has a number on a short line that the OCR has nowhere (`30` in `Pay within` / `30` / `days of notice`): a dropped deadline, amount or date. Listed in `text_agreement.missing_numbers`. A pleading's line numbers (five or more lone numbers) are not counted.
   - On the public filings this caught Apple Vision dropping a whole visible paragraph ("ARTICLE NINTH: Execution of Agreement") and a footnote.
   - On embedded text it can also mean text that is not visible on the page, such as text under a drawn redaction box.
   - A born-digital page with `missing_text` gets `second_reading: embedded_text` when its values match, so reading the PDF's own text covers it at no cost.
@@ -348,7 +349,7 @@ An example (abridged):
   - `independent` is true for embedded text, and for Vision against a model engine. Quote as agreed only from independent comparisons, because two Apple readings share blind spots.
   - `unagreed` lists the sentences that do not agree, each with its line within the page's Markdown and the words the other reading lacks entirely.
   - `agreed_spans` and `agreed_words` count what agrees. `summary.agreed_spans` and `summary.unagreed_spans` total the independent comparisons.
-  - **What is compared:** letters and digits, case-insensitively, and in order. A changed, dropped or doubled word breaks agreement. Line breaks, hyphenation and pleading line numbers don't, and neither does a margin legend that the PDF text puts between a paragraph's lines.
+  - **What is compared:** letters and digits, case-insensitively, and in order; in a number also a `.` or `,` between digits, a minus sign and `%`, so `$1.00` does not agree with `$100`, nor `-25%` with `25%`. A changed, dropped or doubled word breaks agreement. Each word of the other reading backs one sentence only, so a sentence read twice where the page has it once agrees once; the sentences of one line agree only in their order. Line breaks, hyphenation and pleading line numbers don't, and neither does a margin legend that the PDF text puts between a paragraph's lines.
   - **Edges:** a sentence must also start and end where a sentence or line does in the other reading, so a dropped first or last word is caught. Headers and table cells are matched within longer lines.
 
 Measured on the 20 public court filings (230 pages, Apple engine, eval/PUBLIC_SET.md; binary `87f0ac6`, 2026-10-09). A filing counts as e-filed when every page has embedded text, scanned when none has.

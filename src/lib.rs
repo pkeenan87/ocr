@@ -28,5 +28,6 @@ pub mod run;
 pub mod server;
 pub mod supervisor;
 pub mod suspect;
+pub mod telemetry;
 pub mod verify;
 pub mod vision;

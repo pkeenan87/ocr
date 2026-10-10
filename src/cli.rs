@@ -270,8 +270,14 @@ pub struct ScanArgs {
     pub jobs: Option<usize>,
     #[arg(long, conflicts_with = "verbose")]
     pub quiet: bool,
+    /// Per-request detail: with --verbose, one line per model request after each page plan
     #[arg(long)]
     pub verbose: bool,
+    /// Also write `<stem>.timing.json`: per page the prep and recognize time, and per model
+    /// request the round trip, image size, attempt reason, finish reason and the server's own
+    /// tokens and timings (prompt vs decode), with totals per file
+    #[arg(long)]
+    pub timing_json: bool,
     /// Print the planned input -> output mapping and exit
     #[arg(long)]
     pub dry_run: bool,

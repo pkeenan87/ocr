@@ -21,6 +21,7 @@ use crate::model_engine::{Fail, Prepared};
 use crate::pipeline::{self, Settings};
 use crate::progress::{self, Progress};
 use crate::suspect;
+use crate::telemetry::{self, PageTiming};
 use crate::verify;
 use crate::vision::{self, DocKind};
 
@@ -122,7 +123,11 @@ struct Begin {
 
 enum Msg {
     Begin(Box<Begin>),
-    Page { id: usize, page: PageResult },
+    Page {
+        id: usize,
+        page: PageResult,
+        timing: Option<PageTiming>,
+    },
     Stop,
 }
 
@@ -313,6 +318,8 @@ struct Entry {
     mem: BTreeMap<usize, PageResult>,
     ocr: usize,
     text_layer: usize,
+    /// Timing of the pages recognized in this run; the others were resumed.
+    timed: BTreeMap<usize, PageTiming>,
 }
 
 type Done = Result<FileOutcome, (usize, String)>;
@@ -345,12 +352,16 @@ fn writer(
                         mem: BTreeMap::new(),
                         ocr: 0,
                         text_layer: 0,
+                        timed: BTreeMap::new(),
                     },
                 );
                 id
             }
-            Msg::Page { id, page } => {
+            Msg::Page { id, page, timing } => {
                 let e = files.get_mut(&id).expect("pages follow their Begin");
+                if let Some(t) = timing {
+                    e.timed.insert(page.number, t);
+                }
                 let dir = checkpoint::partial_dir(&e.b.output);
                 if page.source == markdown::Source::TextLayer && page.error.is_none() {
                     e.text_layer += 1;
@@ -449,9 +460,14 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         legal_cleanup: cleaned.as_ref().map(|c| c.1),
     };
     let md = markdown::assemble(s.front_matter.then_some(&front), &reviewed, s.page_markers);
+    let mut write_time = Duration::ZERO;
+    let mut verify_time = Duration::ZERO;
+    let t = Instant::now();
     pipeline::write_atomic(&e.b.output, &md).map_err(|err| (id, format!("{err:#}")))?;
+    write_time += t.elapsed();
     if let Some(mode) = s.verify {
         let input = e.b.input.clone();
+        let t = Instant::now();
         let report = verify::report(
             &e.b.name,
             e.b.output.display().to_string(),
@@ -485,11 +501,32 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
             },
             backend.model_ids().is_some(),
         );
+        verify_time = t.elapsed();
         let json = serde_json::to_string_pretty(&report).expect("report serializes");
+        let t = Instant::now();
         pipeline::write_atomic(&verify::sidecar(&e.b.output), &(json + "\n"))
             .map_err(|err| (id, format!("{err:#}")))?;
+        write_time += t.elapsed();
     } else {
         let _ = std::fs::remove_file(verify::sidecar(&e.b.output));
+    }
+
+    if s.timing_json {
+        let ids = backend.model_ids();
+        let json = telemetry::report_json(
+            &backend.name(),
+            ids.as_ref().map(|i| i.0.as_str()),
+            s.dpi,
+            &e.b.selected,
+            &e.timed,
+            &telemetry::FileTimes {
+                wall: e.b.started.elapsed(),
+                verify: verify_time,
+                write: write_time,
+            },
+        );
+        pipeline::write_atomic(&telemetry::sidecar(&e.b.output), &json)
+            .map_err(|err| (id, format!("{err:#}")))?;
     }
 
     let failed: Vec<usize> = results
@@ -549,6 +586,9 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
 /// Runs every item through `backend`. `per_file_bars`: draw a bar per file (directory mode).
 pub fn run(items: &[Item], backend: &dyn Backend, s: &Settings, per_file_bars: bool) -> RunReport {
     let started = Instant::now();
+    if s.timing_json || (s.verbose && !s.quiet) {
+        telemetry::enable();
+    }
     let progress = Progress::new(s.quiet, per_file_bars);
     let (wtx, wrx) = mpsc::channel::<Msg>();
     let (otx, orx) = mpsc::channel::<Done>();
@@ -572,7 +612,7 @@ pub fn run(items: &[Item], backend: &dyn Backend, s: &Settings, per_file_bars: b
     let producers = backend.producers(s).max(1);
     let consumers = backend.consumers(s);
     let (work_tx, work_rx) =
-        sync_channel::<(Arc<FileInfo>, Prepared)>(LOOKAHEAD.max(2 * consumers));
+        sync_channel::<(Arc<FileInfo>, Prepared, Duration)>(LOOKAHEAD.max(2 * consumers));
     let work_rx = Mutex::new(work_rx);
     let mut outcomes = Vec::new();
     let mut failed_writes = Vec::new();
@@ -586,12 +626,20 @@ pub fn run(items: &[Item], backend: &dyn Backend, s: &Settings, per_file_bars: b
             let tx = work_tx.clone();
             handles.push(scope.spawn(move || {
                 while let Some((info, index)) = queue.next(stop) {
+                    let started = Instant::now();
                     match backend.prepare(&info.path, info.kind, index, s) {
                         Work::Done(page) => {
-                            let _ = queue.writer.send(Msg::Page { id: info.id, page });
+                            let timing = s.timing_json.then(|| {
+                                PageTiming::new(page.number, started.elapsed(), None, Vec::new())
+                            });
+                            let _ = queue.writer.send(Msg::Page {
+                                id: info.id,
+                                page,
+                                timing,
+                            });
                         }
                         Work::Model(prep) => {
-                            if tx.send((info, prep)).is_err() {
+                            if tx.send((info, prep, started.elapsed())).is_err() {
                                 break;
                             }
                         }
@@ -604,14 +652,43 @@ pub fn run(items: &[Item], backend: &dyn Backend, s: &Settings, per_file_bars: b
             handles.push(scope.spawn(move || {
                 loop {
                     let msg = work_rx.lock().unwrap().recv();
-                    let Ok((info, prep)) = msg else { break };
+                    let Ok((info, prep, prep_time)) = msg else {
+                        break;
+                    };
                     // After a fatal error keep draining so no producer blocks on a full queue.
                     if stop.load(Ordering::SeqCst) || backend.stopped() {
                         continue;
                     }
-                    match backend.process(&info.path, prep, s) {
+                    let number = prep.index + 1;
+                    let started = Instant::now();
+                    let result = backend.process(&info.path, prep, s);
+                    let recognize = started.elapsed();
+                    let requests = if telemetry::enabled() {
+                        telemetry::take()
+                    } else {
+                        Vec::new()
+                    };
+                    match result {
                         Ok(page) => {
-                            let _ = queue.writer.send(Msg::Page { id: info.id, page });
+                            if s.verbose && !s.quiet {
+                                for (i, r) in requests.iter().enumerate() {
+                                    progress::line(format!(
+                                        "page {number} req {}/{} {}: {}",
+                                        i + 1,
+                                        requests.len(),
+                                        r.label.trim_end_matches(':'),
+                                        r.describe()
+                                    ));
+                                }
+                            }
+                            let timing = s.timing_json.then(|| {
+                                PageTiming::new(number, prep_time, Some(recognize), requests)
+                            });
+                            let _ = queue.writer.send(Msg::Page {
+                                id: info.id,
+                                page,
+                                timing,
+                            });
                         }
                         Err(Fail::Stopped(msg)) => {
                             stop.store(true, Ordering::SeqCst);

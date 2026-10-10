@@ -262,6 +262,7 @@ fn settings(args: &ScanArgs) -> Settings {
         verify: args.verify_json.then_some(args.verify_fields),
         quiet: args.quiet,
         verbose: args.verbose,
+        timing_json: args.timing_json,
         options: Options::default(),
     }
 }

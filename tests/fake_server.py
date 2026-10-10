@@ -161,11 +161,20 @@ class Handler(BaseHTTPRequestHandler):
         if LOG and not probe:
             with LOCK, open(LOG + ".end", "a") as f:
                 f.write(json.dumps({"n": n, "t": time.time()}) + "\n")
-        self.send(200, {
+        out = {
             "model": MODEL,
             "choices": [{"index": 0, "message": {"role": "assistant", "content": content},
                          "finish_reason": reason}],
-        })
+        }
+        if os.environ.get("FAKE_TIMINGS") and not probe:
+            # mlx-vlm 0.7.6 / llama.cpp style per-request metrics.
+            out["usage"] = {"prompt_tokens": 1000, "completion_tokens": 50, "total_tokens": 1050,
+                            "prompt_tokens_details": {"cached_tokens": 0}}
+            out["timings"] = {"prompt_n": 1000, "cache_n": 0, "predicted_n": 50,
+                              "prompt_ms": 500.0, "prompt_per_second": 2000.0,
+                              "predicted_ms": 250.0, "predicted_per_second": 200.0,
+                              "peak_memory": 3.5}
+        self.send(200, out)
 
 
 OLM_FRONT = ("---\nprimary_language: en\nis_rotation_valid: {valid}\nrotation_correction: {rot}\n"

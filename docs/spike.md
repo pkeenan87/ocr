@@ -811,3 +811,33 @@ The 12 values that no longer verify:
 All 12 are false alarms in the safe direction. Taking label words from after a reference value as well would recover them, but it lets a swap through (the next value's label is taken), so it was not done.
 
 **Not changed:** a date at the start of a line (`2 March 2023`) is still not extracted, by design. It is indistinguishable from a pleading line number before `March 2023`.
+
+## Text agreement that keeps numbers (2026-10-09)
+
+From the adversarial review, findings F03 and F10, reproduced on master. Each of these agreed word for word:
+- `Payment is $1.00.` against `$100.`;
+- `-25%` against `25%`;
+- a `30` dropped from `Pay within` / `30` / `days of notice`;
+- two sentences in reverse order;
+- a sentence read twice where the page has it once.
+
+A value the other reading has and the OCR dropped was never reported.
+
+**Now:**
+- In a number, a `.` or `,` between digits, a minus sign and `%` are compared.
+- Each word of the other reading backs one sentence, and the sentences of one line agree only in their order. Separate lines may still differ in order (headers, columns).
+- A number on a short line of the other reading that the OCR has nowhere is listed in `missing_numbers`, and puts `missing_number` in `page_check`. Only real numbers count: `exhibi1s` is a misread word. A pleading's line numbers (five or more lone numbers) are skipped.
+- Values the other reading has and the OCR lacks are listed per page in `expected_fields_missing`. In `all` mode the page gets `fields_missing`.
+
+**Public filings, macOS 26, as users run it:**
+
+| | Before | Now |
+|---|---|---|
+| Values verified (`all`) | 478 | 478 |
+| `azure_pages`, `all` | 118 | 118 |
+| `azure_pages`, `flagged` | 87 | 90 |
+| Agreed sentences (`all`, user run) | 6,998 of 9,118 | 6,925 of 9,132 |
+| Pages with `missing_number` | – | 40 |
+| Pages with `fields_missing` (`all`) | – | 59 |
+
+The blind run still catches 21 of 21 wrong values.

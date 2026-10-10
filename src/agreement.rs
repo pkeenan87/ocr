@@ -105,7 +105,15 @@ fn missing_numbers(body: &str, other: &str) -> Vec<String> {
         if w.len() >= 4 || (line_number(t) && alone >= 5) {
             continue;
         }
-        for n in w.iter().filter(|w| w.chars().any(|c| c.is_ascii_digit())) {
+        // Numbers only: a word with a digit in it (`exhibi1s`, `defendant5`) is a misread
+        // word, which the sentence comparison already reports.
+        let number = |w: &&String| {
+            let t = w.trim_start_matches('-').trim_end_matches('%');
+            t.starts_with(|c: char| c.is_ascii_digit())
+                && t.chars()
+                    .all(|c| c.is_ascii_digit() || c == ',' || c == '.')
+        };
+        for n in w.iter().filter(number) {
             if !have.contains(n) && !out.contains(n) {
                 out.push(n.clone());
             }
@@ -701,6 +709,9 @@ mod tests {
         assert_eq!(a.missing_numbers, ["30"], "{a:#?}");
         let a = compare("Total due", "Total due\n$8,000.00", "x", true);
         assert_eq!(a.missing_numbers, ["8,000.00"], "{a:#?}");
+        // A misread word is not a missing number.
+        let a = compare("See the exhibits.", "See the\nexhibi1s", "x", true);
+        assert!(a.missing_numbers.is_empty(), "{a:#?}");
         // Present elsewhere on the page: not missing.
         let a = compare(
             "Pay within 30\ndays of notice.",

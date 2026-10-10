@@ -340,6 +340,7 @@ An example (abridged):
   - On the public filings this applies to a 1985 note and a handwritten dealer form, whose 120 values were verified against their old layers before.
 - **`page_check`:** the suspect reasons, `failed: …`, `missing_text`, `missing_number`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
   - **`missing_text`:** the other reading (embedded text or second reader) has whole lines the OCR lacks: at least 5 words in lines with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the OCR. They are listed in `text_agreement.missing_lines`.
+  - **`fields_missing`** (`all` mode only): the other reading has values the OCR has nowhere on the page, listed in the page's `expected_fields_missing` (as that reading writes them). A dropped total or deadline is a missing value, not a wrong one, but it still needs a look.
   - **`missing_number`:** the other reading has a number on a short line that the OCR has nowhere (`30` in `Pay within` / `30` / `days of notice`): a dropped deadline, amount or date. Listed in `text_agreement.missing_numbers`. A pleading's line numbers (five or more lone numbers) are not counted.
   - On the public filings this caught Apple Vision dropping a whole visible paragraph ("ARTICLE NINTH: Execution of Agreement") and a footnote.
   - On embedded text it can also mean text that is not visible on the page, such as text under a drawn redaction box.

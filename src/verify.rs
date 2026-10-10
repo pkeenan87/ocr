@@ -680,17 +680,46 @@ fn second_reading(lines: &[Line]) -> SecondReading {
         }
     }
     let mut doubtful = HashSet::new();
+    let keys_of = |t: &str| embedded_keys(&crate::markdown::fix_legal_symbols(t).0);
+    // No confidence is no better than a low one.
+    let unsure = |l: &Line| {
+        l.confidence
+            .is_none_or(|c| c < SECOND_READER_MIN_CONFIDENCE)
+    };
     for l in lines {
-        let mine = embedded_keys(&crate::markdown::fix_legal_symbols(&l.text).0);
-        if l.confidence
-            .is_some_and(|c| c < SECOND_READER_MIN_CONFIDENCE)
-        {
+        let mine = keys_of(&l.text);
+        if unsure(l) {
             doubtful.extend(mine);
             continue;
         }
         for alt in &l.alternatives {
-            let theirs = embedded_keys(&crate::markdown::fix_legal_symbols(alt).0);
-            doubtful.extend(mine.difference(&theirs).cloned());
+            doubtful.extend(mine.difference(&keys_of(alt)).cloned());
+        }
+    }
+    // A value split over two lines (`January 1,` / `2024`) is as doubtful as either line.
+    for pair in lines.windows(2) {
+        let (a, b) = (&pair[0], &pair[1]);
+        let joined = keys_of(&format!("{}\n{}", a.text, b.text));
+        let (ka, kb) = (keys_of(&a.text), keys_of(&b.text));
+        let spanning: Vec<String> = joined
+            .into_iter()
+            .filter(|k| !ka.contains(k) && !kb.contains(k))
+            .collect();
+        if spanning.is_empty() {
+            continue;
+        }
+        if unsure(a) || unsure(b) {
+            doubtful.extend(spanning);
+            continue;
+        }
+        let alts = a
+            .alternatives
+            .iter()
+            .map(|x| format!("{x}\n{}", b.text))
+            .chain(b.alternatives.iter().map(|x| format!("{}\n{x}", a.text)));
+        for alt in alts {
+            let theirs = keys_of(&alt);
+            doubtful.extend(spanning.iter().filter(|k| !theirs.contains(*k)).cloned());
         }
     }
     SecondReading {
@@ -812,6 +841,17 @@ pub fn report<'a>(
         if let Some(e) = &p.error {
             page_check.push(format!("failed: {e}"));
         }
+        // What the engine itself flagged: the model failed and Apple's text stands in, a crop
+        // came back empty or a reply was cut short, or a transcript's line numbers could not be
+        // re-anchored to the page.
+        if p.fallback {
+            page_check.push("engine_fallback".into());
+        } else if p.flagged && p.error.is_none() {
+            page_check.push("engine_flagged".into());
+        }
+        if p.line_numbers == Some(false) {
+            page_check.push("line_numbers_unverified".into());
+        }
         if let Some(b) = &p.bates {
             let mut why = vec![];
             if usual
@@ -923,7 +963,9 @@ pub fn report<'a>(
                 if r.doubtful.contains(k) {
                     f.why.push("doubtful_in_second_reading");
                 } else if r.keys.contains(k) {
-                    if model_engine && !p.fallback {
+                    // A model page's Bates number comes from Apple Vision's side pass, so the
+                    // Apple second reading is the same reader again: it confirms nothing.
+                    if model_engine && !p.fallback && f.kind != Kind::Bates {
                         found = true;
                         matched = "matches_second_reading";
                     }
@@ -1320,6 +1362,92 @@ mod tests {
         }
     }
 
+    fn read_at(text: &str, confidence: Option<f64>) -> Line {
+        Line {
+            confidence,
+            ..read(text)
+        }
+    }
+
+    fn second(pages: &[PageResult], lines: Vec<Line>) -> Report<'static> {
+        report(
+            "x.pdf",
+            "x.md".into(),
+            "model",
+            "now",
+            pages,
+            VerifyFields::Flagged,
+            &|_| Embedded::default(),
+            &|_| Some(lines.clone()),
+            true,
+        )
+    }
+
+    #[test]
+    fn a_value_split_over_doubtful_lines_is_doubtful() {
+        let pages = [page(1, "The note is due on January 1, 2024 at noon.")];
+        let r = second(
+            &pages,
+            vec![
+                read_at("The note is due on January 1,", Some(0.1)),
+                read_at("2024 at noon.", Some(0.1)),
+            ],
+        );
+        let s = statuses(&r);
+        assert_eq!(s[0].1, Status::Check, "{s:?}");
+        assert!(s[0].2.contains(&"doubtful_in_second_reading"), "{s:?}");
+        // Sure on both lines, it verifies.
+        let r = second(
+            &pages,
+            vec![
+                read_at("The note is due on January 1,", Some(1.0)),
+                read_at("2024 at noon.", Some(1.0)),
+            ],
+        );
+        assert_eq!(statuses(&r)[0].1, Status::Verified, "{:?}", statuses(&r));
+        // No confidence is not sure.
+        let r = second(
+            &pages,
+            vec![read_at("The note is due on January 1, 2024 at noon.", None)],
+        );
+        assert_eq!(statuses(&r)[0].1, Status::Check, "{:?}", statuses(&r));
+    }
+
+    #[test]
+    fn a_model_page_bates_number_is_not_verified_by_apple_again() {
+        let mut p = page(1, "Exhibit A to the declaration of counsel.");
+        p.bates = Some("ABC0001234".into());
+        let r = second(
+            &[p],
+            vec![
+                read("Exhibit A to the declaration of counsel."),
+                read("ABC0001234"),
+            ],
+        );
+        let s = statuses(&r);
+        assert_eq!(s[0].0, "ABC0001234");
+        assert_ne!(s[0].1, Status::Verified, "{s:?}");
+    }
+
+    #[test]
+    fn engine_flags_send_the_page_for_a_second_reading() {
+        for (fallback, flagged, line_numbers, why) in [
+            (true, true, None, "engine_fallback"),
+            (false, true, None, "engine_flagged"),
+            (false, false, Some(false), "line_numbers_unverified"),
+        ] {
+            let mut p = page(1, "Readable prose with no values in it at all.");
+            (p.fallback, p.flagged, p.line_numbers) = (fallback, flagged, line_numbers);
+            let r = run(&[p], VerifyFields::All, "");
+            assert!(
+                r.pages[0].page_check.iter().any(|c| c == why),
+                "{why}: {:?}",
+                r.pages[0].page_check
+            );
+            assert_eq!(r.azure_pages, "1", "{why}");
+        }
+    }
+
     #[test]
     fn a_second_reading_confirms_or_contradicts_values_on_scans() {
         let body = "Paid $5,500 on January 11, 2008 and $48,250.00 on May 7, 2007 in \
@@ -1442,10 +1570,17 @@ mod tests {
             );
             let got = statuses(&r);
             let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
-            assert_eq!(status("$5,500").1, Status::Unchecked);
-            assert!(status("$5,500").2.is_empty());
+            // Nothing is verified. A fallen-back page is checked as a whole (`engine_fallback`).
+            if model {
+                assert_eq!(status("$5,500").1, Status::Check);
+                assert_eq!(status("$5,500").2, vec!["suspect_page"]);
+                assert!(r.pages[0].page_check.contains(&"engine_fallback".to_string()));
+            } else {
+                assert_eq!(status("$5,500").1, Status::Unchecked);
+                assert!(status("$5,500").2.is_empty());
+            }
             assert_eq!(status("$48,250.00").1, Status::Check);
-            assert_eq!(status("$48,250.00").2, vec!["not_in_second_reading"]);
+            assert!(status("$48,250.00").2.contains(&"not_in_second_reading"));
         }
     }
 

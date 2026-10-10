@@ -17,6 +17,9 @@ olmOCR front matter; `longtable` adds a table of 80 identical rows (olmOCR text,
 element), which must not be mistaken for a loop; `truncated` cuts the dots JSON in the middle of an element with finish
 stop.
 
+FAKE_PLAIN_MODE, if set, replaces FAKE_MODE for the dots `Extract the text content` (plain
+text) prompt only, so a test can fail the plain request and still reach the layout one.
+
 With FAKE_REPLIES naming a JSON list of strings, the `OCR:` reply of request number `n` is
 `list[(n - 1) % len(list)]` instead of `fake ocr text WxH` (needs FAKE_LOG for the numbering).
 
@@ -208,6 +211,9 @@ def dots_elements(w, h):
 def reply(prompt, w, h, active):
     """(content, finish_reason) for a real request; `active` turns the failure mode on."""
     mode = MODE if active else "ok"
+    plain = os.environ.get("FAKE_PLAIN_MODE")
+    if active and plain and prompt.startswith("Extract the text content"):
+        mode = plain
     reason = "length" if mode == "length" else "stop"
     if mode == "empty":
         return "", reason

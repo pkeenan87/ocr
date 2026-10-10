@@ -909,7 +909,7 @@ fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fa
 pub struct Prepared {
     pub(crate) index: usize,
     bates: Option<String>,
-    transcript: bool,
+    pub(crate) transcript: bool,
     /// Transcript pages: the mini-pages with their Vision lines.
     mini: Vec<MiniPage>,
     column_split: bool,

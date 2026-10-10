@@ -115,6 +115,69 @@ pub fn render_png(
     render_png_fit(path, page_index, dpi, crop, None, 0)
 }
 
+/// Whether a PDF page's embedded text is the document's own characters.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum TextVisibility {
+    /// Drawn visibly (or the page has no text): the document's own characters.
+    #[default]
+    Visible,
+    /// Mostly drawn invisibly (render mode 3, or fully transparent): another OCR's reading laid
+    /// over a scan.
+    OcrLayer,
+    /// The page could not be read (a scan error, or an unsupported platform): confirms nothing.
+    Unknown,
+}
+
+impl TextVisibility {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Visible => "visible",
+            Self::OcrLayer => "ocr_layer",
+            Self::Unknown => "unknown",
+        }
+    }
+}
+
+/// Characters of a page's text drawn visibly and invisibly.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct CharCounts {
+    pub shown: usize,
+    pub invisible: usize,
+}
+
+/// An OCR layer is a fifth or more of the page's characters drawn invisibly, or 200 of them. A
+/// short hidden layer under a long visible text is not enough to call the page a scan, but a
+/// long one is never the document's own, whatever else the page shows.
+pub fn classify_visibility(c: CharCounts) -> TextVisibility {
+    let all = c.shown + c.invisible;
+    if c.invisible >= 200 || (c.invisible > 0 && c.invisible * 5 >= all) {
+        TextVisibility::OcrLayer
+    } else {
+        TextVisibility::Visible
+    }
+}
+
+/// Whether page `page_index` (0-based) of `path` has an invisible OCR text layer. Images have no
+/// text layer. Any error reading the page is `Unknown`, never `Visible`.
+pub fn text_visibility(path: &Path, page_index: usize) -> TextVisibility {
+    if !is_pdf_path(path) {
+        return TextVisibility::Visible;
+    }
+    match char_counts(path, page_index) {
+        Ok(c) => classify_visibility(c),
+        Err(_) => TextVisibility::Unknown,
+    }
+}
+
+/// By content, not extension: a PDF under another name still has a text layer.
+fn is_pdf_path(path: &Path) -> bool {
+    use std::io::Read;
+    let mut head = [0u8; 5];
+    std::fs::File::open(path)
+        .and_then(|mut f| f.read_exact(&mut head))
+        .is_ok_and(|()| &head == b"%PDF-")
+}
+
 #[cfg(target_os = "macos")]
 mod apple;
 #[cfg(target_os = "macos")]
@@ -128,3 +191,23 @@ pub use portable::*;
 mod document;
 #[cfg(not(target_os = "macos"))]
 pub use document::*;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn class(shown: usize, invisible: usize) -> TextVisibility {
+        classify_visibility(CharCounts { shown, invisible })
+    }
+
+    #[test]
+    fn a_fifth_hidden_or_two_hundred_chars_is_an_ocr_layer() {
+        assert_eq!(class(0, 0), TextVisibility::Visible);
+        assert_eq!(class(5000, 0), TextVisibility::Visible);
+        assert_eq!(class(5000, 10), TextVisibility::Visible);
+        assert_eq!(class(80, 20), TextVisibility::OcrLayer);
+        assert_eq!(class(81, 19), TextVisibility::Visible);
+        assert_eq!(class(10_000, 200), TextVisibility::OcrLayer);
+        assert_eq!(class(0, 5), TextVisibility::OcrLayer);
+    }
+}

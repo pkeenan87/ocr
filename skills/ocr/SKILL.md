@@ -69,7 +69,7 @@ Always use `--verify-fields all` for this workflow. The default, `flagged`, leav
 
 - `summary`: how many values are `verified`, `check` and `unchecked`.
 - `azure_pages`: the pages that need a second reading, in Azure's `pages` syntax (`3,7-9`). It is empty when the PDF's own text already confirmed everything.
-- Per page: `fields` (each with `kind`, `text`, `value`, `line`, `status`, `why`), `page_check`, `second_reading`, `text_agreement`, `ocr_text_layer`.
+- Per page: `fields` (each with `kind`, `text`, `value`, `line`, `status`, `why`), `page_check`, `second_reading`, `text_agreement`, `ocr_text_layer`, `text_layer_visibility`.
 - `verified` values were matched by an independent reading: the PDF's own characters, or Vision against a model engine. Nothing else is `verified`.
 
 ### 3. Get the second reading, only for `azure_pages`
@@ -102,6 +102,7 @@ Then:
 - **A word broken at the foot of a page** (`non-`) continues on the next page, past the footer and header (`voting shares`). Never join it to the footer (`nonCOMPLAINT`).
 - **`missing_text` in `page_check`:** the OCR lacks whole lines that another reading has (`text_agreement.missing_lines`). Never say a page does not mention something from its OCR alone. Use the second reading's text, or check the PDF.
 - **`ocr_text_layer: true`:** the page is a scan carrying an older OCR's invisible text layer. That layer counts as one more reading, not as the document's own characters, so agreement with it confirms nothing. Treat the page as a scan.
+- **`text_layer_visibility`:** `visible`, `ocr_layer` or `unknown`, per page with embedded text. `unknown` (the text's drawing could not be read, including any scan error) confirms nothing, like `ocr_layer`: treat the page as a scan and do not call a value verified because the embedded text has it.
 - **`check` and `unchecked` values that step 4 did not confirm are unconfirmed.** Never present them as fact.
 - **Never fill a gap from memory or by inference.** If a value cannot be confirmed, say that it needs checking against page N of the PDF.
 

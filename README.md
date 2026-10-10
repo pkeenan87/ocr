@@ -187,7 +187,7 @@ Notes on the options:
   - A page is corrected only when at least 90% of its words agree with the embedded text, so a hidden layer that does not match the printed page (another draft, a bad scanner OCR layer) changes nothing.
   - A differing word is replaced only when it looks like a misread of the embedded word: at most a third of its characters differ. `thirty` never becomes `sixty`.
   - **Text in the layer that Vision did not see on the page is never inserted.** This covers words under a drawn redaction box, white or invisible text, and neighbouring text caught by a box.
-  - **Text drawn invisibly (render mode 3, or fully transparent) is never a correction.** That is how OCR tools lay a text layer over a scan. Such text is another OCR's reading, not the document's characters (a 1985 note's layer reads `qction`).
+  - **Text drawn invisibly (render mode 3, or fully transparent) is never a correction, nor is text whose drawing cannot be read.** Invisible text is found by counting characters, also inside form XObjects: a fifth of the page's characters, or 200, makes it an OCR layer. That is how OCR tools lay a text layer over a scan. Such text is another OCR's reading, not the document's characters (a 1985 note's layer reads `qction`).
   - **Column-split pages and transcripts are corrected too**, with stricter rules:
     - each box takes exactly the characters inside it, rather than PDFKit's drag-like selection, which takes in the neighbouring column's lines;
     - words of one or two characters change only between look-alike characters, so a misaligned line number `7` never becomes `6`.
@@ -313,6 +313,7 @@ An example (abridged):
   - `suspect_page`: the page is in `suspect_pages`, failed, or has `missing_text`.
   - `not_in_embedded_text`: the page has embedded text and the value is not in it.
   - `not_in_ocr_text_layer`: the page's embedded text is an invisible OCR layer (see `ocr_text_layer`), and the value is not in it.
+  - `text_layer_unknown`: the page's embedded text could not be classified as visible or not (`text_layer_visibility: unknown`), and the value is not in it.
   - `confusable_characters`: a letter that looks like a digit (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`), such as `3:26-cv-O4417` or `$1,O00`. Such a field has no `value`.
   - `invalid_date`: an impossible date, such as `02/30` or `0Q`.
   - `malformed_amount`: broken digit grouping, such as `$4825,0.00`.
@@ -329,7 +330,8 @@ An example (abridged):
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
 - **Values:** amounts include a scale word (`$33.5 million` has the value 33500000), also when the word starts the next line, and a `K`/`M`/`B` suffix (`$1.5B`). Dates are YYYY-MM-DD. A day-first date at the start of a line (`2 March 2023`) is skipped, because there it is a pleading line number before `March 2023`.
 - **A value that matches the embedded text is `verified`,** even on a suspect page: two independent readings agree on it.
-- **`ocr_text_layer`:** the page's embedded text is drawn invisibly over a scan (text render mode 3, or fully transparent as iOS scanner apps draw it). That is how OCR tools add a text layer, so the text is another OCR's reading, not the document's own characters.
+- **`text_layer_visibility`:** `visible`, `ocr_layer` or `unknown`, for a page with embedded text. It counts characters drawn invisibly (render mode 3 or 7, or fill alpha 0), also inside form XObjects. `ocr_layer` is a fifth of the characters or 200 of them. `unknown` (the drawing could not be read, including any scan error, and every platform without the scan) is treated like `ocr_layer`: nothing is verified against that text, a disagreement still counts, and the text agreement is `compared_with: unknown_text_layer`, `independent: false`.
+- **`ocr_text_layer`:** `true` when `text_layer_visibility` is `ocr_layer`: the page's embedded text is drawn invisibly over a scan (text render mode 3, or fully transparent as iOS scanner apps draw it). That is how OCR tools add a text layer, so the text is another OCR's reading, not the document's own characters.
   - **Values:** agreement with it verifies nothing. A disagreement still turns a value into `check`.
   - **Text agreement:** `text_agreement` is `compared_with: ocr_text_layer`, `independent: false`.
   - **Second reading:** the page never gets `second_reading: embedded_text`.
@@ -399,7 +401,7 @@ Guidance:
 ## Limitations
 
 - Transcript line numbers are re-anchored to page geometry for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr and olmOCR). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
-- The raw text-layer path (`--use-text-layer always`) has no layout handling. The default `auto` does not correct pages whose text layer is invisible OCR, because that layer is another reading, not the document's characters.
+- The raw text-layer path (`--use-text-layer always`) has no layout handling. The default `auto` does not correct pages whose text layer is invisible OCR or whose visibility cannot be read, because that layer is another reading, not the document's characters.
 - Pleading margin line numbers (1-2 digits in the left margin) are dropped by Apple Vision, dots and olmOCR but kept by `paddleocr-vl`, where they can be glued to paragraph numbers and land in table crops on pleading paper. Recovering `page:line` citations is not implemented.
 - With olmOCR, a rotated page loses its Bates number in the marker, because the Apple side-pass cannot read a sideways page.
 - Column detection was tuned on synthetic fixtures; it found about 97.6% of lines on held-out synthetic layouts, and unusual layouts can still be mis-ordered.

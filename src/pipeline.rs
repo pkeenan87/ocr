@@ -176,8 +176,10 @@ pub(crate) fn vision_page(path: &Path, index: usize, s: &Settings) -> PageResult
             let (mut block_fixes, mut line_fixes) = (None, None);
             // Text drawn invisibly over a scan is another OCR's reading (a 1985 note's old layer
             // turned `action` into `qction`), not the document's characters: never a correction.
-            let ocr_layer = || vision::invisible_text_share(path, index).is_ok_and(|v| v > 0.5);
-            if s.text_layer == TextLayer::Auto && !ocr_layer() {
+            // A page that cannot be read is no better: only visible text corrects.
+            let visible =
+                || vision::text_visibility(path, index) == vision::TextVisibility::Visible;
+            if s.text_layer == TextLayer::Auto && visible() {
                 // Columns and multi-up transcripts need the characters inside each box exactly.
                 let exact = page.split || page.transcript;
                 block_fixes = correct_page_blocks(path, index, &mut page.blocks, exact);

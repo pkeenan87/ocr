@@ -12,7 +12,7 @@ use image::imageops::FilterType;
 use image::{DynamicImage, GrayImage as Luma8, ImageFormat, RgbImage, RgbaImage};
 use pdfium_render::prelude::*;
 
-use super::{DocInfo, DocKind, GrayImage};
+use super::{CharCounts, DocInfo, DocKind, GrayImage};
 
 /// Largest bitmap side we will render, to bound memory on oversized page boxes (as the bridge).
 const MAX_SIDE: f64 = 16384.0;
@@ -408,9 +408,55 @@ pub fn text_in_regions(
     anyhow::bail!("text by region needs Apple Vision layout (macOS)")
 }
 
-/// Only used to decide Apple's embedded-text correction, which needs macOS.
-pub fn invisible_text_share(_path: &Path, _page_index: usize) -> Result<f64> {
-    anyhow::bail!("invisible-text detection needs PDFKit (macOS)")
+/// Characters of a PDF page's text drawn visibly and invisibly, form XObjects included. A text
+/// object is invisible in a mode that neither fills nor strokes (invisible, or clip only) or with
+/// a fill alpha of 0. Anything pdfium cannot tell is an error, which callers treat as unknown.
+pub(super) fn char_counts(path: &Path, page_index: usize) -> Result<CharCounts> {
+    let pdfium = pdfium()?;
+    let doc = open_pdf(&pdfium, path)?;
+    let page = pdf_page(&doc, page_index)?;
+    let mut counts = CharCounts::default();
+    count_chars(page.objects().iter(), 0, &mut counts)?;
+    Ok(counts)
+}
+
+/// Deepest nesting of form XObjects entered.
+const MAX_FORM_DEPTH: usize = 8;
+
+fn count_chars<'a>(
+    objects: impl Iterator<Item = PdfPageObject<'a>>,
+    depth: usize,
+    counts: &mut CharCounts,
+) -> Result<()> {
+    for object in objects {
+        if let Some(text) = object.as_text_object() {
+            let n = text.text().chars().count();
+            let hidden_mode = !matches!(
+                text.render_mode(),
+                PdfPageTextRenderMode::FilledUnstroked
+                    | PdfPageTextRenderMode::StrokedUnfilled
+                    | PdfPageTextRenderMode::FilledThenStroked
+                    | PdfPageTextRenderMode::FilledUnstrokedClipping
+                    | PdfPageTextRenderMode::StrokedUnfilledClipping
+                    | PdfPageTextRenderMode::FilledThenStrokedClipping
+            );
+            let fill = text
+                .fill_color()
+                .map_err(|e| anyhow!("text fill colour: {e}"))?;
+            // An unrecognised mode (`Unknown`) counts as hidden: not a guess that it is visible.
+            if hidden_mode || fill.alpha() == 0 {
+                counts.invisible += n;
+            } else {
+                counts.shown += n;
+            }
+        } else if let Some(form) = object.as_x_object_form_object() {
+            if depth >= MAX_FORM_DEPTH {
+                bail!("form XObjects nested too deeply");
+            }
+            count_chars(form.iter(), depth + 1, counts)?;
+        }
+    }
+    Ok(())
 }
 
 pub fn text_layer(path: &Path, page_index: usize) -> Result<String> {

@@ -82,7 +82,8 @@ Always use `--verify-fields all` for this workflow. The default, `flagged`, leav
 ### 4. Reconcile each unconfirmed value with the second reading
 
 For every `check` or `unchecked` field on a page that was re-read, find the same value in the second reading of that page, and compare it **by value, not as text**:
-- amounts in cents, so `$3,000` is not `$3,000,000`;
+- amounts in cents and with their sign, so `$3,000` is not `$3,000,000` and `$100.00` is not `-$100.00` or a bracketed `($100.00)` in a table;
+- each occurrence on its own, after its own label: `Principal: $3,000` is not confirmed by the second reading's `Interest: $3,000`;
 - dates as YYYY-MM-DD;
 - docket and Bates numbers as their letters and digits;
 - citations by section or paragraph number **and their sign**: `¶ 60` and `160` are different values, and so are `§ 5` and `§§ 1301`. Both readers tested misread `¶` as `1`, `9` or nothing, each in its own way, so a citation whose sign is missing or different in either reading is a disagreement, never a match;

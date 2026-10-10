@@ -312,6 +312,8 @@ An example (abridged):
 - **`check`:** something speaks against the value. `why` says what:
   - `suspect_page`: the page is in `suspect_pages`, failed, or has `missing_text`.
   - `not_in_embedded_text`: the page has embedded text and the value is not in it.
+  - `label_differs`: the value is in the other reading, but only after other words: each occurrence there backs one OCR value, after the same label (`Principal: $3,000` is not confirmed by `Interest: $3,000`). Header values that the PDF's text puts in another order can get this too, which only sends them for a check.
+  - `more_often_than_in_reference`: the OCR has the value more times than the other reading (`$3,000` twice where the page has it once).
   - `not_in_ocr_text_layer`: the page's embedded text is an invisible OCR layer (see `ocr_text_layer`), and the value is not in it.
   - `text_layer_unknown`: the page's embedded text could not be classified as visible or not (`text_layer_visibility: unknown`), and the value is not in it.
   - `confusable_characters`: a letter that looks like a digit (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`), such as `3:26-cv-O4417` or `$1,O00`. Such a field has no `value`.

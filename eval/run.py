@@ -167,9 +167,10 @@ def main():
                 print("WARNING busy machine:", busy, file=sys.stderr)
             # Apple Vision occasionally segfaults inside TextRecognition (objc_retain, about 1%
             # of runs, Phase 6 finding). A signal death is retried (max 3 attempts) and counted.
+            # Wall time is charged for every attempt, crashed ones included.
             crashes = 0
+            t0 = time.perf_counter()
             while True:
-                t0 = time.perf_counter()
                 if timer:
                     p, child_peak = subprocess.run(cmd, env=env, capture_output=True, text=True), None
                 else:
@@ -186,8 +187,12 @@ def main():
             if p.returncode not in (0, 1) or not md.exists():
                 entry["error"] = p.stderr.strip()[-500:]
             else:
-                s = scorer.score(gt, md.read_text(), strip_line_numbers=(fam == "pleading"),
-                                 keep_furniture=a.keep_furniture)
+                try:
+                    s = scorer.score(gt, md.read_text(), strip_line_numbers=(fam == "pleading"),
+                                     keep_furniture=a.keep_furniture)
+                except scorer.PageError as err:
+                    entry["error"] = f"unscoreable output: {err}"
+            if "error" not in entry:
                 entry.update({k: s[k] for k in ("cer", "dist_sum", "len_sum", "tokens_found", "tokens_total",
                                                 "bates_ok", "bates_total", "tl_ok", "tl_total", "pages_in_output")})
                 entry["cer_pages"] = s["cer_pages"]

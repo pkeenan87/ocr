@@ -6,7 +6,7 @@ use std::path::Path;
 use anyhow::{Context, Result, bail};
 use serde::Deserialize;
 
-use super::{Block, DocInfo, DocKind, GrayImage, Line, Options, Page};
+use super::{Block, CharCounts, DocInfo, DocKind, GrayImage, Line, Options, Page};
 
 unsafe extern "C" {
     fn ocr_bridge_recognize_document(
@@ -155,14 +155,14 @@ struct InvisibleOut {
     ok: bool,
     error: Option<String>,
     #[serde(default)]
-    shown: usize,
+    shown_chars: usize,
     #[serde(default)]
-    invisible: usize,
+    invisible_chars: usize,
 }
 
-/// Share of a PDF page's text drawn invisibly (render mode 3): an OCR layer over a scan, whose
-/// characters are another reading, not the document's own. 0 when the page has no text.
-pub fn invisible_text_share(path: &Path, page_index: usize) -> Result<f64> {
+/// Characters of a PDF page's text drawn visibly and invisibly (render mode 3 or 7, or fully
+/// transparent), form XObjects included.
+pub(super) fn char_counts(path: &Path, page_index: usize) -> Result<CharCounts> {
     let c_path = cstr(&path.to_string_lossy())?;
     let json = unsafe {
         take(ocr_bridge_invisible_text(
@@ -174,11 +174,9 @@ pub fn invisible_text_share(path: &Path, page_index: usize) -> Result<f64> {
     if !out.ok {
         bail!("invisible text: {}", out.error.unwrap_or_default());
     }
-    let all = out.shown + out.invisible;
-    Ok(if all == 0 {
-        0.0
-    } else {
-        out.invisible as f64 / all as f64
+    Ok(CharCounts {
+        shown: out.shown_chars,
+        invisible: out.invisible_chars,
     })
 }
 

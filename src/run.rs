@@ -417,8 +417,7 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
                 }
                 verify::Embedded {
                     text: vision::text_layer(&input, page - 1).unwrap_or_default(),
-                    ocr_layer: vision::invisible_text_share(&input, page - 1)
-                        .is_ok_and(|v| v > 0.5),
+                    visibility: vision::text_visibility(&input, page - 1),
                 }
             },
             &|page| {

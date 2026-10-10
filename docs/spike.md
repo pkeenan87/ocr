@@ -927,7 +927,7 @@ All of them are paired accuracy-and-speed runs on the same pages.
 |---|---|---|---|---|---|
 | pleading, contract, fax, table (seeds 10–12) | 37 | 11.4 / 11.1 / 8.9 / 14.9 → 6.8 / 7.5 / 5.6 / 13.7 | 1,010–1,506 → 258–1,361 | equal or better in every family (fax 6.26% → 0.68%) | token recall 100% both |
 | production, seed 10, pages 1–60 | 60 | 7.4 → 5.2 | 513 → 241 | 0.59% → 0.28% | Bates 60/60 both |
-| 4-up transcripts (seeds 10–19) | 25 | 37.0 → 14.2 | about 4,100 → 1,190 | 1.33% → 2.11% (pooled) | lines 77% → 89% (seeds 10–12) but 93.7% → 90.8% (seeds 13–19); recall 100% → 99.6% |
+| 4-up transcripts (seeds 10–19) | 25 | 37.1 → 14.2 | about 4,100 → 1,190 | 1.29% → 2.10% (pooled) | lines pooled 87.8% → 90.0% (77% → 89% on seeds 10–12, 93.7% → 90.8% on 13–19); recall 100% → 99.7% |
 
 **Public filings** (word error against the PDF's text, 64 pages): plain was 1.3–2.1× faster. Word error went both ways (14.2% → 14.9%, 15.1% → 12.4%, 10.7% → 11.3%), within the noise of reading order.
 

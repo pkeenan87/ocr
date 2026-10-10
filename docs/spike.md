@@ -782,3 +782,32 @@ From the adversarial review (Notion, "OCR Astra Adversarial Review"), validated 
 | Verified in the blind run | 0 | 0 |
 
 So a real scan has about three times the wrong values the old measurement suggested. All 21 are still caught. As users run it: 490 of 883 values verified, 109 pages to Azure.
+
+## Field instances and signs in `--verify-json` (2026-10-09)
+
+From the adversarial review, findings F01, F02 and F09, all reproduced on master:
+- **Swapped values verified.** Embedded `Principal: $8,000. Interest: $3,000.` against OCR `Principal: $3,000. Interest: $8,000.` verified both: the check was "is the value anywhere on the page". So did a value read twice where the page has it once.
+- **Signs dropped.** `-$100.00` and `($100.00)` extracted as `$100.00`, and `$100.00` verified against `-$100.00`. The same for `-25%`.
+- **Truncation.** `USD 1,00.00` gave a valid `USD 1`, and `§ 1983(A)` lost its subsection.
+
+**Now:**
+- Each value in the reference reading backs one OCR value, matched in reading order. It must follow the same label word, one of the two words before it, allowing one misread letter in a long word. Otherwise the value is `check`, with `label_differs` or `more_often_than_in_reference`.
+- Minus signs and table accounting brackets are part of the value and its key. Brackets in prose (`Five Thousand Dollars ($5,000.00)`) are not.
+- `USD 1,00.00` is `malformed_amount`, and capital subsections are kept.
+
+**Public filings, `all`, macOS 26:**
+
+| | Before | Now |
+|---|---|---|
+| Values verified free | 490 | 478 |
+| `azure_pages` | 109 | 118 |
+| Blind wrong values caught | 21 / 21 | 21 / 21 |
+
+The 12 values that no longer verify:
+- 10 are depo-removed-1's running header (docket, date). The OCR misread the header label (`Case:` as `Erik D. Krs`), and PDFKit's text puts the date after `et al.` instead of after the deponent's name.
+- 1 is an Ironworkers date with the same reading-order difference.
+- 1 is San Bernardino's `$33.5 million`, which the OCR has twice because it repeated a paragraph. Flagging the duplicate is right.
+
+All 12 are false alarms in the safe direction. Taking label words from after a reference value as well would recover them, but it lets a swap through (the next value's label is taken), so it was not done.
+
+**Not changed:** a date at the start of a line (`2 March 2023`) is still not extracted, by design. It is indistinguishable from a pleading line number before `March 2023`.

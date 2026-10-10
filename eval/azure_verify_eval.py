@@ -24,8 +24,8 @@ the truth run found it in the embedded text, wrong when the truth run did not.
 
 "Azure has the value": the value's letters, digits and signs (`$ % § ¶`) appear in order in
 Azure's lines for that page, with at most 3 other characters between two of them and not inside
-a longer word or number (`$5,000.00` matches `$ 5,000.00.`; a docket cut short does not match the
-full one; `¶ 60` does not match `160`, nor `§ 5` `§§ 1301`). A value that is also printed
+a longer word or number, with the same `.` or `,` between two digits (`$5,000.00` matches
+`$ 5,000.00.`; `$1.00` does not match `$100`; a docket cut short does not match the full one; `¶ 60` does not match `160`, nor `§ 5` `§§ 1301`). A value that is also printed
 elsewhere on the page can be confirmed by coincidence, so read every "confirmed but wrong" case.
 
 Sentences: every sentence of at least 6 words on a graded page of the OCR. It is confirmed when
@@ -81,14 +81,31 @@ SIGNIFICANT = "0-9a-z$%§¶"
 def has_value(hay, kind, text):
     """Whether `hay` (from `value_text`) has the value: its letters, digits and signs in order,
     at most 3 other characters between two of them, not inside a longer word or number, and for
-    a docket or Bates number not cut short (`...-JGB` does not match `...-JGB-SP`)."""
-    chars = re.findall(f"[{SIGNIFICANT}]", unicodedata.normalize("NFKC", text).lower())
-    if not chars:
+    a docket or Bates number not cut short (`...-JGB` does not match `...-JGB-SP`). Between two
+    digits a `.` or `,` must be the same in both (`$1.00` is not `$100`, nor `1,500` `1.500`)."""
+    t = unicodedata.normalize("NFKC", text).lower()
+    parts = []  # (significant char, separator before it)
+    sep = ""
+    for ch in t:
+        if re.fullmatch(f"[{SIGNIFICANT}]", ch):
+            parts.append((ch, sep))
+            sep = ""
+        else:
+            sep += ch
+    if not parts:
         return False
-    end = r"(?![-_.:/]?[0-9a-z])" if kind in ("docket", "bates") else r"(?![0-9a-z])(?![.,]\d)"
     gap = f"[^{SIGNIFICANT}]{{0,3}}"
-    pat = r"(?<![0-9a-z§¶])" + gap.join(map(re.escape, chars)) + end
-    return re.search(pat, hay) is not None
+    digit_gap = f"[^{SIGNIFICANT}.,]{{0,3}}"
+    pat = r"(?<![0-9a-z§¶])" + re.escape(parts[0][0])
+    for (prev, _), (ch, before) in zip(parts, parts[1:]):
+        if prev.isdigit() and ch.isdigit():
+            punct = [c for c in before if c in ".,"]
+            pat += (r"\s?" + re.escape(punct[0]) + r"\s?") if punct else digit_gap
+        else:
+            pat += gap
+        pat += re.escape(ch)
+    end = r"(?![-_.:/]?[0-9a-z])" if kind in ("docket", "bates") else r"(?![0-9a-z])(?![.,]\d)"
+    return re.search(pat + end, hay) is not None
 
 
 def joined(toks):

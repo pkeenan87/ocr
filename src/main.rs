@@ -199,6 +199,10 @@ fn scan(args: &ScanArgs) -> Result<(), CliError> {
             "skipped {} file(s) with existing output (use --overwrite)",
             plan.skipped_existing
         );
+        eprintln!(
+            "{} output(s) were made by an older ocr and were not checked against their inputs; use --overwrite to redo them.",
+            plan.skipped_existing
+        );
     }
     if plan.items.is_empty() {
         eprintln!("⚠ no matching files to process");
@@ -381,6 +385,15 @@ fn finish(
 
 fn print_mapping(plan: &Plan) {
     for item in &plan.items {
-        println!("{} -> {}", item.input.display(), item.output.display());
+        let note = if item.recorded.is_some() {
+            " (output exists; kept if input and settings are unchanged)"
+        } else {
+            ""
+        };
+        println!(
+            "{} -> {}{note}",
+            item.input.display(),
+            item.output.display()
+        );
     }
 }

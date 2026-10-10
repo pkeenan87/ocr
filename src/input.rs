@@ -66,12 +66,16 @@ pub fn detect(path: &Path) -> std::io::Result<Option<Kind>> {
 pub struct Item {
     pub input: PathBuf,
     pub output: PathBuf,
+    /// Directory mode: the `scan_record` of the output that already exists. The scan checks it
+    /// against the input and settings, and skips the file only if nothing changed.
+    pub recorded: Option<String>,
 }
 
 #[derive(Debug, Default)]
 pub struct Plan {
     pub items: Vec<Item>,
-    /// Files skipped because their output already exists.
+    /// Files skipped because their output already exists and has no `scan_record` (made by an
+    /// older ocr, so it cannot be checked against its input).
     pub skipped_existing: usize,
     /// Partial dirs next to skipped (finished) outputs; the caller removes them.
     pub stale_partials: Vec<PathBuf>,
@@ -140,6 +144,7 @@ pub fn plan_single(
     plan.items.push(Item {
         input: input.to_path_buf(),
         output,
+        recorded: None,
     });
     Ok(plan)
 }
@@ -246,17 +251,22 @@ pub fn plan_dir(
         let output = output_dir
             .join(rel.parent().unwrap_or(Path::new("")))
             .join(md);
+        let mut recorded = None;
         if output.exists() && !overwrite && !checkpoint::retryable(&output) {
-            plan.skipped_existing += 1;
-            let partial = checkpoint::partial_dir(&output);
-            if partial.exists() {
-                plan.stale_partials.push(partial);
+            recorded = checkpoint::read_scan_record(&output);
+            if recorded.is_none() {
+                plan.skipped_existing += 1;
+                let partial = checkpoint::partial_dir(&output);
+                if partial.exists() {
+                    plan.stale_partials.push(partial);
+                }
+                continue;
             }
-            continue;
         }
         plan.items.push(Item {
             input: input_dir.join(&rel),
             output,
+            recorded,
         });
     }
     Ok(plan)

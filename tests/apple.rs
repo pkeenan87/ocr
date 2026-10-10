@@ -283,7 +283,7 @@ fn dpi_is_validated() {
 /// The markdown without its `generated:` timestamp line.
 fn without_generated(md: &str) -> String {
     md.lines()
-        .filter(|l| !l.starts_with("generated:"))
+        .filter(|l| !l.starts_with("generated:") && !l.starts_with("scan_record:"))
         .map(|l| format!("{l}\n"))
         .collect()
 }
@@ -379,6 +379,8 @@ fn columns_and_transcripts_take_the_embedded_characters() {
         "transcript4up_seed0.pdf",
         "ocr_layer.pdf",
         "ocr_layer_alpha.pdf",
+        "ocr_layer_form.pdf",
+        "ocr_layer_mixed.pdf",
     ]);
     let (md, _) = e.scan("two_column.pdf", &[]);
     assert!(md.contains("column_split_pages: [1]"), "{md}");
@@ -412,6 +414,24 @@ fn columns_and_transcripts_take_the_embedded_characters() {
     let v = verify_json(&e, "ocr_layer_alpha");
     assert_eq!(v["pages"][0]["ocr_text_layer"], true, "{v:#}");
     assert!(!md.contains("qction") && !md.contains("Cqurt"), "{md}");
+    assert_eq!(v["pages"][0]["text_layer_visibility"], "ocr_layer", "{v:#}");
+    // The layer inside a Form XObject, and a hidden layer beside a visible header with more
+    // text-showing operators but fewer characters than the layer.
+    for name in ["ocr_layer_form", "ocr_layer_mixed"] {
+        let (md, _) = e.scan(&format!("{name}.pdf"), &["--verify-json"]);
+        assert!(md.contains("embedded_text_fixes: {}"), "{name}: {md}");
+        let v = verify_json(&e, name);
+        assert_eq!(v["pages"][0]["ocr_text_layer"], true, "{name}: {v:#}");
+        assert_eq!(
+            v["pages"][0]["text_layer_visibility"], "ocr_layer",
+            "{name}"
+        );
+        assert_eq!(v["pages"][0]["text_agreement"]["independent"], false);
+        assert!(
+            !md.contains("qction") && !md.contains("Cqurt"),
+            "{name}: {md}"
+        );
+    }
 }
 
 #[test]

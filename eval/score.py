@@ -10,7 +10,8 @@ Both sides pass through the same normalizer (Markdown/HTML table syntax removed,
 unified, whitespace collapsed). Page furniture listed in the ground truth (headers, footers, Bates
 strings) is removed from the model output before comparison, so keeping or dropping it is neutral.
 """
-import argparse, html, json, re, sys, unicodedata
+import argparse
+import collections, html, json, re, sys, unicodedata
 
 try:
     from rapidfuzz.distance import Levenshtein as _lev
@@ -51,17 +52,47 @@ def strip_front_matter(md):
     return md
 
 
-def split_pages(md):
-    """-> {page_no: (body, marker_extra)}. Text before the first marker is ignored."""
+class PageError(ValueError):
+    """Output whose page markers repeat or go backwards: not scoreable."""
+
+
+def split_pages(md, preamble=False):
+    """-> {page_no: (body, marker_extra)}, and with `preamble` also the text before the first
+    marker. Markers must be unique and increasing, or this raises PageError."""
     md = strip_front_matter(md)
     ms = list(MARKER.finditer(md))
     if not ms:
-        return {1: (md, "")}
+        return ({1: (md, "")}, "") if preamble else {1: (md, "")}
     out = {}
+    last = 0
     for i, m in enumerate(ms):
+        n = int(m.group(1))
+        if n <= last:
+            raise PageError(f"page marker {n} after page {last}")
+        last = n
         end = ms[i + 1].start() if i + 1 < len(ms) else len(md)
-        out[int(m.group(1))] = (md[m.end():end], m.group(2))
-    return out
+        out[n] = (md[m.end():end], m.group(2))
+    return (out, md[:ms[0].start()]) if preamble else out
+
+
+def _bounded_count(hay, token):
+    """Occurrences of `token` in `hay` that are not part of a longer word or number:
+    `$3,000` is not in `$3,000,000`, nor `12` in `123`."""
+    pat = r"(?<![0-9A-Za-z])" + re.escape(token) + r"(?![0-9A-Za-z])(?![.,]\d)"
+    if token[:1].isdigit():
+        pat = r"(?<![.,]\d)" + pat
+    return len(re.findall(pat, hay))
+
+
+def _lcs(a, b):
+    """Length of the longest common subsequence of two line lists (ordered, one-to-one)."""
+    prev = [0] * (len(b) + 1)
+    for x in a:
+        cur = [0]
+        for j, y in enumerate(b):
+            cur.append(prev[j] + 1 if x == y else max(prev[j + 1], cur[j]))
+        prev = cur
+    return prev[-1]
 
 
 def _html_tables(text):
@@ -120,8 +151,14 @@ def normalize(text, **kw):
 
 
 def score(gt, md, strip_line_numbers=False, keep_furniture=False):
-    pages = split_pages(md)
+    pages, pre = split_pages(md, preamble=True)
     cer_pages, dist_sum, len_sum = [], 0, 0
+    # Text outside the reference pages (before the first marker, or on pages the reference does
+    # not have) is all insertions.
+    extra_pages = [n for n in pages if not 1 <= n <= len(gt["pages"])]
+    inserted = len(normalize(pre)) + sum(
+        len(normalize(pages[n][0], strip_line_numbers=strip_line_numbers)) for n in extra_pages)
+    dist_sum += inserted
     tok_found = tok_total = 0
     bates_ok = bates_total = 0
     tl_ok = tl_total = 0
@@ -138,22 +175,22 @@ def score(gt, md, strip_line_numbers=False, keep_furniture=False):
         len_sum += len(ref)
         # tokens are searched in the page body plus its marker (Bates may live only in the marker)
         hay = normalize(body) + " " + normalize(extra)
-        for t in gp["tokens"]:
-            tok_total += 1
-            tok_found += t in hay
+        # Each token must appear as itself, as often as the reference lists it.
+        for t, k in collections.Counter(gp["tokens"]).items():
+            tok_total += k
+            tok_found += min(k, _bounded_count(hay, t))
         if gp.get("bates"):
             bates_total += 1
             m = re.search(r"Bates\s+(\S+)", extra)
             bates_ok += bool(m and m.group(1) == gp["bates"])
         if gp.get("kind") == "transcript":
-            have = set(out_lines)
-            for ln in ref_lines:
-                if re.match(r"\d{1,2} ", ln):
-                    tl_total += 1
-                    tl_ok += ln in have
+            # In order and one-to-one: a line read twice or out of order counts once.
+            numbered = [ln for ln in ref_lines if re.match(r"\d{1,2} ", ln)]
+            tl_total += len(numbered)
+            tl_ok += _lcs(numbered, out_lines)
     res = {
         "family": gt.get("family"), "seed": gt.get("seed"), "pages": len(gt["pages"]),
-        "pages_in_output": len(pages),
+        "pages_in_output": len(pages), "inserted_chars": inserted,
         "cer": round(dist_sum / max(len_sum, 1), 4), "cer_pages": cer_pages,
         "dist_sum": dist_sum, "len_sum": len_sum, "bates_ok": bates_ok, "bates_total": bates_total,
         "tl_ok": tl_ok, "tl_total": tl_total,

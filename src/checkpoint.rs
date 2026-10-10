@@ -104,6 +104,72 @@ impl Manifest {
     }
 }
 
+/// 64-bit FNV-1a. Stable across runs, platforms and Rust versions (unlike `DefaultHasher`).
+fn fnv1a(bytes: &[u8]) -> u64 {
+    bytes.iter().fold(0xcbf2_9ce4_8422_2325, |h, &b| {
+        (h ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
+    })
+}
+
+/// The `scan_record` front-matter value: 16 hex digits over everything that decides what a scan
+/// produces and that `--overwrite`-less directory runs can check: the manifest without
+/// `failed_pages`, the selected pages and the `--verify-json` mode.
+pub fn scan_record(
+    m: &Manifest,
+    selected: &[usize],
+    verify: Option<crate::verify::VerifyFields>,
+) -> String {
+    use crate::verify::VerifyFields;
+    let f = &m.fingerprint;
+    let pages: Vec<String> = selected.iter().map(usize::to_string).collect();
+    let verify = match verify {
+        None => "none",
+        Some(VerifyFields::Flagged) => "flagged",
+        Some(VerifyFields::All) => "all",
+    };
+    let text = format!(
+        "format={}\nversion={}\nsize={}\nmtime={}\nhead={}\ntail={}\nengine={}\nrepo={:?}\nmlx={:?}\ndpi={}\ntext_layer={}\ncurrency_fix={}\npages={}\nverify={verify}",
+        m.format,
+        m.crate_version,
+        f.size,
+        f.mtime_nanos,
+        f.head_sha256,
+        f.tail_sha256,
+        m.engine,
+        m.repo,
+        m.mlx_vlm,
+        m.dpi,
+        m.text_layer,
+        m.currency_fix,
+        pages.join(","),
+    );
+    format!("{:016x}", fnv1a(text.as_bytes()))
+}
+
+/// The `scan_record` in the front matter of an existing output; `None` for outputs without one
+/// (made by an older ocr, or with `--no-front-matter`).
+pub fn read_scan_record(output: &Path) -> Option<String> {
+    let mut head = Vec::new();
+    File::open(output)
+        .ok()?
+        .take(8192)
+        .read_to_end(&mut head)
+        .ok()?;
+    let text = String::from_utf8_lossy(&head);
+    let mut lines = text.lines();
+    if lines.next()? != "---" {
+        return None;
+    }
+    for line in lines.take_while(|l| *l != "---") {
+        if let Some(v) = line.strip_prefix("scan_record: ") {
+            let v = v.trim();
+            let ok = v.len() == 16 && v.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'));
+            return ok.then(|| v.to_string());
+        }
+    }
+    None
+}
+
 /// `<output>.ocr-partial`, next to the output file.
 pub fn partial_dir(output: &Path) -> PathBuf {
     let mut s = output.as_os_str().to_owned();
@@ -264,6 +330,55 @@ mod tests {
             currency_fix: true,
             failed_pages: vec![],
         }
+    }
+
+    #[test]
+    fn scan_record_is_stable_and_follows_every_input() {
+        use crate::verify::VerifyFields;
+        let base = scan_record(&manifest(200), &[1, 2], None);
+        assert_eq!(base.len(), 16);
+        assert!(base.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f')));
+        assert_eq!(base, scan_record(&manifest(200), &[1, 2], None));
+        // Pinned: the value must not change between releases.
+        assert_eq!(fnv1a(b"a"), 0xaf63_dc4c_8601_ec8c);
+        // failed_pages is not part of it.
+        let mut failed = manifest(200);
+        failed.failed_pages = vec![2];
+        assert_eq!(base, scan_record(&failed, &[1, 2], None));
+        let differs = |r: String| assert_ne!(base, r);
+        differs(scan_record(&manifest(150), &[1, 2], None));
+        differs(scan_record(&manifest(200), &[1], None));
+        differs(scan_record(
+            &manifest(200),
+            &[1, 2],
+            Some(VerifyFields::Flagged),
+        ));
+        assert_ne!(
+            scan_record(&manifest(200), &[1, 2], Some(VerifyFields::All)),
+            scan_record(&manifest(200), &[1, 2], Some(VerifyFields::Flagged))
+        );
+        let mut m = manifest(200);
+        m.fingerprint.mtime_nanos += 1;
+        differs(scan_record(&m, &[1, 2], None));
+        let mut m = manifest(200);
+        m.engine = "olmocr".into();
+        differs(scan_record(&m, &[1, 2], None));
+    }
+
+    #[test]
+    fn scan_record_is_read_from_the_front_matter_only() {
+        let d = tempfile::tempdir().unwrap();
+        let p = d.path().join("a.md");
+        let write = |t: &str| fs::write(&p, t).unwrap();
+        write("---\nsource: a\nscan_record: 0123456789abcdef\n---\n\nbody\n");
+        assert_eq!(read_scan_record(&p).as_deref(), Some("0123456789abcdef"));
+        write("---\nsource: a\n---\n\nscan_record: 0123456789abcdef\n");
+        assert_eq!(read_scan_record(&p), None);
+        write("---\nscan_record: XYZ\n---\n");
+        assert_eq!(read_scan_record(&p), None);
+        write("done");
+        assert_eq!(read_scan_record(&p), None);
+        assert_eq!(read_scan_record(&d.path().join("missing.md")), None);
     }
 
     fn page(number: usize) -> PageResult {

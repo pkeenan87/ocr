@@ -1862,7 +1862,11 @@ mod tests {
             if model {
                 assert_eq!(status("$5,500").1, Status::Check);
                 assert_eq!(status("$5,500").2, vec!["suspect_page"]);
-                assert!(r.pages[0].page_check.contains(&"engine_fallback".to_string()));
+                assert!(
+                    r.pages[0]
+                        .page_check
+                        .contains(&"engine_fallback".to_string())
+                );
             } else {
                 assert_eq!(status("$5,500").1, Status::Unchecked);
                 assert!(status("$5,500").2.is_empty());

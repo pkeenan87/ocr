@@ -841,3 +841,14 @@ A value the other reading has and the OCR dropped was never reported.
 | Pages with `fields_missing` (`all`) | – | 59 |
 
 The blind run still catches 21 of 21 wrong values.
+
+## Second reader and routing (2026-10-09)
+
+From the adversarial review, findings F05, F06 (Bates), F07, A02 and A05:
+- **F05:** a date split over two second-reader lines of confidence 0.1 verified, because doubt was decided line by line. Now a value spanning two lines is doubtful if either line is, and a line without confidence counts as doubtful.
+- **F06:** on model pages the Bates number comes from Apple's side pass, so the Apple second reading was the same reader again. It no longer verifies Bates numbers.
+- **F07:** fallback, engine-flagged and unanchored transcript pages had no `page_check` reason and were never sent to Azure. They now get `engine_fallback`, `engine_flagged` or `line_numbers_unverified`.
+- **A02:** a crop that stays empty after its retry while other crops have text now flags the page (Paddle and olmOCR).
+- **A05:** a dots reply whose element has a non-string `text` or `category`, or that wraps the array in an object, is incomplete. It is retried, and flagged if it stays so.
+
+**Public filings (Apple):** values verified 478, `azure_pages` 118 (`all`) and 90 (`flagged`), all unchanged. 27 transcript pages now carry `line_numbers_unverified`, but they were already sent. The other changes concern model engines, which were not run for this measurement; unit tests cover them.

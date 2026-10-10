@@ -1072,7 +1072,7 @@ pub fn report<'a>(
         };
         let reread = rereads.get(&i);
         // Each reference occurrence verifies one OCR value, after the same label.
-        let mut embedded_pool = if has_text && !ocr_layer {
+        let mut embedded_pool = if has_text && !ocr_layer && !unknown_layer {
             occurrences(texts[i])
         } else {
             Vec::new()

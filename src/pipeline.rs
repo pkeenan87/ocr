@@ -49,6 +49,8 @@ pub struct Settings {
     pub verify: Option<crate::verify::VerifyFields>,
     pub quiet: bool,
     pub verbose: bool,
+    /// `--timing-json`: write `<stem>.timing.json`.
+    pub timing_json: bool,
     pub options: Options,
 }
 

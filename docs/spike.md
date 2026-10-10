@@ -887,3 +887,32 @@ Rendering is unchanged, since that would change every engine's output and needs 
 | Pages with `annotations_not_read` | – | 10 |
 
 All 10 are depo-knight-avery, whose pages carry a `watermark` annotation: the filing whose court header stamps Apple misreads and Azure leaves out (docs/azure-verify-eval-results.md). The 19 values that no longer verify are on those pages.
+
+## Where model time goes (2026-10-10, `--timing-json`)
+
+Measured on an M1 Max with a warm server and one request at a time, `--verify-json --verify-fields all`. Four public filings of 10 pages each: cmpl-irhythm, mot-janestreet-opp, depo-knight-avery and scan-dean-habeas. Last night's verification fixes changed no timing: the build before them was within 0.4 s on every document.
+
+| | paddleocr-vl (bf16) | dots-ocr (8-bit) |
+|---|---|---|
+| Seconds per page | 2.2–3.7 | 7.3–10.9 |
+| Requests per page | 1–1.8 (crops) | 1 |
+| Prompt tokens per page | about 1,250 | 1,386 |
+| Prefill share of request time | 36–59% | 34–48% |
+| Prefill speed | about 1,000 tok/s | about 400 tok/s |
+| Output tokens per page | 195–540 | 510–960 |
+| Decode speed | 250–260 tok/s | about 140 tok/s |
+| Retries | none | none |
+| Verification per document | 0.1 s (born-digital), 2.6 s (scan) | same |
+
+**What it shows:**
+- **Inference is the bottleneck.** Requests take 96–99% of wall time. Page preparation (render, Apple side pass, crop plan: 11–17 s per 10 pages, 44 s on the scan) runs on other threads and is hidden behind inference. It becomes the bottleneck only if inference gets 2–3× faster.
+- **Dots spends most of its time decoding layout JSON:** 510–960 tokens per page, much of it bounding boxes and categories, at about 140 tok/s. A text-only prompt (`PROMPT_OCR` exists) could cut decode time sharply, but loses the layout categories the renderer uses.
+- **A third or more of the time is prefill of image tokens.** Prompt tokens track image size, so a smaller image or crop costs less. Earlier measurements found higher DPI does not help accuracy.
+- **Nothing is retried,** so retry budgets are not where the time goes on these documents.
+
+**Next experiments, in order of expected gain:**
+1. Dots text-only mode for pages without tables (measure the accuracy cost).
+2. A lower image size per engine.
+3. Two requests at once to use spare GPU capacity while decoding. Earlier tries gave 0.91–1.42×, so measure again, with accuracy.
+
+All of them are paired accuracy-and-speed runs on the same pages.

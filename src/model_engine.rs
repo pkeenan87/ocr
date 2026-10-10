@@ -26,6 +26,7 @@ use crate::progress;
 use crate::regions::{Kind, Region};
 use crate::run::{Backend, Work};
 use crate::server::{self, ServerInfo};
+use crate::telemetry;
 use crate::vision::{self, Block, DocKind};
 
 /// `repetition_penalty` of a loop retry (never used for dots: it corrupts the JSON).
@@ -72,7 +73,7 @@ impl Prompt {
     }
 
     /// Short name for verbose plans.
-    fn label(self) -> &'static str {
+    pub(crate) fn label(self) -> &'static str {
         match self {
             Self::Ocr => "OCR:",
             Self::Table => "Table Recognition:",
@@ -389,6 +390,19 @@ enum PostErr {
 pub(crate) struct Reply {
     pub(crate) text: String,
     pub(crate) finish: String,
+    /// The server's `usage` and `timings`, when it sends them (telemetry only).
+    metrics: telemetry::ServerMetrics,
+}
+
+impl PostErr {
+    fn outcome(&self) -> String {
+        match self {
+            Self::Timeout => "timeout".into(),
+            Self::Conn(m) => format!("connection: {m}"),
+            Self::Status(code, _) => format!("http {code}"),
+            Self::Bad(m) => m.clone(),
+        }
+    }
 }
 
 /// A request with its image already rendered.
@@ -690,7 +704,49 @@ impl Ctx {
                 .as_str()
                 .unwrap_or("stop")
                 .to_string(),
+            metrics: if telemetry::enabled() {
+                telemetry::parse_metrics(&json)
+            } else {
+                Default::default()
+            },
         })
+    }
+
+    /// Telemetry for one attempt (only called when telemetry is on).
+    fn note(
+        &self,
+        req: &Planned,
+        key: u64,
+        (max_tokens, penalty): (u32, Option<f64>),
+        reason: &'static str,
+        wall: Duration,
+        res: &Result<Reply, PostErr>,
+    ) {
+        let (outcome, finish, metrics, empty) = match res {
+            Ok(r) => (
+                "ok".to_string(),
+                Some(r.finish.clone()),
+                r.metrics.clone(),
+                Some(r.text.trim().is_empty()),
+            ),
+            Err(e) => (e.outcome(), None, Default::default(), None),
+        };
+        telemetry::record(
+            key,
+            telemetry::Request {
+                label: req.prompt.label().to_string(),
+                image_bytes: req.url.len(),
+                wall_s: wall.as_secs_f64(),
+                reason,
+                outcome,
+                finish_reason: finish,
+                max_tokens,
+                repetition_penalty: penalty,
+                usage: metrics.usage,
+                timings: metrics.timings,
+            },
+            empty,
+        );
     }
 
     /// One request with the transport-level retries: restart and retry once on timeout, three
@@ -702,6 +758,14 @@ impl Ctx {
         penalty: Option<f64>,
     ) -> Result<Reply, Fail> {
         let (mut timeouts, mut errors, mut lost) = (0, 0, 0);
+        let timed = telemetry::enabled();
+        let key = if timed {
+            telemetry::image_key(&req.url)
+        } else {
+            0
+        };
+        // Why the next attempt is made; None: work it out from the previous attempt.
+        let mut transport: Option<&'static str> = None;
         loop {
             if self.is_stopped() {
                 return Err(Fail::Stopped("server stopped".into()));
@@ -710,10 +774,26 @@ impl Ctx {
             // the process that holds the server lock.
             let slot = self.acquire();
             let seen = self.generation();
-            match self.post(req, max_tokens, penalty) {
+            let started = Instant::now();
+            let res = self.post(req, max_tokens, penalty);
+            if timed {
+                let reason = transport.take().unwrap_or_else(|| {
+                    telemetry::reason(key, max_tokens, self.lim.max_tokens, penalty)
+                });
+                self.note(
+                    req,
+                    key,
+                    (max_tokens, penalty),
+                    reason,
+                    started.elapsed(),
+                    &res,
+                );
+            }
+            match res {
                 Ok(reply) => return Ok(reply),
                 Err(PostErr::Timeout) => {
                     self.recover(seen, "request timed out")?;
+                    transport = Some("after_restart");
                     timeouts += 1;
                     if timeouts >= 2 {
                         return Err(Fail::Failed("request timed out twice".into()));
@@ -725,12 +805,14 @@ impl Ctx {
                         return Err(Fail::Failed(format!("server error {code}: {msg}")));
                     }
                     drop(slot);
+                    transport = Some("transport_retry");
                     std::thread::sleep(Duration::from_secs_f64(BACKOFF_SECS[errors - 1]));
                 }
                 Err(PostErr::Status(code, msg)) => {
                     return Err(Fail::Failed(format!("server returned HTTP {code}: {msg}")));
                 }
                 Err(PostErr::Conn(msg)) => {
+                    transport = Some("after_restart");
                     if self.generation() != seen {
                         continue; // someone restarted the server under us
                     }

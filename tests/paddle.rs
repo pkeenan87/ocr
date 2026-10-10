@@ -405,6 +405,80 @@ fn looping_full_page_is_retried_with_region_crops() {
 }
 
 #[test]
+fn timing_json_records_requests_and_totals_and_changes_nothing_else() {
+    let e = Env::new(&["legal_scan.pdf"]);
+    e.serve(&[("FAKE_TIMINGS", "1")]);
+    e.scan("legal_scan.pdf", &[], &[]).success();
+    let plain = without_generated(&e.markdown("legal_scan.pdf"));
+    assert!(!e.path("legal_scan.timing.json").exists());
+    e.scan("legal_scan.pdf", &["--overwrite", "--timing-json"], &[])
+        .success();
+    assert_eq!(without_generated(&e.markdown("legal_scan.pdf")), plain);
+    let t: Value =
+        serde_json::from_str(&fs::read_to_string(e.path("legal_scan.timing.json")).unwrap())
+            .unwrap();
+    assert_eq!(t["engine"], "paddleocr-vl");
+    assert_eq!(t["model"], "PaddlePaddle/PaddleOCR-VL-1.6");
+    assert_eq!(t["dpi"], 150);
+    let pages = t["pages"].as_array().unwrap();
+    assert_eq!(pages.len(), 1);
+    assert!(pages[0]["prep_s"].as_f64().unwrap() > 0.0);
+    assert!(pages[0]["recognize_s"].as_f64().unwrap() > 0.0);
+    let reqs = pages[0]["requests"].as_array().unwrap();
+    assert!(reqs.len() >= 2, "{reqs:?}");
+    for r in reqs {
+        assert_eq!(r["reason"], "first");
+        assert_eq!(r["outcome"], "ok");
+        assert_eq!(r["finish_reason"], "stop");
+        assert_eq!(r["prompt_tokens"], 1000);
+        assert_eq!(r["predicted_n"], 50);
+        assert_eq!(r["prompt_ms"], 500.0);
+        assert!(r["image_bytes"].as_u64().unwrap() > 1000);
+        assert!(r["wall_s"].as_f64().unwrap() > 0.0);
+    }
+    let n = reqs.len() as u64;
+    let totals = &t["totals"];
+    assert_eq!(totals["prompt_tokens"].as_u64(), Some(1000 * n));
+    assert_eq!(totals["completion_tokens"].as_u64(), Some(50 * n));
+    assert_eq!(totals["server_prompt_s"].as_f64(), Some(0.5 * n as f64));
+    assert_eq!(totals["server_decode_s"].as_f64(), Some(0.25 * n as f64));
+    assert_eq!(totals["attempts_by_reason"]["first"].as_u64(), Some(n));
+    assert!(totals["wall_s"].as_f64().unwrap() >= totals["prep_s"].as_f64().unwrap());
+    assert!(totals["requests_s"].as_f64().unwrap() > 0.0);
+    assert!(totals["write_s"].as_f64().is_some() && totals["verify_s"].as_f64().is_some());
+}
+
+#[test]
+fn timing_json_names_retry_reasons_and_verbose_prints_request_lines() {
+    let e = Env::new(&["transcript_full.pdf"]);
+    e.serve(&[
+        ("FAKE_MODE", "empty"),
+        ("FAKE_FAIL_FIRST", "1"),
+        ("FAKE_TIMINGS", "1"),
+    ]);
+    let out = e
+        .scan("transcript_full.pdf", &["--timing-json", "--verbose"], &[])
+        .success();
+    let err = String::from_utf8_lossy(&out.get_output().stderr).into_owned();
+    assert!(err.contains("page 1 req 1/2 OCR"), "{err}");
+    assert!(
+        err.contains("prompt 1000 tok 0.5s, decode 50 tok 0.2s"),
+        "{err}"
+    );
+    let t: Value =
+        serde_json::from_str(&fs::read_to_string(e.path("transcript_full.timing.json")).unwrap())
+            .unwrap();
+    let reasons: Vec<&str> = t["pages"][0]["requests"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r["reason"].as_str().unwrap())
+        .collect();
+    assert_eq!(reasons, ["first", "empty_retry"]);
+    assert_eq!(t["totals"]["attempts_by_reason"]["empty_retry"], 1);
+}
+
+#[test]
 fn empty_output_is_retried_once() {
     let e = Env::new(&["transcript_full.pdf"]);
     e.serve(&[("FAKE_MODE", "empty"), ("FAKE_FAIL_FIRST", "1")]);

@@ -154,6 +154,7 @@ Usage (`ocr scan --help`):
     --no-front-matter          Omit the YAML header
     --verify-json              Also write <stem>.verify.json: values to double-check, and pages for a second reader
     --verify-fields <MODE>     flagged (default) or all: which unconfirmed values need a second reading
+    --timing-json              Also write <stem>.timing.json: where the time went (prep, each model request, verification, writing)
     --use-text-layer <MODE>    auto, never, always (default: auto for apple, never for model engines)
     --legal-cleanup            Strip running headers and footers repeated across pages (opt-in)
     --dpi <N>                  Render resolution, 72-600 (default 150; dots-ocr 100)
@@ -383,6 +384,29 @@ Real misreads it caught:
 - `§ 1988` and `§ 77q` read as `$1988` and `$ 77`, which do not match the embedded text.
 
 The embedded text of a scanned PDF may itself be an old OCR layer. A match is still two independent readings that agree. A wrong value that both readings share, or one on a page with no embedded text in `flagged` mode, is not caught.
+
+## Where the time goes (`--timing-json`)
+
+`--timing-json` writes `<stem>.timing.json` next to the Markdown (and the `.verify.json`). Without the flag nothing is measured beyond what `--verbose` already prints, no file is written and the Markdown is unchanged. With it, the Markdown and checkpoints are still byte-identical.
+
+For each page it records the prep time (render, Apple side pass, crop planning) and the recognize time, and for each model request: the prompt, the image size (`image_bytes`, the base64 data URL), the client round trip (`wall_s`), why the request was made (`reason`: `first`, `empty_retry`, `length_retry`, `loop_retry`, `parse_retry`, `transport_retry`, `after_restart`), the `finish_reason`, and, when the server reports them, its tokens and timings (`prompt_tokens`, `completion_tokens`, `prompt_n`, `cache_n`, `predicted_n`, `prompt_ms`, `predicted_ms`, `peak_memory`; mlx-vlm and llama.cpp both send them). `totals` sums them per file, including `verify_s`, `write_s` and `attempts_by_reason`. Pages resumed from a checkpoint have no timing and are marked `"resumed": true`; Apple pages have prep and recognize only.
+
+    {"engine": "paddleocr-vl", "model": "PaddlePaddle/PaddleOCR-VL-1.6", "dpi": 150,
+     "pages": [{"page": 1, "prep_s": 0.41, "recognize_s": 3.4, "requests": [
+       {"label": "OCR:", "image_bytes": 831000, "wall_s": 3.4, "reason": "first", "outcome": "ok",
+        "finish_reason": "stop", "max_tokens": 4096, "prompt_tokens": 1260, "completion_tokens": 410,
+        "prompt_n": 1260, "predicted_n": 410, "prompt_ms": 900.0, "predicted_ms": 2300.0}]}],
+     "totals": {"wall_s": 4.1, "prep_s": 0.41, "requests_s": 3.4, "server_prompt_s": 0.9,
+                "server_decode_s": 2.3, "prompt_tokens": 1260, "completion_tokens": 410,
+                "verify_s": 0.0, "write_s": 0.01, "attempts_by_reason": {"first": 1}}}
+
+With `--verbose`, each page also prints one line per request after the page finishes:
+
+    page 3 req 1/2 OCR: 812 KB, 3.4s (prompt 1260 tok 0.9s, decode 410 tok 2.3s)
+
+A retry adds its reason in brackets. Fields the server does not send are left out.
+
+Pages are prepared on separate threads while the model works on earlier pages, so `prep_s` overlaps `requests_s` and the two can add up to more than `wall_s`. On a Mac with one model server, `requests_s` is close to `wall_s`: inference is the bottleneck.
 
 ## Which engine?
 

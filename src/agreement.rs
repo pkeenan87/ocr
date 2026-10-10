@@ -40,6 +40,11 @@ pub struct TextAgreement {
     pub missing_lines: Vec<String>,
     /// Words in `missing_lines`.
     pub missing_words: usize,
+    /// Numbers of the other reading the Markdown has nowhere, on lines too short for
+    /// `missing_lines` (`30` in `Pay within` / `30` / `days of notice`): a dropped deadline,
+    /// amount or date. Pleading line numbers are not counted.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub missing_numbers: Vec<String>,
 }
 
 /// Normalized words of a line, with letter-spaced words joined (`A P P E A R` -> `appear`).
@@ -84,12 +89,71 @@ fn missing_lines(body: &str, other: &str) -> (Vec<String>, usize) {
     (lines, count)
 }
 
-/// Letters and digits, lowercased.
+/// Numbers on short lines of `other` (under four words) that the Markdown has nowhere. A line
+/// that is only a one- or two-digit number counts, unless the other reading has five or more
+/// such lines: then they are a pleading's line numbers.
+fn missing_numbers(body: &str, other: &str) -> Vec<String> {
+    let have: std::collections::HashSet<String> = body.lines().flat_map(line_words).collect();
+    let alone = other.lines().filter(|l| line_number(l.trim())).count();
+    let mut out = Vec::new();
+    for line in other.lines() {
+        let t = line.trim();
+        let mut w = line_words(t);
+        if w.len() > 1 && w.first().is_some_and(|f| line_number(f)) {
+            w.remove(0);
+        }
+        if w.len() >= 4 || (line_number(t) && alone >= 5) {
+            continue;
+        }
+        // Numbers only: a word with a digit in it (`exhibi1s`, `defendant5`) is a misread
+        // word, which the sentence comparison already reports.
+        let number = |w: &&String| {
+            let t = w.trim_start_matches('-').trim_end_matches('%');
+            t.starts_with(|c: char| c.is_ascii_digit())
+                && t.chars()
+                    .all(|c| c.is_ascii_digit() || c == ',' || c == '.')
+        };
+        for n in w.iter().filter(number) {
+            if !have.contains(n) && !out.contains(n) {
+                out.push(n.clone());
+            }
+        }
+    }
+    out
+}
+
+/// Letters and digits, lowercased. A number keeps what changes its value: a `.` or `,`
+/// between digits (`$1.00` is not `$100`), a minus sign before it (`-25%` is not `25%`), and
+/// `%`.
 fn norm(w: &str) -> String {
-    w.chars()
-        .filter(|c| c.is_alphanumeric())
-        .flat_map(char::to_lowercase)
-        .collect()
+    let chars: Vec<char> = w.chars().collect();
+    if !chars.iter().any(char::is_ascii_digit) {
+        return w
+            .chars()
+            .filter(|c| c.is_alphanumeric())
+            .flat_map(char::to_lowercase)
+            .collect();
+    }
+    let digit = |i: usize| chars.get(i).is_some_and(char::is_ascii_digit);
+    let mut out = String::new();
+    for (i, &c) in chars.iter().enumerate() {
+        if c.is_alphanumeric() {
+            out.extend(c.to_lowercase());
+        } else if matches!(c, '.' | ',') && i > 0 && digit(i - 1) && digit(i + 1) {
+            out.push(c);
+        } else if matches!(c, '-' | '\u{2212}')
+            && out.is_empty()
+            && chars[i + 1..]
+                .iter()
+                .find(|c| **c != '$')
+                .is_some_and(char::is_ascii_digit)
+        {
+            out.push('-');
+        } else if c == '%' && i > 0 && digit(i - 1) {
+            out.push('%');
+        }
+    }
+    out
 }
 
 /// One word of the other reading; `alone` when it is a line number: one or two digits on a
@@ -232,6 +296,12 @@ fn line_number(w: &str) -> bool {
 /// A span that starts its Markdown line may start at a line start in the other reading; one
 /// that follows another sentence must follow a sentence end there too (`edge_start`), and the
 /// same for ends. Otherwise a doubled `2024.` at a line start would pass.
+///
+/// Each word of the other reading backs one span only (`used`), so a sentence read twice where
+/// the page has it once does not agree twice; and a span starts at or after `after`, so the
+/// sentences of one Markdown line agree only in their order. Returns the words matched (a
+/// skipped legend line is not used up) and where the match ends.
+#[allow(clippy::too_many_arguments)]
 fn occurs(
     words: &[String],
     leading: usize,
@@ -240,15 +310,19 @@ fn occurs(
     edge_end: bool,
     line: usize,
     prose: bool,
-) -> bool {
-    let from = |j0: usize, k0: usize| {
+    used: &[bool],
+    after: usize,
+) -> Option<(Vec<usize>, usize)> {
+    let from = |j0: usize, k0: usize| -> Option<(Vec<usize>, usize)> {
         let w = &stream[k0];
         if prose && !(w.after_end || edge_start && w.line_start) {
-            return false;
+            return None;
         }
         let (mut j, mut k) = (j0, k0);
+        let mut matched = Vec::new();
         while j < words.len() {
-            if k < stream.len() && stream[k].text == words[j] {
+            if k < stream.len() && stream[k].text == words[j] && !used[k] {
+                matched.push(k);
                 j += 1;
                 k += 1;
             } else if k > k0 && k < stream.len() && stream[k].alone {
@@ -260,14 +334,19 @@ fn occurs(
             {
                 k += stream[k].skip_line;
             } else {
-                return false;
+                return None;
             }
         }
         let last = &stream[k - 1];
-        !prose || last.ends || edge_end && last.line_end
+        (!prose || last.ends || edge_end && last.line_end).then_some((matched, k))
     };
-    (0..stream.len())
-        .any(|k| from(0, k) || (leading > 0 && leading < words.len() && from(leading, k)))
+    (after..stream.len()).find_map(|k| {
+        from(0, k).or_else(|| {
+            (leading > 0 && leading < words.len())
+                .then(|| from(leading, k))
+                .flatten()
+        })
+    })
 }
 
 /// The spans of one Markdown line: sentences of at least three words, so that `U.S.C.` and
@@ -343,6 +422,7 @@ pub fn compare(
         })
         .collect();
     let (missing_lines, missing_words) = missing_lines(body, other);
+    let missing_numbers = missing_numbers(body, other);
     let other = stream(other, &markdown);
     let present: std::collections::HashSet<&str> = other.iter().map(|w| w.text.as_str()).collect();
     let mut out = TextAgreement {
@@ -354,14 +434,18 @@ pub fn compare(
         unagreed: Vec::new(),
         missing_lines,
         missing_words,
+        missing_numbers,
     };
     let (mut words_all, mut words_agreed) = (0usize, 0usize);
+    let mut used = vec![false; other.len()];
     for (i, line) in body.lines().enumerate() {
         if skipped(line) {
             continue;
         }
         let line_spans = spans(line);
         let count = line_spans.len();
+        // Where the previous agreed sentence of this line ended in the other reading.
+        let mut after = 0;
         for (n, span) in line_spans.into_iter().enumerate() {
             let words: Vec<String> = span
                 .iter()
@@ -384,9 +468,23 @@ pub fn compare(
                 w.trim_end_matches(['"', '\'', ')', '\u{201d}'])
                     .ends_with(['.', '?', '!', ';', ':'])
             });
-            if occurs(&words, leading, &other, n == 0, n + 1 == count, i, prose) {
+            if let Some((matched, end)) = occurs(
+                &words,
+                leading,
+                &other,
+                n == 0,
+                n + 1 == count,
+                i,
+                prose,
+                &used,
+                after,
+            ) {
                 out.agreed_spans += 1;
                 words_agreed += words.len();
+                for k in matched {
+                    used[k] = true;
+                }
+                after = end;
             } else {
                 let mut missing: Vec<String> = Vec::new();
                 for (w, raw) in words
@@ -549,6 +647,89 @@ mod tests {
             }
         }
         assert!(planted > 60);
+    }
+
+    #[test]
+    fn numbers_keep_their_decimal_point_and_sign() {
+        for (body, other) in [
+            ("Payment is $1.00.", "Payment is $100."),
+            ("The rate is -25%.", "The rate is 25%."),
+            ("The rate is 25%.", "The rate is 25."),
+            ("Paid 1,500 units.", "Paid 1.500 units."),
+        ] {
+            let a = compare(body, other, "x", true);
+            assert_eq!(a.agreed_spans, 0, "{body} / {other}: {a:#?}");
+        }
+        // Grouping and sentence ends are the same number.
+        let a = compare(
+            "Paid $1,500.00 on May 7, 2024.",
+            "Paid $1,500.00 on May 7,\n2024.",
+            "x",
+            true,
+        );
+        assert_eq!(a.agreed_spans, 1, "{a:#?}");
+    }
+
+    #[test]
+    fn order_and_repeats_count() {
+        // Two sentences of one line in the other order.
+        let a = compare(
+            "The motion is denied. The hearing is vacated.",
+            "The hearing is vacated. The motion is denied.",
+            "x",
+            true,
+        );
+        assert_eq!(a.agreed_spans, 1, "{a:#?}");
+        // A sentence read twice where the page has it once.
+        let a = compare(
+            "The motion is denied.\nThe motion is denied.",
+            "The motion is denied.",
+            "x",
+            true,
+        );
+        assert_eq!((a.spans, a.agreed_spans), (2, 1), "{a:#?}");
+        // On separate lines, reading order may differ (headers, columns): both agree.
+        let a = compare(
+            "The motion is denied.\nThe hearing is vacated.",
+            "The hearing is vacated.\nThe motion is denied.",
+            "x",
+            true,
+        );
+        assert_eq!(a.agreed_spans, 2, "{a:#?}");
+    }
+
+    #[test]
+    fn a_dropped_number_on_its_own_line_is_reported() {
+        let a = compare(
+            "Pay within\ndays of notice.",
+            "Pay within\n30\ndays of notice.",
+            "x",
+            true,
+        );
+        assert_eq!(a.missing_numbers, ["30"], "{a:#?}");
+        let a = compare("Total due", "Total due\n$8,000.00", "x", true);
+        assert_eq!(a.missing_numbers, ["8,000.00"], "{a:#?}");
+        // A misread word is not a missing number.
+        let a = compare("See the exhibits.", "See the\nexhibi1s", "x", true);
+        assert!(a.missing_numbers.is_empty(), "{a:#?}");
+        // Present elsewhere on the page: not missing.
+        let a = compare(
+            "Pay within 30\ndays of notice.",
+            "Pay within\n30\ndays of notice.",
+            "x",
+            true,
+        );
+        assert!(a.missing_numbers.is_empty(), "{a:#?}");
+        // A pleading's line numbers are not page text.
+        let other = (1..=8)
+            .map(|n| format!("{n}\nline of text here"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        let body = (1..=8)
+            .map(|_| "line of text here")
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(compare(&body, &other, "x", true).missing_numbers.is_empty());
     }
 
     #[test]

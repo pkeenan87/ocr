@@ -99,6 +99,10 @@ pub struct PageReport {
     /// PDF's own text, for a suspect page whose values all match it) or `azure`.
     pub second_reading: Option<&'static str>,
     pub fields: Vec<Field>,
+    /// Values the other reading has that the OCR has nowhere on the page, as that reading
+    /// writes them.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub expected_fields_missing: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -739,6 +743,8 @@ struct Occurrence {
     keys: Vec<String>,
     context: Vec<String>,
     used: bool,
+    /// The value as the reference writes it.
+    text: String,
 }
 
 /// Up to two words before a value, back to the value before it, letters only and lowercased
@@ -811,6 +817,7 @@ fn occurrences(text: &str) -> Vec<Occurrence> {
                 keys,
                 context: context_words(&flat[..f.col]),
                 used: false,
+                text: f.text.clone(),
             })
         })
         .collect();
@@ -820,6 +827,7 @@ fn occurrences(text: &str) -> Vec<Occurrence> {
                 keys: vec![k],
                 context: context_words(&flat[..c.get(0).unwrap().start()]),
                 used: false,
+                text: c[0].to_string(),
             });
         }
     }
@@ -1127,6 +1135,35 @@ pub fn report<'a>(
         {
             page_check.push("missing_text".into());
         }
+        // A number the other reading has and the OCR lacks: a dropped deadline, amount or date,
+        // however short its line.
+        if text_agreement
+            .as_ref()
+            .is_some_and(|a| !a.missing_numbers.is_empty())
+        {
+            page_check.push("missing_number".into());
+        }
+        // Values the other reading has and the OCR has nowhere on the page: a dropped total or
+        // deadline is not a wrong value, it is a missing one. Listed always; in `all` mode the
+        // page is checked.
+        let ocr_keys: HashSet<String> =
+            fields.iter().filter_map(|f| key(f.kind, &f.text)).collect();
+        let reference = if embedded_pool.is_empty() {
+            &second_pool
+        } else {
+            &embedded_pool
+        };
+        let mut expected_fields_missing: Vec<String> = Vec::new();
+        for o in reference {
+            if !o.keys.iter().any(|k| ocr_keys.contains(k))
+                && !expected_fields_missing.contains(&o.text)
+            {
+                expected_fields_missing.push(o.text.clone());
+            }
+        }
+        if mode == VerifyFields::All && !expected_fields_missing.is_empty() {
+            page_check.push("fields_missing".into());
+        }
         for f in &mut fields {
             if f.kind == Kind::Docket && odd.contains(&f.text.to_ascii_lowercase()) {
                 f.why.push("differs_from_usual_docket");
@@ -1221,6 +1258,7 @@ pub fn report<'a>(
             text_agreement,
             second_reading,
             fields,
+            expected_fields_missing,
         });
     }
 
@@ -1998,6 +2036,34 @@ mod tests {
                 ("unknown_text_layer", false)
             );
         }
+    }
+
+    #[test]
+    fn a_value_the_ocr_dropped_is_listed() {
+        let layer = format!("Fee: $3,000. Total: $8,000. Due May 7, 2024.{PAD}");
+        let body = format!("Fee: $3,000. Due May 7, 2024.{PAD}");
+        let r = run(&[page(1, &body)], VerifyFields::Flagged, &layer);
+        assert_eq!(r.pages[0].expected_fields_missing, ["$8,000"]);
+        assert!(
+            !r.pages[0]
+                .page_check
+                .contains(&"fields_missing".to_string())
+        );
+        let r = run(&[page(1, &body)], VerifyFields::All, &layer);
+        assert!(
+            r.pages[0]
+                .page_check
+                .contains(&"fields_missing".to_string())
+        );
+        // Born-digital: the PDF's own text has the value, at no cost.
+        assert_eq!(r.pages[0].second_reading, Some("embedded_text"));
+        // Nothing dropped: nothing listed.
+        let r = run(&[page(1, &layer)], VerifyFields::All, &layer);
+        assert!(
+            r.pages[0].expected_fields_missing.is_empty(),
+            "{:?}",
+            r.pages[0]
+        );
     }
 
     #[test]

@@ -521,9 +521,11 @@ public func ocr_bridge_text_in_regions(
 struct InvisibleOut: Encodable {
     var ok: Bool
     var error: String? = nil
-    /// Text-showing operators drawn visibly, and invisibly (render mode 3 or 7, or a fill alpha of 0).
-    var shown: Int = 0
-    var invisible: Int = 0
+    /// Characters (bytes of the shown strings) drawn visibly, and invisibly (render mode 3 or 7,
+    /// or a fill alpha of 0). Counted in characters, so a few visible operators cannot outvote a
+    /// long hidden layer.
+    var shown_chars: Int = 0
+    var invisible_chars: Int = 0
 }
 
 /// Text state while scanning a content stream: the render mode and fill alpha, saved and restored
@@ -534,16 +536,27 @@ private final class TextModes {
     var saved: [(Int, Double)] = []
     var shown = 0
     var invisible = 0
-    /// The page's `/ExtGState` resources, where `gs` finds the fill alpha (`ca`).
-    var extGState: CGPDFDictionaryRef? = nil
-    func show() {
-        if mode == 3 || mode == 7 || alpha == 0 { invisible += 1 } else { shown += 1 }
+    /// Form XObjects being scanned (their stream pointers), to stop cycles, and the depth.
+    var active: [Int] = []
+    var table: CGPDFOperatorTableRef? = nil
+    var failed = false
+    /// The page's resources, for a form that has none of its own (older PDFs inherit them).
+    var pageResources: CGPDFDictionaryRef? = nil
+    func show(_ chars: Int) {
+        if mode == 3 || mode == 7 || alpha == 0 { invisible += chars } else { shown += chars }
     }
+}
+
+private let maxFormDepth = 8
+
+private func modes(_ info: UnsafeMutableRawPointer?) -> TextModes? {
+    info.map { Unmanaged<TextModes>.fromOpaque($0).takeUnretainedValue() }
 }
 
 /// How much of a page's text is drawn invisibly, as OCR tools lay a text layer over a scan:
 /// render mode 3 (or 7), or fully transparent (`ca 0`, as iOS scanner apps write it). Such text is
-/// another OCR's reading, not the document's own characters. Form XObjects are not entered.
+/// another OCR's reading, not the document's own characters. Form XObjects are entered, with
+/// their own resources.
 @_cdecl("ocr_bridge_invisible_text")
 public func ocr_bridge_invisible_text(_ path: UnsafePointer<CChar>, _ pageIndex: Int32) -> UnsafeMutablePointer<CChar>? {
     let p = String(cString: path)
@@ -552,58 +565,100 @@ public func ocr_bridge_invisible_text(_ path: UnsafePointer<CChar>, _ pageIndex:
         return json(InvisibleOut(ok: false, error: "page \(Int(pageIndex) + 1) not found"))
     }
     let state = TextModes()
-    if let dict = page.dictionary {
-        var resources: CGPDFDictionaryRef? = nil
-        var ext: CGPDFDictionaryRef? = nil
-        if CGPDFDictionaryGetDictionary(dict, "Resources", &resources), let resources,
-           CGPDFDictionaryGetDictionary(resources, "ExtGState", &ext) {
-            state.extGState = ext
-        }
-    }
     guard let table = CGPDFOperatorTableCreate() else {
         return json(InvisibleOut(ok: false, error: "no operator table"))
+    }
+    state.table = table
+    if let dict = page.dictionary {
+        var res: CGPDFDictionaryRef? = nil
+        if CGPDFDictionaryGetDictionary(dict, "Resources", &res) { state.pageResources = res }
     }
     // The callbacks get the scanner's info pointer: `state`.
     CGPDFOperatorTableSetCallback(table, "Tr") { s, info in
         var m: CGPDFInteger = 0
-        if CGPDFScannerPopInteger(s, &m), let info {
-            Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue().mode = Int(m)
-        }
+        if CGPDFScannerPopInteger(s, &m) { modes(info)?.mode = Int(m) }
     }
     CGPDFOperatorTableSetCallback(table, "gs") { s, info in
         var name: UnsafePointer<CChar>? = nil
-        guard CGPDFScannerPopName(s, &name), let name, let info else { return }
-        let t = Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue()
+        guard CGPDFScannerPopName(s, &name), let name, let t = modes(info) else { return }
+        // The resources of the stream being scanned: a form's own, or the page's.
+        let cs = CGPDFScannerGetContentStream(s)
+        guard let res = CGPDFContentStreamGetResource(cs, "ExtGState", name) else { return }
         var gs: CGPDFDictionaryRef? = nil
         var ca: CGPDFReal = 1
-        if let ext = t.extGState, CGPDFDictionaryGetDictionary(ext, name, &gs), let gs,
+        if CGPDFObjectGetValue(res, .dictionary, &gs), let gs,
            CGPDFDictionaryGetNumber(gs, "ca", &ca) {
             t.alpha = Double(ca)
         }
     }
     CGPDFOperatorTableSetCallback(table, "q") { _, info in
-        guard let info else { return }
-        let t = Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue()
+        guard let t = modes(info) else { return }
         t.saved.append((t.mode, t.alpha))
     }
     CGPDFOperatorTableSetCallback(table, "Q") { _, info in
-        guard let info else { return }
-        let t = Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue()
+        guard let t = modes(info) else { return }
         (t.mode, t.alpha) = t.saved.popLast() ?? (0, 1)
     }
-    for op in ["Tj", "TJ", "'", "\""] {
-        CGPDFOperatorTableSetCallback(table, op) { _, info in
-            guard let info else { return }
-            Unmanaged<TextModes>.fromOpaque(info).takeUnretainedValue().show()
+    // Tj, ' and " pop the string last (" has two numbers before it).
+    for op in ["Tj", "'", "\""] {
+        CGPDFOperatorTableSetCallback(table, op) { s, info in
+            var str: CGPDFStringRef? = nil
+            guard let t = modes(info) else { return }
+            if CGPDFScannerPopString(s, &str), let str { t.show(CGPDFStringGetLength(str)) } else { t.failed = true }
         }
+    }
+    CGPDFOperatorTableSetCallback(table, "TJ") { s, info in
+        guard let t = modes(info) else { return }
+        var array: CGPDFArrayRef? = nil
+        guard CGPDFScannerPopArray(s, &array), let array else { t.failed = true; return }
+        var n = 0
+        for i in 0..<CGPDFArrayGetCount(array) {
+            var str: CGPDFStringRef? = nil
+            if CGPDFArrayGetString(array, i, &str), let str { n += CGPDFStringGetLength(str) }
+        }
+        t.show(n)
+    }
+    CGPDFOperatorTableSetCallback(table, "Do") { s, info in
+        var name: UnsafePointer<CChar>? = nil
+        guard CGPDFScannerPopName(s, &name), let name, let t = modes(info) else { return }
+        let cs = CGPDFScannerGetContentStream(s)
+        guard let res = CGPDFContentStreamGetResource(cs, "XObject", name) else { return }
+        var stream: CGPDFStreamRef? = nil
+        guard CGPDFObjectGetValue(res, .stream, &stream), let stream,
+              let dict = CGPDFStreamGetDictionary(stream) else { return }
+        var subtype: UnsafePointer<CChar>? = nil
+        guard CGPDFDictionaryGetName(dict, "Subtype", &subtype), let subtype,
+              String(cString: subtype) == "Form" else { return }
+        let id = unsafeBitCast(stream, to: Int.self)
+        // A form that draws itself, or nesting past the limit, cannot be read: not a guess.
+        if t.active.contains(id) || t.active.count >= maxFormDepth { t.failed = true; return }
+        var resources: CGPDFDictionaryRef? = nil
+        _ = CGPDFDictionaryGetDictionary(dict, "Resources", &resources)
+        guard let resources = resources ?? t.pageResources, let table = t.table else {
+            t.failed = true
+            return
+        }
+        let saved = (t.mode, t.alpha, t.saved)
+        t.saved = []
+        t.active.append(id)
+        let inner = CGPDFContentStreamCreateWithStream(stream, resources, cs)
+        let scanner = CGPDFScannerCreate(inner, table, Unmanaged.passUnretained(t).toOpaque())
+        if !CGPDFScannerScan(scanner) { t.failed = true }
+        CGPDFScannerRelease(scanner)
+        CGPDFContentStreamRelease(inner)
+        t.active.removeLast()
+        (t.mode, t.alpha, t.saved) = saved
     }
     let stream = CGPDFContentStreamCreateWithPage(page)
     let scanner = CGPDFScannerCreate(stream, table, Unmanaged.passUnretained(state).toOpaque())
-    CGPDFScannerScan(scanner)
+    let completed = CGPDFScannerScan(scanner)
     CGPDFScannerRelease(scanner)
     CGPDFContentStreamRelease(stream)
     CGPDFOperatorTableRelease(table)
-    return json(InvisibleOut(ok: true, shown: state.shown, invisible: state.invisible))
+    if !completed || state.failed {
+        return json(InvisibleOut(ok: false, error: "content stream not fully readable"))
+    }
+    return json(InvisibleOut(ok: true, shown_chars: state.shown, invisible_chars: state.invisible))
 }
 
 @_cdecl("ocr_bridge_render_gray")

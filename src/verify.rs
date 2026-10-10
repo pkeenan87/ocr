@@ -16,7 +16,7 @@ use regex::Regex;
 use serde::Serialize;
 
 use crate::markdown::{PageResult, Source};
-use crate::vision::Line;
+use crate::vision::{Line, TextVisibility};
 
 /// Below this Vision confidence a second-reader line confirms nothing. Accurate-mode confidence
 /// is coarse (mostly 0.5 or 1.0), so this only drops the lines Vision itself marks as doubtful.
@@ -82,6 +82,10 @@ pub struct PageReport {
     /// Whether that text is drawn invisibly (an OCR layer laid over a scan): another OCR's
     /// reading, not the document's own characters. Agreement with it verifies nothing.
     pub ocr_text_layer: bool,
+    /// What the scan of the page's text drawing found: `visible`, `ocr_layer` or `unknown` (a
+    /// scan error counts). Only meaningful when `embedded_text` is true. `unknown` confirms
+    /// nothing, like `ocr_layer`.
+    pub text_layer_visibility: &'static str,
     /// Whether a second, local reading (Vision's line recognizer at 300 DPI) was compared with,
     /// on a page without embedded text.
     pub second_reader: bool,
@@ -635,7 +639,7 @@ fn close(a: &str, b: &str) -> bool {
 #[derive(Debug, Clone, Default)]
 pub struct Embedded {
     pub text: String,
-    pub ocr_layer: bool,
+    pub visibility: TextVisibility,
 }
 
 /// What a second reading of a page says about values: the keys it read, and the keys it was
@@ -829,7 +833,11 @@ pub fn report<'a>(
             );
         }
         let has_text = has_text[i];
-        let ocr_layer = has_text && layers[i].ocr_layer;
+        let visibility = layers[i].visibility;
+        let ocr_layer = has_text && visibility == TextVisibility::OcrLayer;
+        let unknown_layer = has_text && visibility == TextVisibility::Unknown;
+        // Neither reads as the document's own characters: agreement verifies nothing.
+        let not_own = ocr_layer || unknown_layer;
         let keys = if has_text {
             embedded_keys(texts[i])
         } else {
@@ -837,8 +845,13 @@ pub fn report<'a>(
         };
         let reread = rereads.get(&i);
         let text_agreement = if has_text {
-            Some(if ocr_layer {
-                crate::agreement::compare(&p.body, texts[i], "ocr_text_layer", false)
+            Some(if not_own {
+                let name = if ocr_layer {
+                    "ocr_text_layer"
+                } else {
+                    "unknown_text_layer"
+                };
+                crate::agreement::compare(&p.body, texts[i], name, false)
             } else {
                 crate::agreement::compare(&p.body, texts[i], "embedded_text", true)
             })
@@ -891,10 +904,15 @@ pub fn report<'a>(
             }
             let k = key(f.kind, &f.text);
             let mut found = k.as_ref().is_some_and(|k| keys.contains(k));
-            if ocr_layer {
-                // Another OCR's reading: a disagreement counts, an agreement verifies nothing.
+            if not_own {
+                // Another OCR's reading, or text of unknown visibility: a disagreement counts,
+                // an agreement verifies nothing.
                 if !found && k.is_some() {
-                    f.why.push("not_in_ocr_text_layer");
+                    f.why.push(if ocr_layer {
+                        "not_in_ocr_text_layer"
+                    } else {
+                        "text_layer_unknown"
+                    });
                 }
                 found = false;
             } else if has_text && !found {
@@ -937,7 +955,7 @@ pub fn report<'a>(
             Some("azure")
         } else if page_check.is_empty() {
             None
-        } else if has_text && !ocr_layer {
+        } else if has_text && !not_own {
             Some("embedded_text")
         } else {
             Some("azure")
@@ -948,6 +966,7 @@ pub fn report<'a>(
             page_check,
             embedded_text: has_text,
             ocr_text_layer: ocr_layer,
+            text_layer_visibility: visibility.as_str(),
             second_reader: reread.is_some(),
             text_agreement,
             second_reading,
@@ -1061,7 +1080,7 @@ mod tests {
             mode,
             &|_| Embedded {
                 text: text.clone(),
-                ocr_layer: false,
+                visibility: TextVisibility::Visible,
             },
             &|_| None,
             false,
@@ -1397,7 +1416,7 @@ mod tests {
             VerifyFields::Flagged,
             &|_| Embedded {
                 text: body.repeat(3),
-                ocr_layer: false,
+                visibility: TextVisibility::Visible,
             },
             &|_| panic!("re-read a page with embedded text"),
             true,
@@ -1550,12 +1569,13 @@ mod tests {
                 mode,
                 &|_| Embedded {
                     text: layer.clone(),
-                    ocr_layer: true,
+                    visibility: TextVisibility::OcrLayer,
                 },
                 &|_| None,
                 false,
             );
             assert!(r.pages[0].ocr_text_layer);
+            assert_eq!(r.pages[0].text_layer_visibility, "ocr_layer");
             let got = statuses(&r);
             let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
             assert_eq!(status("$5,500").1, agreed, "{mode:?}");
@@ -1571,6 +1591,54 @@ mod tests {
             assert_eq!(r.pages[0].second_reading, Some("azure"));
             let a = r.pages[0].text_agreement.as_ref().unwrap();
             assert_eq!((a.compared_with, a.independent), ("ocr_text_layer", false));
+        }
+    }
+
+    #[test]
+    fn an_unknown_text_layer_verifies_nothing() {
+        let rest = " More words of the old scanner layer so the page has enough text to compare.";
+        let body = format!("Paid $5,500 on January 11, 2008 under Case No. 3:08-cv-09901.{rest}");
+        let layer = format!("Paid $5,500 on January 11, 2003 under Case No. 3:08-cv-09901.{rest}");
+        let body = body.as_str();
+        let pages = [page(1, body)];
+        for (mode, agreed) in [
+            (VerifyFields::Flagged, Status::Unchecked),
+            (VerifyFields::All, Status::Check),
+        ] {
+            let r = report(
+                "x.pdf",
+                "x.md".into(),
+                "apple",
+                "now",
+                &pages,
+                mode,
+                &|_| Embedded {
+                    text: layer.clone(),
+                    visibility: TextVisibility::Unknown,
+                },
+                &|_| None,
+                false,
+            );
+            assert!(!r.pages[0].ocr_text_layer);
+            assert_eq!(r.pages[0].text_layer_visibility, "unknown");
+            let got = statuses(&r);
+            let status = |t: &str| got.iter().find(|g| g.0 == t).unwrap().clone();
+            assert_eq!(status("$5,500").1, agreed, "{mode:?}");
+            assert_eq!(
+                status("January 11, 2008"),
+                (
+                    "January 11, 2008".into(),
+                    Status::Check,
+                    vec!["text_layer_unknown"]
+                )
+            );
+            assert_eq!(r.summary.verified, 0);
+            assert_eq!(r.pages[0].second_reading, Some("azure"));
+            let a = r.pages[0].text_agreement.as_ref().unwrap();
+            assert_eq!(
+                (a.compared_with, a.independent),
+                ("unknown_text_layer", false)
+            );
         }
     }
 

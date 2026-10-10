@@ -210,7 +210,9 @@ Notes on the options:
 
 ### Resume
 
-Each finished page is checkpointed to `<out>.md.ocr-partial/` next to the output file. If a run is interrupted (Ctrl-C, kill, crash, server loss), run the same command again and it resumes where it stopped; finished files in a directory run are skipped. A changed input, engine or setting (or `--overwrite`) starts fresh. The final `.md` is assembled from the checkpoints and written atomically. Page markers, front matter, `--pages`, `--legal-cleanup`, the `¶`/`§` repair and the suspect-page checks are applied at assembly, so changing them does not invalidate checkpoints. A file that ends with failed pages keeps its partial directory; re-running retries only those pages.
+Each finished page is checkpointed to `<out>.md.ocr-partial/` next to the output file. If a run is interrupted (Ctrl-C, kill, crash, server loss), run the same command again and it resumes where it stopped; finished files in a directory run are skipped only if they are still current (next paragraph). A changed input, engine or setting (or `--overwrite`) starts fresh. The final `.md` is assembled from the checkpoints and written atomically. Page markers, front matter, `--pages`, `--legal-cleanup`, the `¶`/`§` repair and the suspect-page checks are applied at assembly, so changing them does not invalidate checkpoints. A file that ends with failed pages keeps its partial directory; re-running retries only those pages.
+
+Every Markdown output has a `scan_record: <16 hex digits>` front-matter line: a hash of the input file (size, modification time, head and tail), the engine and its version, `--dpi`, `--use-text-layer`, the currency fix, the selected pages, the `ocr` version and the `--verify-json` mode. In directory mode an existing output is skipped only if its record equals the one the current run would write and, with `--verify-json`, its `<stem>.verify.json` exists. Otherwise the file is rescanned, one line says so, and the old `.verify.json` is deleted first. A `.verify.json` therefore never sits beside an output it was not made with, and an output written without `--verify-json` removes an existing sidecar. Outputs without a record (made by an older `ocr`, or with `--no-front-matter`) are skipped as before and counted in one line: "N output(s) were made by an older ocr and were not checked against their inputs; use --overwrite to redo them." Use `--overwrite` to redo those. Options applied at assembly (page markers, `--legal-cleanup`, the symbol fix) are not part of the record.
 
 ### Exit codes
 
@@ -312,6 +314,8 @@ An example (abridged):
 - **`check`:** something speaks against the value. `why` says what:
   - `suspect_page`: the page is in `suspect_pages`, failed, or has `missing_text`.
   - `not_in_embedded_text`: the page has embedded text and the value is not in it.
+  - `label_differs`: the value is in the other reading, but only after other words: each occurrence there backs one OCR value, after the same label (`Principal: $3,000` is not confirmed by `Interest: $3,000`). Header values that the PDF's text puts in another order can get this too, which only sends them for a check.
+  - `more_often_than_in_reference`: the OCR has the value more times than the other reading (`$3,000` twice where the page has it once).
   - `not_in_ocr_text_layer`: the page's embedded text is an invisible OCR layer (see `ocr_text_layer`), and the value is not in it.
   - `text_layer_unknown`: the page's embedded text could not be classified as visible or not (`text_layer_visibility: unknown`), and the value is not in it.
   - `confusable_characters`: a letter that looks like a digit (`O`/`0`, `l`/`1`, `S`/`5`, `B`/`8`), such as `3:26-cv-O4417` or `$1,O00`. Such a field has no `value`.
@@ -336,8 +340,10 @@ An example (abridged):
   - **Text agreement:** `text_agreement` is `compared_with: ocr_text_layer`, `independent: false`.
   - **Second reading:** the page never gets `second_reading: embedded_text`.
   - On the public filings this applies to a 1985 note and a handwritten dealer form, whose 120 values were verified against their old layers before.
-- **`page_check`:** the suspect reasons, `failed: …`, `engine_fallback` (the model failed and Apple's text stands in), `engine_flagged` (a crop came back empty, a reply was malformed or cut short, a table could not be converted), `line_numbers_unverified` (a transcript's numbers could not be re-anchored), `missing_text`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
+- **`page_check`:** the suspect reasons, `failed: …`, `engine_fallback` (the model failed and Apple's text stands in), `engine_flagged` (a crop came back empty, a reply was malformed or cut short, a table could not be converted), `line_numbers_unverified` (a transcript's numbers could not be re-anchored), `missing_text`, `missing_number`, `fields_missing`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
   - **`missing_text`:** the other reading (embedded text or second reader) has whole lines the OCR lacks: at least 5 words in lines with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the OCR. They are listed in `text_agreement.missing_lines`.
+  - **`fields_missing`** (`all` mode only): the other reading has values the OCR has nowhere on the page, listed in the page's `expected_fields_missing` (as that reading writes them). A dropped total or deadline is a missing value, not a wrong one, but it still needs a look.
+  - **`missing_number`:** the other reading has a number on a short line that the OCR has nowhere (`30` in `Pay within` / `30` / `days of notice`): a dropped deadline, amount or date. Listed in `text_agreement.missing_numbers`. A pleading's line numbers (five or more lone numbers) are not counted.
   - On the public filings this caught Apple Vision dropping a whole visible paragraph ("ARTICLE NINTH: Execution of Agreement") and a footnote.
   - On embedded text it can also mean text that is not visible on the page, such as text under a drawn redaction box.
   - A born-digital page with `missing_text` gets `second_reading: embedded_text` when its values match, so reading the PDF's own text covers it at no cost.
@@ -350,7 +356,7 @@ An example (abridged):
   - `independent` is true for embedded text, and for Vision against a model engine. Quote as agreed only from independent comparisons, because two Apple readings share blind spots.
   - `unagreed` lists the sentences that do not agree, each with its line within the page's Markdown and the words the other reading lacks entirely.
   - `agreed_spans` and `agreed_words` count what agrees. `summary.agreed_spans` and `summary.unagreed_spans` total the independent comparisons.
-  - **What is compared:** letters and digits, case-insensitively, and in order. A changed, dropped or doubled word breaks agreement. Line breaks, hyphenation and pleading line numbers don't, and neither does a margin legend that the PDF text puts between a paragraph's lines.
+  - **What is compared:** letters and digits, case-insensitively, and in order; in a number also a `.` or `,` between digits, a minus sign and `%`, so `$1.00` does not agree with `$100`, nor `-25%` with `25%`. A changed, dropped or doubled word breaks agreement. Each word of the other reading backs one sentence only, so a sentence read twice where the page has it once agrees once; the sentences of one line agree only in their order. Line breaks, hyphenation and pleading line numbers don't, and neither does a margin legend that the PDF text puts between a paragraph's lines.
   - **Edges:** a sentence must also start and end where a sentence or line does in the other reading, so a dropped first or last word is caught. Headers and table cells are matched within longer lines.
 
 Measured on the 20 public court filings (230 pages, Apple engine, eval/PUBLIC_SET.md; binary `87f0ac6`, 2026-10-09). A filing counts as e-filed when every page has embedded text, scanned when none has.

@@ -561,3 +561,127 @@ fn two_scans_on_one_server_take_turns() {
     assert_eq!(e.requests().len(), 6);
     assert_eq!(e.max_overlap(), 1, "requests of two processes overlapped");
 }
+
+// ------------------------------------------- directory mode: stale outputs
+
+/// One scan of `in/` into `out/` with the apple engine; returns stderr.
+fn scan_stale(e: &Apple, extra: &[&str]) -> String {
+    let a = Command::cargo_bin("ocr")
+        .unwrap()
+        .env("OCR_CONFIG_DIR", e.config.path())
+        .env("OCR_STATE_DIR", e.state.path())
+        .args(["scan", "--input-dir", "in", "--output-dir", "out"])
+        .args(extra)
+        .current_dir(e.work.path())
+        .assert()
+        .success();
+    String::from_utf8_lossy(&a.get_output().stderr).into_owned()
+}
+
+fn scan_record_of(md: &Path) -> String {
+    fs::read_to_string(md)
+        .unwrap()
+        .lines()
+        .find_map(|l| l.strip_prefix("scan_record: ").map(str::to_string))
+        .expect("scan_record in the front matter")
+}
+
+#[test]
+fn directory_rescans_only_what_changed() {
+    let e = Apple::new();
+    fs::create_dir_all(e.path("in")).unwrap();
+    fs::copy(Path::new(FIXTURES).join("legal.pdf"), e.path("in/a.pdf")).unwrap();
+    let md = e.path("out/a.md");
+    let sidecar = e.path("out/a.verify.json");
+
+    // First run writes the output with a record.
+    let stderr = scan_stale(&e, &[]);
+    assert!(stderr.contains("summary: 1 file(s)"), "{stderr}");
+    let rec = scan_record_of(&md);
+    assert_eq!(rec.len(), 16);
+
+    // (a) Nothing changed: skipped, not scanned.
+    let stderr = scan_stale(&e, &[]);
+    assert!(stderr.contains("skipped 1 file(s)"), "{stderr}");
+    assert!(stderr.contains("summary: 0 file(s)"), "{stderr}");
+    assert_eq!(scan_record_of(&md), rec);
+
+    // (c) --verify-json added: rescanned, sidecar written.
+    let stderr = scan_stale(&e, &["--verify-json"]);
+    assert!(stderr.contains("rescanning"), "{stderr}");
+    assert!(stderr.contains("summary: 1 file(s)"), "{stderr}");
+    assert!(sidecar.exists());
+    let rec_verify = scan_record_of(&md);
+    assert_ne!(rec_verify, rec);
+    // Unchanged with the same flag: skipped.
+    let stderr = scan_stale(&e, &["--verify-json"]);
+    assert!(stderr.contains("skipped 1 file(s)"), "{stderr}");
+    // Sidecar deleted by hand: rescanned.
+    fs::remove_file(&sidecar).unwrap();
+    let stderr = scan_stale(&e, &["--verify-json"]);
+    assert!(stderr.contains("rescanning"), "{stderr}");
+    assert!(sidecar.exists());
+
+    // (d) Verify mode dropped: rescanned, and the old sidecar is gone.
+    let stderr = scan_stale(&e, &[]);
+    assert!(stderr.contains("rescanning"), "{stderr}");
+    assert!(!sidecar.exists());
+    assert_eq!(scan_record_of(&md), rec);
+
+    // (b) The input is replaced: rescanned, and the output changes.
+    let before = without_generated(&fs::read_to_string(&md).unwrap());
+    fs::copy(
+        Path::new(FIXTURES).join("two_column.pdf"),
+        e.path("in/a.pdf"),
+    )
+    .unwrap();
+    let stderr = scan_stale(&e, &[]);
+    assert!(stderr.contains("rescanning"), "{stderr}");
+    assert!(stderr.contains("summary: 1 file(s)"), "{stderr}");
+    let after = without_generated(&fs::read_to_string(&md).unwrap());
+    assert_ne!(before, after);
+    assert_ne!(scan_record_of(&md), rec);
+}
+
+#[test]
+fn replacing_the_input_removes_the_old_sidecar() {
+    let e = Apple::new();
+    fs::create_dir_all(e.path("in")).unwrap();
+    fs::copy(Path::new(FIXTURES).join("legal.pdf"), e.path("in/a.pdf")).unwrap();
+    scan_stale(&e, &["--verify-json"]);
+    let sidecar = e.path("out/a.verify.json");
+    assert!(sidecar.exists());
+    fs::copy(
+        Path::new(FIXTURES).join("two_column.pdf"),
+        e.path("in/a.pdf"),
+    )
+    .unwrap();
+    // Rescanned without --verify-json: no sidecar describing the old PDF is left.
+    scan_stale(&e, &[]);
+    assert!(!sidecar.exists());
+}
+
+#[test]
+fn output_without_a_scan_record_is_kept_and_reported() {
+    let e = Apple::new();
+    fs::create_dir_all(e.path("in")).unwrap();
+    fs::copy(Path::new(FIXTURES).join("legal.pdf"), e.path("in/a.pdf")).unwrap();
+    scan_stale(&e, &[]);
+    // As an older ocr wrote it: no scan_record line.
+    let md = e.path("out/a.md");
+    let old: String = fs::read_to_string(&md)
+        .unwrap()
+        .lines()
+        .filter(|l| !l.starts_with("scan_record:"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    fs::write(&md, &old).unwrap();
+    let stderr = scan_stale(&e, &[]);
+    assert!(
+        stderr.contains(
+            "1 output(s) were made by an older ocr and were not checked against their inputs; use --overwrite to redo them."
+        ),
+        "{stderr}"
+    );
+    assert_eq!(fs::read_to_string(&md).unwrap(), old);
+}

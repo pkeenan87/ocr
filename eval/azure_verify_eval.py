@@ -1,7 +1,7 @@
 """Residual risk of the verification workflow: `ocr --verify-json` plus Azure on the pages it flags.
 
 usage:
-    PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/macos27/apple-all
+    PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/macos26/apple-all
         [--azure eval/out/public/azure-di] [--pdfs eval/out/public/pdfs] [--set eval/public_set.json]
         [--route report|all] [--json out.json]
 

@@ -25,7 +25,7 @@ You are measuring the residual risk of the `ocr` verification workflow with Azur
 ### 1. Update the repo
 
 1. In the existing clone, run `git checkout master` and `git pull`. If there is no clone, follow `docs/azure-eval.md` section 1 (clone, venv, `PYTHONUTF8=1` on Windows).
-2. Check that `eval/verify_bundle/macos27/apple-all/` and `eval/verify_bundle/macos27/apple/` exist, each with `blind/` and `truth/` for all 20 documents. If this machine runs another macOS version, or `ocr` has changed since, make a new bundle instead (`eval/verify_eval.py` for both modes, then `eval/export_verify_bundle.py` into `eval/verify_bundle/<os>/`) and use it below.
+2. Make the bundle for this machine: build `ocr` from master, run `eval/verify_eval.py` for `--verify-fields all` and `flagged`, and copy both runs with `eval/export_verify_bundle.py` into `eval/verify_bundle/<os>/apple-all` and `eval/verify_bundle/<os>/apple` (for example `macos27`). Only `macos26` is committed so far; reuse a committed bundle only if it matches this machine's macOS version and the current `ocr`. If this machine runs another macOS version, or `ocr` has changed since, make a new bundle instead (`eval/verify_eval.py` for both modes, then `eval/export_verify_bundle.py` into `eval/verify_bundle/<os>/`) and use it below.
 3. The venv needs only `eval/requirements.txt`. The interpreter is `PY` below, as in `docs/azure-eval.md`.
 
 ### 2. Azure readings
@@ -49,10 +49,10 @@ Azure reads every page here, so one set of responses serves both routings below:
 Run all four, each with `--json eval/out/azure-verify/<run>-<route>.json`:
 
 ```bash
-PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/macos27/apple-all --route report
-PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/macos27/apple-all --route all
-PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/macos27/apple --route report
-PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/macos27/apple --route all
+PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/<os>/apple-all --route report
+PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/<os>/apple-all --route all
+PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/<os>/apple --route report
+PY -I eval/azure_verify_eval.py --bundle eval/verify_bundle/<os>/apple --route all
 ```
 
 - `--route report` sends Azure only the report's `azure_pages`, which is the workflow as designed. `--route all` sends every page, as a reference.

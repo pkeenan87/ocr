@@ -1,5 +1,7 @@
 # Residual risk of `ocr --verify-json` with Azure on the flagged pages: results
 
+> **Later changes (2026-10-10).** These numbers are from master `0a90ec4`. Since then (PRs 18–25) the blind eval reads without embedded-text correction, `has_value` no longer confirms `$1.00` against `$100`, and verify matches each value to its own occurrence, keeps signs, and flags dropped numbers, engine-flagged pages and annotations. Re-run this measurement on a new bundle to update them. The macOS 27 bundle these results used is not committed yet.
+
 Plan and prompt: [azure-verify-eval.md](azure-verify-eval.md). Script: `eval/azure_verify_eval.py`. Raw outputs: [azure-verify-eval-results/](azure-verify-eval-results/) (`<run>-<route>.json`; `apple-all.json` is run `apple`, route `all`).
 
 ## 1. Environment

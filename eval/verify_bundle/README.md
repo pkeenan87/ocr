@@ -7,7 +7,7 @@ Apple Vision reads differently between macOS versions, so the runs are kept per 
 | Folder | Machine | Build | Graded wrong values | Blind `azure_pages` (`all` / `flagged`) |
 |---|---|---|---|---|
 | `macos26/` | macOS 26.6.2 (home Mac) | master after PR 14 (binary built 12:30, after the merge) | 7 | 222 / 128 |
-| `macos27/` | macOS 27.0.1 (work Mac) | master `0a90ec4` | 15 | 218 / 98 |
+| `macos27/` | macOS 27.0.1 (work Mac) | master `0a90ec4` | 15 | 218 / 98 (not committed yet: the runs are in the work Mac's `eval/out/verify-latest/`) |
 
 Both builds have the same code. The macOS 27 text is closer to the embedded text on 13 of 14 comparable documents (docs/azure-verify-eval-results.md).
 

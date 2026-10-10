@@ -76,21 +76,33 @@ fn unfence(reply: &str) -> &str {
     t.strip_suffix("```").unwrap_or(t).trim()
 }
 
-/// Parses the reply. A valid array is complete. Otherwise (cut off, or broken) the complete
+/// Whether a layout element has the shape dots writes: an object whose `text` and `category`,
+/// when present, are strings. A number or list for text (`"text": 42`) is a broken element whose
+/// text is lost, so the reply is not complete.
+fn well_formed(v: &Value) -> bool {
+    let Value::Object(o) = v else { return false };
+    ["text", "category"]
+        .iter()
+        .all(|k| o.get(*k).is_none_or(Value::is_string))
+}
+
+/// Parses the reply. A valid array of well-formed elements is complete. Otherwise (cut off, or broken) the complete
 /// `{...}` objects found after the first `[` are kept and the rest is dropped.
 pub fn parse_layout(reply: &str) -> Layout {
     let text = unfence(reply);
     if let Ok(Value::Array(items)) = serde_json::from_str::<Value>(text) {
         return Layout {
             elements: items.iter().filter_map(element).collect(),
-            complete: true,
+            complete: items.iter().all(well_formed),
         };
     }
     if let Ok(v @ Value::Object(_)) = serde_json::from_str::<Value>(text) {
-        // A single object instead of an array.
+        // A single object instead of an array; one that wraps the array (`{"elements": [...]}`)
+        // has no element of its own, which is not a complete page.
+        let ok = well_formed(&v) && (v.get("text").is_some() || v.get("category").is_some());
         return Layout {
             elements: element(&v).into_iter().collect(),
-            complete: true,
+            complete: ok,
         };
     }
     let start = text.find('[').map_or(0, |i| i + 1);
@@ -345,6 +357,16 @@ mod tests {
         let body = &upstream[layout_at + "\"prompt_layout_all_en\": \"\"\"".len()..];
         assert_eq!(PROMPT_LAYOUT, &body[..body.find("\"\"\"").unwrap()]);
         assert!(upstream.contains(&format!("\"prompt_ocr\": \"\"\"{PROMPT_OCR}\"\"\"")));
+    }
+
+    #[test]
+    fn a_broken_element_makes_the_reply_incomplete() {
+        let l =
+            parse_layout(r#"[{"category":"Text","text":"Good"},{"category":"Text","text":42}]"#);
+        assert!(!l.complete, "{l:?}");
+        assert!(!parse_layout(r#"[{"category":7,"text":"x"}]"#).complete);
+        assert!(!parse_layout(r#"["just a string"]"#).complete);
+        assert!(!parse_layout(r#"{"elements":[{"category":"Text","text":"x"}]}"#).complete);
     }
 
     #[test]

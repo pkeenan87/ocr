@@ -378,11 +378,35 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         }
     }
     let cleaned = s.legal_cleanup.then(|| markdown::strip_running(&results));
-    let (reviewed, rewrites) = suspect::review(
+    let (mut reviewed, rewrites) = suspect::review(
         cleaned.as_ref().map_or(&results, |c| &c.0),
         s.symbol_fix,
         backend.model_ids().is_some(),
     );
+    // Annotations (filled form fields, stamps, notes, redaction boxes) are never rendered, so no
+    // OCR engine saw them: flag the page. A detector error flags it too (fail closed).
+    let annotations: std::collections::HashMap<usize, Result<Vec<String>, ()>> =
+        if std::env::var_os("OCR_VERIFY_IGNORE_EMBEDDED").is_some() {
+            Default::default()
+        } else {
+            reviewed
+                .iter()
+                .filter(|p| p.error.is_none())
+                .map(|p| {
+                    (
+                        p.number,
+                        vision::annotations(&e.b.input, p.number - 1).map_err(|_| ()),
+                    )
+                })
+                .collect()
+        };
+    for p in &mut reviewed {
+        match annotations.get(&p.number) {
+            Some(Ok(k)) if !k.is_empty() => p.suspect.push("annotations_not_read"),
+            Some(Err(())) => p.suspect.push("annotations_unknown"),
+            _ => {}
+        }
+    }
     if s.verbose && !s.quiet {
         for (page, before, after) in &rewrites {
             eprintln!(
@@ -418,6 +442,11 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
                 verify::Embedded {
                     text: vision::text_layer(&input, page - 1).unwrap_or_default(),
                     visibility: vision::text_visibility(&input, page - 1),
+                    annotations: annotations
+                        .get(&page)
+                        .and_then(|a| a.as_ref().ok().cloned())
+                        .unwrap_or_default(),
+                    annotations_unknown: matches!(annotations.get(&page), Some(Err(()))),
                 }
             },
             &|page| {

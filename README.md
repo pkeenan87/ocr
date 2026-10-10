@@ -269,6 +269,8 @@ Front matter fields (`--no-front-matter` omits the header):
 | `pleading_table` | A table whose first column is pleading line numbers: prose read as a table, or margin numbers pulled into a real table |
 | `transcript_table` | Transcript lines (line numbers, Q. and A.) that came out inside a table; a real table on a transcript page, such as an exhibit list, does not count |
 | `page_order` | A multi-up transcript's `Page N` headers are out of order |
+| `annotations_not_read` | PDF pages only. The page has visible annotations (filled form fields, stamps, FreeText amendments, ink signatures, notes, highlights, redaction boxes) that the renderers do not draw, so no OCR engine saw them. Text under an annotation-style redaction box is still read and must not be quoted. Links and popups, and empty form fields, do not count |
+| `annotations_unknown` | The annotation check itself failed on the page: treated as not read |
 | `mixed_case` | Three or more words with case flipping inside them (`MAeLoN`, `WeST`, `SMiTH`), typical of handwriting or fax noise in capitals; brand names such as `DocuSign` or `McDonald` do not count |
 
 Words are checked against an English word list with legal terms added ([data/words-en.txt](data/words-en.txt), built by `scripts/make_wordlist.py`). Only lowercase words of four or more letters are checked, so names, citations, numbers and identifiers never count. Pages mostly in Spanish, French or Portuguese skip the word checks. Transcript pages whose line numbers could not be re-anchored are not suspect: they are listed in `line_numbers.unverified` with their own hint. On simulated misreads, a page is flagged as `misreads` reliably when about 8% of its words are misread, sometimes at 4%, and not at 1-2%; clean synthetic legal text has at most 1% non-words. The checks cannot see a wrong but plausible word or number (`8,000` read as `3,000`), a dropped sentence, or text in the wrong order that is still readable. An empty `suspect_pages` is not proof that a page is right.
@@ -311,6 +313,7 @@ An example (abridged):
 - **`verified`:** the same value appears in the page's embedded PDF text, a second, independent reading. Values are compared, not substrings: `$3,000` does not match `$3,000,000` in the embedded text, and `3:26-cv-4417` matches `3:26-cv-04417`. Born-digital filings are mostly verified for free.
 - **`check`:** something speaks against the value. `why` says what:
   - `suspect_page`: the page is in `suspect_pages`, failed, or has `missing_text`.
+  - `annotations_not_read`: the page has visible annotations OCR never saw. Agreement of two readings does not clear it.
   - `not_in_embedded_text`: the page has embedded text and the value is not in it.
   - `not_in_ocr_text_layer`: the page's embedded text is an invisible OCR layer (see `ocr_text_layer`), and the value is not in it.
   - `text_layer_unknown`: the page's embedded text could not be classified as visible or not (`text_layer_visibility: unknown`), and the value is not in it.
@@ -336,7 +339,8 @@ An example (abridged):
   - **Text agreement:** `text_agreement` is `compared_with: ocr_text_layer`, `independent: false`.
   - **Second reading:** the page never gets `second_reading: embedded_text`.
   - On the public filings this applies to a 1985 note and a handwritten dealer form, whose 120 values were verified against their old layers before.
-- **`page_check`:** the suspect reasons, `failed: …`, `missing_text`, `words_numerals_mismatch` or `arithmetic_mismatch`, when the whole page needs a second reading.
+- **`page_check`:** the suspect reasons, `failed: …`, `missing_text`, `words_numerals_mismatch`, `arithmetic_mismatch`, `annotations_not_read` or `annotations_unknown`, when the whole page needs a second reading.
+  - **`annotations_not_read`:** the page has annotations that draw something (form values, stamps, notes, redaction boxes) which OCR never saw; their kinds are listed in the page's `annotations`. The page always gets `second_reading: azure`: the PDF's own text does not include them. The pdfium build (Linux, Windows) cannot read form values and counts every form widget.
   - **`missing_text`:** the other reading (embedded text or second reader) has whole lines the OCR lacks: at least 5 words in lines with at least 4 words, of which fewer than a third of the word pairs appear anywhere in the OCR. They are listed in `text_agreement.missing_lines`.
   - On the public filings this caught Apple Vision dropping a whole visible paragraph ("ARTICLE NINTH: Execution of Agreement") and a footnote.
   - On embedded text it can also mean text that is not visible on the page, such as text under a drawn redaction box.

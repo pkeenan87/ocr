@@ -17,6 +17,7 @@ unsafe extern "C" {
     fn ocr_bridge_document_info(path: *const c_char) -> *mut c_char;
     fn ocr_bridge_text_layer(path: *const c_char, page_index: i32) -> *mut c_char;
     fn ocr_bridge_invisible_text(path: *const c_char, page_index: i32) -> *mut c_char;
+    fn ocr_bridge_annotations(path: *const c_char, page_index: i32) -> *mut c_char;
     fn ocr_bridge_text_in_regions(
         path: *const c_char,
         page_index: i32,
@@ -178,6 +179,25 @@ pub(super) fn char_counts(path: &Path, page_index: usize) -> Result<CharCounts> 
         shown: out.shown_chars,
         invisible: out.invisible_chars,
     })
+}
+
+#[derive(Deserialize)]
+struct AnnotationsOut {
+    ok: bool,
+    error: Option<String>,
+    #[serde(default)]
+    kinds: Vec<String>,
+}
+
+/// Kinds of the visible annotations on a PDF page (lowercase, deduplicated). See `vision::annotations`.
+pub(super) fn annotation_kinds(path: &Path, page_index: usize) -> Result<Vec<String>> {
+    let c_path = cstr(&path.to_string_lossy())?;
+    let json = unsafe { take(ocr_bridge_annotations(c_path.as_ptr(), page_index as i32))? };
+    let out: AnnotationsOut = serde_json::from_str(&json).context("bad JSON from vision bridge")?;
+    if !out.ok {
+        bail!("annotations: {}", out.error.unwrap_or_default());
+    }
+    Ok(out.kinds)
 }
 
 pub fn text_layer(path: &Path, page_index: usize) -> Result<String> {

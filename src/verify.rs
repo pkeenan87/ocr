@@ -1159,10 +1159,11 @@ pub fn report<'a>(
                 page_check.push(m.reason.into());
             }
         }
+        // Every amount in a disagreeing sum, the items above a total too.
         for f in fields.iter_mut().filter(|f| f.kind == Kind::Amount) {
             if let Some(m) = mismatches
                 .iter()
-                .find(|m| m.line == f.line && m.amounts.contains(&f.text))
+                .find(|m| m.cells.iter().any(|(l, a)| *l == f.line && *a == f.text))
             {
                 f.why.push(m.reason);
             }
@@ -1890,6 +1891,10 @@ mod tests {
         assert_eq!(status("$3,000.00").1, Status::Check);
         assert!(status("$3,000.00").2.contains(&"words_numerals_mismatch"));
         assert!(status("$310.00").2.contains(&"arithmetic_mismatch"));
+        // The items above the total are in the disagreeing sum too: any of them may be the
+        // misread one.
+        assert!(status("$100.00").2.contains(&"arithmetic_mismatch"));
+        assert!(status("$200.00").2.contains(&"arithmetic_mismatch"));
         assert_eq!(r.azure_pages, "1");
     }
 

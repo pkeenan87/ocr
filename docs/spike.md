@@ -852,3 +852,19 @@ From the adversarial review, findings F05, F06 (Bates), F07, A02 and A05:
 - **A05:** a dots reply whose element has a non-string `text` or `category`, or that wraps the array in an object, is incomplete. It is retried, and flagged if it stays so.
 
 **Public filings (Apple):** values verified 478, `azure_pages` 118 (`all`) and 90 (`flagged`), all unchanged. 27 transcript pages now carry `line_numbers_unverified`, but they were already sent. The other changes concern model engines, which were not run for this measurement; unit tests cover them.
+
+## Arithmetic: subtotals and signed amounts (2026-10-09)
+
+From the adversarial review, finding F11, reproduced on master:
+- A table with `$10 + $20`, a wrong subtotal `$40`, tax `$5` and total `$45` raised nothing, because a subtotal reset the sum without being checked.
+- A refund `($20.00)` was skipped. That gave a false alarm on a correct table with two items, and let a wrong total after a refund pass.
+- A mismatch marked only the total's line, though any item above it may be the misread one.
+
+**Now:**
+- Subtotals are checked against their items.
+- `($20.00)`, `-$20.00` and `$-20.00` count as negative.
+- A mismatch marks every amount in the sum (`Mismatch.cells`).
+
+**Measured:**
+- **Public filings:** no table triggers it, before or after (478 verified, 118 `azure_pages`).
+- **Synthetic `table` family, seeds 10–14:** the same page is flagged before and after (page 2 of each). Only the number of amounts marked on it grows, from the total alone to the whole sum.

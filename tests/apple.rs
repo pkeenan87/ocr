@@ -283,7 +283,7 @@ fn dpi_is_validated() {
 /// The markdown without its `generated:` timestamp line.
 fn without_generated(md: &str) -> String {
     md.lines()
-        .filter(|l| !l.starts_with("generated:"))
+        .filter(|l| !l.starts_with("generated:") && !l.starts_with("scan_record:"))
         .map(|l| format!("{l}\n"))
         .collect()
 }

@@ -1,0 +1,420 @@
+{
+ "bundle": "eval/out/verify-latest/apple",
+ "route": "all",
+ "counts": {
+  "pages": 230,
+  "azure_pages": 230,
+  "graded_pages": 139,
+  "azure_has_right": 496,
+  "right": 513,
+  "confirmed_right": 496,
+  "sentences": 2763,
+  "sentences_confirmed_right": 2292,
+  "sentences_confirmed_unmatched": 63,
+  "sentences_unconfirmed_unmatched": 157,
+  "sentences_unconfirmed_right": 251,
+  "azure_has_wrong": 3,
+  "wrong": 15,
+  "confirmed_wrong": 3,
+  "disputed_wrong": 12,
+  "disputed_right": 17
+ },
+ "examples": {
+  "sentence Azure confirms, not in embedded text": [
+   [
+    "cmpl-sec-kuzdas",
+    1,
+    "(305) 982-6300 UNITED STATES DISTRICT COURT"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    1,
+    "NORTHERN DISTRICT OF CALIFORNIA SECURITIES AND EXCHANGE COMMISSION, Plaintiff, vs."
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    4,
+    "Rowland was cofounder and President of S2A Modular and the Investment LLCs."
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    5,
+    "Page 5 of 18 RELEVANT ENTITIES"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    6,
+    "Defendants attempted raises for up to thirtysix MegaFactories across the United States, ul"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    6,
+    "In February 2023, Defendants initiated the Roll-Up, consolidating the Investment COMPLAINT"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    7,
+    "Once investors selected a specific Investment LLC and MegaFactory to fund, they signed a s"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    8,
+    "informed investors and prospective investors in PPMs, online presentations, and written CO"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    9,
+    "He set the stage for Kuzdas to then explain the remaining investment opportunities tied to"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    11,
+    "online presentation that \u201cjust in Florida alone, we\u2019ve got over 1000 units to build,\u201d whil"
+   ],
+   [
+    "cmpl-sec-kuzdas",
+    13,
+    "Defendants Consolidated Investors into S2A Modular Through the RollUp and Continued to Rai"
+   ],
+   [
+    "cmpl-irhythm",
+    5,
+    "(SEC) that the company identified unauthorized activity involving data maintained on certa"
+   ],
+   [
+    "cmpl-irhythm",
+    6,
+    "Consistent with these security protocols, we recently identified a cybersecurity incident "
+   ],
+   [
+    "cmpl-irhythm",
+    9,
+    "HIPAA JOURNAL, What is Considered Protected Health Information Under HIPAA?, available at:"
+   ],
+   [
+    "cmpl-irhythm",
+    10,
+    "Failing to effectively train all members of their workforce (including independent contrac"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    4,
+    "Plaintiff is informed and believes, and on that basis alleges, that each Defendant, includ"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    5,
+    "Upon information and belief, DOE DEPUTIES failed to provide a clear verbal warning that de"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    7,
+    "Plaintiff brings this claim for relief in his capacity as successorin-interest to DECEDENT"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    10,
+    "free from unwarranted state interference in his familial relationship with his COMPLAINT F"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    14,
+    "County of San Bernardino, et al., case number 5:14-cv-01289-DMG-AGR(x), Plaintiffs argued "
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "County of San Bernardino, case number 5-16-cv1128, Plaintiff argued that the involved San "
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "County of San Bernardino, et al., case number 5:19-cv01023-JGB-SP, Plaintiffs argued at tr"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "(Case Nos. 5:15-cv02515-JGB-DTB) Johnny Alcala and 14 other inmates sued the COMPLAINT FOR"
+   ],
+   [
+    "mot-janestreet-opp",
+    7,
+    "This Court should reject Plaintiff\u2019s invitation to hold Defendants to a non-existent and b"
+   ],
+   [
+    "mot-janestreet-opp",
+    7,
+    "the India options market,\u201d Complaint (\u201cCompl.\u201d) 1 8, 152."
+   ],
+   [
+    "mot-janestreet-opp",
+    8,
+    "Schadewald] was executing Jane Street\u2019s Trading Strategy directly harming Jane Street in t"
+   ],
+   [
+    "mot-janestreet-opp",
+    8,
+    "\u201chave delivered [a] proprietary trading strategy and related confidential information to M"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "Plaintiff\u2019s papers also lack evidence demonstrating that the information at issue was actu"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "Nanney (\u201cNanney Decl.\u201d) does not even mention, much less attempt to supply any evidence, s"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "The Complaint alleges that the \u201ctrade secrets\u201d include \u201cmultimodal signals leveraging mach"
+   ],
+   [
+    "mot-cimontubo-reply",
+    4,
+    "The basic dictionary definition of \u201coutstanding\u201d is \u201cunpaid.\u201d See https://www.merriamwebst"
+   ],
+   [
+    "mot-cimontubo-reply",
+    6,
+    "The Note Agreement is, after all, the negotiated contract between the parties; the Note is"
+   ],
+   [
+    "mot-cimontubo-reply",
+    6,
+    "Notably absent from PDVSA\u2019s papers is any explanation of why a debtor who misses a payment"
+   ],
+   [
+    "mot-cimontubo-reply",
+    6,
+    "Cimontubo\u2019s calculation of interest, however, is grounded by the express terms of the Note"
+   ],
+   [
+    "mot-cimontubo-reply",
+    6,
+    "As such, Cimontubo\u2019s calculation of interest should be granted."
+   ],
+   [
+    "mot-cimontubo-reply",
+    7,
+    "and expenses for the subsequent period through April 2, 2021 to be provided as soon as ava"
+   ],
+   [
+    "depo-removed-1",
+    8,
+    "[removed]"
+   ],
+   [
+    "depo-uber-oconnor",
+    5,
+    "Page 45 Page 47 different based on location, and time as well."
+   ],
+   [
+    "depo-uber-oconnor",
+    6,
+    "You may attend essentially an on-boarding session where they would, you know, learn how to"
+   ],
+   [
+    "depo-uber-oconnor",
+    7,
+    "And over time there becomes this average of how riders rate the services provided, and ess"
+   ],
+   [
+    "depo-uber-oconnor",
+    8,
+    "Page 115 side of the story?"
+   ],
+   [
+    "depo-uber-oconnor",
+    11,
+    "And not only is there no need for cash, drivers are instructed they are not to accept cash"
+   ],
+   [
+    "depo-uber-oconnor",
+    12,
+    "are made from Uber to the partner and then Uber issues 1099s to the partner, right? 1 in h"
+   ],
+   [
+    "depo-uber-oconnor",
+    13,
+    "Uber -- and this may be a question that's Q."
+   ],
+   [
+    "depo-uber-oconnor",
+    14,
+    "I don't want you to guess or speculate, but Page 242"
+   ],
+   [
+    "ctr-holt-settlement",
+    2,
+    "Employer will issue Holt a W2 for this portion of the settlement proceeds."
+   ],
+   [
+    "ctr-holt-settlement",
+    3,
+    "Rather, Holt understands that this language is standard and designed to bring closure to a"
+   ],
+   [
+    "ctr-marital-settlement",
+    5,
+    "[removed]"
+   ],
+   [
+    "ctr-marital-settlement",
+    5,
+    "[removed]"
+   ],
+   [
+    "ctr-marital-settlement",
+    6,
+    "[removed]"
+   ]
+  ],
+  "Azure repeats a wrong value": [
+   [
+    "cmpl-irhythm",
+    8,
+    "amount",
+    "$45"
+   ],
+   [
+    "cmpl-irhythm",
+    9,
+    "citation",
+    "\u00a7 5"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "docket",
+    "5-16-cv1128"
+   ]
+  ],
+  "confirmed but wrong": [
+   [
+    "cmpl-irhythm",
+    8,
+    "amount",
+    "$45"
+   ],
+   [
+    "cmpl-irhythm",
+    9,
+    "citation",
+    "\u00a7 5"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "docket",
+    "5-16-cv1128"
+   ]
+  ],
+  "Azure lacks a right value": [
+   [
+    "depo-knight-avery",
+    1,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    1,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    2,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    3,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    3,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    4,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    5,
+    "docket",
+    "2:23-cV-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    5,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    6,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    7,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    8,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    9,
+    "docket",
+    "2:23-cV-00886-NJ"
+   ],
+   [
+    "ord-garland-dunkin",
+    2,
+    "citation",
+    "\u00b6 60"
+   ],
+   [
+    "ord-garland-dunkin",
+    12,
+    "citation",
+    "\u00b6 46"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    2,
+    "citation",
+    "\u00b6 33"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    3,
+    "citation",
+    "\u00b6 35"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    3,
+    "citation",
+    "\u00b6 30"
+   ]
+  ]
+ }
+}

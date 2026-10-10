@@ -1,0 +1,297 @@
+{
+ "bundle": "eval/out/verify-latest/apple",
+ "route": "report",
+ "counts": {
+  "pages": 230,
+  "azure_pages": 98,
+  "graded_pages": 139,
+  "azure_has_right": 496,
+  "right": 513,
+  "person_right": 344,
+  "confirmed_right": 160,
+  "sentences": 1375,
+  "sentences_confirmed_right": 1037,
+  "sentences_confirmed_unmatched": 25,
+  "azure_has_wrong": 3,
+  "wrong": 15,
+  "confirmed_wrong": 3,
+  "sentences_unconfirmed_unmatched": 94,
+  "disputed_wrong": 8,
+  "person_wrong": 4,
+  "sentences_unconfirmed_right": 219,
+  "disputed_right": 9
+ },
+ "examples": {
+  "sentence Azure confirms, not in embedded text": [
+   [
+    "cmpl-sec-kuzdas",
+    13,
+    "Defendants Consolidated Investors into S2A Modular Through the RollUp and Continued to Rai"
+   ],
+   [
+    "cmpl-irhythm",
+    9,
+    "HIPAA JOURNAL, What is Considered Protected Health Information Under HIPAA?, available at:"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "County of San Bernardino, case number 5-16-cv1128, Plaintiff argued that the involved San "
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "County of San Bernardino, et al., case number 5:19-cv01023-JGB-SP, Plaintiffs argued at tr"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "(Case Nos. 5:15-cv02515-JGB-DTB) Johnny Alcala and 14 other inmates sued the COMPLAINT FOR"
+   ],
+   [
+    "mot-janestreet-opp",
+    7,
+    "This Court should reject Plaintiff\u2019s invitation to hold Defendants to a non-existent and b"
+   ],
+   [
+    "mot-janestreet-opp",
+    7,
+    "the India options market,\u201d Complaint (\u201cCompl.\u201d) 1 8, 152."
+   ],
+   [
+    "mot-janestreet-opp",
+    8,
+    "Schadewald] was executing Jane Street\u2019s Trading Strategy directly harming Jane Street in t"
+   ],
+   [
+    "mot-janestreet-opp",
+    8,
+    "\u201chave delivered [a] proprietary trading strategy and related confidential information to M"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "Plaintiff\u2019s papers also lack evidence demonstrating that the information at issue was actu"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "Nanney (\u201cNanney Decl.\u201d) does not even mention, much less attempt to supply any evidence, s"
+   ],
+   [
+    "mot-janestreet-opp",
+    9,
+    "The Complaint alleges that the \u201ctrade secrets\u201d include \u201cmultimodal signals leveraging mach"
+   ],
+   [
+    "depo-removed-1",
+    8,
+    "[removed]"
+   ],
+   [
+    "depo-uber-oconnor",
+    6,
+    "You may attend essentially an on-boarding session where they would, you know, learn how to"
+   ],
+   [
+    "depo-uber-oconnor",
+    7,
+    "And over time there becomes this average of how riders rate the services provided, and ess"
+   ],
+   [
+    "depo-uber-oconnor",
+    8,
+    "Page 115 side of the story?"
+   ],
+   [
+    "depo-uber-oconnor",
+    11,
+    "And not only is there no need for cash, drivers are instructed they are not to accept cash"
+   ],
+   [
+    "depo-uber-oconnor",
+    12,
+    "are made from Uber to the partner and then Uber issues 1099s to the partner, right? 1 in h"
+   ],
+   [
+    "depo-uber-oconnor",
+    13,
+    "Uber -- and this may be a question that's Q."
+   ],
+   [
+    "depo-uber-oconnor",
+    14,
+    "I don't want you to guess or speculate, but Page 242"
+   ],
+   [
+    "ctr-holt-settlement",
+    3,
+    "Rather, Holt understands that this language is standard and designed to bring closure to a"
+   ],
+   [
+    "ord-garland-dunkin",
+    2,
+    "Plaintiffs sue under the Americans with Disabilities Act (\u201cADA\u201d) and the antidiscriminatio"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    2,
+    "See id. at 1 12-16, 18-19 (naming Karen A."
+   ],
+   [
+    "ord-ironworkers-bogart",
+    2,
+    "See id. at 1)20-23 (naming Deming Xiao (\u201cXiao\u201d), Maurice Sciammas (\u201cSciammas\u201d), Paul Ueunt"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    9,
+    "Davis, Case No. 03:11633-AC, 2012 U.S."
+   ]
+  ],
+  "Azure repeats a wrong value": [
+   [
+    "cmpl-irhythm",
+    8,
+    "amount",
+    "$45"
+   ],
+   [
+    "cmpl-irhythm",
+    9,
+    "citation",
+    "\u00a7 5"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "docket",
+    "5-16-cv1128"
+   ]
+  ],
+  "confirmed but wrong": [
+   [
+    "cmpl-irhythm",
+    8,
+    "amount",
+    "$45"
+   ],
+   [
+    "cmpl-irhythm",
+    9,
+    "citation",
+    "\u00a7 5"
+   ],
+   [
+    "cmpl-ab-sanbernardino",
+    15,
+    "docket",
+    "5-16-cv1128"
+   ]
+  ],
+  "Azure lacks a right value": [
+   [
+    "depo-knight-avery",
+    1,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    1,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    2,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    3,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    3,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    4,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    5,
+    "docket",
+    "2:23-cV-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    5,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    6,
+    "date",
+    "08/01/24"
+   ],
+   [
+    "depo-knight-avery",
+    7,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    8,
+    "docket",
+    "2:23-cv-00886-NJ"
+   ],
+   [
+    "depo-knight-avery",
+    9,
+    "docket",
+    "2:23-cV-00886-NJ"
+   ],
+   [
+    "ord-garland-dunkin",
+    2,
+    "citation",
+    "\u00b6 60"
+   ],
+   [
+    "ord-garland-dunkin",
+    12,
+    "citation",
+    "\u00b6 46"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    2,
+    "citation",
+    "\u00b6 33"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    3,
+    "citation",
+    "\u00b6 35"
+   ],
+   [
+    "ord-ironworkers-bogart",
+    3,
+    "citation",
+    "\u00b6 30"
+   ]
+  ]
+ }
+}

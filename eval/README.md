@@ -43,7 +43,7 @@ Trustworthy ground truth for handwriting cannot be generated, so handwritten ann
 ## Verification eval (`--verify-json`)
     spike/.venv/bin/python -I eval/verify_eval.py --engine apple [--skip-run] [--use-real-config]
 
-This grades the values and statuses of `--verify-json` against the PDFs' embedded text, on the public set's pages that have it. It scans three times: as users run it, with the embedded text hidden from verify (`OCR_VERIFY_IGNORE_EMBEDDED=1`), and the text layer itself.
+This grades the values and statuses of `--verify-json` against the PDFs' embedded text, on the public set's pages that have it (not on pages whose text is an invisible OCR layer). It scans four times: as users run it; read without the embedded text (`--use-text-layer never`, so nothing is corrected from it) and verified with it, which grades; the same reading with the embedded text hidden from verify too (`OCR_VERIFY_IGNORE_EMBEDDED=1`), which is the blind run; and the text layer itself.
 
 It reports:
 - field precision, recall and F1;

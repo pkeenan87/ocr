@@ -753,3 +753,32 @@ The work-machine measurement ([azure-verify-eval-results.md](azure-verify-eval-r
 The 9 values and 15 pages are the marital settlement, now sent to Azure instead of trusted.
 
 **Not fixed:** a docket that PDFKit gives as `5-16-cv-` / `1128` is graded against `5-16-cv-1128`, so `ocr`'s `5-16-cv1128` (letters and digits the same) is a `check`. That is a false alarm, the safe direction.
+
+## Trustworthy measurement (2026-10-09)
+
+From the adversarial review (Notion, "OCR Astra Adversarial Review"), validated against `91c278f`:
+
+- **E03, the blind run was not blind.** `OCR_VERIFY_IGNORE_EMBEDDED=1` hid the embedded text from verify, but the OCR was still corrected from it, so the blind run saw fewer wrong values than a real scan. `eval/verify_eval.py` now reads `truth` and `blind` with `--use-text-layer never` (no correction), and only `truth`'s verify sees the embedded text. A fourth run, `user`, is the scan as users run it, for the headline numbers. Pages whose text is an invisible OCR layer are no longer graded.
+- **E04:** `eval/azure_verify_eval.py` confirmed `$1.00` against `$100`. A `.` or `,` between two digits must now be the same.
+- **E01:** `eval/score.py` raises on repeated or backward page markers, and counts text before the first marker and on pages the reference lacks as insertions.
+- **E02:** token recall is boundary- and occurrence-aware (`$3,000` is not in `$3,000,000`). Transcript-line accuracy is ordered and one-to-one.
+- **E06:** `run.py` charges every attempt's wall time. `agg.py` computes throughput only over runs that produced a result, and reports failed runs.
+
+**Rescoring the earlier accept outputs with the new scorer.** CER is unchanged (no output had extra pages):
+
+| Engine | Token recall, old → new | Transcript lines (raw), old → new |
+|---|---|---|
+| apple (200 DPI) | 95.0% → 94.1% | 38.3% → 28.6% |
+| paddleocr-vl | 96.6% → 95.9% | 25.2% → 22.8% |
+| dots-ocr | 100% → 100% | 68.1% → 68.1% |
+| olmocr | 98.8% → 98.5% | 30.4% → 29.3% |
+
+**New verify baseline** (Apple, `all`, macOS 26, master `91c278f`): 230 pages, 124 graded (embedded text, no OCR layer).
+
+| | Before (half-blind) | Now (blind) |
+|---|---|---|
+| Graded wrong values in the blind run | 7 | 21 |
+| Caught as `check` | 7 | 21 |
+| Verified in the blind run | 0 | 0 |
+
+So a real scan has about three times the wrong values the old measurement suggested. All 21 are still caught. As users run it: 490 of 883 values verified, 109 pages to Azure.

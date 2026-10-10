@@ -190,7 +190,7 @@ static DATE_NUMERIC: LazyLock<Regex> = LazyLock::new(|| {
 });
 static DATE_WORDS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(&format!(
-        r"\b(?:(?P<m1>{MONTHS})\.?\s+(?P<d1>[0-9OIl]{{1,2}})(?:,\s*|\s+)(?P<y1>[0-9OIlQ]{{4}})|(?P<d2>\d{{1,2}})\s+(?P<m2>{MONTHS})\.?,?\s+(?P<y2>\d{{4}}))\b"
+        r"\b(?:(?P<m1>{MONTHS})\.?\s+(?P<d1>[0-9OIl]{{1,2}})(?:st|nd|rd|th)?(?:,\s*|\s+)(?P<y1>[0-9OIlQ]{{4}})|(?P<d2>\d{{1,2}})(?:st|nd|rd|th)?\s+(?:day\s+of\s+|of\s+)?(?P<m2>{MONTHS})\.?,?\s+(?P<y2>\d{{4}}))\b"
     ))
     .unwrap()
 });
@@ -609,7 +609,12 @@ fn extract(body: &str) -> Vec<Field> {
         let indent = line.len() - line.trim_start().len();
         let mut dates: Vec<(usize, &str)> = DATE_WORDS
             .captures_iter(line)
-            .filter(|c| !(c.name("d2").is_some() && c.get(0).unwrap().start() == indent))
+            // An ordinal (`3rd day of March`) is never a line number.
+            .filter(|c| {
+                !c.name("d2").is_some_and(|d| {
+                    d.start() == indent && line[d.end()..].starts_with(char::is_whitespace)
+                })
+            })
             .map(|c| c.get(0).unwrap())
             .chain(DATE_NUMERIC.find_iter(line))
             .map(|m| (m.start(), m.as_str()))
@@ -2288,6 +2293,30 @@ mod tests {
             "{:?}",
             r.pages[0]
         );
+    }
+
+    #[test]
+    fn ordinal_dates_are_found() {
+        for (text, iso) in [
+            ("signed on March 3rd, 2024 by", "2024-03-03"),
+            ("signed this 3rd day of March, 2024 by", "2024-03-03"),
+            ("on the 21st of June 2023 and", "2023-06-21"),
+            ("dated 2nd February 2022.", "2022-02-02"),
+            ("on August 22nd 2019 the", "2019-08-22"),
+        ] {
+            let f = extract(text);
+            assert_eq!(f.len(), 1, "{text}: {f:?}");
+            assert_eq!(
+                (f[0].kind, f[0].value.clone()),
+                (Kind::Date, Some(iso.into())),
+                "{text}"
+            );
+        }
+        // At a line start too, unlike a bare number (a pleading line number).
+        assert_eq!(extract("3rd day of March, 2024").len(), 1);
+        assert!(extract("2 March 2023 was").is_empty());
+        // The ordinal must still be a real day.
+        assert_eq!(extract("on March 32nd, 2024")[0].why, vec!["invalid_date"]);
     }
 
     #[test]

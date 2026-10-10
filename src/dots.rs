@@ -1,7 +1,10 @@
-//! dots scan engine (PLAN §4.2): `prompt_layout_all_en` on the whole page, the JSON array of
-//! `{bbox, category, text}` converted to Markdown. Never uses `repetition_penalty` (it corrupts
-//! the JSON structure): a loop or truncation goes to the crop plan if there is one, then to
-//! `prompt_ocr` as plain text, then to Apple Vision with a flag.
+//! dots scan engine (PLAN §4.2): `prompt_ocr` (plain text) on the whole page first. It writes
+//! 2.4 times fewer tokens than `prompt_layout_all_en` and is about 1.8 times faster at the same
+//! accuracy (docs/spike.md, "dots: plain text first"). Transcript pages keep the layout prompt
+//! first, then the crop plan, then plain text: there plain text was less accurate. If the plain reply is cut off, loops or
+//! stays empty, `prompt_layout_all_en` follows: the JSON array of `{bbox, category, text}`
+//! converted to Markdown, on the whole page and then the crop plan, and finally Apple Vision with
+//! a flag. Never uses `repetition_penalty` (it corrupts the JSON structure).
 
 use std::path::Path;
 
@@ -222,12 +225,26 @@ impl ScanEngine for Dots {
 
     fn run(&self, ctx: &Ctx, path: &Path, prep: &Prepared, s: &Settings) -> Result<Output, Fail> {
         let planned = prep.planned.as_ref().map_err(|e| Fail::Failed(e.clone()))?;
-        // Stage 1: the layout prompt on the page.
+        // Stage 1: plain text on the page.
+        // Transcripts keep the layout prompt first: plain text was 2.5 times faster on them but
+        // slightly less accurate (line accuracy 90.8% against 93.7%), and their page:line
+        // citations depend on it.
+        if prep.transcript {
+            return layout_first(ctx, path, prep, s, planned, self);
+        }
+        // Only a bad reply moves on to the layout prompt; a server that failed after its own
+        // retries (5xx, timeout) would fail the layout request too.
+        let plain_failed = match plain_text(ctx, &planned[0]) {
+            Ok(out) => return Ok(out),
+            Err(Plain::Reply(why)) => why,
+            Err(Plain::Server(fail)) => return Err(fail),
+        };
+        // Stage 2: the layout prompt on the page.
         match layout_requests(ctx, planned) {
             Err(Fail::Degenerate) => {}
             other => return other,
         }
-        // Stage 2: the crop plan, if the page has one.
+        // Stage 3: the layout prompt on the crop plan, if the page has one.
         if let Some(specs) = prep.alt.as_deref() {
             let crops = render_specs(path, prep.index, s.dpi, specs, self).map_err(Fail::Failed)?;
             match layout_requests(ctx, &crops) {
@@ -235,9 +252,38 @@ impl ScanEngine for Dots {
                 other => return other,
             }
         }
-        // Stage 3: plain text. Failing that, the caller falls back to Apple Vision.
-        plain_text(ctx, &planned[0])
+        // The caller falls back to Apple Vision.
+        Err(Fail::Failed(format!(
+            "plain text failed ({plain_failed}) and the layout reply looped or was cut off"
+        )))
     }
+}
+
+/// The order for transcript pages: the layout prompt on the page, then on the crop plan, then
+/// plain text.
+fn layout_first(
+    ctx: &Ctx,
+    path: &Path,
+    prep: &Prepared,
+    s: &Settings,
+    planned: &[Planned],
+    engine: &Dots,
+) -> Result<Output, Fail> {
+    match layout_requests(ctx, planned) {
+        Err(Fail::Degenerate) => {}
+        other => return other,
+    }
+    if let Some(specs) = prep.alt.as_deref() {
+        let crops = render_specs(path, prep.index, s.dpi, specs, engine).map_err(Fail::Failed)?;
+        match layout_requests(ctx, &crops) {
+            Err(Fail::Degenerate) => {}
+            other => return other,
+        }
+    }
+    plain_text(ctx, &planned[0]).map_err(|e| match e {
+        Plain::Reply(why) => Fail::Failed(why),
+        Plain::Server(fail) => fail,
+    })
 }
 
 /// Layout requests in order, joined.
@@ -306,26 +352,36 @@ fn layout_request(ctx: &Ctx, req: &Planned) -> Result<(String, bool, bool), Fail
     }
 }
 
+/// Why the plain-text request gave nothing usable.
+enum Plain {
+    /// The reply was cut off, looped or stayed empty: the layout prompt may do better.
+    Reply(String),
+    /// The request itself failed after the transport retries.
+    Server(Fail),
+}
+
 /// `prompt_ocr` on the page image: plain text, with tables converted like elsewhere.
-fn plain_text(ctx: &Ctx, page: &Planned) -> Result<Output, Fail> {
+fn plain_text(ctx: &Ctx, page: &Planned) -> Result<Output, Plain> {
     let req = Planned {
         prompt: Prompt::DotsOcr,
         ..page.clone()
     };
     let mut empty_retried = false;
     loop {
-        let reply = ctx.send(&req, ctx.lim.max_tokens, None)?;
+        let reply = ctx
+            .send(&req, ctx.lim.max_tokens, None)
+            .map_err(Plain::Server)?;
         if reply.finish == "length" {
-            return Err(Fail::Failed("output truncated at max_tokens".into()));
+            return Err(Plain::Reply("output truncated at max_tokens".into()));
         }
         if has_repetition_loop(&htmltable::strip_tables(&reply.text)) {
-            return Err(Fail::Failed("repetition loop".into()));
+            return Err(Plain::Reply("repetition loop".into()));
         }
         let (tables, converted) = htmltable::convert_tables(&reply.text);
         let body = clean_ocr(&tables);
         if body.is_empty() {
             if empty_retried {
-                return Err(Fail::Failed("empty model output".into()));
+                return Err(Plain::Reply("empty model output".into()));
             }
             empty_retried = true;
             continue;

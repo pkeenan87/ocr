@@ -40,8 +40,9 @@ fn no_penalty(reqs: &[Value]) {
 
 #[test]
 fn layout_json_becomes_markdown() {
+    // The plain request comes first; make it loop so the layout prompt is reached.
     let e = env(&["legal_scan.pdf"]);
-    e.serve(&[]);
+    e.serve(&[("FAKE_PLAIN_MODE", "loop")]);
     e.scan("legal_scan.pdf", &[], &[]).success();
     let md = e.markdown("legal_scan.pdf");
     for want in [
@@ -69,15 +70,34 @@ fn layout_json_becomes_markdown() {
         "{md}"
     );
     let reqs = e.requests();
-    assert_eq!(kinds(&reqs), ["layout"], "{reqs:?}");
-    assert_eq!(reqs[0]["text_first"], false, "image first");
-    assert_eq!(reqs[0]["max_tokens"], 8192);
+    assert_eq!(kinds(&reqs), ["ocr", "layout"], "{reqs:?}");
+    assert_eq!(reqs[1]["text_first"], false, "image first");
+    assert_eq!(reqs[1]["max_tokens"], 8192);
     assert_eq!(
-        (reqs[0]["w"].as_u64(), reqs[0]["h"].as_u64()),
+        (reqs[1]["w"].as_u64(), reqs[1]["h"].as_u64()),
         (Some(850), Some(1100)),
         "100 DPI (the dots default)"
     );
     no_penalty(&reqs);
+}
+
+#[test]
+fn clean_plain_text_is_used_directly_and_no_layout_request_is_sent() {
+    let e = env(&["legal_scan.pdf"]);
+    e.serve(&[]);
+    e.scan("legal_scan.pdf", &[], &[]).success();
+    let reqs = e.requests();
+    assert_eq!(kinds(&reqs), ["ocr"], "{reqs:?}");
+    assert_eq!(reqs[0]["text_first"], false, "image first");
+    assert_eq!(reqs[0]["max_tokens"], 8192);
+    no_penalty(&reqs);
+    let md = e.markdown("legal_scan.pdf");
+    assert!(md.contains("fake dots plain text 850x1100"), "{md}");
+    assert!(!md.contains("FAKE TITLE"), "{md}");
+    assert!(
+        md.contains("fallback_pages: []\n") && md.contains("flagged_pages: []\n"),
+        "{md}"
+    );
 }
 
 #[test]
@@ -114,10 +134,10 @@ fn columns_are_not_split_up_front_and_unverified_transcripts_get_the_verify_hint
 
 #[test]
 fn long_repeating_table_is_not_a_loop() {
-    let e = env(&["transcript_full.pdf"]);
-    e.serve(&[("FAKE_MODE", "longtable")]);
-    e.scan("transcript_full.pdf", &[], &[]).success();
-    let md = e.markdown("transcript_full.pdf");
+    let e = env(&["legal_scan.pdf"]);
+    e.serve(&[("FAKE_MODE", "longtable"), ("FAKE_PLAIN_MODE", "loop")]);
+    e.scan("legal_scan.pdf", &[], &[]).success();
+    let md = e.markdown("legal_scan.pdf");
     assert_eq!(
         md.matches("| N/A | $0.00 | Not applicable |").count(),
         80,
@@ -127,7 +147,12 @@ fn long_repeating_table_is_not_a_loop() {
         md.contains("flagged_pages: []\n") && md.contains("fallback_pages: []\n"),
         "{md}"
     );
-    assert_eq!(e.requests().len(), 1, "no retry");
+    let reqs = e.requests();
+    assert_eq!(
+        kinds(&reqs),
+        ["ocr", "layout"],
+        "no retry of the layout request: {reqs:?}"
+    );
 }
 
 #[test]
@@ -144,12 +169,12 @@ fn text_layer_is_opt_in() {
 
 #[test]
 fn truncated_json_is_retried_then_kept_and_flagged() {
-    let e = env(&["transcript_full.pdf"]);
-    e.serve(&[("FAKE_MODE", "truncated")]);
-    e.scan("transcript_full.pdf", &[], &[]).code(1);
+    let e = env(&["legal_scan.pdf"]);
+    e.serve(&[("FAKE_MODE", "truncated"), ("FAKE_PLAIN_MODE", "loop")]);
+    e.scan("legal_scan.pdf", &[], &[]).code(1);
     let reqs = e.requests();
-    assert_eq!(kinds(&reqs), ["layout", "layout"], "{reqs:?}");
-    let md = e.markdown("transcript_full.pdf");
+    assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
+    let md = e.markdown("legal_scan.pdf");
     // The complete elements survive, the cut-off one does not.
     assert!(
         md.contains("FAKE RUNNING HEADER") && md.contains("# FAKE TITLE"),
@@ -166,11 +191,17 @@ fn truncated_json_is_retried_then_kept_and_flagged() {
 
 #[test]
 fn truncated_json_that_clears_on_retry_is_not_flagged() {
-    let e = env(&["transcript_full.pdf"]);
-    e.serve(&[("FAKE_MODE", "truncated"), ("FAKE_FAIL_FIRST", "1")]);
-    e.scan("transcript_full.pdf", &[], &[]).success();
-    assert_eq!(e.requests().len(), 2);
-    let md = e.markdown("transcript_full.pdf");
+    let e = env(&["legal_scan.pdf"]);
+    // Request 1 (plain) loops, request 2 (layout) is cut off, request 3 (the retry) is whole.
+    e.serve(&[
+        ("FAKE_MODE", "truncated"),
+        ("FAKE_PLAIN_MODE", "loop"),
+        ("FAKE_FAIL_FIRST", "2"),
+    ]);
+    e.scan("legal_scan.pdf", &[], &[]).success();
+    let reqs = e.requests();
+    assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
+    let md = e.markdown("legal_scan.pdf");
     assert!(
         md.contains("FAKE RUNNING FOOTER") && md.contains("flagged_pages: []\n"),
         "{md}"
@@ -180,16 +211,16 @@ fn truncated_json_that_clears_on_retry_is_not_flagged() {
 // ---------------------------------------------------- loops and truncation
 
 #[test]
-fn loop_without_crops_goes_to_plain_text_then_apple() {
-    let e = env(&["transcript_full.pdf"]);
+fn loop_in_plain_layout_and_first_crop_goes_to_apple() {
+    let e = env(&["legal_scan.pdf"]);
     e.serve(&[("FAKE_MODE", "loop")]);
-    e.scan("transcript_full.pdf", &[], &[])
+    e.scan("legal_scan.pdf", &[], &[])
         .code(1)
         .stderr(predicate::str::contains("repetition loop"));
     let reqs = e.requests();
-    assert_eq!(kinds(&reqs), ["layout", "ocr"], "{reqs:?}");
+    assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
     no_penalty(&reqs);
-    let md = e.markdown("transcript_full.pdf");
+    let md = e.markdown("legal_scan.pdf");
     assert!(
         md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
         "{md}"
@@ -198,14 +229,15 @@ fn loop_without_crops_goes_to_plain_text_then_apple() {
 }
 
 #[test]
-fn loop_that_clears_in_plain_text_is_not_a_fallback() {
-    let e = env(&["transcript_full.pdf"]);
+fn plain_text_that_loops_goes_to_layout_and_is_not_a_fallback() {
+    let e = env(&["legal_scan.pdf"]);
     e.serve(&[("FAKE_MODE", "loop"), ("FAKE_FAIL_FIRST", "1")]);
-    e.scan("transcript_full.pdf", &[], &[]).success();
+    e.scan("legal_scan.pdf", &[], &[]).success();
     let reqs = e.requests();
-    assert_eq!(kinds(&reqs), ["layout", "ocr"], "{reqs:?}");
-    let md = e.markdown("transcript_full.pdf");
-    assert!(md.contains("fake dots plain text 850x1100"), "{md}");
+    assert_eq!(kinds(&reqs), ["ocr", "layout"], "{reqs:?}");
+    let md = e.markdown("legal_scan.pdf");
+    assert!(md.contains("# FAKE TITLE 850x1100"), "{md}");
+    assert!(!md.contains("the same line again"), "{md}");
     assert!(md.contains("fallback_pages: []\n"), "{md}");
 }
 
@@ -213,12 +245,17 @@ fn loop_that_clears_in_plain_text_is_not_a_fallback() {
 fn looping_page_with_regions_is_retried_as_crops() {
     // signature_block.pdf: one full-page request, but two regions the side-pass can crop.
     let e = env(&["signature_block.pdf"]);
-    e.serve(&[("FAKE_MODE", "loop"), ("FAKE_FAIL_FIRST", "1")]);
+    // The plain request and the full-page layout request loop; the two crops are fine.
+    e.serve(&[("FAKE_MODE", "loop"), ("FAKE_FAIL_FIRST", "2")]);
     e.scan("signature_block.pdf", &[], &[]).success();
     let reqs = e.requests();
-    assert_eq!(kinds(&reqs), ["layout", "layout", "layout"], "{reqs:?}");
+    assert_eq!(
+        kinds(&reqs),
+        ["ocr", "layout", "layout", "layout"],
+        "{reqs:?}"
+    );
     assert!(
-        reqs[1..].iter().all(|r| r["h"].as_u64().unwrap() < 1100),
+        reqs[2..].iter().all(|r| r["h"].as_u64().unwrap() < 1100),
         "{reqs:?}"
     );
     no_penalty(&reqs);
@@ -228,16 +265,19 @@ fn looping_page_with_regions_is_retried_as_crops() {
 }
 
 #[test]
-fn looping_crop_goes_to_plain_text() {
+fn looping_crop_ends_the_crop_plan_and_falls_back_to_apple() {
+    // Plain and full-page layout loop, and so does the first crop: no more crops, no plain retry.
     let e = env(&["signature_block.pdf"]);
-    e.serve(&[("FAKE_MODE", "loop"), ("FAKE_FAIL_FIRST", "2")]);
-    e.scan("signature_block.pdf", &[], &[]).success();
+    e.serve(&[("FAKE_MODE", "loop"), ("FAKE_FAIL_FIRST", "3")]);
+    e.scan("signature_block.pdf", &[], &[]).code(1);
     let reqs = e.requests();
-    assert_eq!(kinds(&reqs), ["layout", "layout", "ocr"], "{reqs:?}");
+    assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
+    assert!(reqs[2]["h"].as_u64().unwrap() < 1100, "a crop: {reqs:?}");
     no_penalty(&reqs);
+    let md = e.markdown("signature_block.pdf");
     assert!(
-        e.markdown("signature_block.pdf")
-            .contains("fake dots plain text 850x1100")
+        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
+        "{md}"
     );
 }
 
@@ -247,75 +287,88 @@ fn everything_looping_falls_back_to_apple() {
     e.serve(&[("FAKE_MODE", "loop")]);
     e.scan("signature_block.pdf", &[], &[]).code(1);
     let reqs = e.requests();
-    assert_eq!(kinds(&reqs), ["layout", "layout", "ocr"], "{reqs:?}");
+    // Plain, the full-page layout request, then the first crop.
+    assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
     no_penalty(&reqs);
+    let md = e.markdown("signature_block.pdf");
     assert!(
-        e.markdown("signature_block.pdf")
-            .contains("fallback_pages: [1]\n")
+        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
+        "{md}"
     );
+    assert!(!md.contains("the same line again"), "{md}");
 }
 
 #[test]
-fn truncation_goes_to_plain_text_without_a_bigger_budget() {
-    let e = env(&["transcript_full.pdf"]);
+fn plain_truncation_goes_to_layout_without_a_bigger_budget() {
+    let e = env(&["legal_scan.pdf"]);
     e.serve(&[("FAKE_MODE", "length"), ("FAKE_FAIL_FIRST", "1")]);
-    e.scan("transcript_full.pdf", &[], &[]).success();
+    e.scan("legal_scan.pdf", &[], &[]).success();
     let reqs = e.requests();
-    assert_eq!(kinds(&reqs), ["layout", "ocr"], "{reqs:?}");
+    assert_eq!(kinds(&reqs), ["ocr", "layout"], "{reqs:?}");
     assert!(reqs.iter().all(|r| r["max_tokens"] == 8192), "{reqs:?}");
     assert!(
-        e.markdown("transcript_full.pdf")
-            .contains("fake dots plain text")
+        e.markdown("legal_scan.pdf")
+            .contains("# FAKE TITLE 850x1100")
     );
 }
 
 #[test]
 fn persistent_truncation_falls_back_and_flags() {
-    let e = env(&["transcript_full.pdf"]);
+    let e = env(&["legal_scan.pdf"]);
     e.serve(&[("FAKE_MODE", "length")]);
-    e.scan("transcript_full.pdf", &[], &[])
+    e.scan("legal_scan.pdf", &[], &[])
         .code(1)
         .stderr(predicate::str::contains("truncated"));
-    let md = e.markdown("transcript_full.pdf");
+    let md = e.markdown("legal_scan.pdf");
     assert!(
         md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
         "{md}"
     );
-    assert_eq!(e.requests().len(), 2);
+    let reqs = e.requests();
+    assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
 }
 
 #[test]
 fn empty_output_is_retried_once() {
-    let e = env(&["transcript_full.pdf"]);
+    let e = env(&["legal_scan.pdf"]);
     e.serve(&[("FAKE_MODE", "empty"), ("FAKE_FAIL_FIRST", "1")]);
-    e.scan("transcript_full.pdf", &[], &[]).success();
-    assert_eq!(e.requests().len(), 2);
-    assert!(e.markdown("transcript_full.pdf").contains("fake dots text"));
+    e.scan("legal_scan.pdf", &[], &[]).success();
+    let reqs = e.requests();
+    assert_eq!(kinds(&reqs), ["ocr", "ocr"], "{reqs:?}");
+    assert!(
+        e.markdown("legal_scan.pdf")
+            .contains("fake dots plain text")
+    );
 }
 
 #[test]
 fn persistent_empty_output_falls_back_and_flags() {
-    let e = env(&["transcript_full.pdf"]);
+    let e = env(&["legal_scan.pdf"]);
     e.serve(&[("FAKE_MODE", "empty")]);
-    e.scan("transcript_full.pdf", &[], &[])
+    e.scan("legal_scan.pdf", &[], &[])
         .code(1)
         .stderr(predicate::str::contains("empty model output"));
-    let md = e.markdown("transcript_full.pdf");
+    let md = e.markdown("legal_scan.pdf");
     assert!(
         md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
         "{md}"
     );
-    assert_eq!(e.requests().len(), 2, "one try and one retry");
+    let reqs = e.requests();
+    assert_eq!(
+        kinds(&reqs),
+        ["ocr", "ocr", "layout", "layout"],
+        "one try and one retry for each prompt: {reqs:?}"
+    );
 }
 
 #[test]
 fn timeout_restarts_the_server_then_falls_back() {
-    let e = env(&["transcript_full.pdf"]);
+    let e = env(&["legal_scan.pdf"]);
     let env = [("FAKE_MODE", "sleep"), ("FAKE_SLEEP_SECS", "20")];
     e.serve(&env);
     let before = e.server_pid();
     e.scan(
-        "transcript_full.pdf",
+        "legal_scan.pdf",
         &[],
         &[("OCR_REQUEST_TIMEOUT_SECS", "2"), env[0], env[1]],
     )
@@ -323,15 +376,20 @@ fn timeout_restarts_the_server_then_falls_back() {
     .stderr(predicate::str::contains("restarting the model server"));
     assert_ne!(e.server_pid(), before, "server was not restarted");
     assert!(
-        e.markdown("transcript_full.pdf")
+        e.markdown("legal_scan.pdf")
             .contains("fallback_pages: [1]\n")
     );
-    assert_eq!(e.requests().len(), 2, "one try and one retry");
+    let reqs = e.requests();
+    assert_eq!(
+        kinds(&reqs),
+        ["ocr", "ocr"],
+        "a timeout after its restart is a server failure: no layout request: {reqs:?}"
+    );
 }
 
 #[test]
 fn timeout_retry_can_succeed() {
-    let e = env(&["transcript_full.pdf"]);
+    let e = env(&["legal_scan.pdf"]);
     let env = [
         ("FAKE_MODE", "sleep"),
         ("FAKE_SLEEP_SECS", "20"),
@@ -340,27 +398,80 @@ fn timeout_retry_can_succeed() {
     e.serve(&env);
     let before = e.server_pid();
     e.scan(
-        "transcript_full.pdf",
+        "legal_scan.pdf",
         &[],
         &[("OCR_REQUEST_TIMEOUT_SECS", "2"), env[0], env[1], env[2]],
     )
     .success();
     assert_ne!(e.server_pid(), before);
-    assert!(e.markdown("transcript_full.pdf").contains("fake dots text"));
+    assert!(
+        e.markdown("legal_scan.pdf")
+            .contains("fake dots plain text")
+    );
 }
 
 #[test]
 fn server_errors_are_tried_three_times_then_fall_back() {
-    let e = env(&["transcript_full.pdf"]);
+    let e = env(&["legal_scan.pdf"]);
     e.serve(&[("FAKE_MODE", "error5xx")]);
     let t = Instant::now();
-    e.scan("transcript_full.pdf", &[], &[]).code(1);
+    e.scan("legal_scan.pdf", &[], &[]).code(1);
     assert!(t.elapsed() >= Duration::from_millis(1500), "no backoff");
-    assert_eq!(e.requests().len(), 3);
+    // Three tries for the plain request, then three for the layout request.
+    let reqs = e.requests();
+    assert_eq!(kinds(&reqs), ["ocr", "ocr", "ocr"], "{reqs:?}");
     assert!(
-        e.markdown("transcript_full.pdf")
+        e.markdown("legal_scan.pdf")
             .contains("fallback_pages: [1]\n")
     );
+}
+
+// ------------------------------------------------- transcript pages: layout first
+
+#[test]
+fn transcript_page_sends_only_the_layout_prompt() {
+    let e = env(&["transcript_full.pdf"]);
+    e.serve(&[]);
+    e.scan("transcript_full.pdf", &[], &[]).success();
+    let reqs = e.requests();
+    assert_eq!(kinds(&reqs), ["layout"], "{reqs:?}");
+    let md = e.markdown("transcript_full.pdf");
+    assert!(md.contains("# FAKE TITLE 850x1100"), "{md}");
+    assert!(md.contains("fallback_pages: []\n"), "{md}");
+}
+
+#[test]
+fn transcript_layout_loop_without_crops_goes_to_plain_text() {
+    // The layout request loops (1), the plain one is fine (2): not a fallback.
+    let e = env(&["transcript_full.pdf"]);
+    e.serve(&[("FAKE_MODE", "loop"), ("FAKE_FAIL_FIRST", "1")]);
+    e.scan("transcript_full.pdf", &[], &[]).success();
+    let reqs = e.requests();
+    assert_eq!(kinds(&reqs), ["layout", "ocr"], "{reqs:?}");
+    no_penalty(&reqs);
+    let md = e.markdown("transcript_full.pdf");
+    assert!(md.contains("fake dots plain text 850x1100"), "{md}");
+    assert!(
+        md.contains("fallback_pages: []\n") && md.contains("flagged_pages: []\n"),
+        "{md}"
+    );
+}
+
+#[test]
+fn transcript_everything_looping_falls_back_to_apple() {
+    let e = env(&["transcript_full.pdf"]);
+    e.serve(&[("FAKE_MODE", "loop")]);
+    e.scan("transcript_full.pdf", &[], &[])
+        .code(1)
+        .stderr(predicate::str::contains("repetition loop"));
+    let reqs = e.requests();
+    assert_eq!(kinds(&reqs), ["layout", "ocr"], "{reqs:?}");
+    let md = e.markdown("transcript_full.pdf");
+    assert!(
+        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
+        "{md}"
+    );
+    assert!(!md.contains("the same line again"), "{md}");
 }
 
 #[test]

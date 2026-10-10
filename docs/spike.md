@@ -916,3 +916,21 @@ Measured on an M1 Max with a warm server and one request at a time, `--verify-js
 3. Two requests at once to use spare GPU capacity while decoding. Earlier tries gave 0.91–1.42×, so measure again, with accuracy.
 
 All of them are paired accuracy-and-speed runs on the same pages.
+
+## dots: plain text first (2026-10-10)
+
+`--timing-json` showed dots spending most of its time writing layout JSON: 510–960 output tokens per page at about 140 tok/s. The upstream plain-text prompt (`prompt_ocr`) was already the last fallback. Here it was compared with the layout prompt on the same pages, the same warm server, and alternating order. The layout prompt was used first until now.
+
+**Synthetic fixtures** (ground truth, `eval/score.py`):
+
+| Set | Pages | s/page, layout → plain | Output tokens/page | CER, layout → plain | Other |
+|---|---|---|---|---|---|
+| pleading, contract, fax, table (seeds 10–12) | 37 | 11.4 / 11.1 / 8.9 / 14.9 → 6.8 / 7.5 / 5.6 / 13.7 | 1,010–1,506 → 258–1,361 | equal or better in every family (fax 6.26% → 0.68%) | token recall 100% both |
+| production, seed 10, pages 1–60 | 60 | 7.4 → 5.2 | 513 → 241 | 0.59% → 0.28% | Bates 60/60 both |
+| 4-up transcripts (seeds 10–19) | 25 | 37.0 → 14.2 | about 4,100 → 1,190 | 1.33% → 2.11% (pooled) | lines 77% → 89% (seeds 10–12) but 93.7% → 90.8% (seeds 13–19); recall 100% → 99.6% |
+
+**Public filings** (word error against the PDF's text, 64 pages): plain was 1.3–2.1× faster. Word error went both ways (14.2% → 14.9%, 15.1% → 12.4%, 10.7% → 11.3%), within the noise of reading order.
+
+**Decision:** plain text first on ordinary pages. If the reply is cut off, loops or stays empty, the layout prompt follows (page, then crops), then Apple Vision. A server failure after its retries goes straight to Apple, so a dead server is not asked twice. Transcript pages keep the layout prompt first: plain text was 2.5× faster there but less accurate in two of three measures, and their page:line citations depend on it.
+
+**What plain text loses:** the layout categories, so headings (`#`, `##`), `[Figure]` and formula markers. Tables still come as HTML and are converted. Bates numbers still come from the Apple side pass.

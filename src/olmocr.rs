@@ -244,6 +244,9 @@ fn run_requests(
         out.flagged |= flagged;
         if !md.trim().is_empty() {
             parts.push(md);
+        } else if reqs.len() > 1 {
+            // A crop that stays empty while others have text: part of the page may be missing.
+            out.flagged = true;
         }
     }
     out.body = parts.join("\n\n");

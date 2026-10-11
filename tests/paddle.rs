@@ -446,6 +446,9 @@ fn timing_json_records_requests_and_totals_and_changes_nothing_else() {
     assert!(totals["wall_s"].as_f64().unwrap() >= totals["prep_s"].as_f64().unwrap());
     assert!(totals["requests_s"].as_f64().unwrap() > 0.0);
     assert!(totals["write_s"].as_f64().is_some() && totals["verify_s"].as_f64().is_some());
+    // A later run without the flag removes the old timings: they describe another run.
+    e.scan("legal_scan.pdf", &["--overwrite"], &[]).success();
+    assert!(!e.path("legal_scan.timing.json").exists());
 }
 
 #[test]

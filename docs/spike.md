@@ -976,3 +976,18 @@ Overall word error against the PDF text is the same for both prompts (36.97% lay
 **Fix:** a plain reply with more than 28 consecutive bare numbers (a pleading has at most 28 margin numbers) is a bad reply, `counting run`, and goes to the layout prompt like a loop. Re-run on cmpl-sec-kuzdas: page 5's plain reply is rejected (`parse_retry` in `--timing-json`), the layout reply is used, and paragraph 22 and its number are back.
 
 The lesson from "Lower DPI" applies here too: checks on synthetic pages and a few filings did not show this; a full real-filing run did.
+
+## Two model requests at once: not adopted (2026-10-11)
+
+mlx-vlm batches requests continuously (`--max-num-seqs N`), but `ocr` starts it with 1. An experiment build started it with 2 and scanned with `--jobs 2`. The comparison was against 1 and 1, on all 20 public filings (230 pages), with the same warm-server conditions.
+
+| Engine | Wall, 1 → 2 in flight | Speed | Word error against the PDF text | Pages with identical text | Retries |
+|---|---|---|---|---|---|
+| paddleocr-vl | 1,332 s → 1,594 s | 0.84× | 36.87% → 40.00% | 128 of 230 | 11 restarts after timeouts with 2 in flight, none with 1 |
+| dots-ocr | 5,010 s → 8,466 s | 0.59× | 36.92% → 43.38% | 46 of 230 | 43 bad-reply retries and 17 restarts with 2, against 4 and 4 with 1 |
+
+**Two in flight is slower and less accurate on both engines.** Batching changes the outputs: most dots pages differ, and its replies loop or break more often. The timeouts then trigger server restarts, which the client handles as if it were the only request running (review finding P05). That is consistent with the earlier MLX finding (0.91–1.42×, Paddle bf16 slower at 2).
+
+dots one at a time was slower in this run than in the DPI check the day before (21.8 s against 12.3 s per page, with 4 restarts). Part of this run overlapped other work on the machine. The comparison was made under the same conditions, and the result does not depend on it.
+
+**Not adopted:** the server stays at one request at a time. The remaining speed levers are the per-page choices already made (plain text first for dots) and engine choice.

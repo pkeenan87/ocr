@@ -235,6 +235,14 @@ static LABELED_DOCKET: LazyLock<Regex> = LazyLock::new(|| {
     )
     .unwrap()
 });
+/// The court's electronic filing stamp across the top of a filed page (`Case 1:24-cv-01234-JPO
+/// Document 25 Filed 04/24/24 Page 1 of 30`). It is printed over the page, sometimes twice over
+/// itself, and image readers misread such overprints the same way: Paddle and Apple Vision both
+/// read a stamped `04/24/24` printed over `04/18/24` as `04/28/24`, on every page.
+static COURT_STAMP: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)\bcase\b.{0,60}\bdoc(?:ument|\.)?\s*#?:?\s*\d+.{0,80}\bfiled\b").unwrap()
+});
+
 /// Citations with a section or paragraph sign.
 static CITATION: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?:§§?|¶¶?)\s?\d[\w.\-]*(?:\([A-Za-z0-9]{1,4}\))*").unwrap());
@@ -1292,9 +1300,19 @@ pub fn report<'a>(
                 if r.doubtful.contains(k) {
                     f.why.push("doubtful_in_second_reading");
                 } else if r.keys.contains(k) {
+                    // Two image readers agreeing on the court's filing stamp confirms nothing:
+                    // they misread its overprints alike. The PDF's own text or Azure can.
+                    let on_stamp = f
+                        .line
+                        .checked_sub(1)
+                        .and_then(|i| body_lines.get(i))
+                        .is_some_and(|l| COURT_STAMP.is_match(l));
+                    if on_stamp {
+                        f.why.push("court_stamp");
+                    }
                     // A model page's Bates number comes from Apple Vision's side pass, so the
                     // Apple second reading is the same reader again: it confirms nothing.
-                    if model_engine && !p.fallback && f.kind != Kind::Bates {
+                    else if model_engine && !p.fallback && f.kind != Kind::Bates {
                         found = true;
                         matched = "matches_second_reading";
                     }
@@ -1794,6 +1812,51 @@ mod tests {
             );
             assert_eq!(r.azure_pages, "1", "{why}");
         }
+    }
+
+    #[test]
+    fn filing_stamp_values_are_not_verified_by_two_image_readers() {
+        // The Jane Street stamp: `04/24/24` printed over `04/18/24`, read `04/28/24` by both.
+        let stamp = "Case 1:24-cv-01234-JPO Document 25 Filed 04/28/24 Page 1 of 30";
+        let body = format!("{stamp}\nThe motion was argued on March 4, 2024 before the court.");
+        let lines = vec![
+            read(stamp),
+            read("The motion was argued on March 4, 2024 before the court."),
+        ];
+        let r = report(
+            "x.pdf",
+            "x.md".into(),
+            "model",
+            "now",
+            &[page(1, &body)],
+            VerifyFields::Flagged,
+            &|_| Embedded::default(),
+            &|_| Some(lines.clone()),
+            true,
+        );
+        let s = statuses(&r);
+        let status = |t: &str| s.iter().find(|g| g.0 == t).unwrap().clone();
+        assert_eq!(status("04/28/24").1, Status::Check, "{s:?}");
+        assert!(status("04/28/24").2.contains(&"court_stamp"), "{s:?}");
+        assert_eq!(status("1:24-cv-01234-JPO").1, Status::Check, "{s:?}");
+        // Off the stamp, agreement still verifies.
+        assert_eq!(status("March 4, 2024").1, Status::Verified, "{s:?}");
+        // The PDF's own text still verifies stamp values.
+        let layer = format!(
+            "Case 1:24-cv-01234-JPO Document 25 Filed 04/28/24 Page 1 of 30 The motion \
+            was argued on March 4, 2024 before the court.{PAD}"
+        );
+        let r = run(
+            &[page(1, &format!("{body}{PAD}"))],
+            VerifyFields::Flagged,
+            &layer,
+        );
+        let s = statuses(&r);
+        assert_eq!(
+            s.iter().find(|g| g.0 == "04/28/24").unwrap().1,
+            Status::Verified,
+            "{s:?}"
+        );
     }
 
     #[test]

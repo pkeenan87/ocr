@@ -94,6 +94,7 @@ Then:
 - **Different value:** a disagreement. Never pick one. Report both readings and the page, and say the PDF page must be checked.
 - **Not found in the second reading:** still unconfirmed.
 - **Special reasons win.** A value with `words_numerals_mismatch` or `arithmetic_mismatch` stays in dispute even if the second reading agrees, because the document contradicts itself (`Five Thousand Dollars ($3,000.00)`). Say so.
+- **`court_stamp`:** a filing-stamp value that two image readers agreed on. It is unconfirmed until the second service or the PDF's own text agrees.
 - **Stamps, handwriting and margin notes:** say where the value came from even when it is confirmed. Overprinted or doubled stamps fooled every pair of image readers tested (`04/24/24` over `04/18/24` read as `04/28/24` by all of them).
 
 ### 5. What you may state, quote and compute

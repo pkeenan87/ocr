@@ -991,3 +991,22 @@ mlx-vlm batches requests continuously (`--max-num-seqs N`), but `ocr` starts it 
 dots one at a time was slower in this run than in the DPI check the day before (21.8 s against 12.3 s per page, with 4 restarts). Part of this run overlapped other work on the machine. The comparison was made under the same conditions, and the result does not depend on it.
 
 **Not adopted:** the server stays at one request at a time. The remaining speed levers are the per-page choices already made (plain text first for dots) and engine choice.
+
+## Filing-stamp values and two image readers (2026-10-11)
+
+`eval/verify_eval.py` on paddleocr-vl (20 public filings, scan conditions: the blind run hides the PDF text) found 10 wrongly verified values:
+- **8 were the Jane Street filing stamp.** `04/24/24` is printed over `04/18/24`, and Paddle and the Apple second reading both read it as `04/28/24`, so their agreement verified the wrong date on every page.
+- **1 was a paragraph-sign count** (`¶ 8-10` for `¶¶ 8-10`).
+- **1 was a grading artifact** (the PDF text glues a footnote marker to `$1,000,000`).
+
+**Fix:** values on the court's electronic filing stamp line (`Case … Document … Filed … Page … of …`) are never verified by the second image reader. They get `court_stamp` and stay unconfirmed until the PDF's own text or Azure agrees. The PDF's own text still verifies them on born-digital pages.
+
+| Paddle, 20 filings | Before | After |
+|---|---|---|
+| Blind values verified | 461 | 295 |
+| ...of which wrong | 10 (2.2%) | 2 (0.7%; one sign count, one grading artifact) |
+| Wrong values caught as `check` | 4 of 14 | 12 of 14 |
+| Values verified as users run it | 721 of 1,097 | 629 |
+| `azure_pages` | 125 | 138 |
+
+The values that no longer verify are the filing-stamp docket, date and page numbers repeated on every scanned page. Apple-only runs are unaffected: two Apple readings never verify each other.

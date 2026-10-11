@@ -11,3 +11,8 @@ for fn in a.files:
     failed = sum("error" in e for f in fams for e in r["runs"][f].values())
     print(f"{r['tag']}: fams={fams} CER={d('dist_sum')/d('len_sum'):.4f} tokrecall={d('tokens_found')/d('tokens_total'):.4f} "
           f"bates={d('bates_ok')}/{d('bates_total')} pages={pg} pages/s={pg/w:.2f} failed_runs={failed}")
+    ok = [e for f in fams for e in r["runs"][f].values() if "error" not in e]
+    if ok and all("wlen" in e for e in ok):
+        print(f"  strict CER={d('dist_strict')/d('len_strict'):.4f} WER={d('wdist')/d('wlen'):.4f} "
+              f"strict WER={d('wdist_strict')/d('wlen_strict'):.4f} "
+              f"edits: {d('subs')} substituted, {d('dels')} deleted, {d('ins')} inserted")

@@ -100,6 +100,14 @@ def words(text):
     return [w for w in (re.sub(r"[^0-9a-z§¶$%]", "", x.lower()) for x in text.split()) if w]
 
 
+def words_strict(text):
+    """Words as written: case, punctuation, decimal points and signs kept; only Markdown and HTML
+    markup removed, and a hyphen at a line end joined."""
+    text = re.sub(r"<[^>]+>|\|[-: |]+\||[|#*_`]", " ", text)
+    text = re.sub(r"-[ \t]*\r?\n\s*", "-", text)
+    return text.split()
+
+
 def field_id(f):
     """A value's identity: parsed value when there is one, else the text squashed."""
     v = f.get("value")
@@ -129,6 +137,8 @@ def main():
     c = collections.Counter()
     examples = collections.defaultdict(list)
     edits = ref_words = 0
+    strict_edits = strict_ref = 0
+    dropped = []  # (doc, page, reference words the OCR lacks, longest run of them)
     for d in docs:
         doc = d["id"]
         user, truth, blind = load(a, "user", doc), load(a, "truth", doc), load(a, "blind", doc)
@@ -159,6 +169,24 @@ def main():
             ocr_w = words(md.get(n, ""))
             edits += Levenshtein.distance(ocr_w, ref_w)
             ref_words += len(ref_w)
+            ref_s = words_strict(pdf[n - 1].get_textpage().get_text_range())
+            strict_edits += Levenshtein.distance(words_strict(md.get(n, "")), ref_s)
+            strict_ref += len(ref_s)
+            # Deleted runs: reference words in a row the OCR does not have (a dropped line or
+            # paragraph), as opposed to scattered misreads or a different reading order.
+            longest = deleted = 0
+            for op in Levenshtein.editops(ref_w, ocr_w):
+                if op.tag == "delete":
+                    deleted += 1
+            # A run that appears elsewhere on the OCR page (8 words in a row) moved, not dropped.
+            have = " " + " ".join(ocr_w) + " "
+            for tag, i1, i2, j1, j2 in Levenshtein.opcodes(ref_w, ocr_w):
+                if tag == "delete" and not any(
+                        " " + " ".join(ref_w[k:k + 8]) + " " in have for k in range(i1, i2 - 7)):
+                    longest = max(longest, i2 - i1)
+            c["words_deleted"] += deleted
+            if longest >= 12:
+                dropped.append((doc, n, deleted, longest))
             # Status accuracy of the blind run, graded by the truth run.
             why_t = {(f["kind"], f["text"], f["line"]): f["why"] for f in pt["fields"]}
             for f in pb["fields"]:
@@ -197,7 +225,13 @@ def main():
     print(f"- user run: values verified {c['verified']} of {c['fields']}; "
           f"pages to Azure {c['azure_pages']}")
     print(f"- fields vs embedded text: precision {prec:.1%}, recall {rec:.1%}, F1 {f1:.1%}")
-    print(f"- word error rate vs embedded text: {pct(edits, ref_words)} ({ref_words} words)")
+    print(f"- word error rate vs embedded text: {pct(edits, ref_words)} ({ref_words} words); "
+          f"strict (case, punctuation, decimals kept) {pct(strict_edits, strict_ref)}; "
+          f"reference words deleted {c['words_deleted']}")
+    print(f"- pages with a run of 12+ reference words missing and found nowhere on the OCR page "
+          f"(a dropped line or paragraph): {len(dropped)}")
+    for x in sorted(dropped, key=lambda x: -x[3])[:10]:
+        print("   ", x)
     print(f"- blind statuses: verified {c['verified_right'] + c['verified_wrong']}, "
           f"of which wrong {c['verified_wrong']} "
           f"({pct(c['verified_wrong'], c['verified_right'] + c['verified_wrong'])})")

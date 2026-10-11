@@ -4,7 +4,9 @@
 usage: score.py <gt.json> <output.md> [--strip-line-numbers] [--keep-furniture]
 
 Importable: score(gt, md_text, strip_line_numbers=False) -> dict. Metrics: CER (per page and
-overall, micro-averaged over ground-truth characters), token recall, Bates accuracy (page marker
+overall, micro-averaged over ground-truth characters) with its substitutions, deletions and
+insertions; WER; both also *strict* (no NFKC, quotes and dashes not unified: what a reader copying
+the text gets); token recall, Bates accuracy (page marker
 `<!-- page N · Bates X -->` against the ground truth) and, for transcript4up, exact line accuracy.
 Both sides pass through the same normalizer (Markdown/HTML table syntax removed, quotes and dashes
 unified, whitespace collapsed). Page furniture listed in the ground truth (headers, footers, Bates
@@ -18,7 +20,15 @@ try:
 
     def edit_distance(a, b):
         return _lev.distance(a, b)
+
+    def edit_counts(ref, out):
+        """(substitutions, deletions, insertions) turning `ref` into `out`; works on strings or
+        word lists. A deletion is reference text the output lacks, an insertion is extra output."""
+        ops = collections.Counter(op.tag for op in _lev.editops(ref, out))
+        return ops["replace"], ops["delete"], ops["insert"]
 except ImportError:  # numpy DP fallback, row by row
+    def edit_counts(ref, out):
+        return None
     import numpy as np
 
     def edit_distance(a, b):
@@ -105,14 +115,17 @@ def _html_tables(text):
     return re.sub(r"<table.*?</table>", table, text, flags=re.S | re.I)
 
 
-def normalize_lines(text, strip_line_numbers=False, furniture=()):
-    """Plain-text lines, each whitespace-collapsed, empty lines dropped."""
-    text = unicodedata.normalize("NFKC", text)
+def normalize_lines(text, strip_line_numbers=False, furniture=(), strict=False):
+    """Plain-text lines, each whitespace-collapsed, empty lines dropped. `strict` keeps the
+    characters as written (NFC only, quotes and dashes as they are); markup is removed either way."""
+    text = unicodedata.normalize("NFC" if strict else "NFKC", text)
     text = _html_tables(text)
     text = re.sub(r"<br\s*/?>", " ", text, flags=re.I)
     text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
     text = re.sub(r"</?[a-zA-Z][^>]*>", " ", text)
-    text = html.unescape(text).translate(QUOTES)
+    text = html.unescape(text)
+    if not strict:
+        text = text.translate(QUOTES)
     out = []
     for ln in text.split("\n"):
         s = ln.strip()
@@ -133,7 +146,10 @@ def normalize_lines(text, strip_line_numbers=False, furniture=()):
         if s:
             out.append(s)
     if furniture:
-        fur = [" ".join(unicodedata.normalize("NFKC", f).translate(QUOTES).split()) for f in furniture]
+        def nf(f):
+            f = unicodedata.normalize("NFC" if strict else "NFKC", f)
+            return f if strict else f.translate(QUOTES)
+        fur = [" ".join(nf(f).split()) for f in furniture]
         fur = sorted((f for f in fur if f), key=len, reverse=True)
         res = []
         for ln in out:
@@ -153,12 +169,23 @@ def normalize(text, **kw):
 def score(gt, md, strip_line_numbers=False, keep_furniture=False):
     pages, pre = split_pages(md, preamble=True)
     cer_pages, dist_sum, len_sum = [], 0, 0
+    # Strict CER, WER (normalized and strict), and the character edits by kind.
+    m = collections.Counter()
     # Text outside the reference pages (before the first marker, or on pages the reference does
     # not have) is all insertions.
     extra_pages = [n for n in pages if not 1 <= n <= len(gt["pages"])]
     inserted = len(normalize(pre)) + sum(
         len(normalize(pages[n][0], strip_line_numbers=strip_line_numbers)) for n in extra_pages)
     dist_sum += inserted
+    pre_strict = normalize(pre, strict=True)
+    m["dist_strict"] += len(pre_strict) + sum(
+        len(normalize(pages[n][0], strip_line_numbers=strip_line_numbers, strict=True))
+        for n in extra_pages)
+    m["ins"] += inserted
+    extra_words = normalize(pre).split() + [
+        w for n in extra_pages for w in normalize(pages[n][0], strip_line_numbers=strip_line_numbers).split()]
+    m["wdist"] += len(extra_words)
+    m["wdist_strict"] += len(extra_words)
     tok_found = tok_total = 0
     bates_ok = bates_total = 0
     tl_ok = tl_total = 0
@@ -173,6 +200,19 @@ def score(gt, md, strip_line_numbers=False, keep_furniture=False):
         cer_pages.append(round(d / max(len(ref), 1), 4))
         dist_sum += d
         len_sum += len(ref)
+        ops = edit_counts(ref, out)
+        if ops:
+            m["subs"] += ops[0]
+            m["dels"] += ops[1]
+            m["ins"] += ops[2]
+        out_s = " ".join(normalize_lines(body, strip_line_numbers=strip_line_numbers, furniture=fur, strict=True))
+        ref_s = " ".join(normalize_lines(gp["text"], strict=True))
+        m["dist_strict"] += edit_distance(ref_s, out_s)
+        m["len_strict"] += len(ref_s)
+        m["wdist"] += edit_distance(ref.split(), out.split())
+        m["wlen"] += len(ref.split())
+        m["wdist_strict"] += edit_distance(ref_s.split(), out_s.split())
+        m["wlen_strict"] += len(ref_s.split())
         # tokens are searched in the page body plus its marker (Bates may live only in the marker)
         hay = normalize(body) + " " + normalize(extra)
         # Each token must appear as itself, as often as the reference lists it.
@@ -191,6 +231,11 @@ def score(gt, md, strip_line_numbers=False, keep_furniture=False):
     res = {
         "family": gt.get("family"), "seed": gt.get("seed"), "pages": len(gt["pages"]),
         "pages_in_output": len(pages), "inserted_chars": inserted,
+        "cer_strict": round(m["dist_strict"] / max(m["len_strict"], 1), 4),
+        "wer": round(m["wdist"] / max(m["wlen"], 1), 4),
+        "wer_strict": round(m["wdist_strict"] / max(m["wlen_strict"], 1), 4),
+        **{k: m[k] for k in ("dist_strict", "len_strict", "wdist", "wlen", "wdist_strict",
+                             "wlen_strict", "subs", "dels", "ins")},
         "cer": round(dist_sum / max(len_sum, 1), 4), "cer_pages": cer_pages,
         "dist_sum": dist_sum, "len_sum": len_sum, "bates_ok": bates_ok, "bates_total": bates_total,
         "tl_ok": tl_ok, "tl_total": tl_total,

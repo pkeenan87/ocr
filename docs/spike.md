@@ -934,3 +934,31 @@ All of them are paired accuracy-and-speed runs on the same pages.
 **Decision:** plain text first on ordinary pages. If the reply is cut off, loops or stays empty, the layout prompt follows (page, then crops), then Apple Vision. A server failure after its retries goes straight to Apple, so a dead server is not asked twice. Transcript pages keep the layout prompt first: plain text was 2.5× faster there but less accurate in two of three measures, and their page:line citations depend on it.
 
 **What plain text loses:** the layout categories, so headings (`#`, `##`), `[Figure]` and formula markers. Tables still come as HTML and are converted. Bates numbers still come from the Apple side pass.
+
+## Lower DPI for the model image: not adopted (2026-10-11)
+
+Prefill (reading the image) is a third or more of each model request, and it grows with image size. The sweep used the same pages, warm servers, rotated order and `--timing-json`.
+
+**Synthetic fixtures** (seeds 10–12 five families, plus production pages 1–60):
+
+| Engine | DPI | s/page, ordinary | CER, ordinary | Production s/page, CER, Bates | 4-up transcripts |
+|---|---|---|---|---|---|
+| dots | 100 (default) | 8.03 | 0.06% | 5.22, 0.28%, 60/60 | CER 2.32%, lines 77.4% |
+| dots | 85 | 6.90 | 0.02% | 4.10, 0.16%, 60/60 | CER 2.97%, lines 69.3% |
+| dots | 72 | 6.13 | 0.62% | 3.29, 0.25%, **57/60** | CER 10.2%, lines 41.3% |
+| paddleocr-vl | 150 (default) | 4.45 | 8.52%* | 2.54, 0.03%, 60/60 | unchanged (crops at 200 DPI) |
+| paddleocr-vl | 120 | 4.48 | 0.24%* | 2.34, 0.00%, 60/60 | unchanged |
+| paddleocr-vl | 100 | 3.81 | 3.80%*, pleading recall 94.5% | 2.15, 0.00%, 60/60 | unchanged |
+
+\* Paddle's pleading CER swings with DPI (34.6% at 150, 0.8% at 120, 15.3% at 100) while recall stays at 99.5–100%. This is the known margin-number artifact, on 11 pages; it is worth its own look.
+
+- **Paddle:** its image processor resizes the image, so 120 DPI is no faster, and 100 DPI loses words on pleadings. It stays at 150.
+- **dots:** 85 DPI looked free on synthetic pages, 14–21% faster. A build that rendered only non-transcript pages at 85 DPI (Apple side pass and transcripts at 100) was then checked on all 20 public filings, 230 pages each way:
+  - Overall it was 20% faster: 12.3 → 9.9 s/page.
+  - It made real errors that clean synthetic renders do not show:
+    - iRhythm page 5 lost a heading and a paragraph, and pages 3–5 read the pleading line numbers as text. Word error rose from 14.9% to 18.0%.
+    - The 1985 Lozano typed scan misread words and numbers (`charges` → `fees`, `1963` → `1965`, `Creighton` → `Creston`) and lost a sentence. Word error rose from 59.8% to 66.8%.
+    - The Nissan dealer form had a page fall back to Apple.
+  - **Not adopted.** dots stays at 100 DPI.
+
+Lesson: synthetic fixtures are clean renders and miss resolution-sensitive failures on real scans. A speed change that lowers image quality must be checked on real filings before it ships.

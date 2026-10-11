@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holdout review</title>
+<style>
+:root {
+  --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #dddcd6;
+  --ok: #1f7a3a; --ok-bg: #e4f3e8; --bad: #a3271f; --bad-bg: #f8e3e1; --warn-bg: #fff4d6;
+  --accent: #2f5fd0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161615; --panel: #1f1f1d; --text: #ecebe6; --muted: #a09f98; --line: #3a3a36;
+    --ok: #6fd28f; --ok-bg: #1d3324; --bad: #f08a80; --bad-bg: #3a1f1c; --warn-bg: #3a3218;
+    --accent: #8aa9ff;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161615; --panel: #1f1f1d; --text: #ecebe6; --muted: #a09f98; --line: #3a3a36;
+  --ok: #6fd28f; --ok-bg: #1d3324; --bad: #f08a80; --bad-bg: #3a1f1c; --warn-bg: #3a3218;
+  --accent: #8aa9ff;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 -apple-system, system-ui, sans-serif; }
+header { display: flex; gap: 12px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; flex-wrap: wrap; }
+header h1 { font-size: 15px; margin: 0 8px 0 0; }
+button, select, input[type=text] { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+button { cursor: pointer; }
+button.on-ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+button.on-bad { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+main { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; padding: 12px 16px; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+.imgwrap { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: auto; max-height: calc(100vh - 80px); }
+.imgwrap img { display: block; transform-origin: top left; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; max-height: calc(100vh - 80px); overflow: auto; }
+.value { border: 1px solid var(--line); border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+.value.agreed { border-left: 4px solid var(--ok); }
+.value.split { border-left: 4px solid #d9a400; background: var(--warn-bg); }
+.value .kind { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+.readings { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--muted); margin: 4px 0; }
+.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.row input[type=text] { flex: 1; min-width: 140px; font-family: ui-monospace, Menlo, monospace; }
+label.chk { font-size: 12px; color: var(--muted); }
+h2 { font-size: 13px; margin: 14px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+textarea { width: 100%; min-height: 260px; font: 12px/1.4 ui-monospace, Menlo, monospace; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+.progress { color: var(--muted); font-size: 13px; }
+.hint { font-size: 12px; color: var(--muted); }
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Holdout review</h1>
+  <button id="prev" title="Previous page (←)">◀</button>
+  <select id="jump"></select>
+  <button id="next" title="Next page (→)">▶</button>
+  <span class="progress" id="progress"></span>
+  <span style="flex:1"></span>
+  <label class="hint">Zoom <input id="zoom" type="range" min="50" max="250" value="100"></label>
+  <input id="reviewer" type="text" placeholder="Reviewer name" style="width:140px">
+  <button id="export">Export JSON</button>
+  <label class="hint"><input id="importfile" type="file" accept="application/json" style="display:none"><button id="import">Import</button></label>
+</header>
+<main>
+  <div class="imgwrap"><img id="img" alt="Page image"></div>
+  <div class="panel">
+    <div id="title" style="font-weight:600"></div>
+    <div class="hint" id="what"></div>
+    <div class="hint" id="hints"></div>
+    <h2>Values on this page</h2>
+    <div class="hint">For each value: fix the text to exactly what is printed, then mark it <b>Correct</b> (it is on the page) or <b>Not on page</b> (a misreading). Green: all readings agreed. Yellow: they differ. Agreement is not proof: check every one.</div>
+    <div id="values"></div>
+    <button id="add">+ Add a value the readings missed</button>
+    <h2>Page facts</h2>
+    <div class="facts" id="facts"></div>
+    <div id="transcribe" style="display:none">
+      <h2>Transcription</h2>
+      <div class="hint">Correct this text to match the page exactly, in reading order (headers and footers included, line breaks between lines).</div>
+      <textarea id="text"></textarea>
+    </div>
+    <h2>Done</h2>
+    <label><input type="checkbox" id="done"> This page is fully reviewed</label>
+    <div class="hint" id="notes-h">Notes (anything unclear on the page):</div>
+    <input id="notes" type="text" style="width:100%">
+  </div>
+</main>
+<script>
+const DATA = /*DATA*/null;
+const KEY = "ocr-holdout-v1";
+const KINDS = ["amount", "date", "docket", "bates", "citation", "percent", "paragraph"];
+const FACTS = ["blank", "rotated", "stamp", "handwriting", "form_fields", "checkboxes", "redaction_box", "multi_column", "transcript", "table", "footnotes", "signature"];
+const FLAGS = ["stamp", "handwriting", "form_field"];
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { state = {}; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+const pid = (p) => `${p.doc}-p${p.page}`;
+let i = 0;
+try { i = Math.min(DATA.pages.length - 1, parseInt(localStorage.getItem(KEY + "-at") || "0", 10) || 0); } catch (e) {}
+
+function pageState(p) {
+  const id = pid(p);
+  if (!state[id]) {
+    const values = p.values.map((v) => {
+      const counts = {};
+      Object.values(v.texts).forEach((t) => { counts[t] = (counts[t] || 0) + 1; });
+      const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+      return { kind: v.kind, readings: v.texts, printed: best, decision: null, flags: [] };
+    });
+    state[id] = { values, added: [], facts: [], text: p.transcript_prefill || "", done: false, notes: "" };
+  }
+  return state[id];
+}
+
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  kids.flat().forEach((k) => e.append(k));
+  return e;
+}
+
+function valueBox(v, list, idx, isAdded) {
+  const agreed = !isAdded && Object.keys(v.readings).length === DATA.engines.length && new Set(Object.values(v.readings)).size === 1;
+  const box = el("div", { class: "value " + (isAdded ? "" : agreed ? "agreed" : "split") });
+  const kind = isAdded
+    ? el("select", { onchange: (e) => { v.kind = e.target.value; save(); } }, ...KINDS.map((k) => { const o = el("option", { value: k }, k); if (k === v.kind) o.selected = true; return o; }))
+    : el("span", { class: "kind" }, v.kind);
+  box.append(kind);
+  if (!isAdded) {
+    box.append(el("div", { class: "readings" }, DATA.engines.map((e) => `${e}: ${v.readings[e] ?? "—"}`).join("   ")));
+  }
+  const input = el("input", { type: "text", value: v.printed, oninput: (e) => { v.printed = e.target.value; save(); } });
+  const ok = el("button", { class: v.decision === "correct" ? "on-ok" : "", onclick: () => { v.decision = "correct"; save(); render(); } }, "Correct");
+  const bad = isAdded
+    ? el("button", { onclick: () => { list.splice(idx, 1); save(); render(); } }, "Remove")
+    : el("button", { class: v.decision === "wrong" ? "on-bad" : "", onclick: () => { v.decision = "wrong"; save(); render(); } }, "Not on page");
+  box.append(el("div", { class: "row" }, input, ok, bad));
+  box.append(el("div", { class: "row" }, FLAGS.map((f) => el("label", { class: "chk" },
+    el("input", { type: "checkbox", ...(v.flags.includes(f) ? { checked: "" } : {}), onchange: (e) => { v.flags = e.target.checked ? [...v.flags, f] : v.flags.filter((x) => x !== f); save(); } }), " " + f.replace("_", " ")))));
+  return box;
+}
+
+function render() {
+  const p = DATA.pages[i], s = pageState(p);
+  try { localStorage.setItem(KEY + "-at", String(i)); } catch (e) {}
+  document.getElementById("img").src = p.image;
+  document.getElementById("title").textContent = `${p.doc}, page ${p.page}`;
+  document.getElementById("what").textContent = p.what;
+  document.getElementById("hints").textContent = "Engine flags: " + Object.entries(p.hints).map(([e, h]) => `${e}: ${h.join(", ") || "none"}`).join(" · ");
+  const vals = document.getElementById("values"); vals.replaceChildren();
+  s.values.forEach((v, k) => { const b = valueBox(v, s.values, k, false); if (b) vals.append(b); });
+  s.added.forEach((v, k) => { const b = valueBox(v, s.added, k, true); if (b) vals.append(b); });
+  const facts = document.getElementById("facts"); facts.replaceChildren(...FACTS.map((f) => el("label", {},
+    el("input", { type: "checkbox", ...(s.facts.includes(f) ? { checked: "" } : {}), onchange: (e) => { s.facts = e.target.checked ? [...s.facts, f] : s.facts.filter((x) => x !== f); save(); } }), " " + f.replace("_", " "))));
+  document.getElementById("transcribe").style.display = p.transcribe ? "" : "none";
+  document.getElementById("text").value = s.text;
+  document.getElementById("done").checked = s.done;
+  document.getElementById("notes").value = s.notes;
+  const jump = document.getElementById("jump");
+  jump.replaceChildren(...DATA.pages.map((q, k) => { const st = state[pid(q)]; const o = el("option", { value: k }, `${st && st.done ? "✓" : "·"} ${q.doc} p${q.page}${q.transcribe ? " (T)" : ""}`); if (k === i) o.selected = true; return o; }));
+  const done = DATA.pages.filter((q) => state[pid(q)] && state[pid(q)].done).length;
+  document.getElementById("progress").textContent = `${done} / ${DATA.pages.length} pages done`;
+}
+
+document.getElementById("text").addEventListener("input", (e) => { pageState(DATA.pages[i]).text = e.target.value; save(); });
+document.getElementById("notes").addEventListener("input", (e) => { pageState(DATA.pages[i]).notes = e.target.value; save(); });
+document.getElementById("done").addEventListener("change", (e) => {
+  const s = pageState(DATA.pages[i]);
+  const open = s.values.filter((v) => !v.decision).length;
+  if (e.target.checked && open) { alert(`${open} value(s) on this page have no decision yet.`); e.target.checked = false; return; }
+  s.done = e.target.checked; save(); render();
+});
+document.getElementById("add").addEventListener("click", () => { pageState(DATA.pages[i]).added.push({ kind: "amount", printed: "", decision: "correct", flags: [] }); save(); render(); });
+document.getElementById("prev").addEventListener("click", () => { if (i > 0) { i--; render(); } });
+document.getElementById("next").addEventListener("click", () => { if (i < DATA.pages.length - 1) { i++; render(); } });
+document.getElementById("jump").addEventListener("change", (e) => { i = parseInt(e.target.value, 10); render(); });
+document.getElementById("zoom").addEventListener("input", (e) => { document.getElementById("img").style.width = (e.target.value * 8.5 * 1.5) + "px"; });
+document.addEventListener("keydown", (e) => {
+  if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+  if (e.key === "ArrowRight") document.getElementById("next").click();
+  if (e.key === "ArrowLeft") document.getElementById("prev").click();
+});
+try { document.getElementById("reviewer").value = localStorage.getItem(KEY + "-who") || ""; } catch (e) {}
+document.getElementById("reviewer").addEventListener("input", (e) => { try { localStorage.setItem(KEY + "-who", e.target.value); } catch (er) {} });
+document.getElementById("export").addEventListener("click", () => {
+  const out = { version: 1, reviewer: document.getElementById("reviewer").value, exported: new Date().toISOString(), engines: DATA.engines,
+    pages: DATA.pages.map((p) => ({ doc: p.doc, page: p.page, ...pageState(p) })) };
+  const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: "application/json" })), download: "holdout_v1.json" });
+  document.body.append(a); a.click(); a.remove();
+});
+document.getElementById("import").addEventListener("click", () => document.getElementById("importfile").click());
+document.getElementById("importfile").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const j = JSON.parse(await f.text());
+  j.pages.forEach((p) => { const { doc, page, ...rest } = p; state[`${doc}-p${page}`] = rest; });
+  save(); render();
+});
+document.getElementById("img").style.width = (100 * 8.5 * 1.5) + "px";
+render();
+</script>
+</body>
+</html>

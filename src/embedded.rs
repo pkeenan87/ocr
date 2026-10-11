@@ -33,9 +33,13 @@ fn norm(w: &str) -> String {
 }
 
 /// Embedded words, with line-end hyphenation joined when Vision has the joined word
-/// (`agree-` `ment` -> `agreement`).
+/// (`agree-` `ment` -> `agreement`). Court-reporter software spaces transcripts with middle
+/// dots (`· · ·KEENAN T. KNIGHT,`): they are spacing, never part of a word.
 fn embedded_words(text: &str, vision: &std::collections::HashSet<String>) -> Vec<String> {
-    let raw: Vec<&str> = text.split_whitespace().collect();
+    let raw: Vec<&str> = text
+        .split(|c: char| c.is_whitespace() || c == '\u{b7}')
+        .filter(|w| !w.is_empty())
+        .collect();
     let mut out: Vec<String> = Vec::with_capacity(raw.len());
     let mut i = 0;
     while i < raw.len() {
@@ -649,6 +653,18 @@ mod tests {
         );
         assert!(o.applied);
         assert_eq!(s[0], "the parties agreement is binding");
+    }
+
+    #[test]
+    fn transcript_middle_dots_are_spacing() {
+        // Min-U-Script text layers space with middle dots, also between words
+        // (`photograph·Exhibit`); a misread is still fixed, and no dot reaches the output.
+        let (s, o) = fix(
+            &["KEENAN I. KNIGHT, Plaintiff, vs. LT. AVERY"],
+            "· · ·KEENAN T. KNIGHT,\r\n· · · · Plaintiff,·vs.\r\n· · ·LT. AVERY",
+        );
+        assert!(o.applied, "{o:?}");
+        assert_eq!(s[0], "KEENAN T. KNIGHT, Plaintiff, vs. LT. AVERY");
     }
 
     #[test]

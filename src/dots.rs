@@ -352,6 +352,32 @@ fn layout_request(ctx: &Ctx, req: &Planned) -> Result<(String, bool, bool), Fail
     }
 }
 
+/// The longest run of lines that are only consecutive numbers (`41`, `42`, `43`...). A pleading
+/// has at most 28 margin numbers, so a longer run is the model counting instead of reading: on
+/// a public complaint (docs/spike.md) plain text printed 41 to 100 in place of a paragraph and
+/// renumbered the one before it. Such a reply goes to the layout prompt.
+const MAX_NUMBER_RUN: usize = 28;
+
+fn counting_run(text: &str) -> bool {
+    let (mut run, mut prev) = (0usize, None::<u32>);
+    for line in text.lines() {
+        let t = line.trim();
+        if t.is_empty() {
+            continue;
+        }
+        match t.parse::<u32>() {
+            Ok(n) if prev.is_some_and(|p| n == p + 1) => run += 1,
+            Ok(_) => run = 1,
+            Err(_) => run = 0,
+        }
+        prev = t.parse().ok();
+        if run > MAX_NUMBER_RUN {
+            return true;
+        }
+    }
+    false
+}
+
 /// Why the plain-text request gave nothing usable.
 enum Plain {
     /// The reply was cut off, looped or stayed empty: the layout prompt may do better.
@@ -377,6 +403,9 @@ fn plain_text(ctx: &Ctx, page: &Planned) -> Result<Output, Plain> {
         if has_repetition_loop(&htmltable::strip_tables(&reply.text)) {
             return Err(Plain::Reply("repetition loop".into()));
         }
+        if counting_run(&reply.text) {
+            return Err(Plain::Reply("counting run".into()));
+        }
         let (tables, converted) = htmltable::convert_tables(&reply.text);
         let body = clean_ocr(&tables);
         if body.is_empty() {
@@ -398,6 +427,19 @@ fn plain_text(ctx: &Ctx, page: &Planned) -> Result<Output, Plain> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_long_counting_run_is_a_bad_reply() {
+        let margin: String = (1..=28).map(|n| format!("{n}\n")).collect();
+        assert!(!counting_run(&format!("Text.\n{margin}More text.")));
+        let counting: String = (41..=100).map(|n| format!("{n}\n\n")).collect();
+        assert!(counting_run(&format!(
+            "37. S2A Investments 5, LLC.\n{counting}"
+        )));
+        // Numbers with text between them are not a run.
+        let listed: String = (1..=40).map(|n| format!("{n}\nItem\n")).collect();
+        assert!(!counting_run(&listed));
+    }
 
     fn el(category: &str, text: &str) -> Element {
         Element {

@@ -962,3 +962,17 @@ Prefill (reading the image) is a third or more of each model request, and it gro
   - **Not adopted.** dots stays at 100 DPI.
 
 Lesson: synthetic fixtures are clean renders and miss resolution-sensitive failures on real scans. A speed change that lowers image quality must be checked on real filings before it ships.
+
+## dots plain text: a counting run (2026-10-11)
+
+Plain-text-first ("dots: plain text first") was measured on synthetic pages and five public filings. A later run on all 20 public filings found one bad page that those had missed. On cmpl-sec-kuzdas page 5, plain text lost track of the pleading margin:
+- it printed the numbers 41 to 100 as bare lines in place of paragraph 22;
+- it renumbered paragraph 21 as `37`.
+
+That is a dropped paragraph and a wrong paragraph number. No other public page had a run of 30 or more consecutive bare numbers, in either mode.
+
+Overall word error against the PDF text is the same for both prompts (36.97% layout first against 37.06% plain first, all 20 filings).
+
+**Fix:** a plain reply with more than 28 consecutive bare numbers (a pleading has at most 28 margin numbers) is a bad reply, `counting run`, and goes to the layout prompt like a loop. Re-run on cmpl-sec-kuzdas: page 5's plain reply is rejected (`parse_retry` in `--timing-json`), the layout reply is used, and paragraph 22 and its number are back.
+
+The lesson from "Lower DPI" applies here too: checks on synthetic pages and a few filings did not show this; a full real-filing run did.

@@ -104,6 +104,11 @@ def aggregate(entries):
     ratio = lambda a, b: round(g(a) / g(b), 4) if g(b) else None
     return {"sets": len(entries), "failed": len(entries) - len(ok), "pages": g("pages"),
             "cer": ratio("dist_sum", "len_sum"), "token_recall": ratio("tokens_found", "tokens_total"),
+            # Older result files lack the strict and word-level sums.
+            **({"cer_strict": ratio("dist_strict", "len_strict"), "wer": ratio("wdist", "wlen"),
+                "wer_strict": ratio("wdist_strict", "wlen_strict"),
+                "subs": g("subs"), "dels": g("dels"), "ins": g("ins")}
+               if all("wlen" in e for e in ok) else {}),
             "bates_accuracy": ratio("bates_ok", "bates_total"),
             "transcript_line_accuracy": ratio("tl_ok", "tl_total"),
             "pages_per_s": round(g("pages") / g("wall_s"), 3), "wall_s": round(g("wall_s"), 1),
@@ -194,6 +199,8 @@ def main():
                     entry["error"] = f"unscoreable output: {err}"
             if "error" not in entry:
                 entry.update({k: s[k] for k in ("cer", "dist_sum", "len_sum", "tokens_found", "tokens_total",
+                                                "dist_strict", "len_strict", "wdist", "wlen",
+                                                "wdist_strict", "wlen_strict", "subs", "dels", "ins",
                                                 "bates_ok", "bates_total", "tl_ok", "tl_total", "pages_in_output")})
                 entry["cer_pages"] = s["cer_pages"]
                 if p.returncode == 1:

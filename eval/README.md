@@ -58,3 +58,17 @@ The embedded text is not perfect ground truth (old scans carry bad OCR layers), 
 ### With Azure on the flagged pages
 
 `eval/azure_verify_eval.py` simulates the skill's workflow (rely on `verified`, confirm the rest with Azure on `azure_pages`, send what is left to a person) on the committed Mac runs in `eval/verify_bundle/` and raw Azure responses, and grades it against the embedded text. It needs no Mac. The work-machine steps are in `docs/azure-verify-eval.md`.
+
+### Strict and normalized error rates
+
+`eval/score.py` reports, per file, CER as before (NFKC, quotes and dashes unified, markup removed, ground-truth furniture removed) and also:
+- `cer_strict`: the same text kept as written (NFC only, curly quotes and dashes as they are);
+- `wer` and `wer_strict`;
+- the character edits by kind: `subs`, `dels` (reference text the output lacks: dropped words) and `ins` (extra output).
+
+`run.py` aggregates them, and `agg.py` prints them for result files that have them.
+
+`eval/verify_eval.py` adds:
+- a strict word error rate against the embedded text (case, punctuation, decimal points and signs kept);
+- the reference words deleted;
+- the pages with a run of 12 or more reference words that appear nowhere on the OCR page, which usually means a dropped line or paragraph. Text that the OCR has elsewhere on the page counts as moved, not dropped. Misreads can still put a page on this list, so it is a list of pages to look at, not a count of drops.

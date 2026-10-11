@@ -328,6 +328,7 @@ An example (abridged):
   - `differs_from_usual_docket`: one digit off the docket number the document repeats.
   - `bates_out_of_sequence`: the Bates number breaks the page sequence.
   - `not_in_second_reading`: a scanned page (no embedded text) was read a second time, and that reading does not have the value.
+  - `court_stamp`: the value is on the court's electronic filing stamp (`Case … Document … Filed … Page … of …`), and only the second image reader agrees. Image readers misread an overprinted stamp alike (Paddle and Apple both read the Jane Street `04/24/24` printed over `04/18/24` as `04/28/24`), so their agreement is not a confirmation. The PDF's own text, or Azure, can confirm it.
   - `doubtful_in_second_reading`: the second reading has the value, but Vision marks that line as doubtful (or gives no confidence) or offers a different next-best reading. A value split over two lines is as doubtful as either line.
   - `words_numerals_mismatch`: an amount in words disagrees with its numerals. `Five Thousand Dollars ($3,000.00)` means one side was misread, or the document itself is wrong.
   - `arithmetic_mismatch`: a table's total row disagrees with the sum of the amounts above it. A `Subtotal` row and what follows it, such as tax, are allowed for.

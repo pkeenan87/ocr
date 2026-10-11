@@ -527,6 +527,9 @@ fn finish(mut e: Entry, backend: &dyn Backend, s: &Settings) -> Done {
         );
         pipeline::write_atomic(&telemetry::sidecar(&e.b.output), &json)
             .map_err(|err| (id, format!("{err:#}")))?;
+    } else {
+        // Timings from an earlier run describe that run, not this output.
+        let _ = std::fs::remove_file(telemetry::sidecar(&e.b.output));
     }
 
     let failed: Vec<usize> = results

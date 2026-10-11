@@ -387,7 +387,7 @@ The embedded text of a scanned PDF may itself be an old OCR layer. A match is st
 
 ## Where the time goes (`--timing-json`)
 
-`--timing-json` writes `<stem>.timing.json` next to the Markdown (and the `.verify.json`). Without the flag nothing is measured beyond what `--verbose` already prints, no file is written and the Markdown is unchanged. With it, the Markdown and checkpoints are still byte-identical.
+`--timing-json` writes `<stem>.timing.json` next to the Markdown (and the `.verify.json`). Without the flag nothing is measured beyond what `--verbose` already prints, no file is written (an old `.timing.json` from an earlier run is removed) and the Markdown is unchanged. With it, the Markdown and checkpoints are still byte-identical.
 
 For each page it records the prep time (render, Apple side pass, crop planning) and the recognize time, and for each model request: the prompt, the image size (`image_bytes`, the base64 data URL), the client round trip (`wall_s`), why the request was made (`reason`: `first`, `empty_retry`, `length_retry`, `loop_retry`, `parse_retry`, `transport_retry`, `after_restart`), the `finish_reason`, and, when the server reports them, its tokens and timings (`prompt_tokens`, `completion_tokens`, `prompt_n`, `cache_n`, `predicted_n`, `prompt_ms`, `predicted_ms`, `peak_memory`; mlx-vlm and llama.cpp both send them). `totals` sums them per file, including `verify_s`, `write_s` and `attempts_by_reason`. Pages resumed from a checkpoint have no timing and are marked `"resumed": true`; Apple pages have prep and recognize only.
 

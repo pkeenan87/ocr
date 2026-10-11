@@ -407,16 +407,42 @@ fn key(kind: Kind, text: &str) -> Option<String> {
 /// The canonical values found in a page's embedded text, by the same extraction as the OCR
 /// text, so `$3,000` never matches inside `$3,000,000`. Bates numbers are matched as whole
 /// tokens (one word, or two joined, for `ABC 0001234`).
+/// Other keys a docket number in the reference text also matches: its letters and digits, with
+/// an office number written before it with a hyphen (`5-16-cv-1128`, which the federal shape
+/// reads as `16-cv-1128`), so an OCR reading of the same characters (`5-16-cv1128`) agrees.
+fn docket_aliases(flat: &str, f: &Field) -> Vec<String> {
+    if f.kind != Kind::Docket {
+        return Vec::new();
+    }
+    let before = &flat[..f.col];
+    let office: String = before
+        .strip_suffix(['-', ':'])
+        .map(|b| {
+            b.chars()
+                .rev()
+                .take_while(char::is_ascii_digit)
+                .collect::<Vec<_>>()
+                .into_iter()
+                .rev()
+                .collect()
+        })
+        .unwrap_or_default();
+    let mut out = vec![format!("docket:other:{}", squash(&f.text))];
+    if (1..=2).contains(&office.len()) {
+        out.push(format!("docket:other:{office}{}", squash(&f.text)));
+    }
+    out
+}
+
 fn embedded_keys(text: &str) -> HashSet<String> {
     // Embedded text breaks lines anywhere (`January \r\n21, 2026`): read it as one line. A
     // line-end hyphen joins its halves (`5:15-` / `CV-01102`), and soft hyphens go.
     let text = LINE_END_HYPHEN.replace_all(text, "-");
     let text = text.replace(['\u{ad}', '\u{fffe}'], "");
     let flat = text.split_whitespace().collect::<Vec<_>>().join(" ");
-    let mut keys: HashSet<String> = extract(&flat)
-        .iter()
-        .filter_map(|f| key(f.kind, &f.text))
-        .collect();
+    let fields = extract(&flat);
+    let mut keys: HashSet<String> = fields.iter().filter_map(|f| key(f.kind, &f.text)).collect();
+    keys.extend(fields.iter().flat_map(|f| docket_aliases(&flat, f)));
     // A docket number read without its office prefix (`19-cv-09902`) matches the embedded
     // one with it (`3:19-cv-09902`); a prefix that was read must still match exactly.
     let without_office: Vec<String> = keys
@@ -821,6 +847,7 @@ fn occurrences(text: &str) -> Vec<Occurrence> {
             if let Some((_, rest)) = k.strip_prefix("docket:").and_then(|r| r.split_once(':')) {
                 keys.push(format!("docket::{rest}"));
             }
+            keys.extend(docket_aliases(&flat, f));
             Some(Occurrence {
                 keys,
                 context: context_words(&flat[..f.col]),
@@ -2317,6 +2344,24 @@ mod tests {
         assert!(extract("2 March 2023 was").is_empty());
         // The ordinal must still be a real day.
         assert_eq!(extract("on March 32nd, 2024")[0].why, vec!["invalid_date"]);
+    }
+
+    #[test]
+    fn a_docket_read_with_the_same_characters_matches() {
+        // PDFKit gives `5-16-cv-` / `1128`; the OCR joined the line without the hyphen.
+        let layer =
+            format!("In Archibald, case number 5-16-cv-\n1128, the jury returned a verdict.{PAD}");
+        let body =
+            format!("In Archibald, case number 5-16-cv1128, the jury returned a verdict.{PAD}");
+        let r = run(&[page(1, &body)], VerifyFields::Flagged, &layer);
+        let s = statuses(&r);
+        assert_eq!(s[0].0, "5-16-cv1128");
+        assert_eq!(s[0].1, Status::Verified, "{s:?}");
+        // A different number still differs.
+        let body =
+            format!("In Archibald, case number 5-16-cv1129, the jury returned a verdict.{PAD}");
+        let r = run(&[page(1, &body)], VerifyFields::Flagged, &layer);
+        assert_eq!(statuses(&r)[0].1, Status::Check, "{:?}", statuses(&r));
     }
 
     #[test]

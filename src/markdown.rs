@@ -196,13 +196,31 @@ pub fn is_pleading_margin_number(block: &Block) -> bool {
         && block.bbox[0] + block.bbox[2] <= MARGIN_ZONE
 }
 
+/// Bates-looking tokens in `t` that are not part of something else: the tail of a docket number
+/// (`2:23-CV-00886`) or a Westlaw or Lexis citation (`2020 WL 5835149`).
+fn bates_in(t: &str) -> impl Iterator<Item = &str> {
+    BATES.find_iter(t).filter_map(move |m| {
+        let before = &t[..m.start()];
+        let docket_tail = before.ends_with(['-', ':'])
+            && before[..before.len() - 1].ends_with(|c: char| c.is_ascii_digit());
+        let prefix: String = m
+            .as_str()
+            .chars()
+            .take_while(|c| c.is_ascii_alphabetic())
+            .collect();
+        // `WL` and `LEXIS` numbers are case citations, not production stamps.
+        let citation = ["WL", "LEXIS"].contains(&prefix.as_str());
+        (!docket_tail && !citation).then_some(m.as_str())
+    })
+}
+
 /// First Bates-looking token in the blocks at the bottom of the page.
 pub fn find_bates(blocks: &[Block]) -> Option<String> {
     blocks
         .iter()
         .filter(|b| b.bbox[1] >= 1.0 - BATES_ZONE)
         .flat_map(block_texts)
-        .find_map(|t| BATES.find(&t).map(|m| m.as_str().to_string()))
+        .find_map(|t| bates_in(&t).next().map(str::to_string))
 }
 
 /// A Bates number in the last lines of a page's text (model output, which keeps the footer),
@@ -212,7 +230,7 @@ pub fn find_bates_in_text(body: &str) -> Option<String> {
         .rev()
         .filter(|l| !l.trim().is_empty())
         .take(BATES_TAIL_LINES)
-        .find_map(|l| BATES.find_iter(l).last().map(|m| m.as_str().to_string()))
+        .find_map(|l| bates_in(l).last().map(str::to_string))
 }
 
 fn block_texts(b: &Block) -> Vec<String> {
@@ -743,6 +761,25 @@ mod tests {
         assert_eq!(find_bates(&[spaced]).as_deref(), Some("ABC 0001234"));
         assert_eq!(
             find_bates(&[para("Page 12345", [0.1, 0.95, 0.2, 0.02])]),
+            None
+        );
+        // The tail of a docket number and a Westlaw citation are not Bates numbers; a real one
+        // after them on the same line still is.
+        for text in [
+            "Case 2:23-CV-00886-PP Filed 08/01/24 Page 8 of 10",
+            "Harris v. Adams, 2020 WL 5835149 (Cal. Ct. App.)",
+            "2019 U.S. Dist. LEXIS 123456",
+        ] {
+            assert_eq!(
+                find_bates(&[para(text, [0.1, 0.95, 0.8, 0.02])]),
+                None,
+                "{text}"
+            );
+        }
+        let both = para("Case 2:23-CV-00886-PP SMITH000123", [0.1, 0.95, 0.8, 0.02]);
+        assert_eq!(find_bates(&[both]).as_deref(), Some("SMITH000123"));
+        assert_eq!(
+            find_bates_in_text("text\n\nCase 2:23-CV-00886-PP Page 8").as_deref(),
             None
         );
     }

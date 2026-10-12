@@ -164,6 +164,99 @@ static BARE_AMOUNTS: LazyLock<[Regex; 3]> = LazyLock::new(|| {
         .unwrap(),
     ]
 });
+/// A number with cents, or with digit grouping, as a table cell or an invoice line writes money:
+/// `5,156.00`, `74.52`, `(20.00)`.
+static MONEY_SHAPE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\(?-?\$?\s?(?:\d{1,3}(?:,\d{3})+(?:\.\d{2})?|\d{1,7}\.\d{2})\)?$").unwrap()
+});
+/// Grouped with cents: money wherever it stands.
+static GROUPED_CENTS: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\d{1,3}(?:,\d{3})+\.\d{2}").unwrap());
+/// A table column or a line above that says the numbers are money.
+static MONEY_WORDS: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)\b(?:amount|rate|fees?|costs?|price|total|balance|payments?|due|charges?|disbursements?|subtotal)\b|\$").unwrap()
+});
+/// Columns that hold quantities, not money, even under a money word (`TOTAL HOURS`).
+static COUNT_WORDS: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)\b(?:hours?|hrs|qty|quantity|units?|days?|no\.?|count)\b").unwrap()
+});
+
+/// Money without a `$` on `lines[i]`, by three rules: grouped with cents anywhere; a number with
+/// cents in a table column whose heading is a money word; and a line of nothing but such numbers
+/// within six lines below a `$` or a money word (an invoice whose `$` stands apart). Returns
+/// (byte offset, text) pairs.
+fn unsigned_money(lines: &[&str], i: usize) -> Vec<(usize, String)> {
+    let line = lines[i];
+    let mut out: Vec<(usize, String)> = Vec::new();
+    let mut add = |at: usize, t: &str| {
+        if !out.iter().any(|(a, _)| *a == at) {
+            out.push((at, t.to_string()));
+        }
+    };
+    for m in GROUPED_CENTS.find_iter(line) {
+        let before = line[..m.start()].chars().next_back();
+        let after = line[m.end()..].chars().next();
+        if before.is_some_and(|c| c.is_ascii_digit() || c == ',' || c == '.')
+            || after.is_some_and(|c| c.is_ascii_digit() || c == '%')
+        {
+            continue;
+        }
+        add(m.start(), m.as_str());
+    }
+    let t = line.trim();
+    if t.starts_with('|') {
+        // The table's heading row: the first row of this block of pipe rows.
+        let top = (0..=i)
+            .rev()
+            .take_while(|&k| lines[k].trim().starts_with('|'))
+            .last()
+            .unwrap_or(i);
+        let head: Vec<&str> = lines[top].trim().trim_matches('|').split('|').collect();
+        let money_col = |c: usize| {
+            head.get(c)
+                .is_some_and(|h| MONEY_WORDS.is_match(h) && !COUNT_WORDS.is_match(h))
+        };
+        if top != i {
+            let mut at = line.find('|').unwrap_or(0) + 1;
+            for (c, cell) in line.trim().trim_matches('|').split('|').enumerate() {
+                let start = line[at..].find(cell).map_or(at, |o| at + o);
+                let v = cell.trim();
+                if money_col(c) && MONEY_SHAPE.is_match(v) {
+                    add(start + (cell.len() - cell.trim_start().len()), v);
+                }
+                at = start + cell.len();
+            }
+        }
+    }
+    // A line of nothing but numbers with cents (and Markdown or leader dots around them).
+    let bare: Vec<&str> = t
+        .split(|c: char| c.is_whitespace() || c == '|')
+        .map(|w| w.trim_matches(|c: char| c == '#' || c == '.' || c == '\u{2026}'))
+        .filter(|w| !w.is_empty())
+        .collect();
+    if !bare.is_empty()
+        && bare
+            .iter()
+            .all(|w| MONEY_SHAPE.is_match(w) && w.contains('.'))
+        && lines[..i]
+            .iter()
+            .rev()
+            .filter(|l| !l.trim().is_empty())
+            .take(6)
+            .any(|l| MONEY_WORDS.is_match(l))
+    {
+        let mut from = 0;
+        for w in bare {
+            if let Some(o) = line[from..].find(w) {
+                add(from + o, w);
+                from += o + w.len();
+            }
+        }
+    }
+    out.sort();
+    out
+}
+
 /// An amount written without `$` (`USD 5,000`, `5,000 dollars`, `5,000.00`) as `$5,000`.
 fn dollar_form(text: &str) -> String {
     let t = text.trim();
@@ -190,7 +283,7 @@ static DATE_NUMERIC: LazyLock<Regex> = LazyLock::new(|| {
 });
 static DATE_WORDS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(&format!(
-        r"\b(?:(?P<m1>{MONTHS})\.?\s+(?P<d1>[0-9OIl]{{1,2}})(?:st|nd|rd|th)?(?:,\s*|\s+)(?P<y1>[0-9OIlQ]{{4}})|(?P<d2>\d{{1,2}})(?:st|nd|rd|th)?\s+(?:day\s+of\s+|of\s+)?(?P<m2>{MONTHS})\.?,?\s+(?P<y2>\d{{4}}))\b"
+        r"\b(?:(?P<m1>(?i:{MONTHS}))\.?\s+(?P<d1>[0-9OIl]{{1,2}})(?i:st|nd|rd|th)?(?:,\s*|\s+)(?P<y1>[0-9OIlQ]{{4}})|(?P<d2>\d{{1,2}})(?i:st|nd|rd|th)?\s+(?i:day\s+of\s+|of\s+)?(?P<m2>(?i:{MONTHS}))\.?,?\s+(?P<y2>\d{{4}}))\b"
     ))
     .unwrap()
 });
@@ -244,8 +337,10 @@ static COURT_STAMP: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Citations with a section or paragraph sign.
-static CITATION: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?:§§?|¶¶?)\s?\d[\w.\-]*(?:\([A-Za-z0-9]{1,4}\))*").unwrap());
+static CITATION: LazyLock<Regex> = LazyLock::new(|| {
+    // A dot inside a section number (`§ 52.1`), never a run of leader dots (`§ 1692.....12`).
+    Regex::new(r"(?:§§?|¶¶?)\s?\d(?:[\w\-]|\.(?:[\w\-]))*(?:\([A-Za-z0-9]{1,4}\))*").unwrap()
+});
 static PERCENT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\b\d{1,3}(?:\.\d+)?\s?%").unwrap());
 /// Bates prefix and number (`SMITH000123`, `ABC 0001234`).
 static BATES_PARTS: LazyLock<Regex> =
@@ -638,6 +733,22 @@ fn extract(body: &str) -> Vec<Field> {
                     .and_then(|v| serde_json::Number::from_f64(v).map(serde_json::Value::Number));
                 push(m.start(), Kind::Amount, m.as_str(), value, vec![]);
             }
+        }
+        // Money without any `$` or word: invoices and money columns.
+        let mut taken: Vec<std::ops::Range<usize>> = dollars.clone();
+        for re in BARE_AMOUNTS.iter() {
+            taken.extend(re.find_iter(line).map(|m| m.range()));
+        }
+        for (at, t) in unsigned_money(&lines, i) {
+            if taken.iter().any(|r| r.start < at + t.len() && at < r.end) {
+                continue;
+            }
+            let negative = t.starts_with('(') || t.starts_with('-');
+            let digits = t.trim_matches(|c: char| "()-$ ".contains(c));
+            let value = parse_amount(&format!("${digits}"))
+                .map(|v| if negative { -v } else { v })
+                .and_then(|v| serde_json::Number::from_f64(v).map(serde_json::Value::Number));
+            push(at, Kind::Amount, &t, value, vec![]);
         }
         // `2 March 2023` at the start of a line is a pleading line number before `March 2023`.
         let indent = line.len() - line.trim_start().len();
@@ -2425,6 +2536,72 @@ mod tests {
             format!("In Archibald, case number 5-16-cv1129, the jury returned a verdict.{PAD}");
         let r = run(&[page(1, &body)], VerifyFields::Flagged, &layer);
         assert_eq!(statuses(&r)[0].1, Status::Check, "{:?}", statuses(&r));
+    }
+
+    #[test]
+    fn dates_in_capitals_are_found() {
+        for (text, iso) in [
+            (
+                "BANCO PANAMERICANO, INC.\nMARCH 15, 2007\nINVOICE",
+                "2007-03-15",
+            ),
+            ("TUESDAY, MARCH 13, 1990", "1990-03-13"),
+            ("RECEIVED APR 15 2008", "2008-04-15"),
+            ("the 3RD DAY OF MAY, 2021 at noon", "2021-05-03"),
+        ] {
+            let f: Vec<_> = extract(text)
+                .into_iter()
+                .filter(|f| f.kind == Kind::Date)
+                .collect();
+            assert_eq!(f.len(), 1, "{text}: {f:?}");
+            assert_eq!(f[0].value, Some(iso.into()), "{text}");
+        }
+    }
+
+    #[test]
+    fn invoice_amounts_without_a_dollar_sign_are_found() {
+        let amounts = |text: &str| -> Vec<(String, Option<serde_json::Value>)> {
+            extract(text)
+                .into_iter()
+                .filter(|f| f.kind == Kind::Amount)
+                .map(|f| (f.text, f.value))
+                .collect()
+        };
+        // The `$` stands on its own line, the numbers below it.
+        let page = "FEES.....\n\n$\n\nDISBURSEMENTS\n\nTOTAL AMOUNT DUE\n\n$\n\n# 5,156.00\n\n74.52\n\n5,230.52";
+        assert_eq!(
+            amounts(page),
+            [
+                ("5,156.00".to_string(), Some(serde_json::json!(5156.0))),
+                ("74.52".to_string(), Some(serde_json::json!(74.52))),
+                ("5,230.52".to_string(), Some(serde_json::json!(5230.52))),
+            ]
+        );
+        // A money column; hours stay out.
+        let table = "| ID | TIMEKEEPER | HOURS | RATE | AMOUNT |\n| --- | --- | --- | --- | --- |\n\
+            | GJJ | GREGORY J. JORDAN | 8.90 | 389.89 | 3,470.00 |\n| JSOH | JEAN SOH | 1.70 | 240.00 | 408.00 |";
+        let got: Vec<String> = amounts(table).into_iter().map(|a| a.0).collect();
+        assert_eq!(got, ["389.89", "3,470.00", "240.00", "408.00"]);
+        // A refund in a money column is negative.
+        let refund = "| Item | Amount |\n| --- | --- |\n| Refund | (20.00) |";
+        assert_eq!(amounts(refund)[0].1, Some(serde_json::json!(-20.0)));
+        // Not money: a lone decimal with no money word near, a version, a measurement in a
+        // sentence, a percentage.
+        for text in [
+            "Section 4.12\n\n3.25",
+            "The tract is 12.50 acres.",
+            "a rate of 12.50% per year",
+        ] {
+            assert!(amounts(text).is_empty(), "{text}: {:?}", amounts(text));
+        }
+    }
+
+    #[test]
+    fn citations_stop_at_leader_dots() {
+        let f =
+            extract("15 U.S.C. § 1692.....12\n15 U.S.C. § 1692a(6).....13\nCal. Civ. Code § 52.1");
+        let got: Vec<&str> = f.iter().map(|f| f.text.as_str()).collect();
+        assert_eq!(got, ["§ 1692", "§ 1692a(6)", "§ 52.1"]);
     }
 
     #[test]

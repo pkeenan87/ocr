@@ -196,6 +196,14 @@ pub fn is_pleading_margin_number(block: &Block) -> bool {
         && block.bbox[0] + block.bbox[2] <= MARGIN_ZONE
 }
 
+/// US state and territory abbreviations, which precede a ZIP code in an address.
+const US_STATES: &[&str] = &[
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+    "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM",
+    "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA",
+    "WV", "WI", "WY", "PR", "GU", "VI",
+];
+
 /// Bates-looking tokens in `t` that are not part of something else: the tail of a docket number
 /// (`2:23-CV-00886`) or a Westlaw or Lexis citation (`2020 WL 5835149`).
 fn bates_in(t: &str) -> impl Iterator<Item = &str> {
@@ -210,7 +218,10 @@ fn bates_in(t: &str) -> impl Iterator<Item = &str> {
             .collect();
         // `WL` and `LEXIS` numbers are case citations, not production stamps.
         let citation = ["WL", "LEXIS"].contains(&prefix.as_str());
-        (!docket_tail && !citation).then_some(m.as_str())
+        // A state and its ZIP code (`Seattle, WA 98104`).
+        let number = m.as_str().trim_start_matches(|c: char| !c.is_ascii_digit());
+        let zip = prefix.len() == 2 && US_STATES.contains(&prefix.as_str()) && number.len() == 5;
+        (!docket_tail && !citation && !zip).then_some(m.as_str())
     })
 }
 
@@ -776,6 +787,18 @@ mod tests {
                 "{text}"
             );
         }
+        // A state and ZIP code in an address is not a Bates number; a longer number still is.
+        assert_eq!(
+            find_bates(&[para(
+                "700 Stewart Street, Seattle, WA 98104",
+                [0.1, 0.95, 0.8, 0.02]
+            )]),
+            None
+        );
+        assert_eq!(
+            find_bates(&[para("WA 0012345", [0.1, 0.95, 0.8, 0.02])]).as_deref(),
+            Some("WA 0012345")
+        );
         let both = para("Case 2:23-CV-00886-PP SMITH000123", [0.1, 0.95, 0.8, 0.02]);
         assert_eq!(find_bates(&[both]).as_deref(), Some("SMITH000123"));
         assert_eq!(

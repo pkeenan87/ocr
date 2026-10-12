@@ -1036,3 +1036,31 @@ Two decisions are recorded in the set:
   - stamps (struck-through or overprinted filing headers, RECEIVED stamps);
   - handwriting.
 - **dots finds 19 of 49 dockets.** Most dockets are in the court's filing-stamp header, which the plain-text prompt (adopted in "dots: plain text first") appears to leave out. This is to be checked.
+
+## Extraction gaps found by the holdout set (2026-10-12)
+
+The holdout set showed four extraction gaps in `ocr` (values missed, none wrongly verified). Each was copied into the development tests and fixed there:
+1. **Dates in capitals:** `MARCH 15, 2007`, `TUESDAY, MARCH 13, 1990`, `APR 15 2008`. Month names, ordinals and "day of" now match in any case.
+2. **Invoice amounts without `$`:** these are now money:
+   - a number grouped with cents (`5,156.00`), anywhere;
+   - a number with cents in a table column headed by a money word (amount, rate, fee, total, balance, due, and so on). Not under a quantity word such as hours or units;
+   - a line of nothing but such numbers within six lines below a `$` or a money word.
+
+   Accounting brackets in a money column are negative.
+3. **ZIP codes as Bates numbers:** a state abbreviation and a 5-digit ZIP (`WA 98104`) is no longer a Bates number.
+4. **Leader dots in citations:** `§ 1692.....12` is `§ 1692`.
+
+**Results:**
+
+| Measure | Before | After |
+|---|---|---|
+| Holdout, Apple: values found (292) | 83.6% | 93.3% |
+| Holdout, Apple: verified but wrong | 0 | 0 |
+| Public filings (`all`): values found | 883 | 899 |
+| Public filings: verified | 459 | 464 |
+| Public filings: `azure_pages` | 126 | 126 |
+| Public filings: blind wrong values caught | 21 of 21 | 18 of 18 |
+
+Seven values the fixes found on the holdout set were confirmed by the PDFs' own text and added to the set: h02 `JANUARY 8, 2010`, h06 `0.00`, and h09's balance column.
+
+What Apple still misses on the holdout set is mostly stamps, struck-through headers, handwriting and text it did not read at all.

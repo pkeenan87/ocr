@@ -309,7 +309,7 @@ An example (abridged):
 }
 ```
 
-- **Fields:** `amount`, `date` (with `value` as YYYY-MM-DD; `03/07/2024`, `March 7, 2024`, `7 March 2024`, and ordinals such as `March 7th, 2024` or `the 7th day of March, 2024`), `docket`, `bates`, `citation` (with `§` or `¶`) and `percent`.
+- **Fields:** `amount`, `date` (with `value` as YYYY-MM-DD; `03/07/2024`, `March 7, 2024`, `7 March 2024`, ordinals such as `March 7th, 2024` or `the 7th day of March, 2024`, and month names in any case, such as `MARCH 15, 2007`), `docket`, `bates`, `citation` (with `§` or `¶`) and `percent`. Amounts without `$` count when grouped with cents (`5,156.00`), in a table column headed by a money word (`AMOUNT`, `RATE`, `FEES`, `TOTAL`; not `HOURS`), or alone on a line just below a `$` or a fees/total line, as invoices print them. A state and ZIP code (`WA 98104`) is not a Bates number, and a citation stops at leader dots (`§ 1692.....12` is `§ 1692`).
   - **Dockets:** federal shapes such as `3:26-cv-04417` anywhere, and any court's format after a label (`Case No.: 11-4604 PSG`, `C.A. No. 5215-VCG`, `Index No. 651234/2021`). `Docket No. 35` cites an entry, not a case, and is left out.
   - **Amounts:** with `$`, and without it in three shapes that cannot be a count: `USD 5,000`, `5,000 dollars`, and `sum of 5,000.00` (cents required).
 - Each field has the exact text as it appears in the Markdown, its page, and its line within the page.

@@ -1,0 +1,3331 @@
+{
+ "version": 1,
+ "reviewer": "Patrick Keenan",
+ "exported": "2026-10-12T13:08:30.804Z",
+ "engines": [
+  "apple"
+ ],
+ "pages": [
+  {
+   "doc": "h01",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "July 25, 1991"
+     },
+     "printed": "July 25, 1991",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "docket",
+     "printed": "8:91-cv-00317-LES-RGK",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    },
+    {
+     "kind": "date",
+     "printed": "May 31, 1991",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    },
+    {
+     "kind": "date",
+     "printed": "10th day of November, 1992",
+     "decision": "correct",
+     "flags": [
+      "handwriting"
+     ],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "# 8910374ES RCK DOC SOEA1LE DC10'2: PSe ID HA6 O\n\nU. S. DISTRICT COURT\n\nIN THE UNITED STATES DISTRICT COURTSTRICT OF NEBRASKA\n\nFOR THE DISTRICT OF NEBRASKA\n\n92 NOV 10 PM 3:07\n\nUNITED STATES OF AMERICA,\n\nPlaintiff,\n\nCLERKOb\n\nNORBERT H. EBEL\n\n8:CV91-00317\n\nDECREE OF FORFEITURE\n\nONE 1985 CHEVROLET ASTRO VAN, VIN 1G8DM15NOFB188154,\n\nDefendant.\n\nNOW ON THIS\n\nNovember, 1992, this matter\n\n.10\n\nday of\n\ncomes on before the Court upon the Stipulation for Entry of Decree of Forfeiture filed by the Plaintiff, United States of America, and the Claimant, Ruth Martinez; and upon the Motion for Default Judgment against Arturo Martinez and Ignacio Chavez filed by the Plaintiff. Upon review of the record of this case, the Court, being duly advised in the premises, finds as follows:\n\n1. A Complaint for Forfeiture was filed herein on May 31,\n\n1991. A Warrant for Arrest in Rem was issued by this Court and was properly executed on the defendant property by the United States\n\nMarshal.\n\n2. Publication of the notice of this action and of the\n\narrest of the defendant property were duly made pursuant to Order of this Court dated July 25, 1991.\n\n3. No person or entity entitled to the defendant property has filed a claim or answer to Plaintiff's Complaint within the time fixed by law, other than Ruth Martinez.",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h01",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "11/10/92"
+     },
+     "printed": "11/10/92",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "8:91-cv-00317-LES-RGK"
+     },
+     "printed": "8:91-cv-00317-LES-RGK",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "October 20, 1992"
+     },
+     "printed": "October 20, 1992",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h02",
+   "page": 1,
+   "values": [
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$267,552"
+     },
+     "printed": "$267,552",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "JANUARY 8, 2010",
+     "decision": "correct",
+     "flags": [],
+     "source": "in the PDF's own text (born-digital), found by the 2026-10-12 extraction fixes; reported to the reviewer"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h02",
+   "page": 2,
+   "values": [
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$267,552"
+     },
+     "printed": "$267,552",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "April 24, 1995"
+     },
+     "printed": "April 24, 1995",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "April 18, 1990"
+     },
+     "printed": "April 18, 1990",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "Aug. 27, 1998"
+     },
+     "printed": "Aug. 27, 1998",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "Nov. 29, 2000"
+     },
+     "printed": "Nov. 29, 2000",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$265,000"
+     },
+     "printed": "$265,000",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$2000"
+     },
+     "printed": "$2000",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$10,000"
+     },
+     "printed": "$10,000",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "May 15, 1990"
+     },
+     "printed": "May 15, 1990",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§§ 5316(a)(1)(a)"
+     },
+     "printed": "§§ 5316(a)(1)(a)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "October 28, 1991"
+     },
+     "printed": "October 28, 1991",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "# BACKGROUND\n\nHaving exhausted appeals seeking to overturn the April 24, 1995 forfeiture of $267,552\n\nseized from him on April 18, 1990 when Petitioner attempted to leave the country without\n\nreporting it, Petitioner has filed yet another Motion pursuant to Rule 60(b), alleging that the\n\nSupreme Court decision in Santos v. United States, 128 S. Ct. 2020 (2008) rendered the\n\nforfeiture in this case invalid.\n\nThe factual and lengthy procedural history of this case are detailed in this Court’s\n\nopinions in United States v. Two Hundred and Sixty-Seven Thousand, Five Hundred and\n\nTwenty-Two Dollars in United States Currency, No. 90-5773, 1998 WL 546850, at *1 (E.D. Pa.\n\nAug. 27, 1998), and Ezeiruaku v. United States, No. 00-2225, 2000 WL 1751077, at *1 (E.D. Pa.\n\nNov. 29, 2000), as well as in the Third Circuit opinion in the related criminal case, United States\n\nv. Ezeiruaku, 936 F.2d 136 (3d Cir. 1991). In summary, on April 18, 1990, Petitioner was arrested at Philadelphia International Airport after Customs Inspectors discovered some $265,000\n\nin unreported currency wrapped in $2000 packs of twenty-dollar bills, separately wrapped in\n\ncarbon paper, in his checked luggage. Despite acknowledging hearing the announcement from a\n\nLufthansa representative requiring all passengers on the international flight to file a Customs\n\nform if they were carrying more than $10,000 in currency out of the country, Petitioner falsely\n\ndenied having more than $10,000 either on his person or in his luggage. Id. at 138.\n\nOn May 15, 1990, a criminal indictment was returned charging Petitioner with attempting\n\nto cause the transportation of currency in excess of $10,000 to various points outside the United\n\nStates without filing the required United States Customs currency report in violation of 31 U.S.C.\n\n§§ 5316(a)(1)(a) and 5322(a). On October 28, 1991, Petitioner pleaded guilty to this offense. On",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h02",
+   "page": 3,
+   "values": [
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$267,522.00"
+     },
+     "printed": "$267,522.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "September 6, 1990"
+     },
+     "printed": "September 6, 1990",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "September 18, 1990"
+     },
+     "printed": "September 18, 1990",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "February 4, 1994"
+     },
+     "printed": "February 4, 1994",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "December 9, 1994"
+     },
+     "printed": "December 9, 1994",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "January 4, 1995"
+     },
+     "printed": "January 4, 1995",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "April 24, 1995"
+     },
+     "printed": "April 24, 1995",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "June 12, 1998"
+     },
+     "printed": "June 12, 1998",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "August 27, 1998"
+     },
+     "printed": "August 27, 1998",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "May 1, 2000"
+     },
+     "printed": "May 1, 2000",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "November 29, 2000"
+     },
+     "printed": "November 29, 2000",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h02",
+   "page": 4,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "Aug. 17, 2004"
+     },
+     "printed": "Aug. 17, 2004",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$267,522.00"
+     },
+     "printed": "$267,522.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "April 24, 1995"
+     },
+     "printed": "April 24, 1995",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "August 27, 1998"
+     },
+     "printed": "August 27, 1998",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$267,552"
+     },
+     "printed": "$267,552",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h03",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/17/2001"
+     },
+     "printed": "05/17/2001",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§2254"
+     },
+     "printed": "§2254",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§2255"
+     },
+     "printed": "§2255",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$2255"
+     },
+     "printed": "$2255",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "-00878 WWC Document 1\n\n# Case 1:01 ov\n\nFiled 05/17/2001\n\nPage 1 of 8\n\nIN THE UNITED STATES DISTRICT COURT\n\nFOR THE MIDDLE: DITSCTOVENNSOTA-088\n\nPETITION FOR WRIT OF HABEAS CORPUS\n\nS.C. §2254 - PERSONS IN STATE CUSTODY)\n\n(28\n\nEdward Coss\n\nPETITIONER\n\n(Include name under which you were convicted)\n\n(Full name)\n\nvS -\n\nCASE NO.\n\n(Supplied by the Court)\n\nJames P. Morgan\n\nRES PONDENT\n\n(Name of Warden, Superintendent,\n\nJailor, or authorized\n\nFILED\n\nperson having custody of petitioner)\n\nSCRANTON\n\nand\n\nMAY 1 7 2001\n\nTHE DISTRICT ATTORNEY OF THE COUNTY OF Lackawanna County.\n\nand\n\nPER\n\nDEPUTY CLERK\n\nTHE ATTORNEY GENERAL OF THE STATE OF Pennsylvania\n\nADDITIONAL RESPONDENT\n\nEdward Coss,CB_5970\n\nName\n\nSCI Smithfield\n\nPlace of Confinement\n\nCB5970\n\nPrison Number\n\n(If petitioner is attacking a state court judgment which\n\nimposed a sentence to be served in the future, petitioner must fill in the name of the state where the judgment was entered.\n\nIE\n\npetitioner has 'a sentence to be served in the future\n\nunder a\n\nfederal'\n\ntudgment which he wishes to attack, he should file a motion\n\n28 U.S.C.,\n\nin the federal court which entered the'\n\nunder\n\n§2255,\n\nPURPOSES.)\n\nDO NOT USE THIS FORM FOR $2255\n\njudgment.\n\nPETITION FOR WRIT OF HABEAS CORPUS BY A PERSON IN STATE CUSTODY\n\nINSTRUCTIONS- READ CAREFULLY\n\nThis petition must be legibly handwristen or typewritten\n\n(2)\n\nand signed by the petitioner. Any false statement of a material",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h03",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/17/2001"
+     },
+     "printed": "05/17/2001",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "January 30, 1987"
+     },
+     "printed": "January 30, 1987",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "docket",
+     "printed": "1:01-cv-00878-WWC",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h03",
+   "page": 3,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:01-cv-00878-WWC"
+     },
+     "printed": "1:01-cv-00878-WWC",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "05/17/2001",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "This missed 05/17/2001 in the header"
+  },
+  {
+   "doc": "h03",
+   "page": 4,
+   "values": [],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "05/17/2001",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "docket",
+     "printed": "1:01-cv-00878-WWC",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "The page missed 05/17/2001 in the header and the case number"
+  },
+  {
+   "doc": "h04",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "01/26/23"
+     },
+     "printed": "01/26/23",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:23-mc-00011-SAB"
+     },
+     "printed": "1:23-mc-00011-SAB",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h05",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "01/26/23"
+     },
+     "printed": "01/26/23",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:23-mc-00011-SAB"
+     },
+     "printed": "1:23-mc-00011-SAB",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:21-cv-00598"
+     },
+     "printed": "2:21-cv-00598",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "January 25, 2023"
+     },
+     "printed": "January 25, 2023",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "# Case 1:23-mc-00011-SAB Document 1 Filed 01/26/23 Page 1 of 4\n\nAO 451 (Rev. 12/12) Clerk's Certification of a Judgment to be Registered in Another District\n\nUNITED STATES DISTRICT COURT\n\nfor the\n\nEastern District of Louisiana\n\nSensiva Health, LLC, et al\n\nPlaintiff\n\nCivil Action No. 2:21-cv-00598 T(5)\n\nUniversal Meditech, Inc, et al\n\nDefendant\n\nCLERK'S CERTIFICATION OF A JUDGMENT TO BE REGISTERED IN ANOTHER DISTRICT\n\n1 certify that the attached judgment is a copy of a judgment entered by this court on (dafe)\n\nJanuary 25, 2023\n\n1 also certify that, as appears from this court's records, no motion listed in Fed. R. App. P. 4(a)(4)(A) is pending before this court, the time for appeal has expired, and no appeal has been filed or, if one was filed, it is no longer pending.\n\nDate:January 26, 2023\n\nCarol L. Michel\n\nCLERK OF COURT\n\nEellen s Stall\n\nSignature of Clerk or Deputy Clerk",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h05",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "December 13, 2022"
+     },
+     "printed": "December 13, 2022",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "December 30, 2022"
+     },
+     "printed": "December 30, 2022",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "January 3, 2023"
+     },
+     "printed": "January 3, 2023",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "January 11, 2023",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    },
+    {
+     "kind": "date",
+     "printed": "01/26/23",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h05",
+   "page": 3,
+   "values": [
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$375,000.00"
+     },
+     "printed": "$375,000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "December 24, 2021"
+     },
+     "printed": "December 24, 2021",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$525,000.00"
+     },
+     "printed": "$525,000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "February 8, 2021"
+     },
+     "printed": "February 8, 2021",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$1,336,558.00"
+     },
+     "printed": "$1,336,558.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1961"
+     },
+     "printed": "§ 1961",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$13,230.53"
+     },
+     "printed": "$13,230.53",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "01/26/23",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h05",
+   "page": 4,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "25th day of January, 2023"
+     },
+     "printed": "25th day of January, 2023",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "Jan 26 2023"
+     },
+     "printed": "Jan 26 2023",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "citation",
+     "printed": "§ 1963",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h06",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "04/21/23"
+     },
+     "printed": "04/21/23",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "4:23-cv-00348-DMR"
+     },
+     "printed": "4:23-cv-00348-DMR",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "4:23-cv-00348"
+     },
+     "printed": "4:23-cv-00348",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h06",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "04/21/23"
+     },
+     "printed": "04/21/23",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "4:23-cv-00348-DMR"
+     },
+     "printed": "4:23-cv-00348-DMR",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "amount",
+     "printed": "0.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "in the PDF's own text (born-digital), found by the 2026-10-12 extraction fixes; reported to the reviewer"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h07",
+   "page": 1,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:15-cv-01009-JBM-JEH"
+     },
+     "printed": "1:15-cv-01009-JBM-JEH",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "15-CV-1009"
+     },
+     "printed": "15-CV-1009",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "1/7/15"
+     },
+     "printed": "1/7/15",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "16 February, 2015",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h07",
+   "page": 2,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "15 CV 1009"
+     },
+     "printed": "15 CV 1009",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "January 12, 2015"
+     },
+     "printed": "January 12, 2015",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "February 06, 2015"
+     },
+     "printed": "February 06, 2015",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "Jul 13, 2017"
+     },
+     "printed": "Jul 13, 2017",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h08",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/24/21"
+     },
+     "printed": "02/24/21",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:19-cv-07208-ST"
+     },
+     "printed": "1:19-cv-07208-ST",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:19-cv-07208-MKB-ST"
+     },
+     "printed": "1:19-cv-07208-MKB-ST",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h08",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/24/21"
+     },
+     "printed": "02/24/21",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:19-cv-07208-ST"
+     },
+     "printed": "1:19-cv-07208-ST",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$70,000.00"
+     },
+     "printed": "$70,000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$10,000.00"
+     },
+     "printed": "$10,000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "January 4, 2021"
+     },
+     "printed": "January 4, 2021",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$60,000.00"
+     },
+     "printed": "$60,000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "February 1, 2021"
+     },
+     "printed": "February 1, 2021",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "March 1, 2021"
+     },
+     "printed": "March 1, 2021",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "October 1, 2021"
+     },
+     "printed": "October 1, 2021",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "# Case 1:19-cv-07208-ST Document 35 Filed 02/24/21 Page 2 of 15 PageID #: 132\n\n2. Dismissal of Pending Action. The Parties agree that, upon executing the Agreement, the Parties, through their attorneys, shall execute a Stipulation and Order of Dismissal With Prejudice of the Pending Action, with each Party bearing its own fees and costs, in the form annexed hereto as Exhibit A. The Parties agree that Defendants’ counsel will hold the Stipulation and Order of Dismissal With Prejudice in escrow and will not file the Stipulation and Order of Dismissal With Prejudice with the Court unless and until the Court issues an Order approving the Agreement in its entirety, at which time Defendants’ counsel may file the Stipulation and Order of Dismissal With Prejudice with the United States District Court, Eastern District of New York, without further notice.\n3. Consideration. Upon the full execution of this Agreement and the Stipulation of Discontinuance with Prejudice (in the form annexed hereto as Exhibit A), Defendants agree to pay Plaintiffs the total sum of Seventy Thousand Dollars and Zero Cents ($70,000.00) (the “Settlement Payment”).\n\na. Defendants shall make an initial payment to Plaintiffs in the amount of Ten Thousand Dollars and Zero Cents ($10,000.00) on or before January 4, 2021 (the “Initial Payment”).\nb. After making the Initial Payment, Defendants shall pay Plaintiffs the remaining balance of Sixty Thousand Dollars and Zero Cents ($60,000.00) in nine (9) monthly installments as detailed in the payment scheduled annexed hereto as Exhibit B, with the first installment due on or before February 1, 2021 and the remaining installments due on or before the first day of each month from March 1, 2021 through October 1, 2021.\nc. The Settlement Payment shall be allocated to Plaintiffs and their counsel as",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h08",
+   "page": 3,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/24/21"
+     },
+     "printed": "02/24/21",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:19-cv-07208-ST"
+     },
+     "printed": "1:19-cv-07208-ST",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$2,710.00"
+     },
+     "printed": "$2,710.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$12,710.00"
+     },
+     "printed": "$12,710.00",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h08",
+   "page": 4,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/24/21"
+     },
+     "printed": "02/24/21",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:19-cv-07208-ST"
+     },
+     "printed": "1:19-cv-07208-ST",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$610.00"
+     },
+     "printed": "$610.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$23,130.00"
+     },
+     "printed": "$23,130.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$23,740.00"
+     },
+     "printed": "$23,740.00",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h08",
+   "page": 5,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/24/21"
+     },
+     "printed": "02/24/21",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:19-cv-07208-ST"
+     },
+     "printed": "1:19-cv-07208-ST",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h09",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "12/09/09"
+     },
+     "printed": "12/09/09",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:09-cv-00465-LKK-DAD"
+     },
+     "printed": "2:09-cv-00465-LKK-DAD",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$9,500.00"
+     },
+     "printed": "$9,500.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$4,000.00"
+     },
+     "printed": "$4,000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$1,000.00"
+     },
+     "printed": "$1,000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$5,000.00"
+     },
+     "printed": "$5,000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$500"
+     },
+     "printed": "$500",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "12/15/09"
+     },
+     "printed": "12/15/09",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "1/15/10"
+     },
+     "printed": "1/15/10",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "2/15/10"
+     },
+     "printed": "2/15/10",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/15/10"
+     },
+     "printed": "3/15/10",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "amount",
+     "printed": "($9,500.00)",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "5,500.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "in the PDF's own text (born-digital), found by the 2026-10-12 extraction fixes; reported to the reviewer"
+    },
+    {
+     "kind": "amount",
+     "printed": "4,500.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "in the PDF's own text (born-digital), found by the 2026-10-12 extraction fixes; reported to the reviewer"
+    },
+    {
+     "kind": "amount",
+     "printed": "3,500.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "in the PDF's own text (born-digital), found by the 2026-10-12 extraction fixes; reported to the reviewer"
+    },
+    {
+     "kind": "amount",
+     "printed": "2,500.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "in the PDF's own text (born-digital), found by the 2026-10-12 extraction fixes; reported to the reviewer"
+    },
+    {
+     "kind": "amount",
+     "printed": "1,500.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "in the PDF's own text (born-digital), found by the 2026-10-12 extraction fixes; reported to the reviewer"
+    }
+   ],
+   "facts": [],
+   "text": "# Case 2:09-cv-00465-LKK-DAD Document 17 Filed 12/09/09 Page 1 of 2\n\nJason K. Singleton, State Bar #166170\n\njason@singletonlawgroup.com\n\nRichard E. Grabowski, State Bar # 236207\n\nrgrabowski@mckinleyville.net\n\nSINGLETON LAW GROUP\n\n611 “L” Street, Suite A\n\nEureka, CA 95501\n\n(707) 441-1177\n\nFAX 441-1533\n\nAttorneys for Plaintiff, KIMBERLY BLOCK\n\nUNITED STATES DISTRICT COURT\n\nKIMBERLY BLOCK,\n\nEASTERN DISTRICT OF CALIFORNIA\n\nCase No. 2:09-CV-00465-LKK-DAD\n\nv.\n\nPlaintiff,\n\nQUICK SHOP MARKET INC., a California corporation, dba QUICK SHOP MARKET,\n\nDefendants.\n\nSTIPULATION FOR ENTRY OF JUDGMENT UPON DEFAULT IN PAYMENTS UNDER SETTLEMENT AGREEMENT\n\nDefendant QUICK SHOP MARKET, INC., by and through its attorney of record PAIGE\n\nHIBBERT and Plaintiff KIMBERLY BLOCK, by and through her attorney of record, JASON K.\n\nSINGLETON hereby provide this stipulation for entry of judgment upon default in payments under settlement agreement.\n\nPursuant to a separate settlement agreement, the parties have agreed to a compromise\n\nsettlement in the amount of $9,500.00 payable as follows:\n\na.b. c. d.\n\nTotal Settlement $9,500.00\n\n$4,000.00 upon execution of Settlement Agreement\n\n$1,000.00/month (5 months = $5,000.00)\n\n$500 final payment\n\n| Due Date | Amount | ($9,500.00) Balance Due |\n| --- | --- | --- |\n| W/ Settlement Agreement | $4,000.00 | 5,500.00 |\n| 12/15/09 | $1000.00 | 4,500.00 |\n| 1/15/10 | $1000.00 | 3,500.00 |\n| 2/15/10 | $1000.00 | 2,500.00 |\n| 3/15/10 | $1000.00 | 1,500.00 |\n\nStipulation for Entry of Judgment\n\n1PDF created with pdfFactory trial version www.pdffactory.com\n\n2:09-CV-00465-LKK-DAD",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h09",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "12/09/09"
+     },
+     "printed": "12/09/09",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:09-cv-00465-LKK-DAD"
+     },
+     "printed": "2:09-cv-00465-LKK-DAD",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "4/15/10"
+     },
+     "printed": "4/15/10",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "5/15/10"
+     },
+     "printed": "5/15/10",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$1000.00"
+     },
+     "printed": "$1000.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$500.00"
+     },
+     "printed": "$500.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$600.00"
+     },
+     "printed": "$600.00",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "November 24, 2009"
+     },
+     "printed": "November 24, 2009",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "December 8, 2009"
+     },
+     "printed": "December 8, 2009",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "amount",
+     "printed": "$0",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h10",
+   "page": 1,
+   "values": [],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "MARCH 15, 2007",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "5,156.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "74.52",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "5,230.52",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "All financial values missing"
+  },
+  {
+   "doc": "h10",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "12/20/06"
+     },
+     "printed": "12/20/06",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/02/07"
+     },
+     "printed": "02/02/07",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/14/07"
+     },
+     "printed": "02/14/07",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/15/07"
+     },
+     "printed": "02/15/07",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/16/07"
+     },
+     "printed": "02/16/07",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/19/07"
+     },
+     "printed": "02/19/07",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/22/07"
+     },
+     "printed": "02/22/07",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/28/07"
+     },
+     "printed": "02/28/07",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "MARCH 15, 2007",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "$ 5,156.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "Missed March 15, 2007 in the header"
+  },
+  {
+   "doc": "h10",
+   "page": 3,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "02/09/07"
+     },
+     "printed": "02/09/07",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "MARCH 15, 2007",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "$ 74.52",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "47.83",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "26.69",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "Missed March 15, 2007 in the header"
+  },
+  {
+   "doc": "h10",
+   "page": 4,
+   "values": [],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "MARCH 15, 2007",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "389.89",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "355.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "240.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "3,470.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "1,278.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "408.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "5,156.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "Missed March 15, 2007 and all financial amounts"
+  },
+  {
+   "doc": "h10",
+   "page": 5,
+   "values": [],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "MARCH 15, 2007",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "5,156.00",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "74.52",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "amount",
+     "printed": "5,230.52",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "Missed March 15, 2007 and all financial amounts"
+  },
+  {
+   "doc": "h11",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/1/14"
+     },
+     "printed": "3/1/14",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/31/14"
+     },
+     "printed": "3/31/14",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "4/1/2014"
+     },
+     "printed": "4/1/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/21/16"
+     },
+     "printed": "05/21/16",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$167.99"
+     },
+     "printed": "$167.99",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$0.00"
+     },
+     "printed": "$0.00",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h11",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/1/2014"
+     },
+     "printed": "3/1/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/31/2014"
+     },
+     "printed": "3/31/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "4/8/2014"
+     },
+     "printed": "4/8/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/21/16"
+     },
+     "printed": "05/21/16",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "# History/Time Spent\n\nSusan M. Gray, Gray, Susan\n\n22255 Center Ridge Road\n\nSuite 210\n\nRocky River, Oh 44116-3979\n\nDate Range: 3/1/2014 - 3/31/2014\n\nContact\n\nResult\n\nMs. Sherry Loy\n\nDate\n\nTime\n\nDuration\n\nRegarding & Details\n\nCreated 4/8/2014 at 3:55 PM\n\nPage 1 of 4\n\n13-13755-aih Doc 68-2 FILED 05/21/16 ENTERED 05/21/16 17:13:04 Page 2 of 5",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h11",
+   "page": 3,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/1/2014"
+     },
+     "printed": "3/1/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/31/2014"
+     },
+     "printed": "3/31/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/27/2014"
+     },
+     "printed": "3/27/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "4/8/2014"
+     },
+     "printed": "4/8/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/21/16"
+     },
+     "printed": "05/21/16",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h11",
+   "page": 4,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/1/2014"
+     },
+     "printed": "3/1/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/31/2014"
+     },
+     "printed": "3/31/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "March 26, 2014"
+     },
+     "printed": "March 26, 2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "4/8/2014"
+     },
+     "printed": "4/8/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/21/16"
+     },
+     "printed": "05/21/16",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h11",
+   "page": 5,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/1/2014"
+     },
+     "printed": "3/1/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/31/2014"
+     },
+     "printed": "3/31/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/24/2014"
+     },
+     "printed": "3/24/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "4/8/2014"
+     },
+     "printed": "4/8/2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/21/16"
+     },
+     "printed": "05/21/16",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h12",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/06/2008"
+     },
+     "printed": "05/06/2008",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:07-cr-00890-LAP"
+     },
+     "printed": "1:07-cr-00890-LAP",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "March 24, 2008"
+     },
+     "printed": "March 24, 2008",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "APR 15 2008",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "date",
+     "printed": "5/6/08",
+     "decision": "correct",
+     "flags": [
+      "stamp",
+      "handwriting"
+     ],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "Missed April 15 208 in the stamp"
+  },
+  {
+   "doc": "h12",
+   "page": 2,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:07-cr-00890-LAP"
+     },
+     "printed": "1:07-cr-00890-LAP",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/06/2008"
+     },
+     "printed": "05/06/2008",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "March 24,2008"
+     },
+     "printed": "March 24,2008",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "Case 1:07-cr-00890-LAP\n\nDocument 12\n\nFiled 05/06/2008\n\nPage 2 of 5\n\nUNITED STATES OF AMERICA V.\n\nJAMES LYONS,\n\nMarch 24,2008\n\n| Page 1 | Page 3 |\n| --- | --- |\n| 113 (2] 8 Đ1 OF VỌN 55... 131 UNITED STATES OF AMERICA (4) 07 Cr. 890 (LAP) [5] Plea [6] Defendant. [8] Hrch : Noos [9] 10:15 a.n. Before: [20] HON. ANDREW J. PECK [11] Magistrate Judge [121 [13] APPEARANCES HICHAEL J. CARCIA (16) NOYOEK® (171 [181 PARVIAsgistont United States Attorney (20) [21] BY : | you completed? THE DEPENDANT: Juris doctorate 1997. THE COURTI Are vou a United States citizon. Mr. [4] Lyons? 151 [6] been under the care of a doctor, a prychiatrist. or any other medical or mental health professional? [101 fazily counseling with & local psychologist. [22] medication (12) 1HE 0000T: [131 in any way would prevent you from teing clear and understanding [14] and procecding in court today? [25] THE DEFENDANT: [161 THE COuRTI Have yeu ever been traated for slcoholism [17] or drug addiction? [18] THE DEFENDANT: [19] THE COUR?: Do you feel physically and rentally all right and able and willing to proceed with your case today? [221 THE DEFENDANT: Yes. 1221 THR COURT: hearing or understanding what I'm saying to you? (24) THE DEFENDANT: No. I'm fine, your Honor. [25] THE COURT: You've got a law degree, so you'll |\n| Page 2 (Case called) [2] THE COURT: Counsel, atate your appearances for the Parvin Noyne for the government. Good morning, your Honor Good norning, your Honor. Piona Doherty [3] Federal Defenders of New York, for Mr. Lyons, who is aeated IBJ beside me in court today. Is this your signature on the consent to proceed forn? [11] THE DEPENDANT: Yes, it is, your Honor. 1121 THE COURT: Defore you signed it, did your attorney explain to you that you have the right to have your plea heard [14] before the district judge, Judge Preska, but that if you [151 consent, i can hear your plea and i ll make a reconnendation to [16] Judge Preska? THE DEFENDANT: Yes, she did, your Honor. THE COURT: You have agreed to that? THE DEFENDANT: I did. THE COURT: Please raise your right hand. [21] (Defendant 8worn) THE COURT: State your full nane for the court (231] reporter's record. [24] THE DEFENDANT: James Daniel Lyons. TiB COURT: Khat is the last grade of scheoling that | Page 4 (1) understand more here than most people. Nevertheless, if at any ta1 point either you don't understand what I'm telfing you or what (3) I'm asking you or for whatever reason you don't hear what I'm [4] saying, don't try to finesse or fake your way through it; just ask me to be clear or louder or both. Is that agreed? THE DEFENDANT: I agree, your Honor. Thank you. (7] THE COURT: Have you received a copy of the indictment [8] against you? THE DEFENDANT: 1 have. THE COURT: Have you reviewed it with Ms. Doherty? [11] THE DEFENDANT: I have. THE COURT: Do you wish me to publicly read it out a3 loud now? THE DEFENDANT: No, I do not. THE COURT: You've talked with Ms. Doherty about the charges you're facing and how you wish to plead? THE DEFENDANT: I have THE COURT: Are you satisfied with the representation that she has been and is giving to you'? THE DEFENDANT: I have (21] THE COURT: I'm not sure an \"I have\" works on that [221 one. THE DEFENDANT: I'm very satisfied, your Honor. [24] THE COURT: Thank you. Are you ready to enter a plea 125) at this timc? |\n\n(3) I'm asking you or for whatever reason you don't hear what I'm\n[4] saying, don't try to finesse or fake your way through it; just ask me to be clear or louder or both. Is that agreed? THE DEFENDANT: I agree, your Honor. Thank you.\n\nCONFERENCE\n\nMin-U-Script®\n\n(1) Page 1 - Page 4",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h12",
+   "page": 3,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:07-cr-00890-LAP"
+     },
+     "printed": "1:07-cr-00890-LAP",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "March 24, 2008"
+     },
+     "printed": "March 24, 2008",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/06/2008"
+     },
+     "printed": "05/06/2008",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$100"
+     },
+     "printed": "$100",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "amount",
+     "printed": "$1 million",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h12",
+   "page": 4,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:07-cr-00890-LAP"
+     },
+     "printed": "1:07-cr-00890-LAP",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "05/06/2008"
+     },
+     "printed": "05/06/2008",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "March 24, 2001"
+     },
+     "printed": "March 24, 2008",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "November 6, 2007"
+     },
+     "printed": "November 6, 2007",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "March 24, 2008 is cut off so it looks like 2001 but is actually 2008"
+  },
+  {
+   "doc": "h13",
+   "page": 1,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:88-cr-00129-JAK"
+     },
+     "printed": "2:88-cr-00129-JAK",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "01/28/92"
+     },
+     "printed": "01/28/92",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "MARCH 13, 1990",
+     "decision": "correct",
+     "flags": [],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    },
+    {
+     "kind": "date",
+     "printed": "JAN 28 1992",
+     "decision": "correct",
+     "flags": [
+      "stamp"
+     ],
+     "source": "reviewer note, entered by Claude from the page image, confirmed by reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": "Missing March 13, 1990"
+  },
+  {
+   "doc": "h13",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "01/28/92"
+     },
+     "printed": "01/28/92",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:88-cr-00129-JAK"
+     },
+     "printed": "2:88-cr-00129-JAK",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "# Case 2:88-cr-00129-JAK Document 245 Filed 01/28/92\n\n#:384\n\nINDEX\n\n2\n\n4\n\nS\n\n6\n\n7\n\nPROCEEDINGS IN OPEN COURT:\n\nPRETRIAL CONFERENCE RESUMED\n\n# Page 2 of 10 Page ID\n\nPAGE\n\n4\n\n10\n\n12\n\n13",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h13",
+   "page": 3,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:88-cr-00129-JAK"
+     },
+     "printed": "2:88-cr-00129-JAK",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "01/28/92"
+     },
+     "printed": "01/28/92",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h13",
+   "page": 4,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:88-cr-00129-JAK"
+     },
+     "printed": "2:88-cr-00129-JAK",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "01/28/92"
+     },
+     "printed": "01/28/92",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h14",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "12/03/15"
+     },
+     "printed": "12/03/15",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "3:15-cv-01376-JLS-JLB"
+     },
+     "printed": "3:15-cv-01376-JLS-JLB",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "15-CV-1376-JLS"
+     },
+     "printed": "15-CV-1376-JLS",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "January 21, 2016",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h14",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "12/03/15"
+     },
+     "printed": "12/03/15",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "3:15-cv-01376-JLS-JLB"
+     },
+     "printed": "3:15-cv-01376-JLS-JLB",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 15"
+     },
+     "printed": "§ 15",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1692c(a)(1)"
+     },
+     "printed": "§ 1692c(a)(1)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1692d(5)"
+     },
+     "printed": "§ 1692d(5)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1692d(6)"
+     },
+     "printed": "§ 1692d(6)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "15-CV-1376-JLS"
+     },
+     "printed": "15-CV-1376-JLS",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "# Case 3:15-cv-01376-JLS-JLB Document 19-1 Filed 12/03/15 Page 2 of 27\n\nTABLE OF CONTENTS\n\n2\n\nPage\n\nINTRODUCTION\n\n4\n\nFACTS ..\n\nII.\n\n5\n\nSTANDARD OF REVIEW\n\nIV.\n\nDISCUSSION\n\n7\n\n3\n\nPlaintiff’s Amended Complaint Makes Clear That Her Claims Are Merely a Subterfuge Through Which Plaintiff Hopes to Address a Grievance With Guardian’s Authorized Dealer. ....................................................................................\n\nA.\n\n9\n\n10\n\n12\n\nB.\n\nPlaintiff Has Failed to State a Claim Under the Telephone Consumer Protection Act.\n\n1. Plaintiff provided express written consent to receive the calls. ..\n2. Plaintiff has failed to allege the use of an automatic telephone dialing system or an artificial or prerecorded voice.\n\n13\n\n6\n\n14\n\n15\n\n16\n\n17\n\n18\n\nPlaintiff Has Failed to State a Claim Under the Federal Fair Debt Collection Practices Act.\n\n12\n\n19\n\n1.\n\nPlaintiff’s claims under the Federal Fair Debt Collection Practices Act must be dismissed because Plaintiff has failed to allege that Guardian is aạẠdebt collector” within the meaning of the Act.\n\n20\n\n21\n\n12\n\n22\n\n23\n\n2.\n\nPlaintiff has not alleged a violation of § 15 U.S.C.\n\n§ 1692c(a)(1).\n\n15\n\n25\n\n3. Plaintiff failed to state a claim for violation of\n\n15 U.S.C. § 1692d(5).\n\n16\n\n26\n\n27\n\n4. Plaintiff has failed to state a claim for violation of\n\n15 U.S.C. § 1692d(6).\n\n17\n\n28\n\n-ii-\n\nMEMORANDUM OF POINTS AND AUTHORITIES IN SUPPORT OF MOTION TO DISMISS FOR FAILURE TO STATE A CLAIM\n\n15-CV-1376-JLS(JLB)",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h14",
+   "page": 3,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "12/03/15"
+     },
+     "printed": "12/03/15",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "3:15-cv-01376-JLS-JLB"
+     },
+     "printed": "3:15-cv-01376-JLS-JLB",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1692e(10)"
+     },
+     "printed": "§ 1692e(10)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "15-CV-1376-JLS"
+     },
+     "printed": "15-CV-1376-JLS-JLB",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h14",
+   "page": 4,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "12/03/15"
+     },
+     "printed": "12/03/15",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "3:15-cv-01376-JLS-JLB"
+     },
+     "printed": "3:15-cv-01376-JLS-JLB",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "July 15, 2015"
+     },
+     "printed": "July 15, 2015",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "12-CV-0583-H"
+     },
+     "printed": "12-CV-0583-H",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "June 18, 2012"
+     },
+     "printed": "June 18, 2012",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "10-CV-1267"
+     },
+     "printed": "10-CV-1267",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "Jan. 27, 2011"
+     },
+     "printed": "Jan. 27, 2011",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "14-CV-05678-JST"
+     },
+     "printed": "14-CV-05678-JST",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "July 19, 2015"
+     },
+     "printed": "July 19, 2015",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "13-CV-04987-BLF"
+     },
+     "printed": "13-CV-04987-BLF",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "May 20, 2014"
+     },
+     "printed": "May 20, 2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "May 5, 2008"
+     },
+     "printed": "May 5, 2008",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1692"
+     },
+     "printed": "§ 1692",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1692a(6)"
+     },
+     "printed": "§ 1692a(6)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1692c(a)"
+     },
+     "printed": "§ 1692c(a)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "15-CV-1376-JLS"
+     },
+     "printed": "15-CV-1376-JLS",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "citation",
+     "printed": "§ 1692",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h15",
+   "page": 1,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "11/26/2007"
+     },
+     "printed": "11/26/2007",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:07-cv-00770-GMS"
+     },
+     "printed": "1:07-cv-00770-GMS",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h15",
+   "page": 2,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:07-cv-00770-GMS"
+     },
+     "printed": "1:07-cv-00770-GMS",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "11/26/2007"
+     },
+     "printed": "11/26/2007",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h15",
+   "page": 3,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "11/26/2007"
+     },
+     "printed": "11/26/2007",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h16",
+   "page": 1,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:17-cv-02524-LLS"
+     },
+     "printed": "1:17-cv-02524-LLS",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "03/29/23"
+     },
+     "printed": "03/29/23",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "3/29/21"
+     },
+     "printed": "3/29/21",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "17-cv-02524"
+     },
+     "printed": "17-cv-02524",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "April 26, 2017"
+     },
+     "printed": "April 26, 2017",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "# Case 1:17-cv-02524-LLS Document 187\n\nNIGIN\n\nNL\n\nUNITED STATES DISTRICT COURT SOUTHERN DISTRICT OF NEW YORK\n\nDAVID NAGELBERG, individually and as\n\nTRUSTEE of the DAVID S. NAGELBERG 2003\n\nREVOCABLE TRUST and PENSCO C/F DAVID\n\nS. NAGELBERG ROTH IRA, MATTHEW HAYDEN, MITCHELL KNAPP, LAWRENCE\n\nJ. SHEER DDS PSP, WILLIAM J. ROUHANA, JR., AMY NEWMARK, TIMOTHY ROUHANA, ROSEMARY ROUHANA, ELLA DAMIANO, MICHAEL DAMIANO, and LONDONDERRY\n\nCAPITAL LLC,\n\nPlaintiffs,\n\n# Filed 03/29/23 Page 1.of 3\n\nLSDC SDNY DOCUMENT\n\nELECTRONICA!LY FILED\n\nDO( #:\n\nDAT\n\n3/29/21\n\nCase No: 17-cv-02524 (LLS)\n\n-against-\n\nJOSEPH MELI, MATTHEW HARRITON, 875\n\nHOLDINGS, LLC, ADVANCE\n\nENTERTAINMENT, LLC, ADVANCE\n\nENTERTAINMENT II, LLC, 127 HOLDINGS LLC, and 'TRIPOINT GLOBAL EQUITIES, LLC,\n\nDefendants.\n\n¡PROPOSEDI FINAL JUDGMENT AND ORDER\n\nWHEREAS on April 26, 2017, Plaintiffs filed the operative Amended Complaint in this\n\nAction, asserting, among other things, claims on behalf of all Plaintiffs against Defendants Joseph\n\nMeli, Advance Entertainment, LLC, Advance Entertainment II, LLC, and 127 Holdings, LLC (collectively, the \"Meli Defendants) and Defendants Matthew Harriton and 875 Holdings, LLC (the \"Harriton Defendants\") for (i) Fraud in Connection with the Purchase or Sale of Securities in\n\nviolation of Section 10(b) of the Exchange Act and Rule 10b-5(a)(c); and (ii) Common-Law\n\nFraud; and claims on behalf of two Plaintiffs against TriPoint Global Equities, LLC (\"TriPoint\")\n\nfor (i) Common-Law Fraud and (ii) Negligent Misrepresentation;",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h16",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "03/29/23"
+     },
+     "printed": "03/29/23",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:17-cv-02524-LLS"
+     },
+     "printed": "1:17-cv-02524-LLS",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "February 14, 2023"
+     },
+     "printed": "February 14, 2023",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "February 28, 2023"
+     },
+     "printed": "February 28, 2023",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$3,513,443.49"
+     },
+     "printed": "$3,513,443.49",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$2,410,139.90"
+     },
+     "printed": "$2,410,139.90",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$347,150.68"
+     },
+     "printed": "$347,150.68",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$272,872.24"
+     },
+     "printed": "$272,872.24",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$177,512.04"
+     },
+     "printed": "$177,512.04",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h16",
+   "page": 3,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "03/29/23"
+     },
+     "printed": "03/29/23",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "1:17-cv-02524-LLS"
+     },
+     "printed": "1:17-cv-02524-LLS",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$177,470.80"
+     },
+     "printed": "$177,470.80",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$177,491.42"
+     },
+     "printed": "$177,491.42",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$120,034.21"
+     },
+     "printed": "$120,034.21",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "March 29, 2023",
+     "decision": "correct",
+     "flags": [
+      "handwriting"
+     ],
+     "source": "read by the reviewer 2026-10-12 (overwritten handwritten day)"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h17",
+   "page": 1,
+   "values": [
+    {
+     "kind": "bates",
+     "readings": {
+      "apple": "WA 98104"
+     },
+     "printed": "WA 98104",
+     "decision": "wrong",
+     "flags": [],
+     "exclusion": "A ZIP code (Seattle, WA 98104), not a Bates number: the pre-fill mislabelled it. Excluded 2026-10-12."
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "06/26/24"
+     },
+     "printed": "06/26/24",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:22-cV-01344-TMC"
+     },
+     "printed": "2:22-cV-01344-TMC",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$62,465.58"
+     },
+     "printed": "$62,465.58",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h17",
+   "page": 2,
+   "values": [
+    {
+     "kind": "bates",
+     "readings": {
+      "apple": "WA 98104"
+     },
+     "printed": "WA 98104",
+     "decision": "wrong",
+     "flags": [],
+     "exclusion": "A ZIP code (Seattle, WA 98104), not a Bates number: the pre-fill mislabelled it. Excluded 2026-10-12."
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "06/26/24"
+     },
+     "printed": "06/26/24",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:22-cV-01344-TMC"
+     },
+     "printed": "2:22-cV-01344-TMC",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h18",
+   "page": 1,
+   "values": [
+    {
+     "kind": "docket",
+     "readings": {
+      "apple": "2:16-cv-664"
+     },
+     "printed": "2:16-cv-664",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h18",
+   "page": 2,
+   "values": [
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "January 31, 2018"
+     },
+     "printed": "January 31, 2018",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$99,430"
+     },
+     "printed": "$99,430",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "August 27, 2018"
+     },
+     "printed": "August 27, 2018",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "date",
+     "printed": "June 16, 2014",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "# that were located across an access road (“the Epic Access Road”) in a trench (“the trench”) to be\n\nexcavated by TEK. (Id. at 3.) However, Eclipse Resources, an energy company that produces\n\nnatural gas, would not permit Blue Racer to dig the trench across the Epic Access Road on June\n\n16, 2014, because Eclipse Resources was in the process of fracking the wells located under\n\nanother drill pad (“Weekender Pad”). (Id.) This action centers primarily on TEK’s work\n\ncompleting a temporary access road (“the temporary access road”) to Weekender Pad and\n\nexcavation of the trench. (Id. at 2–4.) TEK alleges that Pioneer Pipe agreed to pay for the work\n\nbut failed to do so. (ECF No. 1.) The Complaint asserts claims for breach of contract,\n\nintentional misrepresentation/fraud, unjust enrichment, promissory estoppel, and liability under a third-party beneficiary theory. (Id.) Pioneer Pipe denied liability, asserting a variety of defenses.\n\n(ECF No. 18.)\n\nThis action was tried before a jury on January 29 through January 31, 2018. (ECF Nos.\n\n50, 64, 67, 68, 69.) During trial, Pioneer Pipe moved for a directed verdict on all claims and the\n\nCourt granted judgment as a matter of law in Pioneer Pipe’s favor on the third-party beneficiary\n\nclaim. On January 31, 2018, the jury returned a unanimous verdict in favor of TEK on its\n\nquantum meruit/unjust enrichment claim in the amount of $99,430 and in Pioneer Pipe’s favor\n\non the remaining claims of breach of contract, promissory estoppel, and intentional\n\nmisrepresentation/fraud. (ECF No. 70.) Thereafter, Pioneer Pipe moved for judgment as a matter of law pursuant to Federal Rule of Civil Procedure 50 on the claim of unjust enrichment\n\nand moved for a new trial pursuant to Federal Rule of Civil Procedure 59(a). (ECF No. 77.) On\n\nAugust 27, 2018, the Court denied Pioneer Pipe’s Motion for Judgment as a Matter of Law\n\nand/or Motion for New Trial. (ECF No. 82.)",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h18",
+   "page": 3,
+   "values": [
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$11,829.68"
+     },
+     "printed": "$11,829.68",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$99,430"
+     },
+     "printed": "$99,430",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1343.03"
+     },
+     "printed": "§ 1343.03",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1343.03(A)"
+     },
+     "printed": "§ 1343.03(A)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "Aug. 17, 2018"
+     },
+     "printed": "Aug. 17, 2018",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [
+    {
+     "kind": "citation",
+     "printed": "¶ 26",
+     "decision": "correct",
+     "flags": [],
+     "source": "found by an engine, checked against the page image by Claude, confirmed by the reviewer 2026-10-12"
+    }
+   ],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h18",
+   "page": 4,
+   "values": [
+    {
+     "kind": "percent",
+     "readings": {
+      "apple": "3%"
+     },
+     "printed": "3%",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 5703.47"
+     },
+     "printed": "§ 5703.47",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "percent",
+     "readings": {
+      "apple": "4%"
+     },
+     "printed": "4%",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  },
+  {
+   "doc": "h18",
+   "page": 5,
+   "values": [
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1343.03"
+     },
+     "printed": "§ 1343.03",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "citation",
+     "readings": {
+      "apple": "§ 1343.03(A)"
+     },
+     "printed": "§ 1343.03(A)",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "Feb. 23, 2010"
+     },
+     "printed": "Feb. 23, 2010",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "July 31, 2014"
+     },
+     "printed": "July 31, 2014",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "amount",
+     "readings": {
+      "apple": "$11,829.68"
+     },
+     "printed": "$11,829.68",
+     "decision": "correct",
+     "flags": []
+    },
+    {
+     "kind": "date",
+     "readings": {
+      "apple": "January 31, 2018"
+     },
+     "printed": "January 31, 2018",
+     "decision": "correct",
+     "flags": []
+    }
+   ],
+   "added": [],
+   "facts": [],
+   "text": "",
+   "done": true,
+   "notes": ""
+  }
+ ],
+ "notes": "Values from the reviewer's notes were entered from the page images and confirmed by the reviewer on 2026-10-12. Page facts were not reviewed in v1 and are not measured.",
+ "facts_reviewed": false,
+ "open_questions": [],
+ "decisions": [
+  "Dockets are compared by court office, year, type and number; judge initials appended to a docket (15-CV-1376-JLS against 15-CV-1376-JLS-JLB) do not make it wrong (reviewer, 2026-10-12)."
+ ]
+}

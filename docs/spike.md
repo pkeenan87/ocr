@@ -1010,3 +1010,29 @@ dots one at a time was slower in this run than in the DPI check the day before (
 | `azure_pages` | 125 | 138 |
 
 The values that no longer verify are the filing-stamp docket, date and page numbers repeated on every scanned page. Apple-only runs are unaffected: two Apple readings never verify each other.
+
+## The human-checked holdout set, v1 (2026-10-12)
+
+`eval/holdout/holdout_v1.json` covers 18 public filings and 61 pages (`docs/holdout-plan.md`). It was reviewed by Patrick in the review page, with the pre-fill from Apple on his work Mac. Values his notes named, and values other engines or the PDF's own text found that the pre-fill had missed, were checked against the page images and confirmed with him. The set holds **292 values and 12 transcribed pages**. Page facts were not reviewed in v1.
+
+Two decisions are recorded in the set:
+- a docket is compared by court office, year, type and number, without judge initials;
+- the pre-fill's two "Bates" values `WA 98104` were ZIP codes and are excluded.
+
+`eval/holdout/score.py` compares an engine's output by typed value, with its own parser.
+
+**Baseline** (master `e08094d` plus PRs 35–37, macOS 26, `--verify-json --verify-fields all`):
+
+| Engine | Values found | Verified but wrong | Amounts | Dates | Dockets | Transcription CER / word error |
+|---|---|---|---|---|---|---|
+| Apple | 83.6% | **0** | 46/71 | 134/151 | 46/49 | 14.3% / 20.7% |
+| paddleocr-vl | 88.4% | **0** | 50/71 | 140/151 | 48/49 | 17.2% / 23.6% |
+| dots-ocr | 67.5% | **0** | 53/71 | 105/151 | 19/49 | 29.9% / 38.0% |
+
+- **No engine verified a wrong value.** Every verified value is on the page.
+- **What is missed:**
+  - dates in capitals (`MARCH 15, 2007`);
+  - invoice amounts without a `$` next to them;
+  - stamps (struck-through or overprinted filing headers, RECEIVED stamps);
+  - handwriting.
+- **dots finds 19 of 49 dockets.** Most dockets are in the court's filing-stamp header, which the plain-text prompt (adopted in "dots: plain text first") appears to leave out. This is to be checked.

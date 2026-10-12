@@ -1064,3 +1064,11 @@ The holdout set showed four extraction gaps in `ocr` (values missed, none wrongl
 Seven values the fixes found on the holdout set were confirmed by the PDFs' own text and added to the set: h02 `JANUARY 8, 2010`, h06 `0.00`, and h09's balance column.
 
 What Apple still misses on the holdout set is mostly stamps, struck-through headers, handwriting and text it did not read at all.
+
+## dots: the filing-stamp header put back (2026-10-12)
+
+The holdout set showed dots finding only 19 of 49 dockets. Since "dots: plain text first", dots often leaves out the court's colored filing-stamp header (`Case … Document … Filed … Page … of …`). That header holds the case number, filed date and page count; on h05 its case number differs from the caption's.
+
+**Fix:** when the Apple side pass reads a filing-stamp line at the top of a model page (top tenth), and the model's text has no such line, Apple's line is put at the top of the page. Its values still get `court_stamp`, so two image readers never verify them; the PDF's own text or Azure can.
+
+**Holdout, dots, against master:** values found 74.3% → 85.3% (dockets 19 → 34 of 49, dates 113 → 130 of 151), verified but wrong 0 → 0.

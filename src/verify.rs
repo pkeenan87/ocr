@@ -328,13 +328,6 @@ static LABELED_DOCKET: LazyLock<Regex> = LazyLock::new(|| {
     )
     .unwrap()
 });
-/// The court's electronic filing stamp across the top of a filed page (`Case 1:24-cv-01234-JPO
-/// Document 25 Filed 04/24/24 Page 1 of 30`). It is printed over the page, sometimes twice over
-/// itself, and image readers misread such overprints the same way: Paddle and Apple Vision both
-/// read a stamped `04/24/24` printed over `04/18/24` as `04/28/24`, on every page.
-static COURT_STAMP: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)\bcase\b.{0,60}\bdoc(?:ument|\.)?\s*#?:?\s*\d+.{0,80}\bfiled\b").unwrap()
-});
 
 /// Citations with a section or paragraph sign.
 static CITATION: LazyLock<Regex> = LazyLock::new(|| {
@@ -1417,7 +1410,7 @@ pub fn report<'a>(
                         .line
                         .checked_sub(1)
                         .and_then(|i| body_lines.get(i))
-                        .is_some_and(|l| COURT_STAMP.is_match(l));
+                        .is_some_and(|l| crate::markdown::COURT_STAMP.is_match(l));
                     if on_stamp {
                         f.why.push("court_stamp");
                     }

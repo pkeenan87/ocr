@@ -15,6 +15,8 @@ It is built for legal documents that run to hundreds of pages: it streams pages,
 
 Status: Phase 6 evaluation is done; results are in [docs/eval.md](docs/eval.md). The fixtures are synthetic.
 
+**Testing the pilot?** Start with [docs/TESTERS.md](docs/TESTERS.md).
+
 ## Requirements
 
 - Apple Silicon Mac, macOS 26 or later (Apple Vision's document API needs it).

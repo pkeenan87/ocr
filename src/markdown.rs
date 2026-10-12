@@ -196,6 +196,37 @@ pub fn is_pleading_margin_number(block: &Block) -> bool {
         && block.bbox[0] + block.bbox[2] <= MARGIN_ZONE
 }
 
+/// The court's electronic filing stamp across the top of a filed page (`Case 1:24-cv-01234-JPO
+/// Document 25 Filed 04/24/24 Page 1 of 30`). It is printed over the page, sometimes twice over
+/// itself, and image readers misread such overprints the same way: Paddle and Apple Vision both
+/// read a stamped `04/24/24` printed over `04/18/24` as `04/28/24`, on every page.
+pub(crate) static COURT_STAMP: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)\bcase\b.{0,60}\bdoc(?:ument|\.)?\s*#?:?\s*\d+.{0,80}\bfiled\b").unwrap()
+});
+
+/// Where the filing stamp sits: the top of the page.
+const STAMP_ZONE: f64 = 0.1;
+
+/// The filing-stamp line Apple Vision read at the top of the page, if any.
+pub fn find_court_stamp(blocks: &[Block]) -> Option<String> {
+    blocks
+        .iter()
+        .filter(|b| b.bbox[1] < STAMP_ZONE)
+        .flat_map(block_texts)
+        .map(|t| t.split_whitespace().collect::<Vec<_>>().join(" "))
+        .find(|t| COURT_STAMP.is_match(t))
+}
+
+/// The page text with the filing-stamp line put back at the top when the model left it out
+/// (plain-text dots drops the court's colored header): its case number, filed date and page
+/// count are on the page. Two image readers never verify its values (`court_stamp`).
+pub fn restore_court_stamp(body: String, stamp: Option<&str>) -> String {
+    match stamp {
+        Some(st) if !body.lines().any(|l| COURT_STAMP.is_match(l)) => format!("{st}\n\n{body}"),
+        _ => body,
+    }
+}
+
 /// US state and territory abbreviations, which precede a ZIP code in an address.
 const US_STATES: &[&str] = &[
     "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
@@ -757,6 +788,34 @@ mod tests {
         let page = "Exhibit DEF000001 attached.\nline\nline\nline\nline\nCOMPLAINT - Page 3 of 14";
         assert_eq!(find_bates_in_text(page), None);
         assert_eq!(find_bates_in_text(""), None);
+    }
+
+    #[test]
+    fn a_dropped_filing_stamp_is_put_back() {
+        let stamp = para(
+            "Case 1:23-mc-00011-SAB Document 1 Filed 01/26/23 Page 1 of 4",
+            [0.2, 0.03, 0.6, 0.02],
+        );
+        let body_text = para("UNITED STATES DISTRICT COURT", [0.3, 0.2, 0.4, 0.02]);
+        let found = find_court_stamp(&[stamp, body_text]);
+        assert_eq!(
+            found.as_deref(),
+            Some("Case 1:23-mc-00011-SAB Document 1 Filed 01/26/23 Page 1 of 4")
+        );
+        let restored = restore_court_stamp("UNITED STATES DISTRICT COURT".into(), found.as_deref());
+        assert!(
+            restored.starts_with("Case 1:23-mc-00011-SAB Document 1 Filed 01/26/23"),
+            "{restored}"
+        );
+        // Already there (as the model read it): not added twice.
+        let kept = "Case 1:23-mc-00011-SAB Document 1 Filed 01/26/23 Page 1 of 4\n\nTEXT";
+        assert_eq!(restore_court_stamp(kept.into(), found.as_deref()), kept);
+        // A stamp-like line lower on the page is not the filing stamp.
+        let low = para(
+            "Case 1:23-mc-00011-SAB Document 1 Filed 01/26/23",
+            [0.2, 0.5, 0.6, 0.02],
+        );
+        assert_eq!(find_court_stamp(&[low]), None);
     }
 
     #[test]

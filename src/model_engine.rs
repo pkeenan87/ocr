@@ -909,6 +909,8 @@ fn run_planned(ctx: &Ctx, reqs: &[Planned], crop_alt: bool) -> Result<Output, Fa
 pub struct Prepared {
     pub(crate) index: usize,
     bates: Option<String>,
+    /// The filing-stamp line Apple Vision read at the top of the page (macOS only).
+    stamp: Option<String>,
     pub(crate) transcript: bool,
     /// Transcript pages: the mini-pages with their Vision lines.
     mini: Vec<MiniPage>,
@@ -951,7 +953,7 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
     let engine = ctx.spec;
     let prompt = engine.page_prompt();
     let full: Vec<Spec> = vec![(prompt, None)];
-    let (specs, split, alt, bates, transcript, mini) =
+    let (specs, split, alt, bates, stamp, transcript, mini) =
         match pipeline::side_pass(path, index, s.dpi, &s.options) {
             Ok(side) => {
                 let (specs, split) = engine.plan(&side);
@@ -964,11 +966,12 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
                     split,
                     alt,
                     markdown::find_bates(&side.blocks),
+                    markdown::find_court_stamp(&side.blocks),
                     side.transcript,
                     side.mini,
                 )
             }
-            Err(_) => (full, false, None, None, false, Vec::new()),
+            Err(_) => (full, false, None, None, None, false, Vec::new()),
         };
     if s.verbose && !s.quiet {
         let kinds: Vec<&str> = specs.iter().map(|(p, _)| p.label()).collect();
@@ -994,6 +997,7 @@ fn prepare(path: &Path, kind: DocKind, index: usize, s: &Settings, ctx: &Ctx) ->
     Work::Model(Prepared {
         index,
         bates,
+        stamp,
         transcript,
         mini,
         column_split: split,
@@ -1016,6 +1020,7 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
             } else {
                 (out.body, None)
             };
+            let body = markdown::restore_court_stamp(body, prep.stamp.as_deref());
             PageResult {
                 // Off macOS there is no Vision side-pass: the Bates number comes from the
                 // model's own text, which keeps the footer, or from olmOCR's corner requests

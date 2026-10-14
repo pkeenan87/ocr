@@ -10,9 +10,9 @@ pub mod dots;
 pub mod embedded;
 pub mod engines;
 pub mod error;
-#[cfg(not(target_os = "macos"))]
 pub mod fetch;
 pub mod htmltable;
+pub mod indra;
 pub mod input;
 pub mod layout;
 #[cfg(not(target_os = "macos"))]

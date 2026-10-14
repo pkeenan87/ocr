@@ -53,6 +53,18 @@ pub trait Backend: Sync {
     fn producers(&self, s: &Settings) -> usize;
     /// Threads making model requests (0: none).
     fn consumers(&self, s: &Settings) -> usize;
+    /// Called once per file, after the checkpoints are loaded, with the 0-based pages still to
+    /// do. An engine that works through a whole document at once (indra-ocr's helper process)
+    /// starts from here; an `Err` fails the file.
+    fn open(
+        &self,
+        _path: &Path,
+        _kind: DocKind,
+        _pending: &[usize],
+        _s: &Settings,
+    ) -> Result<(), String> {
+        Ok(())
+    }
     fn prepare(&self, path: &Path, kind: DocKind, index: usize, s: &Settings) -> Work;
     fn process(&self, path: &Path, prep: Prepared, s: &Settings) -> Result<PageResult, Fail>;
     /// Whether the run cannot continue (model server gone).
@@ -259,6 +271,13 @@ impl Queue<'_> {
             .filter(|p| !loaded.pages.contains_key(&(p + 1)))
             .collect();
         let resumed = selected.len() - pending.len();
+        if !pending.is_empty() {
+            let todo: Vec<usize> = pending.iter().copied().collect();
+            if let Err(e) = self.backend.open(&item.input, info.kind, &todo, s) {
+                self.fail(id, format!("{}: {e}", item.input.display()));
+                return None;
+            }
+        }
         let name = item.input.file_name().map_or_else(
             || item.input.display().to_string(),
             |n| n.to_string_lossy().into_owned(),

@@ -17,7 +17,11 @@ use crate::config::{Config, EngineEntry, Runtime, state_dir};
 use crate::engines::{self, MLX_VLM_PIN, RamVerdict};
 use crate::error::CliError;
 
-const UV_INSTALL: &str = "curl -LsSf https://astral.sh/uv/install.sh | sh";
+const UV_INSTALL: &str = if cfg!(windows) {
+    "powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\""
+} else {
+    "curl -LsSf https://astral.sh/uv/install.sh | sh"
+};
 
 /// What `server.json` records about the server we spawned.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -51,17 +55,28 @@ fn venv_dir() -> Result<PathBuf, CliError> {
     Ok(state_dir()?.join("venv"))
 }
 
+/// The `uv` to use, or the setup error telling how to install it.
+fn require_uv() -> Result<PathBuf, CliError> {
+    find_uv().ok_or_else(|| {
+        CliError::Setup(format!(
+            "error: `uv` is required but was not found. Install it with:\n  {UV_INSTALL}"
+        ))
+    })
+}
+
 // ---------------------------------------------------------------- setup
 
+/// `uv` on `PATH`, else where its installer puts it (`~/.local/bin`; `uv.exe` on Windows).
 fn find_uv() -> Option<PathBuf> {
+    let exe = if cfg!(windows) { "uv.exe" } else { "uv" };
     let on_path = std::env::var_os("PATH").and_then(|p| {
         std::env::split_paths(&p)
-            .map(|d| d.join("uv"))
+            .map(|d| d.join(exe))
             .find(|c| c.is_file())
     });
     on_path.or_else(|| {
         dirs::home_dir()
-            .map(|h| h.join(".local/bin/uv"))
+            .map(|h| h.join(".local/bin").join(exe))
             .filter(|c| c.is_file())
     })
 }
@@ -93,9 +108,10 @@ fn run_checked(cmd: &mut Command, what: &str) -> Result<(), CliError> {
     }
 }
 
-/// Creates the venv and installs the pinned mlx-vlm; returns the recorded runtime versions.
-fn ensure_venv(uv: &Path, venv: &Path) -> Result<Runtime, CliError> {
-    let python = venv.join("bin/python");
+/// Creates the venv (Python 3.12) if it is missing and installs `dist==pin` into it unless that
+/// version is already there. Returns the venv's Python version.
+fn ensure_venv_pkg(uv: &Path, venv: &Path, dist: &str, pin: &str) -> Result<String, CliError> {
+    let python = crate::indra::venv_python(venv);
     if !python.exists() {
         println!("creating Python 3.12 environment in {}", venv.display());
         run_checked(
@@ -105,42 +121,100 @@ fn ensure_venv(uv: &Path, venv: &Path) -> Result<Runtime, CliError> {
             "uv venv",
         )?;
     }
-    let mlx_version = |p: &Path| {
-        python_out(
-            p,
-            "import importlib.metadata as m; print(m.version('mlx-vlm'))",
-        )
-    };
-    if mlx_version(&python).as_deref() == Some(MLX_VLM_PIN) {
-        println!("mlx-vlm {MLX_VLM_PIN} already installed");
+    if pkg_version(&python, dist).as_deref() == Some(pin) {
+        println!("{dist} {pin} already installed");
     } else {
-        println!("installing mlx-vlm=={MLX_VLM_PIN}");
+        println!("installing {dist}=={pin}");
         run_checked(
             Command::new(uv)
                 .args(["pip", "install", "--python"])
                 .arg(&python)
-                .arg(format!("mlx-vlm=={MLX_VLM_PIN}")),
+                .arg(format!("{dist}=={pin}")),
             "uv pip install",
         )?;
     }
-    let py = python_out(&python, "import platform; print(platform.python_version())")
-        .ok_or_else(|| CliError::Setup("error: cannot run the venv's python".into()))?;
-    let mlx = mlx_version(&python)
-        .ok_or_else(|| CliError::Setup("error: mlx-vlm is not importable in the venv".into()))?;
+    if pkg_version(&python, dist).is_none() {
+        return Err(CliError::Setup(format!(
+            "error: {dist} is not importable in the venv"
+        )));
+    }
+    python_out(&python, "import platform; print(platform.python_version())")
+        .ok_or_else(|| CliError::Setup("error: cannot run the venv's python".into()))
+}
+
+fn pkg_version(python: &Path, dist: &str) -> Option<String> {
+    python_out(
+        python,
+        &format!("import importlib.metadata as m; print(m.version('{dist}'))"),
+    )
+}
+
+/// Creates the venv and installs the pinned mlx-vlm; returns the recorded runtime versions.
+fn ensure_venv(uv: &Path, venv: &Path) -> Result<Runtime, CliError> {
+    let py = ensure_venv_pkg(uv, venv, "mlx-vlm", MLX_VLM_PIN)?;
     Ok(Runtime {
         python: py,
-        mlx_vlm: mlx,
+        mlx_vlm: MLX_VLM_PIN.to_string(),
         ..Default::default()
+    })
+}
+
+/// Installs indra-ocr (every platform): its own venv with the pinned package, the pinned ONNX
+/// weights, the helper script, and (off macOS) pdfium for `ocr`'s own page reading. No server,
+/// no llama.cpp, no GPU check. `fake` (OCR_FAKE_INSTALL) only writes the helper.
+fn install_indra(fake: bool) -> Result<EngineEntry, CliError> {
+    use crate::indra;
+    let dir = indra::indra_dir()?;
+    fs::create_dir_all(&dir).map_err(anyhow::Error::from)?;
+    if !fake {
+        let uv = require_uv()?;
+        let py = ensure_venv_pkg(&uv, &indra::venv_dir()?, "indra-ocr", engines::INDRA_PIN)?;
+        println!("indra-ocr {} on Python {py}", engines::INDRA_PIN);
+        let weights = indra::model_dir()?;
+        for file in engines::INDRA_FILES {
+            let url = format!(
+                "https://huggingface.co/{}/resolve/{}/{}",
+                engines::INDRA_REPO,
+                engines::INDRA_REVISION,
+                file.name
+            );
+            let label = format!("{} ({:.1} MB)", file.name, file.size as f64 / 1e6);
+            crate::fetch::download(&url, &weights.join(file.name), file.sha256, &label)?;
+        }
+        #[cfg(not(target_os = "macos"))]
+        crate::llama::install_pdfium()?;
+    }
+    let helper = indra::helper_path()?;
+    fs::write(&helper, indra::HELPER).with_context(|| format!("writing {}", helper.display()))?;
+    Ok(EngineEntry {
+        installed: true,
+        version: Some(engines::INDRA_PIN.into()),
+        repo: Some(engines::INDRA_REPO.into()),
+        quant: None,
     })
 }
 
 /// Installs the requested model engines (runtime, weights) and records them in the config.
 pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> {
-    let models = args.requested_models();
-    if models.is_empty() {
+    let requested = args.requested_models();
+    if requested.is_empty() {
         return Ok(());
     }
     let fake = std::env::var_os("OCR_FAKE_INSTALL").is_some_and(|v| v == "1");
+    // indra-ocr has no server, quant or version: it is checked and installed on its own.
+    let indra = requested.contains(&Engine::IndraOcr);
+    if indra && args.model.contains(&Engine::IndraOcr) {
+        if args.quant.is_some() {
+            return Err(CliError::Usage(
+                "engine 'indra-ocr' has no --quant (it runs ONNX models on the CPU)".into(),
+            ));
+        }
+        Engine::IndraOcr.resolve_version(args.model_version.as_deref())?;
+    }
+    let models: Vec<Engine> = requested
+        .into_iter()
+        .filter(|e| *e != Engine::IndraOcr)
+        .collect();
 
     // Resolve and check everything up front so nothing is downloaded for a doomed request.
     let mut plan = Vec::new();
@@ -163,31 +237,32 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
         plan.push((engine, version, quant, repo));
     }
 
-    let runtime = if fake && cfg!(target_os = "macos") {
-        Runtime {
+    let runtime = if plan.is_empty() {
+        None
+    } else if fake && cfg!(target_os = "macos") {
+        Some(Runtime {
             python: "fake".into(),
             mlx_vlm: MLX_VLM_PIN.into(),
             ..Default::default()
-        }
+        })
     } else if fake {
-        Runtime {
+        Some(Runtime {
             llama_cpp: Some(engines::LLAMA_BUILD.into()),
             llama_variant: Some("cpu".into()),
             ..Default::default()
-        }
+        })
     } else if cfg!(not(target_os = "macos")) {
         let engines: Vec<_> = plan.iter().map(|p| (p.0, p.1, p.2)).collect();
-        install_llama_runtime(&engines, args.force)?
+        Some(install_llama_runtime(&engines, args.force)?)
     } else {
-        let uv = find_uv().ok_or_else(|| {
-            CliError::Setup(format!(
-                "error: `uv` is required but was not found. Install it with:\n  {UV_INSTALL}"
-            ))
-        })?;
+        let uv = require_uv()?;
         std::fs::create_dir_all(state_dir()?).map_err(anyhow::Error::from)?;
-        ensure_venv(&uv, &venv_dir()?)?
+        Some(ensure_venv(&uv, &venv_dir()?)?)
     };
-    cfg.runtime = Some(runtime);
+    // An indra-ocr-only setup leaves the llama.cpp / mlx-vlm runtime record alone.
+    if runtime.is_some() {
+        cfg.runtime = runtime;
+    }
 
     for (engine, version, quant, repo) in plan {
         if !fake && cfg!(target_os = "macos") {
@@ -213,6 +288,15 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
         );
         cfg.save()?;
         println!("{} ready ({repo})", engine.name());
+    }
+    if indra {
+        let entry = install_indra(fake)?;
+        let repo = entry.repo.clone().unwrap_or_default();
+        cfg.engines.insert(Engine::IndraOcr.name().into(), entry);
+        cfg.save()?;
+        println!(
+            "indra-ocr ready ({repo}); it runs without a server: `ocr scan --model indra-ocr`"
+        );
     }
     Ok(())
 }

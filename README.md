@@ -2,7 +2,7 @@
 
 Local, private OCR of PDFs and images to Markdown on Apple Silicon, and on Linux and Windows machines with a GPU (see [Linux and Windows](#linux-and-windows)). Nothing is uploaded anywhere.
 
-`ocr` is a single command-line tool with four engines:
+`ocr` is a single command-line tool with five engines:
 
 | `--model` | Backend | Runs |
 |---|---|---|
@@ -10,6 +10,7 @@ Local, private OCR of PDFs and images to Markdown on Apple Silicon, and on Linux
 | `paddleocr-vl` | PaddleOCR-VL (0.9B) | Local model server |
 | `olmocr` | olmOCR 2 (7B) | Local model server |
 | `dots-ocr` | dots.mocr (or the original dots.ocr) | Local model server |
+| `indra-ocr` | indra-ocr (ONNX, CPU only) | A helper process per document, no server (see [indra-ocr](#indra-ocr)) |
 
 It is built for legal documents that run to hundreds of pages: it streams pages, writes per-page checkpoints, resumes after an interruption, keeps Bates numbers in page markers and flags pages it is not sure about.
 
@@ -22,7 +23,7 @@ Status: Phase 6 evaluation is done; results are in [docs/eval.md](docs/eval.md).
 - Apple Silicon Mac, macOS 26 or later (Apple Vision's document API needs it).
 - Xcode command line tools (`xcode-select --install`), for the Swift toolchain.
 - Rust, via [rustup](https://rustup.rs), to build.
-- For the model engines only: [`uv`](https://docs.astral.sh/uv/). Setup builds a managed Python environment with a pinned `mlx-vlm` (0.7.6) and downloads weights from Hugging Face.
+- For the model engines only (and for `indra-ocr` on every platform): [`uv`](https://docs.astral.sh/uv/). Setup builds a managed Python environment with a pinned `mlx-vlm` (0.7.6) and downloads weights from Hugging Face.
 
 Memory needed by the model engines (peak physical footprint measured with `vmmap`; the server runs one model at a time):
 
@@ -59,7 +60,7 @@ To install a model engine:
     ocr server setup --model olmocr --quant 4bit
     ocr server setup --all
 
-`--model` is repeatable; other setup flags are `--quant 4bit|8bit|bf16`, `--model-version`, `--non-interactive` and `--force` (skip the RAM check). Valid versions: paddleocr-vl `1.6` (default), `1.5`, `1.0`; dots-ocr `dots.mocr` (default), `dots.ocr`. olmOCR has no selectable version. Not every quant exists for every release; the error message lists those that do. Defaults: paddleocr-vl bf16, olmocr and dots-ocr 8bit.
+`--model` is repeatable; other setup flags are `--quant 4bit|8bit|bf16`, `--model-version`, `--non-interactive` and `--force` (skip the RAM check). Valid versions: paddleocr-vl `1.6` (default), `1.5`, `1.0`; dots-ocr `dots.mocr` (default), `dots.ocr`. olmOCR has no selectable version. Not every quant exists for every release; the error message lists those that do. Defaults: paddleocr-vl bf16, olmocr and dots-ocr 8bit. `indra-ocr` takes neither `--quant` nor `--model-version`.
 
 For a model engine, a missing or incomplete setup is an error (exit 2), not a warning:
 
@@ -79,7 +80,7 @@ Status: Phase 7 (PLAN.md §9). Linux was tested on a Ryzen 9950X with the CPU bu
 
 Off the Mac:
 - There is no Apple Vision, so `apple` is not offered and **`paddleocr-vl` is the default engine**.
-- The models run in llama.cpp's `llama-server` (release b11510) instead of mlx-vlm, from GGUF weights. No Python is needed.
+- The models run in llama.cpp's `llama-server` (release b11510) instead of mlx-vlm, from GGUF weights. No Python is needed, except for `indra-ocr`, which runs in a `uv`-managed Python environment.
 - PDFs are rendered with pdfium (`chromium/7881`).
 
 **Requirements:**
@@ -151,7 +152,7 @@ Usage (`ocr scan --help`):
     --input-dir <DIR>          Input directory
     --output-file <PATH.md>    Output Markdown file (default ./<stem>.md)
     --output-dir <DIR>         Output directory (default <input-dir>/ocr-output)
-    --model <MODEL>            [default: apple] [apple, olmocr, paddleocr-vl, dots-ocr]
+    --model <MODEL>            [default: apple] [apple, olmocr, paddleocr-vl, dots-ocr, indra-ocr]
     --model-version <V>        Pin an older model release (paddleocr-vl: 1.6|1.5|1.0, dots-ocr: dots.mocr|dots.ocr)
     --file-type <FILE_TYPE>    [default: auto] [pdf, image, auto]
     --recursive                Walk subfolders and mirror the tree in the output
@@ -167,8 +168,8 @@ Usage (`ocr scan --help`):
     --timing-json              Also write <stem>.timing.json: where the time went (prep, each model request, verification, writing)
     --use-text-layer <MODE>    auto, never, always (default: auto for apple, never for model engines)
     --legal-cleanup            Strip running headers and footers repeated across pages (opt-in)
-    --dpi <N>                  Render resolution, 72-600 (default 150; dots-ocr 100)
-    --jobs <N>                 Total pages in flight across the whole run [alias: --parallel]
+    --dpi <N>                  Render resolution, 72-600 (default 150; dots-ocr 100; indra-ocr 200)
+    --jobs <N>                 Total pages in flight across the whole run [alias: --parallel]; indra-ocr: its ONNX threads (default: all cores)
     --quiet / --verbose
     --dry-run                  Print the planned input -> output mapping and exit
 
@@ -207,7 +208,7 @@ Notes on the options:
   - **Letters and digits are never added.** Only punctuation that the PDF has and Vision missed can come back (`units essentially,` → `units—essentially,`).
 
   `never` is pure OCR (the default for model engines). `always` takes the raw embedded text instead of OCR and has no layout handling: margin line numbers come out inline, tables are flattened and the Bates number is lost.
-- **`--dpi`** has a per-engine default tuned in Phase 6: Apple 150 (switched from 200 on 2026-10-08 by user decision: 150 scored better on the synthetic fixtures, mostly on fax scans; pleading CER and Bates were slightly worse, so use `--dpi 200` on clean pleadings if that matters), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so.
+- **`--dpi`** has a per-engine default tuned in Phase 6 (indra-ocr uses its own default, 200): Apple 150 (switched from 200 on 2026-10-08 by user decision: 150 scored better on the synthetic fixtures, mostly on fax scans; pleading CER and Bates were slightly worse, so use `--dpi 200` on clean pleadings if that matters), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so.
 - **`--legal-cleanup`** is opt-in because it changes citable text. A line is stripped when it sits in the top or bottom three lines of at least half the pages (minimum 3 pages); lines of 20 or more characters match fuzzily. Transcript pages, table rows, Bates numbers and page markers are never stripped. It runs at assembly time, so toggling it never redoes OCR.
 - **`--no-currency-fix`**: Vision sometimes reads `$` as `S`. By default `S22,375.50` becomes `$22,375.50` on Apple pages (counted per page in the front matter). Model-engine output is not touched.
 - **`--no-symbol-fix`**: Vision never outputs `¶` and sometimes reads `§` as `S` or `$`. By default, on Apple Vision text (and, with a model engine, only on pages that fell back to Apple), `Compl. 9 60` and `Id. T18` become `Compl. ¶ 60` and `Id. ¶ 18` (`99` becomes `¶¶`), and `U.S.C. $1441(b)` and `U.S.C. S 1367` become `U.S.C. § 1441(b)` and `U.S.C. § 1367`. Only these shapes are rewritten: the paragraph sign after a citation form such as `Id.`, `Compl.` or `Decl.` and before a number on the same line (never after `Ex.`), and the section sign after `U.S.C.`/`C.F.R.` (never before an amount such as `$75,000` or `$50.00`), `S` before a section with a subsection (`S1983(a)`), or `$` before one with two (`$1983(a)(1)`). A bare `$1441(b)` is left alone because it looks exactly like an amount with a list marker (`$150(a)`). Text-layer pages are not touched. The fix runs at assembly, so toggling it never redoes OCR; replacements are counted in `symbol_fixes`, and `--verbose` prints each one (`before -> after`).
@@ -419,6 +420,21 @@ A retry adds its reason in brackets. Fields the server does not send are left ou
 
 Pages are prepared on separate threads while the model works on earlier pages, so `prep_s` overlaps `requests_s` and the two can add up to more than `wall_s`. On a Mac with one model server, `requests_s` is close to `wall_s`: inference is the bottleneck.
 
+## indra-ocr
+
+`indra-ocr` ([datalab-to/indra-ocr](https://huggingface.co/datalab-to/indra-ocr)) is not a vision-language model. It is a small ONNX pipeline (line detection, recognition, reading order, orientation and script models, about 18 MB) that runs on the CPU on every platform. There is no server and no GPU use: `ocr scan --model indra-ocr` starts a Python helper process per document and reads the pages back as they finish, so checkpoints, resume, `--pages`, `--jobs` (ONNX threads) and `--dpi` (default 200) work as for the other engines.
+
+Setup needs [`uv`](https://docs.astral.sh/uv/). It builds a Python 3.12 environment under the state directory (`indra/venv`) with the pinned `indra-ocr==0.3.1` package, downloads the seven weight files of the default pipeline from Hugging Face at a pinned revision (sha256 checked) and, off the Mac, pdfium:
+
+    ocr server setup --model indra-ocr
+    ocr scan --model indra-ocr --input-file complaint.pdf
+
+There is no `--quant` or `--model-version`, and `ocr server start --model indra-ocr` only says that no server is needed. At scan time the helper runs offline.
+
+Page headers and footers are read but left out of the body, and the Bates number is taken from them. HTML tables become GFM tables. By its model card it is weaker than the VLM engines on degraded scans, handwriting and complex tables; check such pages.
+
+License: the weights are under a modified OpenRAIL-M. They are free for research, personal use and startups under $20M in funding or revenue, and may not be used competitively with Datalab's API. Read the [model card](https://huggingface.co/datalab-to/indra-ocr) before using it commercially.
+
 ## Which engine?
 
 | Engine | Best for | Speed (measured) | 300-page estimate | Memory (server peak) |
@@ -426,6 +442,7 @@ Pages are prepared on separate threads while the model works on earlier pages, s
 | apple | General documents, contracts, pleadings, scans, bulk runs. Transcripts work (line numbers re-anchored) but dots-ocr is more accurate | about 3.4-3.5 pages/s at 150 DPI with the Vision limit of 2 (16 pages/s before the limit; see below) | about 85-87 s | `ocr` worker about 178 MB |
 | paddleocr-vl | The fastest model engine; text-heavy documents, tables | about 0.19 pages/s (5.3 s/page at 150 DPI) | about 27 minutes | 4.0 GB |
 | olmocr | Clean prose and tables in ordinary documents | about 0.06 pages/s (about 16 s/page, from the spike) | about 80 minutes | 11-11.5 GB (5.5 GB at 4bit, estimated) |
+| indra-ocr | Fast CPU-only text extraction on any machine, no GPU or server; clean documents | about 2.5 pages/s on a 32-thread CPU (3-page pleading in 1.2 s, models loaded each run) | a few minutes | no server; a few hundred MB in the helper process |
 | dots-ocr | **Deposition transcripts (most accurate)** and layout-heavy pages | plain text first since 2026-10-10: about 5–9 s/page on ordinary pages (was 7–17), transcripts about 36 s per 4-up page (layout prompt, unchanged) | about 30–45 minutes, not counting transcripts | 6.8 GB |
 
 Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 85-87 s at the 150 DPI default (84-96 s at 200 DPI), about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes. Accuracy on the synthetic eval set (accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):

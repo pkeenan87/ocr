@@ -371,9 +371,10 @@ pub fn cpu_warning() -> &'static str {
 }
 
 /// Whether `engine` may be installed on the CPU build without `--force`: only PaddleOCR-VL
-/// (0.9B) is practical there (PLAN §9.5).
+/// (0.9B) is practical there (PLAN §9.5). indra-ocr is CPU-only by design and never reaches
+/// the llama.cpp setup.
 pub fn cpu_ok(engine: Engine) -> bool {
-    engine == Engine::PaddleocrVl
+    matches!(engine, Engine::PaddleocrVl | Engine::IndraOcr)
 }
 
 /// Memory an engine needs to run: its GGUF files plus 1.5 GB for the KV cache (sized by
@@ -615,7 +616,9 @@ fn prompt_budget(engine: Engine) -> u32 {
     match engine {
         Engine::Olmocr => 2048,
         Engine::PaddleocrVl => scaled(1253, 150),
-        _ => scaled(1386, 100),
+        Engine::DotsOcr => scaled(1386, 100),
+        // No llama-server: nothing is sized.
+        Engine::IndraOcr | Engine::Apple => 0,
     }
 }
 

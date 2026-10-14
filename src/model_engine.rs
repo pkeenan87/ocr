@@ -146,7 +146,7 @@ pub fn scan_engine(engine: Engine) -> Option<&'static dyn ScanEngine> {
         Engine::PaddleocrVl => Some(&Paddle),
         Engine::Olmocr => Some(&crate::olmocr::Olmocr),
         Engine::DotsOcr => Some(&crate::dots::Dots),
-        Engine::Apple => None,
+        Engine::Apple | Engine::IndraOcr => None,
     }
 }
 
@@ -1116,7 +1116,7 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
     Ok(result)
 }
 
-fn blank(number: usize) -> PageResult {
+pub(crate) fn blank(number: usize) -> PageResult {
     PageResult {
         number,
         source: markdown::Source::Vision,

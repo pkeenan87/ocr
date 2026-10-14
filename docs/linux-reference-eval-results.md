@@ -65,7 +65,7 @@ vLLM preallocates a fixed fraction of the card (11–13.5 GB peak observed at `-
 - **dots, Mac dots.mocr 8-bit vs dots.mocr bf16:** within 0.7 points everywhere (fax 6.3% vs 5.6%, transcripts 1.2% vs 1.0%). No quantization loss.
 - **PaddleOCR-VL** runs at bf16/f16 in every column, so it has no quantization question. Its differences are the pipeline:
   - tables: the Mac crops tables found by Vision (`Table Recognition:`), which takes CER to 0.0%; full-page `OCR:` gives 12.3% under both vLLM and llama.cpp;
-  - transcripts: `ocr` splits 4-up pages into panel crops, which helps (39.1% on llama.cpp), while full-page `OCR:` under vLLM gives 69.2%;
+  - transcripts: one of the nine vLLM pages ran into a repetition loop (15.7k characters, cut off at `max_tokens`). `ocr` retries a looping or truncated reply (repetition penalty, then column and band crops), the reference harness does not: 39.1% on llama.cpp against 69.2% under vLLM. Off the Mac there is no transcript detection, so this is not panel cropping;
   - pleading: the Mac's 13.3% is over seeds 10–19 with Vision-driven column and band crops; full-page `OCR:` is at 0.9% on seeds 10–12.
 
 ## Confounders

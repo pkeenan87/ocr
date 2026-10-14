@@ -1,10 +1,12 @@
-# Linux reference eval (RTX 3090, vLLM, full precision)
+# Linux reference eval (NVIDIA GPU, vLLM, full precision)
 
 **Purpose:** measure whether the quantized MLX builds used on the Mac (8-bit olmOCR and dots, bf16 or 4-bit Paddle) lose accuracy, compared with full-precision models served by vLLM. It uses the same generated pages, the same prompts and the same scorer.
 
-**This is a reference only.** `ocr` itself is macOS-only and does not build on Linux.
+**This is a reference only.** It measures the models, not `ocr`: since Phase 7 `ocr` builds and runs on Linux with llama.cpp, and its own Linux numbers come from `eval/run.py` (PLAN.md §9.7).
 
-Paste the prompt below into Claude Code on the Linux machine after `git clone git@github.com:pkeenan87/ocr.git && cd ocr`.
+**Last run:** 2026-10-14 on an RTX 5060 Ti (16 GB) with vLLM 0.31.0. Results: `docs/linux-reference-eval-results.md` on branch `linux-reference-eval`. The harness from that run is `eval/vllm_reference.py` on the same branch; reuse it rather than writing a new one.
+
+Paste the prompt below into Claude Code on the Linux machine, in a clone of the repo.
 
 ---
 
@@ -21,7 +23,7 @@ Paste the prompt below into Claude Code on the Linux machine after `git clone gi
 
 ## Prompt
 
-You are running a reference accuracy evaluation for the `ocr` project, which is the current repo. `ocr` is a macOS CLI and cannot be built here. Do not try to build it. You will reproduce its model requests with vLLM on this machine's RTX 3090 (24 GB) and score the results with the repo's own scorer.
+You are running a reference accuracy evaluation for the `ocr` project, which is the current repo. You will reproduce its model requests with vLLM on this machine's NVIDIA GPU and score the results with the repo's own scorer. You do not need to build `ocr` for this. If branch `linux-reference-eval` exists, start from its `eval/vllm_reference.py` harness.
 
 **Read first:**
 - `eval/README.md`;
@@ -33,9 +35,9 @@ You are running a reference accuracy evaluation for the `ocr` project, which is 
 ### 1. Environment
 
 1. Set up a Python 3.12 venv with `uv`.
-2. Install `vllm`, a version that supports Qwen2.5-VL, PaddleOCR-VL and dots.ocr. **Check vLLM's supported-models documentation before choosing the version, and record the version you used.**
+2. Install `vllm`, a version that supports Qwen2.5-VL, PaddleOCR-VL and dots.ocr. **Check vLLM's supported-models documentation before choosing the version, and record the version you used.** 0.31.0 worked on Blackwell (sm_120). Also install `ninja` into the venv and put the venv's `bin` on `PATH`: vLLM's warm-up compile fails without it.
 3. Install the eval dependencies: `reportlab`, `pypdfium2`, `Pillow`, `rapidfuzz`, `numpy`.
-4. Check the GPU with `nvidia-smi`.
+4. Check the GPU with `nvidia-smi`. Note its memory: with 16 GB, olmOCR must use the FP8 build (bf16 needs about 17 GB).
 
 ### 2. Fixtures
 
@@ -71,7 +73,7 @@ For each engine and family, record:
 - CER;
 - token recall;
 - transcript-line accuracy;
-- pages/s on the 3090;
+- pages/s on the GPU;
 - peak VRAM.
 
 **Differences from the Mac setup.** These are confounders, so report them:
@@ -83,7 +85,7 @@ For each engine and family, record:
 
 ### 6. Write the results to Notion
 
-Create a page titled `ocr reference eval — vLLM full precision (RTX 3090)` with:
+Create a page titled `ocr reference eval — vLLM full precision (<GPU>)` with:
 - the environment: GPU, driver, CUDA, vLLM version, model ids;
 - a per-engine, per-family results table;
 - the Mac numbers from `docs/eval.md` alongside, if present;

@@ -1,4 +1,4 @@
-//! Pinned downloads off macOS (PLAN §9, Phase 7d-1): `curl` fetches with resume, the sha256 is
+//! Pinned downloads (llama.cpp and pdfium off macOS, indra-ocr's weights everywhere; PLAN §9, Phase 7d-1): `curl` fetches with resume, the sha256 is
 //! checked before a file is used, and archives are unpacked with `tar` (which reads zip too on
 //! Windows). Both tools ship with current Linux distributions and Windows 10 and later.
 

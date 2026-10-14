@@ -192,9 +192,12 @@ fn nvidia() -> Option<(Vec<(String, u64)>, u32)> {
     (!gpus.is_empty()).then_some((gpus, cuda))
 }
 
-/// "CUDA Version: 13.0" in `nvidia-smi`'s header.
+/// "CUDA Version: 13.0" in `nvidia-smi`'s header ("CUDA UMD Version: 13.3" from driver 610 on).
 fn parse_cuda_major(text: &str) -> Option<u32> {
-    let rest = &text[text.find("CUDA Version:")? + "CUDA Version:".len()..];
+    let label = ["CUDA Version:", "CUDA UMD Version:"]
+        .into_iter()
+        .find(|l| text.contains(l))?;
+    let rest = &text[text.find(label)? + label.len()..];
     rest.trim_start()
         .split(|c: char| !c.is_ascii_digit())
         .next()?
@@ -368,9 +371,10 @@ pub fn cpu_warning() -> &'static str {
 }
 
 /// Whether `engine` may be installed on the CPU build without `--force`: only PaddleOCR-VL
-/// (0.9B) is practical there (PLAN §9.5).
+/// (0.9B) is practical there (PLAN §9.5). indra-ocr is CPU-only by design and never reaches
+/// the llama.cpp setup.
 pub fn cpu_ok(engine: Engine) -> bool {
-    engine == Engine::PaddleocrVl
+    matches!(engine, Engine::PaddleocrVl | Engine::IndraOcr)
 }
 
 /// Memory an engine needs to run: its GGUF files plus 1.5 GB for the KV cache (sized by
@@ -612,7 +616,9 @@ fn prompt_budget(engine: Engine) -> u32 {
     match engine {
         Engine::Olmocr => 2048,
         Engine::PaddleocrVl => scaled(1253, 150),
-        _ => scaled(1386, 100),
+        Engine::DotsOcr => scaled(1386, 100),
+        // No llama-server: nothing is sized.
+        Engine::IndraOcr | Engine::Apple => 0,
     }
 }
 
@@ -661,6 +667,8 @@ mod tests {
         let header = "| NVIDIA-SMI 580.82  Driver Version: 580.82  CUDA Version: 13.0 |";
         assert_eq!(parse_cuda_major(header), Some(13));
         assert_eq!(parse_cuda_major("CUDA Version: 12.8"), Some(12));
+        let header = "| NVIDIA-SMI 610.57.04   KMD Version: 610.57.04   CUDA UMD Version: 13.3 |";
+        assert_eq!(parse_cuda_major(header), Some(13));
         assert_eq!(
             parse_nvidia_gpus("NVIDIA GeForce RTX 3090, 24576\n"),
             [("NVIDIA GeForce RTX 3090".to_string(), 24576)]

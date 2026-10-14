@@ -5,6 +5,24 @@ use crate::cli::{Engine, Quant};
 /// Pinned `mlx-vlm` release installed into the managed venv (macOS).
 pub const MLX_VLM_PIN: &str = "0.7.6";
 
+/// Pinned `indra-ocr` PyPI release installed into its own venv (every platform).
+pub const INDRA_PIN: &str = "0.3.1";
+
+/// Hugging Face repo of indra-ocr's ONNX models, pinned to a revision below.
+pub const INDRA_REPO: &str = "datalab-to/indra-ocr";
+
+/// The revision of `INDRA_REPO` the files below were hashed at.
+pub const INDRA_REVISION: &str = "5993a956d7ea1d43c0d40d409962bb0b033ac1e8";
+
+/// What a checkpoint records for the engine's weights and runtime (the manifest `repo` and
+/// `mlx_vlm` keys): the repo at its short revision, and the pip package.
+pub fn indra_ids() -> (String, String) {
+    (
+        format!("{INDRA_REPO}@{}", &INDRA_REVISION[..7]),
+        format!("indra-ocr {INDRA_PIN}"),
+    )
+}
+
 /// Pinned llama.cpp release whose `llama-server` serves the models elsewhere (PLAN §9).
 pub const LLAMA_BUILD: &str = "b11510";
 
@@ -18,11 +36,11 @@ impl Quant {
     }
 }
 
-/// Default quant for an engine.
+/// Default quant for an engine (indra-ocr has none; its weights are ONNX files).
 pub fn default_quant(engine: Engine) -> Quant {
     match engine {
         Engine::PaddleocrVl => Quant::Bf16,
-        _ => Quant::Q8,
+        Engine::Olmocr | Engine::DotsOcr | Engine::Apple | Engine::IndraOcr => Quant::Q8,
     }
 }
 
@@ -196,6 +214,47 @@ pub fn gguf(engine: Engine, version: Option<&str>, quant: Quant) -> Option<Gguf>
     })
 }
 
+/// The files the default (non-math) indra-ocr pipeline loads: `OrtOCR` opens det, rec, order,
+/// orient and script+rec_cjk when present, and reads meta.json. Pinned at `INDRA_REVISION`;
+/// the sha256 of the LFS files is the LFS oid, meta.json's was computed from the download.
+pub const INDRA_FILES: [GgufFile; 7] = [
+    f(
+        "det.onnx",
+        389_948,
+        "46b0050ce4c4692f887a1a9c038480223af1c7a91b3fcced2657d9cf00290dc4",
+    ),
+    f(
+        "rec.onnx",
+        4_977_797,
+        "e243be069b357e56a0e867a21d7482e498df42fb19678bfb67a25f48b1f06151",
+    ),
+    f(
+        "rec_cjk.onnx",
+        9_255_441,
+        "4cec840b55e1bb7f375daf30a2975404a867a71ac1a5bc5b1629c4909ce16baa",
+    ),
+    f(
+        "order.onnx",
+        2_973_138,
+        "23635dd2324b4ccc00c408af961273a2dedd2e4f0386bc54dba678c41bcf6b46",
+    ),
+    f(
+        "orient.onnx",
+        371_414,
+        "8d7bfce5d08bcad55955f41ca494a7f9d9d3ed5d5b6da1f6f276d5c509590729",
+    ),
+    f(
+        "script.onnx",
+        191_005,
+        "5ba37030e817affede0097a7503b6829624104166c6e0b6aacecacf919fc7d11",
+    ),
+    f(
+        "meta.json",
+        139_429,
+        "ff6ec58f91c93a475ae9505ad21c73c3ecda0b378f1d889dd83408e10832d1bb",
+    ),
+];
+
 /// Per-request limits of a model engine. `timeout_secs` is 2 x (prefill + `max_tokens` / decode
 /// rate) from the measured rates in docs/spike.md; the retry limits are for the larger
 /// `retry_max_tokens` request after a truncated reply.
@@ -227,7 +286,14 @@ pub fn limits(engine: Engine) -> Limits {
             timeout_secs: 190,
             retry_timeout_secs: 190,
         },
-        _ => Limits {
+        // indra-ocr makes no model requests; these are never read.
+        Engine::IndraOcr => Limits {
+            max_tokens: 0,
+            retry_max_tokens: 0,
+            timeout_secs: 0,
+            retry_timeout_secs: 0,
+        },
+        Engine::PaddleocrVl | Engine::Apple => Limits {
             max_tokens: 4096,
             retry_max_tokens: 8192,
             timeout_secs: 45,
@@ -252,6 +318,8 @@ pub fn footprint_gb(engine: Engine, quant: Quant) -> f64 {
         Engine::DotsOcr => (7.3, 8.0),
         Engine::PaddleocrVl => (3.8, 16.0),
         Engine::Apple => return 0.0,
+        // Seven small ONNX files and a few hundred MB of runtime memory; the quant is ignored.
+        Engine::IndraOcr => return 0.5,
     };
     let bits = match quant {
         Quant::Q4 => 4.0,

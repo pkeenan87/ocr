@@ -256,6 +256,11 @@ fn bates_in(t: &str) -> impl Iterator<Item = &str> {
     })
 }
 
+/// The right-most Bates-looking token in `text` (a block's text, which may span lines).
+pub fn last_bates_in(text: &str) -> Option<String> {
+    bates_in(text).last().map(str::to_string)
+}
+
 /// First Bates-looking token in the blocks at the bottom of the page.
 pub fn find_bates(blocks: &[Block]) -> Option<String> {
     blocks

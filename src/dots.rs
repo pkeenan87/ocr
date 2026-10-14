@@ -12,11 +12,13 @@ use serde_json::Value;
 
 use crate::cli::Engine;
 use crate::htmltable;
+use crate::markdown;
 use crate::model_engine::{
     Ctx, Fail, Output, Planned, Prepared, Prompt, ScanEngine, Spec, clean_ocr, has_repetition_loop,
     render_specs,
 };
 use crate::pipeline::{Settings, SidePass};
+use crate::vision;
 
 /// `prompt_layout_all_en` from rednote-hilab/dots.mocr@05196189, `dots_mocr/utils/prompts.py`,
 /// verbatim (copy in spike/upstream/rednote-hilab_dots.mocr.py; identical to dots.ocr@b06a7810).
@@ -224,6 +226,26 @@ impl ScanEngine for Dots {
     }
 
     fn run(&self, ctx: &Ctx, path: &Path, prep: &Prepared, s: &Settings) -> Result<Output, Fail> {
+        let mut out = self.ladder(ctx, path, prep, s)?;
+        // `prompt_ocr` leaves out Page-footer text, so off macOS a plain-text page has no Bates
+        // number to find in it (the layout prompt keeps it).
+        if let Some(bates) = ctx.corner_bates(path, prep, &out.body, |crop| {
+            corner(ctx, path, prep, s, crop)
+        })? {
+            out.bates = Some(bates);
+        }
+        Ok(out)
+    }
+}
+
+impl Dots {
+    fn ladder(
+        &self,
+        ctx: &Ctx,
+        path: &Path,
+        prep: &Prepared,
+        s: &Settings,
+    ) -> Result<Output, Fail> {
         let planned = prep.planned.as_ref().map_err(|e| Fail::Failed(e.clone()))?;
         // Stage 1: plain text on the page.
         // Transcripts keep the layout prompt first: plain text was 2.5 times faster on them but
@@ -384,6 +406,41 @@ enum Plain {
     Reply(String),
     /// The request itself failed after the transport retries.
     Server(Fail),
+}
+
+/// Enough for a short line, or the layout JSON of one.
+const CORNER_MAX_TOKENS: u32 = 256;
+
+/// One Bates corner (`Ctx::corner_bates`): `prompt_ocr`, then the layout prompt, on the crop.
+/// At the default 100 DPI each read 4 of 5 corners and the pair read all 5 (docs/spike.md,
+/// "dots Bates corners").
+fn corner(
+    ctx: &Ctx,
+    path: &Path,
+    prep: &Prepared,
+    s: &Settings,
+    crop: [f64; 4],
+) -> Result<Option<String>, Fail> {
+    let png = vision::render_png_fit(path, prep.index, s.dpi, Some(crop), None, 0)
+        .map_err(|e| Fail::Failed(e.to_string()))?;
+    for prompt in [Prompt::DotsOcr, Prompt::DotsLayout] {
+        let reply = ctx.send(&Planned::new(prompt, &png, false), CORNER_MAX_TOKENS, None)?;
+        let text = match prompt {
+            Prompt::DotsLayout => {
+                let texts: Vec<String> = parse_layout(&reply.text)
+                    .elements
+                    .into_iter()
+                    .map(|e| e.text)
+                    .collect();
+                texts.join("\n")
+            }
+            _ => reply.text,
+        };
+        if let Some(bates) = markdown::find_bates_in_text(&text) {
+            return Ok(Some(bates));
+        }
+    }
+    Ok(None)
 }
 
 /// `prompt_ocr` on the page image: plain text, with tables converted like elsewhere.

@@ -434,6 +434,24 @@ Every remaining Margin on the public set was rendered and holds only line number
 
 **Cost:** about 52 s a page against about 40 s without the corners, on the CPU build. On a GPU each corner should take about a second. A page with no Bates number pays for both corners.
 
+## dots Bates corners (2026-10-14, RTX 5060 Ti, CUDA build, dots.ocr Q8_0)
+
+**Problem.** Off the Mac, dots gave no Bates numbers: `three_pages.pdf` had none in its page markers. The raw `prompt_layout_all_en` reply does carry `Page-footer "SMITH000123"`, but dots' first request is `prompt_ocr`, which upstream defines as "parse ocr text except the Page-header and Page-footer". On the Mac, Vision supplies the Bates number, so this never showed.
+
+**Test.** The bottom-right corner (olmOCR's `BATES_CORNERS` crop, 30% x 10%) of five pages, sent with each prompt:
+
+| Page | `prompt_ocr`, 100 DPI | layout, 100 DPI | `prompt_ocr`, 200 DPI | layout, 200 DPI |
+|---|---|---|---|---|
+| three_pages p1 | SMITH000123 | SMITH000123 | (empty) | SMITH000123 |
+| seed10 pleading p1 | STERL008788 (plus a body fragment) | Picture only | STERL008788 | STERL008788 |
+| seed11 pleading p1 | (empty) | LAKES003503 | (empty) | Picture only |
+| seed10 production p1 | ACME0000001 | ACME0000001 | ACME0000001 | ACME0000001 |
+| seed10 production p8 | ACME0000008 | ACME0000008 | ACME0000008 | ACME0000008 |
+
+At the default 100 DPI each prompt read 4 of 5 corners and the two together read all 5. Higher DPI did not help.
+
+**Decision.** Off the Mac, a dots page whose text has no Bates number gets the olmOCR corner requests (now shared as `Ctx::corner_bates`), with `prompt_ocr` and then the layout prompt on each corner, at 256 tokens. A document stops getting them after three pages without one. Cost on `three_pages.pdf`: 7.6 s against 7.0 s. Accept seeds 10–12: pleading Bates 90.9% (10/11).
+
 ## `--verify-json` on the public filings (2026-10-09)
 
 This run measures the values-to-check report on the 20 public court filings (230 pages, Apple engine, 150 DPI): `--verify-json`, in both `--verify-fields` modes.

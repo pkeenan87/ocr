@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run `ocr scan` over one or more eval sets (made by generate.py), then score them.
 
-usage: run.py --engine apple|paddleocr-vl|olmocr|dots-ocr --set DIR [DIR ...] --out RESULTS_DIR
+usage: run.py --engine apple|paddleocr-vl|olmocr|dots-ocr|indra-ocr --set DIR [DIR ...] --out RESULTS_DIR
               [--tag NAME] [--dpi N] [--extra-args "..."] [--families a,b] [--keep-furniture]
               [--use-real-config] [--ocr-bin PATH] [--git-rev HASH]
 
@@ -33,7 +33,9 @@ import score as scorer  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 ISO_CONFIG, ISO_STATE = ROOT / "eval/out/state/config", ROOT / "eval/out/state/state"
 FAMILIES = ["pleading", "contract", "transcript4up", "fax", "table", "production"]
-MODEL_ENGINES = {"paddleocr-vl", "olmocr", "dots-ocr"}
+MODEL_ENGINES = {"paddleocr-vl", "olmocr", "dots-ocr", "indra-ocr"}
+# Model engines that run as a subprocess of the scan: no server, so no server pid, peak or VRAM.
+NO_SERVER_ENGINES = {"indra-ocr"}
 
 
 def to_mb(s):
@@ -118,7 +120,7 @@ def aggregate(entries):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--engine", required=True, choices=["apple", "paddleocr-vl", "olmocr", "dots-ocr"])
+    ap.add_argument("--engine", required=True, choices=["apple", "paddleocr-vl", "olmocr", "dots-ocr", "indra-ocr"])
     ap.add_argument("--set", required=True, nargs="+", dest="set_dirs")
     ap.add_argument("--out", required=True)
     ap.add_argument("--tag")
@@ -210,7 +212,7 @@ def main():
             print(f"{set_dir.name}/{fam}: {entry.get('cer')} CER, {wall:.1f}s", file=sys.stderr, flush=True)
             json.dump(result, open(res_path, "w"), indent=1)  # checkpoint
 
-    if a.engine in MODEL_ENGINES:
+    if a.engine in MODEL_ENGINES and a.engine not in NO_SERVER_ENGINES:
         result["server_peak_mb"] = server_peak_mb(state_dir)
         result["server_vram_mb"] = server_vram_mb(state_dir)
     result["last_summary"] = {fam: aggregate(es) for fam, es in this_run.items()}
@@ -226,7 +228,7 @@ def main():
         print(f"| {fam} | {g['sets']}{' ('+str(g['failed'])+' failed)' if g['failed'] else ''} | {g['pages']} | {f(g['cer'])} | "
               f"{f(g['token_recall'])} | {f(g['bates_accuracy'])} | {f(g['transcript_line_accuracy'])} | "
               f"{g['pages_per_s']} | {g['wall_s']} | {g['ocr_peak_mb']} | {g['crashes']} |")
-    if a.engine in MODEL_ENGINES:
+    if a.engine in MODEL_ENGINES and a.engine not in NO_SERVER_ENGINES:
         print(f"\nServer peak memory: {result.get('server_peak_mb')} MB; GPU memory: {result.get('server_vram_mb')} MB")
 
 

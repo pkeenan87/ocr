@@ -221,8 +221,8 @@ def score(gt, md, strip_line_numbers=False, keep_furniture=False):
             tok_found += min(k, _bounded_count(hay, t))
         if gp.get("bates"):
             bates_total += 1
-            m = re.search(r"Bates\s+(\S+)", extra)
-            bates_ok += bool(m and m.group(1) == gp["bates"])
+            bm = re.search(r"Bates\s+(\S+)", extra)
+            bates_ok += bool(bm and bm.group(1) == gp["bates"])
         if gp.get("kind") == "transcript":
             # In order and one-to-one: a line read twice or out of order counts once.
             numbered = [ln for ln in ref_lines if re.match(r"\d{1,2} ", ln)]

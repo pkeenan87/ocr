@@ -75,7 +75,7 @@ Model engines also need a running server:
 
 ## Linux and Windows
 
-Status: Phase 7 (PLAN.md §9). Linux was tested on a Ryzen 9950X, which has no discrete GPU, with the CPU build. The RTX 3090 (CUDA) run and a native Windows run are still to come. Windows builds and tests run in CI.
+Status: Phase 7 (PLAN.md §9). Linux was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build: all three model engines pass. A native Windows run is still to come. Windows builds and tests run in CI.
 
 Off the Mac:
 - There is no Apple Vision, so `apple` is not offered and **`paddleocr-vl` is the default engine**.
@@ -119,13 +119,21 @@ Set `OCR_LLAMA_VARIANT=cuda12|cuda13|vulkan|cpu` to override the choice. If a CU
 | olmocr (8bit = Q8_0, default) | 9.5 GB | 10.9 GB |
 | olmocr (bf16) | 16.6 GB | 18.1 GB |
 
-Measured: PaddleOCR-VL on the CPU build uses 2.1 GB resident. TODO(eval): measure GPU memory on the RTX 3090.
+Measured: PaddleOCR-VL on the CPU build uses 2.1 GB resident. On an RTX 5060 Ti (16 GB, CUDA 13 build, accept seeds 10–12, 2026-10-14):
+
+| Engine | GPU memory in use | Pages/s |
+|---|---|---|
+| paddleocr-vl 1.6 | 2.4 GB | 0.16–0.71 (4-up transcripts slowest) |
+| dots-ocr (dots.ocr Q8_0) | 4.4 GB | 0.13–0.43 |
+| olmocr (Q8_0) | 10.2 GB | 0.03–0.11 |
+
+olmocr bf16 (18.1 GB) does not fit a 16 GB card; use the default 8bit.
 
 **Differences from the Mac:**
 - dots defaults to `dots.ocr`, because llama.cpp's support for dots.mocr is unconfirmed. Only PaddleOCR-VL 1.6 and 1.5 are offered.
 - Without the Apple Vision side-pass:
   - Bates numbers come from the model's own text.
-  - olmOCR, which drops footers, gets two extra small requests per page, for the bottom-right and bottom-left corners. A Bates number centred under the footer is not found.
+  - olmOCR, which drops footers, and dots, whose plain-text prompt leaves out page footers, get up to two extra small requests per page, for the bottom-right and bottom-left corners, when the page text has no Bates number. A document stops getting them after three pages without one. A Bates number centred under the footer is not found.
   - There are no table crops and no transcript detection.
   - A page the model fails is recorded as failed, and a re-run retries it, instead of falling back to Apple Vision text.
 - Column detection still works: it runs on the rendered bitmap.

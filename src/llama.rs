@@ -192,9 +192,12 @@ fn nvidia() -> Option<(Vec<(String, u64)>, u32)> {
     (!gpus.is_empty()).then_some((gpus, cuda))
 }
 
-/// "CUDA Version: 13.0" in `nvidia-smi`'s header.
+/// "CUDA Version: 13.0" in `nvidia-smi`'s header ("CUDA UMD Version: 13.3" from driver 610 on).
 fn parse_cuda_major(text: &str) -> Option<u32> {
-    let rest = &text[text.find("CUDA Version:")? + "CUDA Version:".len()..];
+    let label = ["CUDA Version:", "CUDA UMD Version:"]
+        .into_iter()
+        .find(|l| text.contains(l))?;
+    let rest = &text[text.find(label)? + label.len()..];
     rest.trim_start()
         .split(|c: char| !c.is_ascii_digit())
         .next()?
@@ -661,6 +664,8 @@ mod tests {
         let header = "| NVIDIA-SMI 580.82  Driver Version: 580.82  CUDA Version: 13.0 |";
         assert_eq!(parse_cuda_major(header), Some(13));
         assert_eq!(parse_cuda_major("CUDA Version: 12.8"), Some(12));
+        let header = "| NVIDIA-SMI 610.57.04   KMD Version: 610.57.04   CUDA UMD Version: 13.3 |";
+        assert_eq!(parse_cuda_major(header), Some(13));
         assert_eq!(
             parse_nvidia_gpus("NVIDIA GeForce RTX 3090, 24576\n"),
             [("NVIDIA GeForce RTX 3090".to_string(), 24576)]

@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Reference run of the model engines at full precision through vLLM (docs/linux-reference-eval.md).
+
+Reproduces each engine's full-page request with the upstream prompt, writes `<family>.md` with one
+`<!-- page N -->` marker per page (no Bates), and scores it with eval/score.py using the same flags
+as eval/run.py. One vLLM server must already be serving the engine's model on --port.
+
+    python eval/vllm_reference.py --engine dots --set eval/out/seed10 eval/out/seed11 \
+        --out eval/out/vllm --model rednote-hilab/dots.mocr
+"""
+import argparse, base64, concurrent.futures as cf, io, json, re, subprocess, sys, time, urllib.request
+from pathlib import Path
+
+import pypdfium2 as pdfium
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "eval"))
+sys.path.insert(0, str(ROOT / "spike/upstream"))
+import score as scorer  # noqa: E402
+from allenai_olmocr import build_no_anchoring_v4_yaml_prompt  # noqa: E402
+
+FAMILIES = ["pleading", "contract", "transcript4up", "fax", "table"]
+
+
+def upstream_prompt(file, key):
+    src = (ROOT / "spike/upstream" / file).read_text()
+    return re.search(rf'"{key}":\s*"""(.*?)"""', src, re.S).group(1)
+
+
+# Engine: (prompt, text first, render, max_tokens). Render: ("dpi", n) or ("side", px).
+ENGINES = {
+    "paddle": ("OCR:", False, ("dpi", 150), 4096),
+    "olmocr": (build_no_anchoring_v4_yaml_prompt(), True, ("side", 1288), 4096),
+    "dots": (upstream_prompt("rednote-hilab_dots.mocr.py", "prompt_layout_all_en"), False, ("dpi", 100), 8192),
+}
+
+
+def render(page, how):
+    kind, n = how
+    w, h = page.get_size()
+    scale = n / 72 if kind == "dpi" else n / max(w, h)
+    buf = io.BytesIO()
+    page.render(scale=scale).to_pil().convert("RGB").save(buf, "PNG")
+    return buf.getvalue()
+
+
+def ask(port, model, png, prompt, text_first, max_tokens):
+    image = {"type": "image_url", "image_url": {"url": "data:image/png;base64," + base64.b64encode(png).decode()}}
+    text = {"type": "text", "text": prompt}
+    body = {"model": model, "temperature": 0, "max_tokens": max_tokens,
+            "messages": [{"role": "user", "content": [text, image] if text_first else [image, text]}]}
+    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions", json.dumps(body).encode(),
+                                 {"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=900) as r:
+        return json.load(r)["choices"][0]["message"]["content"] or ""
+
+
+def strip_yaml(reply):
+    m = re.match(r"\s*---\n.*?\n---\n?", reply, re.S)
+    return reply[m.end():] if m else reply
+
+
+def dots_markdown(reply):
+    t = reply.strip()
+    t = re.sub(r"^```(?:json)?\s*|\s*```$", "", t)
+    try:
+        items = json.loads(t)
+    except json.JSONDecodeError:
+        return reply  # unparseable (e.g. truncated): scored as is
+    parts = []
+    for el in items if isinstance(items, list) else []:
+        cat, txt = el.get("category", ""), (el.get("text") or "").strip()
+        if cat == "Picture" or not txt:
+            continue
+        parts.append({"Title": "# ", "Section-header": "## "}.get(cat, "") + txt)
+    return "\n\n".join(parts)
+
+
+CONVERT = {"paddle": lambda r: r, "olmocr": strip_yaml, "dots": dots_markdown}
+
+
+def vram_mb():
+    try:
+        out = subprocess.run(["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits"],
+                             capture_output=True, text=True).stdout
+        return sum(int(x) for x in out.split())
+    except OSError:
+        return None
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--engine", required=True, choices=ENGINES)
+    ap.add_argument("--model", required=True, help="model id as served by vLLM")
+    ap.add_argument("--set", required=True, nargs="+", dest="set_dirs")
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--port", type=int, default=8000)
+    ap.add_argument("--families", default=",".join(FAMILIES))
+    ap.add_argument("--first-pages", type=int)
+    ap.add_argument("--concurrency", type=int, default=1)
+    a = ap.parse_args()
+    prompt, text_first, how, max_tokens = ENGINES[a.engine]
+    out_root = Path(a.out) / a.engine
+    results, peak_vram = {}, 0
+    for set_dir in map(Path, a.set_dirs):
+        for fam in a.families.split(","):
+            pdf_path = set_dir / f"{fam}.pdf"
+            if not pdf_path.exists():
+                continue
+            gt = json.load(open(set_dir / f"{fam}.gt.json"))
+            pdf = pdfium.PdfDocument(str(pdf_path))
+            n = len(pdf) if not a.first_pages else min(a.first_pages, len(pdf))
+            if a.first_pages:
+                gt = {**gt, "pages": gt["pages"][:n]}
+            pngs = [render(pdf[i], how) for i in range(n)]
+            t0 = time.time()
+            with cf.ThreadPoolExecutor(a.concurrency) as pool:
+                replies = list(pool.map(lambda p: ask(a.port, a.model, p, prompt, text_first, max_tokens), pngs))
+            wall = time.time() - t0
+            peak_vram = max(peak_vram, vram_mb() or 0)
+            md = "".join(f"<!-- page {i} -->\n\n{CONVERT[a.engine](r).strip()}\n\n" for i, r in enumerate(replies, 1))
+            dest = out_root / set_dir.name / f"{fam}.md"
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(md)
+            (dest.with_suffix(".raw.json")).write_text(json.dumps(replies, indent=1))
+            s = scorer.score(gt, md, strip_line_numbers=(fam == "pleading"))
+            e = {k: s[k] for k in ("dist_sum", "len_sum", "tokens_found", "tokens_total", "tl_ok", "tl_total")}
+            e.update(pages=n, wall_s=round(wall, 2), cer=s["cer"])
+            results.setdefault(fam, []).append(e)
+            print(f"{set_dir.name}/{fam}: {s['cer']} CER, {wall:.1f}s", file=sys.stderr, flush=True)
+    summary = {}
+    for fam, es in results.items():
+        g = lambda k: sum(e[k] for e in es)
+        r = lambda x, y: round(g(x) / g(y), 4) if g(y) else None
+        summary[fam] = {"pages": g("pages"), "cer": r("dist_sum", "len_sum"),
+                        "token_recall": r("tokens_found", "tokens_total"),
+                        "transcript_line_accuracy": r("tl_ok", "tl_total"),
+                        "pages_per_s": round(g("pages") / g("wall_s"), 3)}
+    res = {"engine": a.engine, "model": a.model, "render": how, "peak_vram_mb": peak_vram,
+           "runs": results, "summary": summary}
+    Path(a.out).mkdir(parents=True, exist_ok=True)
+    json.dump(res, open(Path(a.out) / f"{a.engine}.json", "w"), indent=1)
+    f = lambda v: "-" if v is None else f"{v * 100:.1f}%"
+    print(f"\n{a.engine} ({a.model})  peak GPU memory used {peak_vram} MB")
+    print("| family | pages | CER | token recall | transcript lines | pages/s |\n|---|---|---|---|---|---|")
+    for fam, s in summary.items():
+        print(f"| {fam} | {s['pages']} | {f(s['cer'])} | {f(s['token_recall'])} | "
+              f"{f(s['transcript_line_accuracy'])} | {s['pages_per_s']} |")
+
+
+if __name__ == "__main__":
+    main()

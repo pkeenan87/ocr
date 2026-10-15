@@ -7,6 +7,8 @@ as eval/run.py. One vLLM server must already be serving the engine's model on --
 
     python eval/vllm_reference.py --engine dots --set eval/out/seed10 eval/out/seed11 \
         --out eval/out/vllm --model rednote-hilab/dots.mocr
+
+--rescore scores the Markdown a previous run saved under --out, with no server (no timings or GPU memory).
 """
 import argparse, base64, concurrent.futures as cf, io, json, re, subprocess, sys, time, urllib.request
 from pathlib import Path
@@ -98,6 +100,7 @@ def main():
     ap.add_argument("--families", default=",".join(FAMILIES))
     ap.add_argument("--first-pages", type=int)
     ap.add_argument("--concurrency", type=int, default=1)
+    ap.add_argument("--rescore", action="store_true", help="score the saved Markdown; no server needed")
     a = ap.parse_args()
     prompt, text_first, how, max_tokens = ENGINES[a.engine]
     out_root = Path(a.out) / a.engine
@@ -112,39 +115,51 @@ def main():
             n = len(pdf) if not a.first_pages else min(a.first_pages, len(pdf))
             if a.first_pages:
                 gt = {**gt, "pages": gt["pages"][:n]}
-            pngs = [render(pdf[i], how) for i in range(n)]
-            t0 = time.time()
-            with cf.ThreadPoolExecutor(a.concurrency) as pool:
-                replies = list(pool.map(lambda p: ask(a.port, a.model, p, prompt, text_first, max_tokens), pngs))
-            wall = time.time() - t0
-            peak_vram = max(peak_vram, vram_mb() or 0)
-            md = "".join(f"<!-- page {i} -->\n\n{CONVERT[a.engine](r).strip()}\n\n" for i, r in enumerate(replies, 1))
             dest = out_root / set_dir.name / f"{fam}.md"
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(md)
-            (dest.with_suffix(".raw.json")).write_text(json.dumps(replies, indent=1))
+            if a.rescore:
+                md, wall = dest.read_text(), None
+            else:
+                pngs = [render(pdf[i], how) for i in range(n)]
+                t0 = time.time()
+                with cf.ThreadPoolExecutor(a.concurrency) as pool:
+                    replies = list(pool.map(lambda p: ask(a.port, a.model, p, prompt, text_first, max_tokens), pngs))
+                wall = time.time() - t0
+                peak_vram = max(peak_vram, vram_mb() or 0)
+                md = "".join(f"<!-- page {i} -->\n\n{CONVERT[a.engine](r).strip()}\n\n" for i, r in enumerate(replies, 1))
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_text(md)
+                (dest.with_suffix(".raw.json")).write_text(json.dumps(replies, indent=1))
             s = scorer.score(gt, md, strip_line_numbers=(fam == "pleading"))
-            e = {k: s[k] for k in ("dist_sum", "len_sum", "tokens_found", "tokens_total", "tl_ok", "tl_total")}
-            e.update(pages=n, wall_s=round(wall, 2), cer=s["cer"])
+            e = {k: s[k] for k in ("dist_sum", "len_sum", "tokens_found", "tokens_total", "tl_ok", "tl_total",
+                                   "cer_pages", "dist_pages", "len_pages")}
+            e.update(pages=n, wall_s=None if wall is None else round(wall, 2), cer=s["cer"])
             results.setdefault(fam, []).append(e)
-            print(f"{set_dir.name}/{fam}: {s['cer']} CER, {wall:.1f}s", file=sys.stderr, flush=True)
+            took = "" if wall is None else f", {wall:.1f}s"
+            print(f"{set_dir.name}/{fam}: {s['cer']} CER{took}, pages {s['cer_pages']}", file=sys.stderr, flush=True)
     summary = {}
     for fam, es in results.items():
         g = lambda k: sum(e[k] for e in es)
         r = lambda x, y: round(g(x) / g(y), 4) if g(y) else None
+        # Pooled CER without the single worst page, to see how much one page (e.g. a loop) carries.
+        per_page = sorted(((d, l) for e in es for d, l in zip(e["dist_pages"], e["len_pages"])),
+                          key=lambda dl: dl[0] / max(dl[1], 1))[:-1]
+        rest = sum(l for _, l in per_page)
+        walls = [e["wall_s"] for e in es]
         summary[fam] = {"pages": g("pages"), "cer": r("dist_sum", "len_sum"),
+                        "cer_excl_worst": round(sum(d for d, _ in per_page) / rest, 4) if rest else None,
                         "token_recall": r("tokens_found", "tokens_total"),
                         "transcript_line_accuracy": r("tl_ok", "tl_total"),
-                        "pages_per_s": round(g("pages") / g("wall_s"), 3)}
+                        "pages_per_s": None if None in walls else round(g("pages") / sum(walls), 3)}
     res = {"engine": a.engine, "model": a.model, "render": how, "peak_vram_mb": peak_vram,
            "runs": results, "summary": summary}
     Path(a.out).mkdir(parents=True, exist_ok=True)
-    json.dump(res, open(Path(a.out) / f"{a.engine}.json", "w"), indent=1)
+    json.dump(res, open(Path(a.out) / f"{a.engine}{'-rescore' if a.rescore else ''}.json", "w"), indent=1)
     f = lambda v: "-" if v is None else f"{v * 100:.1f}%"
     print(f"\n{a.engine} ({a.model})  peak GPU memory used {peak_vram} MB")
-    print("| family | pages | CER | token recall | transcript lines | pages/s |\n|---|---|---|---|---|---|")
+    print("| family | pages | CER | CER without worst page | token recall | transcript lines | pages/s |\n"
+          "|---|---|---|---|---|---|---|")
     for fam, s in summary.items():
-        print(f"| {fam} | {s['pages']} | {f(s['cer'])} | {f(s['token_recall'])} | "
+        print(f"| {fam} | {s['pages']} | {f(s['cer'])} | {f(s['cer_excl_worst'])} | {f(s['token_recall'])} | "
               f"{f(s['transcript_line_accuracy'])} | {s['pages_per_s']} |")
 
 

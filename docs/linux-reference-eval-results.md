@@ -1,10 +1,16 @@
-# ocr reference eval — vLLM full precision (RTX 5060 Ti)
+# ocr reference eval — vLLM reference builds (RTX 5060 Ti)
 
 Run 2026-10-14 by following `docs/linux-reference-eval.md`. The runbook was written for an RTX 3090 (24 GB). This run used a 16 GB card, so olmOCR ran as the official FP8 build instead of bf16. The harness is `eval/vllm_reference.py`; raw replies and per-file Markdown are in `eval/out/vllm/` (not committed).
 
 **Question:** do the quantized builds `ocr` uses lose accuracy against the models at full precision?
 
-**Answer: no measurable loss.** On every engine and family, the full-precision reference and the quantized engines agree to within about 1 point of CER, often exactly. The differences that remain come from the pipeline (crops, the Vision side-pass, Bates corner requests), not from quantization.
+**Answer: no measurable loss for dots; open for olmOCR; PaddleOCR-VL has no quantized build to compare.**
+
+- **dots:** the Mac's 8-bit dots.mocr is within 0.7 points of CER of dots.mocr at bf16 on every family. This is the only engine where the run compares a quantized build with full precision.
+- **olmOCR:** bf16 does not fit a 16 GB card, so the reference ran the official FP8 build. The comparison is 8-bit MLX against FP8, two quantized builds. They agree to within 0.5 points of CER, but the question for olmOCR stays open until bf16 runs on a 24 GB card.
+- **PaddleOCR-VL** runs at bf16/f16 in every column.
+
+The differences that remain come from the pipeline (crops, the Vision side-pass, Bates corner requests, retries), not from the weights.
 
 ## Environment
 
@@ -65,8 +71,8 @@ vLLM preallocates a fixed fraction of the card (11–13.5 GB peak observed at `-
 - **dots, Mac dots.mocr 8-bit vs dots.mocr bf16:** within 0.7 points everywhere (fax 6.3% vs 5.6%, transcripts 1.2% vs 1.0%). No quantization loss.
 - **PaddleOCR-VL** runs at bf16/f16 in every column, so it has no quantization question. Its differences are the pipeline:
   - tables: the Mac crops tables found by Vision (`Table Recognition:`), which takes CER to 0.0%; full-page `OCR:` gives 12.3% under both vLLM and llama.cpp;
-  - transcripts: one of the nine vLLM pages ran into a repetition loop (15.7k characters, cut off at `max_tokens`). `ocr` retries a looping or truncated reply (repetition penalty, then column and band crops), the reference harness does not: 39.1% on llama.cpp against 69.2% under vLLM. Off the Mac there is no transcript detection, so this is not panel cropping;
-  - pleading: the Mac's 13.3% is over seeds 10–19 with Vision-driven column and band crops; full-page `OCR:` is at 0.9% on seeds 10–12.
+  - transcripts: one of the nine vLLM pages ran into a repetition loop (15.7k characters, cut off at `max_tokens`). `ocr` retries a looping or truncated reply (repetition penalty, then column and band crops), the reference harness does not: 39.1% on llama.cpp against 69.2% under vLLM. Off the Mac there is no transcript detection, so this is not panel cropping. **Not yet verified:** CER is pooled over the family (edit distance summed over summed reference length), so one 15.7k-character page can carry most of the gap, but the run did not record per-page CER. The harness now records it (`dist_pages`, and `cer_excl_worst` in the summary); re-score the saved Markdown with `--rescore` to confirm;
+  - pleading: the Mac's 13.3% is over seeds 10–19 with Vision-driven column and band crops; full-page `OCR:` is at 0.9% on seeds 10–12. The seed ranges differ, but a 12-point gap suggests the crops hurt Paddle on pleadings. Worth a Mac run of seeds 10–12 with and without crops.
 
 ## Confounders
 
@@ -75,8 +81,6 @@ vLLM preallocates a fixed fraction of the card (11–13.5 GB peak observed at `-
 - **Precision:** olmOCR is FP8 here, not bf16 (the card has 16 GB). FP8 is closer to the Mac's 8-bit than bf16 would be, so the olmOCR comparison is strictly "8-bit MLX vs FP8".
 - **dots model:** `ocr` off the Mac uses dots.ocr (GGUF); the reference and the Mac use dots.mocr.
 - **Small sample:** 46 pages per engine (seeds 10–12), as in the Mac's olmOCR and dots accept sets.
-
-## Notes for the runbook
-
-- `docs/linux-reference-eval.md` says `ocr` does not build on Linux. That is stale since Phase 7: `ocr` builds and runs on Linux, and its own CUDA results are the middle column above.
-- vLLM 0.31.0 needs `ninja` on `PATH` for its warm-up compile; install it into the venv.
+- **dots truncation:** a dots reply that is not valid JSON (for example cut off at `max_tokens`) is scored as raw JSON, markup included, which raises its CER. dots' fax figure (5.6%) may include some of this; the raw replies are in `eval/out/vllm/dots/*/fax.raw.json`.
+- **Speed:** the two speed columns are not like for like. `ocr`'s timings include rendering and the Bates corner requests; vLLM's are model time only, and the vLLM dots run uses the longer layout prompt where `ocr` uses `prompt_ocr`.
+- **Bates:** the scorer counts a Bates number as right only on an exact match, so it does not tell a missed number from a wrong one. olmOCR on CUDA got 9/11 pleading Bates numbers (Mac 10/11); check the two misses in `eval/out/results/olmocr-*-linux-cuda.json` to see whether they are missing or wrong.

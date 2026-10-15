@@ -168,7 +168,7 @@ def normalize(text, **kw):
 
 def score(gt, md, strip_line_numbers=False, keep_furniture=False):
     pages, pre = split_pages(md, preamble=True)
-    cer_pages, dist_sum, len_sum = [], 0, 0
+    cer_pages, dist_pages, len_pages, dist_sum, len_sum = [], [], [], 0, 0
     # Strict CER, WER (normalized and strict), and the character edits by kind.
     m = collections.Counter()
     # Text outside the reference pages (before the first marker, or on pages the reference does
@@ -198,6 +198,8 @@ def score(gt, md, strip_line_numbers=False, keep_furniture=False):
         ref = " ".join(ref_lines)
         d = edit_distance(ref, out)
         cer_pages.append(round(d / max(len(ref), 1), 4))
+        dist_pages.append(d)
+        len_pages.append(len(ref))
         dist_sum += d
         len_sum += len(ref)
         ops = edit_counts(ref, out)
@@ -237,6 +239,7 @@ def score(gt, md, strip_line_numbers=False, keep_furniture=False):
         **{k: m[k] for k in ("dist_strict", "len_strict", "wdist", "wlen", "wdist_strict",
                              "wlen_strict", "subs", "dels", "ins")},
         "cer": round(dist_sum / max(len_sum, 1), 4), "cer_pages": cer_pages,
+        "dist_pages": dist_pages, "len_pages": len_pages,
         "dist_sum": dist_sum, "len_sum": len_sum, "bates_ok": bates_ok, "bates_total": bates_total,
         "tl_ok": tl_ok, "tl_total": tl_total,
         "token_recall": round(tok_found / tok_total, 4) if tok_total else None,

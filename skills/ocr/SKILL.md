@@ -11,7 +11,7 @@ description: OCR PDFs and images to Markdown locally on a Mac with the `ocr` com
 
 1. Check that the tool is installed: `command -v ocr && ocr --version`. If it is missing, tell the user and stop; do not try to install it yourself.
 2. The default engine, `apple`, needs no setup. For a model engine, run `ocr server setup --model <engine>` once. It downloads several GB, so confirm with the user first.
-3. A model engine also needs its server running: `ocr server start --model <engine>`. Only one model server runs at a time. Run `ocr server stop` when you finish, unless the user wants it left running.
+3. A model engine also needs its server running: `ocr server start --model <engine>`. Only one model server runs at a time. `indra-ocr` is the exception: it has no server (setup needs `uv` and downloads about 18 MB). Run `ocr server stop` when you finish, unless the user wants it left running.
 
 ## Choosing an engine
 
@@ -21,6 +21,7 @@ description: OCR PDFs and images to Markdown locally on a Mac with the `ocr` com
 | Deposition transcripts (full-page or 4-up condensed) | `dots-ocr` | Most accurate on transcripts; about 12 s/page |
 | Table-heavy documents, or a faster model engine | `paddleocr-vl` | About 5 s/page |
 | Clean prose and tables | `olmocr` | Slowest (about 16 s/page), needs 11 GB of memory |
+| A machine with no GPU, or a fast first pass on clean documents | `indra-ocr` | CPU only, about 2 pages/s, no server; weaker on degraded scans, handwriting and complex tables; weights are under a modified OpenRAIL-M (research, personal use, small startups) |
 
 Start with `apple` unless the document is a transcript or the user asks for a model. Before a model run of more than about 50 pages, tell the user the estimated time.
 

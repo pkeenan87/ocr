@@ -51,10 +51,17 @@ pub enum Engine {
     Olmocr,
     PaddleocrVl,
     DotsOcr,
+    /// CPU-only ONNX pipeline run as a subprocess per document; no server.
+    IndraOcr,
 }
 
 impl Engine {
-    pub const MODELS: [Engine; 3] = [Engine::Olmocr, Engine::PaddleocrVl, Engine::DotsOcr];
+    pub const MODELS: [Engine; 4] = [
+        Engine::Olmocr,
+        Engine::PaddleocrVl,
+        Engine::DotsOcr,
+        Engine::IndraOcr,
+    ];
 
     pub fn name(self) -> &'static str {
         match self {
@@ -62,6 +69,7 @@ impl Engine {
             Self::Olmocr => "olmocr",
             Self::PaddleocrVl => "paddleocr-vl",
             Self::DotsOcr => "dots-ocr",
+            Self::IndraOcr => "indra-ocr",
         }
     }
 
@@ -69,12 +77,18 @@ impl Engine {
     /// build are offered, and dots defaults to `dots.ocr` (PLAN §9.5).
     pub fn versions(self) -> &'static [&'static str] {
         match self {
-            Self::Apple | Self::Olmocr => &[],
+            Self::Apple | Self::Olmocr | Self::IndraOcr => &[],
             Self::PaddleocrVl if cfg!(target_os = "macos") => &["1.6", "1.5", "1.0"],
             Self::PaddleocrVl => &["1.6", "1.5"],
             Self::DotsOcr if cfg!(target_os = "macos") => &["dots.mocr", "dots.ocr"],
             Self::DotsOcr => &["dots.ocr"],
         }
+    }
+
+    /// Whether the engine is served over HTTP by `ocr server start`. indra-ocr runs as a
+    /// subprocess per document, and apple in-process.
+    pub fn has_server(self) -> bool {
+        !matches!(self, Self::Apple | Self::IndraOcr)
     }
 
     /// Validates `--model-version`, returning the version to use (if the engine has any).
@@ -262,10 +276,11 @@ pub struct ScanArgs {
     /// Strip running headers and footers repeated across pages (opt-in)
     #[arg(long)]
     pub legal_cleanup: bool,
-    /// Render resolution, 72-600 (default 150; dots-ocr 100)
+    /// Render resolution, 72-600 (default 150; dots-ocr 100; indra-ocr 200)
     #[arg(long, value_name = "N", value_parser = clap::value_parser!(u32).range(72..=600))]
     pub dpi: Option<u32>,
-    /// Total pages in flight across the whole run (Apple Vision itself recognizes at most 2 at a time)
+    /// Total pages in flight across the whole run (Apple Vision itself recognizes at most 2 at a
+    /// time); indra-ocr: its ONNX thread count
     #[arg(long, visible_alias = "parallel", value_name = "N", value_parser = parse_jobs)]
     pub jobs: Option<usize>,
     #[arg(long, conflicts_with = "verbose")]
@@ -292,6 +307,8 @@ pub const OLMOCR_SIDE_DPI: u32 = 200;
 pub const PADDLE_DPI: u32 = 150;
 /// Phase 6 tuning (docs/eval.md): dots-ocr was as accurate at 100 DPI as at 200, and 3-4x faster.
 pub const DOTS_DPI: u32 = 100;
+/// indra-ocr's own default render resolution.
+pub const INDRA_DPI: u32 = 200;
 
 impl ScanArgs {
     /// Apple defaults to `auto`: Vision's layout with the exact characters of a PDF's embedded
@@ -310,20 +327,23 @@ impl ScanArgs {
         !self.no_page_markers
     }
 
-    /// Effective `--dpi`: explicit value, else the engine default (apple 150; paddleocr-vl 150; dots-ocr 100; olmocr side pass 200).
+    /// Effective `--dpi`: explicit value, else the engine default (apple 150; paddleocr-vl 150; dots-ocr 100; olmocr side pass 200; indra-ocr 200).
     pub fn effective_dpi(&self) -> u32 {
         self.dpi.unwrap_or(match self.model {
             Engine::PaddleocrVl => PADDLE_DPI,
             Engine::DotsOcr => DOTS_DPI,
             Engine::Olmocr => OLMOCR_SIDE_DPI,
-            _ => DEFAULT_DPI,
+            Engine::IndraOcr => INDRA_DPI,
+            Engine::Apple => DEFAULT_DPI,
         })
     }
 
-    /// Effective `--jobs`: explicit value, else performance cores (apple) or 1 (model engines).
+    /// Effective `--jobs`: explicit value, else performance cores (apple), the available cores
+    /// (indra-ocr: its ONNX threads) or 1 (model engines).
     pub fn effective_jobs(&self) -> usize {
         self.jobs.unwrap_or(match self.model {
             Engine::Apple => perf_cores(),
+            Engine::IndraOcr => std::thread::available_parallelism().map_or(1, |n| n.get()),
             _ => 1,
         })
     }
@@ -385,6 +405,15 @@ mod tests {
                 "dots.ocr"
             })
         );
+    }
+
+    #[test]
+    fn indra_has_no_server_and_no_version() {
+        assert_eq!(Engine::IndraOcr.name(), "indra-ocr");
+        assert!(Engine::MODELS.contains(&Engine::IndraOcr));
+        assert!(!Engine::IndraOcr.has_server() && Engine::Olmocr.has_server());
+        assert_eq!(Engine::IndraOcr.resolve_version(None).unwrap(), None);
+        assert!(Engine::IndraOcr.resolve_version(Some("1")).is_err());
     }
 
     #[test]

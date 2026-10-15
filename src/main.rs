@@ -6,6 +6,7 @@ use ocr::cli::{Cli, Command, Engine, ScanArgs, ServerCommand, SetupArgs, StartAr
 use ocr::config::Config;
 use ocr::engines::MLX_VLM_PIN;
 use ocr::error::CliError;
+use ocr::indra::Indra;
 use ocr::input::{self, Plan};
 use ocr::model_engine;
 use ocr::pipeline::{Apple, Settings};
@@ -88,6 +89,11 @@ fn gate(engine: Engine) -> Result<(), CliError> {
             if engine == Engine::Apple {
                 eprintln!("{warning}");
                 Ok(())
+            } else if engine == Engine::IndraOcr {
+                Err(CliError::Setup(
+                    "⚠ ocr is not set up yet. Run `ocr server setup --model indra-ocr` first."
+                        .into(),
+                ))
             } else {
                 Err(CliError::Setup(warning.into()))
             }
@@ -130,6 +136,12 @@ fn start(args: &StartArgs) -> Result<(), CliError> {
                 "the apple engine runs in-process and needs no server".into(),
             ));
         }
+        Some(Engine::IndraOcr) => {
+            println!(
+                "indra-ocr runs without a server: it starts per document during `ocr scan --model indra-ocr`."
+            );
+            return Ok(());
+        }
         Some(m) => m,
         None => default_server_model()?,
     };
@@ -137,14 +149,15 @@ fn start(args: &StartArgs) -> Result<(), CliError> {
     server::start(args, model)
 }
 
-/// With no `--model`, serve the one installed model engine; otherwise ask the user to choose.
+/// With no `--model`, serve the one installed model engine that has a server (not indra-ocr);
+/// otherwise ask the user to choose.
 fn default_server_model() -> Result<Engine, CliError> {
     let config = Config::load().map_err(|e| CliError::Setup(e.to_string()))?;
     let installed: Vec<Engine> = config
         .map(|c| {
             Engine::MODELS
                 .into_iter()
-                .filter(|m| c.is_installed(*m))
+                .filter(|m| m.has_server() && c.is_installed(*m))
                 .collect()
         })
         .unwrap_or_default();
@@ -153,7 +166,7 @@ fn default_server_model() -> Result<Engine, CliError> {
         [] => Err(CliError::Setup(if cfg!(target_os = "macos") {
             "no model engine is installed. The default apple engine needs no server: run \
              `ocr scan` directly. To use a model engine, run `ocr server setup --model <engine>` \
-             (paddleocr-vl, olmocr or dots-ocr)."
+             (paddleocr-vl, olmocr or dots-ocr; indra-ocr needs no server)."
                 .into()
         } else {
             "no model engine is installed. Run `ocr server setup --model <engine>`.".into()
@@ -218,11 +231,14 @@ fn scan(args: &ScanArgs) -> Result<(), CliError> {
         print_mapping(&plan);
         return Ok(());
     }
-    if args.model != Engine::Apple {
-        let info = model_gate(args)?;
-        return run_model(args, &plan, info);
+    match args.model {
+        Engine::Apple => run_apple(args, &plan),
+        Engine::IndraOcr => run_indra(args, &plan),
+        _ => {
+            let info = model_gate(args)?;
+            run_model(args, &plan, info)
+        }
     }
-    run_apple(args, &plan)
 }
 
 /// Model-engine scan gate (PLAN §3): the right server must be running.
@@ -305,6 +321,15 @@ fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliEr
     let ctx = model_engine::Ctx::new(spec, info, &mlx, settings.jobs);
     let report = run::run(&plan.items, &ctx, &settings, args.input_dir.is_some());
     finish(plan, report, true, !args.no_front_matter)
+}
+
+/// Runs indra-ocr over every planned file: a helper process per document, no server. Failed
+/// pages make the run partial, and a re-run retries them.
+fn run_indra(args: &ScanArgs, plan: &Plan) -> Result<(), CliError> {
+    let backend = Indra::new()?;
+    let settings = settings(args);
+    let report = run::run(&plan.items, &backend, &settings, args.input_dir.is_some());
+    finish(plan, report, false, !args.no_front_matter)
 }
 
 /// Runs the apple pipeline over every planned file; failed pages or files make the run partial.

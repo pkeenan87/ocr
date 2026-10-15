@@ -146,7 +146,7 @@ pub fn scan_engine(engine: Engine) -> Option<&'static dyn ScanEngine> {
         Engine::PaddleocrVl => Some(&Paddle),
         Engine::Olmocr => Some(&crate::olmocr::Olmocr),
         Engine::DotsOcr => Some(&crate::dots::Dots),
-        Engine::Apple => None,
+        Engine::Apple | Engine::IndraOcr => None,
     }
 }
 
@@ -454,6 +454,12 @@ const BATES_FOUND: u32 = u32::MAX;
 /// Pages of a document probed for a Bates corner, with nothing found, before probing stops.
 const BATES_PROBE_PAGES: u32 = 3;
 
+/// Bottom-right, then bottom-left corner of the page (normalized top-left [x, y, w, h]), where
+/// Bates numbers are stamped. olmOCR drops a whole footer strip as page furniture, and dots'
+/// `prompt_ocr` leaves out Page-footer text, but both read a corner on its own (docs/spike.md,
+/// "olmOCR footer strip" and "dots Bates corners").
+const BATES_CORNERS: [[f64; 4]; 2] = [[0.7, 0.9, 0.3, 0.1], [0.0, 0.9, 0.3, 0.1]];
+
 /// Requests the server runs at once: its recorded `slots` (llama-server), else `--max-num-seqs`
 /// from its recorded argv (mlx-vlm), else 1.
 pub fn max_num_seqs(info: &ServerInfo) -> usize {
@@ -590,6 +596,42 @@ impl Ctx {
         } else if *n != BATES_FOUND {
             *n += 1;
         }
+    }
+
+    /// Off macOS, where no Vision side-pass reads the footer: when the page's own text has no
+    /// Bates number, asks `probe` for each of `BATES_CORNERS` in turn and returns the first
+    /// number found. A corner that fails or reads nothing is skipped; only a stopped server ends
+    /// the page. Corner requests cost up to two model calls a page, so a document stops getting
+    /// them once its first pages showed none (`want_bates_corners`).
+    pub(crate) fn corner_bates(
+        &self,
+        path: &Path,
+        prep: &Prepared,
+        body: &str,
+        mut probe: impl FnMut([f64; 4]) -> Result<Option<String>, Fail>,
+    ) -> Result<Option<String>, Fail> {
+        if cfg!(target_os = "macos") || prep.bates().is_some() {
+            return Ok(None);
+        }
+        if markdown::find_bates_in_text(body).is_some() {
+            self.note_bates(path, true);
+            return Ok(None);
+        }
+        if !self.want_bates_corners(path) {
+            return Ok(None);
+        }
+        for crop in BATES_CORNERS {
+            match probe(crop) {
+                Ok(Some(bates)) => {
+                    self.note_bates(path, true);
+                    return Ok(Some(bates));
+                }
+                Err(stopped @ Fail::Stopped(_)) => return Err(stopped),
+                _ => {}
+            }
+        }
+        self.note_bates(path, false);
+        Ok(None)
     }
 
     /// Waits for a request slot. The timeout clock of a request must start after this returns.
@@ -1074,7 +1116,7 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
     Ok(result)
 }
 
-fn blank(number: usize) -> PageResult {
+pub(crate) fn blank(number: usize) -> PageResult {
     PageResult {
         number,
         source: markdown::Source::Vision,

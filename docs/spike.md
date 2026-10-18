@@ -1121,3 +1121,15 @@ First real run of indra-ocr on macOS (it had been tested only with the fake help
 **Fix:** a header or footer block that is the filing stamp (`COURT_STAMP`) is put back at the top of the page, after the Bates search (so its `Page 2 of 5` is never a Bates number). Its values keep `court_stamp`, so the Vision re-read never verifies them. Tests: three `page_result` unit tests and a fake-helper scan with `--verify-json` (`INDRA_FAKE_STAMP`).
 
 **Holdout, indra-ocr:** values found 66.8% → **80.8%** (dockets 14 → 34 of 49, dates 96 → 117 of 151), verified 142 → 164, **verified but wrong 0 → 0**. Of the values on restored stamp lines, 24 are verified by the PDF's own text and none by the Vision re-read; 11 are `check` with `court_stamp`.
+
+### olmOCR on the holdout set (2026-10-18)
+
+olmOCR 2 (mlx-community 8bit), build of #46, same settings. 61 pages took 28 minutes (about 28 s a page on the M1 Max).
+
+| Values found (292) | Verified but wrong | Verified / check | Amounts | Dates | Dockets | Citations | CER / word error |
+|---|---|---|---|---|---|---|---|
+| 77.4% | **0** | 160 / 66 | 61/71 | 113/151 | 31/49 | 19/19 | 28.7% / 27.6% |
+
+- No misreads: every value olmOCR found is the page's. No engine value outside the set was verified (3 extra, all `check`).
+- What it drops is mostly filing-stamp dates and dockets on old scans (h03, h11, h12), the capitalised header date on h10 (`MARCH 15, 2007`) and h10's invoice amounts.
+- The lowest word error of all engines (27.6%) but a high CER: it drops whole header and footer lines.

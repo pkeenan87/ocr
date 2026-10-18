@@ -462,16 +462,17 @@ License: the weights are under a modified OpenRAIL-M. They are free for research
 
 Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 85-87 s at the 150 DPI default (84-96 s at 200 DPI), about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes.
 
-**Accuracy on real filings** (the hand-checked holdout set: 61 pages of 18 public court filings, 292 values; v1.0 release build `3dff738`, macOS 26.6, `--verify-json --verify-fields all`, 2026-10-18). The measure that matters is the second column: a value marked `verified` that is not what the page says.
+**Accuracy on real filings** (the hand-checked holdout set: 61 pages of 18 public court filings, 292 values; release builds of `3dff738`, and of #46 for indra-ocr and olmOCR; macOS 26.6, `--verify-json --verify-fields all`, 2026-10-18). The measure that matters is the second column: a value marked `verified` that is not what the page says.
 
 | Engine | Values found | Verified but wrong | Verified | Amounts | Dates | Dockets | Citations | Transcription CER / word error (12 pages) |
 |---|---|---|---|---|---|---|---|---|
 | apple | 93.5% | **0** | 141 | 67/71 | 142/151 | 46/49 | 16/19 | 14.3% / 20.7% |
 | paddleocr-vl | 96.6% | **0** | 181 | 67/71 | 146/151 | 48/49 | 19/19 | 17.5% / 23.8% |
 | dots-ocr | 85.3% | **0** | 175 | 65/71 | 130/151 | 34/49 | 18/19 | 28.1% / 36.4% |
+| olmocr | 77.4% | **0** | 160 | 61/71 | 113/151 | 31/49 | 19/19 | 28.7% / 27.6% |
 | indra-ocr | 80.8% | **0** | 164 | 65/71 | 117/151 | 34/49 | 18/19 | 21.8% / 38.7% |
 
-Every misread value (two for Apple, one each for Paddle, dots and indra-ocr, such as `March 24, 2008` read as `2001`) was marked `check`, not `verified`. What every engine misses is mostly stamps, struck-through filing headers and handwriting; dots and indra-ocr also drop many filing-stamp dockets and dates on old scans. The set was measured on the Mac only: off the Mac nothing verifies a value on a scan (see [Known limits](#known-limits)), and olmOCR has not been scored on it. Details: [docs/spike.md](docs/spike.md).
+Every misread value was marked `check`, not `verified`: two for Apple and one each for Paddle, dots and indra-ocr (such as `March 24, 2008` read as `2001`). olmOCR misread none. What every engine misses is mostly stamps, struck-through filing headers and handwriting; dots, olmOCR and indra-ocr also drop many filing-stamp dockets and dates on old scans. The set was measured on the Mac only: off the Mac nothing verifies a value on a scan (see [Known limits](#known-limits)). Details: [docs/spike.md](docs/spike.md).
 
 Accuracy on the synthetic eval set (Phase 6, 2026-10-08; accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
 

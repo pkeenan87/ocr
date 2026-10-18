@@ -5,6 +5,8 @@
 // Needs Apple Vision (PLAN §9).
 #![cfg(target_os = "macos")]
 
+mod common;
+
 use std::fs;
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
@@ -739,12 +741,15 @@ fn real_paddle_engine() {
             t.elapsed().as_secs_f64(),
             String::from_utf8_lossy(&out.stderr)
         );
-        if out.status.code() != Some(0) {
+        let md = e.markdown(input);
+        if out.status.code() != Some(0)
+            && !common::only_fixture_duplicate_flag(out.status.code(), label, &md)
+        {
             failures
                 .borrow_mut()
                 .push(format!("{label}: exit {:?}", out.status.code()));
         }
-        e.markdown(input)
+        md
     };
 
     // legal_scan: case number, four amounts and the Bates number are exact; twice, byte-identical.

@@ -454,11 +454,16 @@ const BATES_FOUND: u32 = u32::MAX;
 /// Pages of a document probed for a Bates corner, with nothing found, before probing stops.
 const BATES_PROBE_PAGES: u32 = 3;
 
-/// Bottom-right, then bottom-left corner of the page (normalized top-left [x, y, w, h]), where
-/// Bates numbers are stamped. olmOCR drops a whole footer strip as page furniture, and dots'
-/// `prompt_ocr` leaves out Page-footer text, but both read a corner on its own (docs/spike.md,
-/// "olmOCR footer strip" and "dots Bates corners").
-const BATES_CORNERS: [[f64; 4]; 2] = [[0.7, 0.9, 0.3, 0.1], [0.0, 0.9, 0.3, 0.1]];
+/// Bottom-right corner, bottom-left corner, then bottom centre of the page (normalized top-left
+/// [x, y, w, h]), where Bates numbers are stamped. olmOCR drops a whole footer strip as page
+/// furniture, and dots' `prompt_ocr` leaves out Page-footer text, but both read a corner on its
+/// own (docs/spike.md, "olmOCR footer strip" and "dots Bates corners"). The order is fixed so a
+/// page's result does not depend on the pages read before it.
+const BATES_CORNERS: [[f64; 4]; 3] = [
+    [0.7, 0.9, 0.3, 0.1],
+    [0.0, 0.9, 0.3, 0.1],
+    [0.3, 0.9, 0.4, 0.1],
+];
 
 /// Requests the server runs at once: its recorded `slots` (llama-server), else `--max-num-seqs`
 /// from its recorded argv (mlx-vlm), else 1.

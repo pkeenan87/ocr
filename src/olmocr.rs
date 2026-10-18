@@ -157,17 +157,18 @@ impl ScanEngine for Olmocr {
 
     fn run(&self, ctx: &Ctx, path: &Path, prep: &Prepared, s: &Settings) -> Result<Output, Fail> {
         let planned = prep.planned.as_ref().map_err(|e| Fail::Failed(e.clone()))?;
-        let mut out = match run_requests(ctx, path, prep, s, planned, true, prep.alt.is_some()) {
-            Err(Fail::Degenerate) => {
-                let specs = prep.alt.as_deref().unwrap_or_default();
-                let crops =
-                    render_specs(path, prep.index, s.dpi, specs, self).map_err(Fail::Failed)?;
-                run_requests(ctx, path, prep, s, &crops, false, false)
-            }
-            other => other,
-        }?;
+        let (mut out, turn) =
+            match run_requests(ctx, path, prep, s, planned, true, prep.alt.is_some()) {
+                Err(Fail::Degenerate) => {
+                    let specs = prep.alt.as_deref().unwrap_or_default();
+                    let crops =
+                        render_specs(path, prep.index, s.dpi, specs, self).map_err(Fail::Failed)?;
+                    run_requests(ctx, path, prep, s, &crops, false, false)
+                }
+                other => other,
+            }?;
         if let Some(bates) = ctx.corner_bates(path, prep, &out.body, |crop| {
-            corner(ctx, path, prep, s, crop)
+            corner(ctx, path, prep, s, crop, turn)
         })? {
             out.bates = Some(bates);
         }
@@ -179,16 +180,27 @@ impl ScanEngine for Olmocr {
 const CORNER_MAX_TOKENS: u32 = 256;
 
 /// One Bates corner (`Ctx::corner_bates`). olmOCR drops a whole footer strip as page furniture,
-/// but reads a corner on its own (docs/spike.md, "olmOCR footer strip").
+/// but reads a corner on its own (docs/spike.md, "olmOCR footer strip"). `crop` is a corner of
+/// the upright page: on a page the model turned by `turn`, the corner is taken from the turned
+/// page.
 fn corner(
     ctx: &Ctx,
     path: &Path,
     prep: &Prepared,
     s: &Settings,
     crop: [f64; 4],
+    turn: u32,
 ) -> Result<Option<String>, Fail> {
-    let png = vision::render_png_fit(path, prep.index, s.dpi, Some(crop), Some(MAX_SIDE), 0)
-        .map_err(|e| Fail::Failed(e.to_string()))?;
+    let unturned = unturn_crop(crop, turn);
+    let png = vision::render_png_fit(
+        path,
+        prep.index,
+        s.dpi,
+        Some(unturned),
+        Some(MAX_SIDE),
+        turn,
+    )
+    .map_err(|e| Fail::Failed(e.to_string()))?;
     let reply = ctx.send(
         &Planned::new(Prompt::Olmocr, &png, true),
         CORNER_MAX_TOKENS,
@@ -197,6 +209,19 @@ fn corner(
     Ok(markdown::find_bates_in_text(&parse_reply(&reply.text).body))
 }
 
+/// `crop` (normalized top-left [x, y, w, h] of the page turned `turn` degrees counter-clockwise)
+/// in the frame of the page before the turn: `render_png_fit` crops first, then turns.
+fn unturn_crop([x, y, w, h]: [f64; 4], turn: u32) -> [f64; 4] {
+    match turn {
+        90 => [1.0 - y - h, x, h, w],
+        180 => [1.0 - x - w, 1.0 - y - h, w, h],
+        270 => [y, 1.0 - x - w, h, w],
+        _ => [x, y, w, h],
+    }
+}
+
+/// The page's text from `reqs`, and the turn (degrees counter-clockwise) a full-page request
+/// applied after the model said the rotation was invalid.
 fn run_requests(
     ctx: &Ctx,
     path: &Path,
@@ -205,16 +230,17 @@ fn run_requests(
     reqs: &[Planned],
     full_page: bool,
     crop_alt: bool,
-) -> Result<Output, Fail> {
+) -> Result<(Output, u32), Fail> {
     let mut out = Output {
         body: String::new(),
         table: false,
         flagged: false,
         bates: None,
     };
-    let mut parts = Vec::new();
+    let (mut parts, mut turn) = (Vec::new(), 0);
     for req in reqs {
-        let (md, table, flagged) = request(ctx, path, prep, s, req, full_page, crop_alt)?;
+        let (md, table, flagged, rotation) = request(ctx, path, prep, s, req, full_page, crop_alt)?;
+        turn = rotation;
         out.table |= table;
         out.flagged |= flagged;
         if !md.trim().is_empty() {
@@ -228,11 +254,11 @@ fn run_requests(
     if out.body.trim().is_empty() {
         return Err(Fail::Failed("empty model output".into()));
     }
-    Ok(out)
+    Ok((out, turn))
 }
 
-/// One request and its ladder; returns the Markdown, whether a table was converted and whether
-/// the page needs a human look.
+/// One request and its ladder; returns the Markdown, whether a table was converted, whether
+/// the page needs a human look, and the turn applied to the page (0 unless rotated).
 ///
 /// - Rotation: with `full_page`, a reply with `is_rotation_valid: False` and a correction is
 ///   retried once on the page rendered again and turned by the correction, as olmOCR's own
@@ -255,7 +281,7 @@ fn request(
     first: &Planned,
     full_page: bool,
     crop_alt: bool,
-) -> Result<(String, bool, bool), Fail> {
+) -> Result<(String, bool, bool, u32), Fail> {
     let mut req = first.clone();
     let mut crop_alt = crop_alt;
     let (mut max_tokens, mut penalty) = (ctx.lim.max_tokens, None);
@@ -312,13 +338,47 @@ fn request(
             empty_retried = true;
             continue;
         }
-        return Ok((md, table, flagged));
+        return Ok((md, table, flagged, rotation));
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn corners_of_a_turned_page_map_back_to_the_stored_page() {
+        // A point (u, v) of the stored page lands at these upright coordinates after a
+        // counter-clockwise turn (`rotate_ccw`).
+        let turned = |[u, v]: [f64; 2], turn: u32| match turn {
+            90 => [v, 1.0 - u],
+            180 => [1.0 - u, 1.0 - v],
+            270 => [1.0 - v, u],
+            _ => [u, v],
+        };
+        let close =
+            |a: [f64; 2], b: [f64; 2]| (a[0] - b[0]).abs() < 1e-9 && (a[1] - b[1]).abs() < 1e-9;
+        for turn in [0, 90, 180, 270] {
+            for crop in [
+                [0.7, 0.9, 0.3, 0.1],
+                [0.0, 0.9, 0.3, 0.1],
+                [0.3, 0.9, 0.4, 0.1],
+            ] {
+                let [x, y, w, h] = unturn_crop(crop, turn);
+                // The stored crop's corners turn into the upright crop's corners.
+                let mut got: Vec<[f64; 2]> = [[x, y], [x + w, y], [x, y + h], [x + w, y + h]]
+                    .into_iter()
+                    .map(|p| turned(p, turn))
+                    .collect();
+                let [cx, cy, cw, ch] = crop;
+                let want = [[cx, cy], [cx + cw, cy], [cx, cy + ch], [cx + cw, cy + ch]];
+                for p in want {
+                    let i = got.iter().position(|&g| close(g, p)).expect("corner");
+                    got.remove(i);
+                }
+            }
+        }
+    }
 
     #[test]
     fn prompt_is_upstream_verbatim() {

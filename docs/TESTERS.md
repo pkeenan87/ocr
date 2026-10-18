@@ -1,13 +1,14 @@
 # ocr pilot: guide for testers
 
-Thank you for testing `ocr`. It turns scanned and image-only PDFs into Markdown on your Mac or Linux machine, and tells you which values (amounts, dates, docket and Bates numbers, citations) it could confirm and which you must check against the page.
+Thank you for testing `ocr`. It turns scanned and image-only PDFs into Markdown on your Mac or Linux PC, and tells you which values (amounts, dates, docket and Bates numbers, citations) it could confirm and which you must check against the page.
 
 **One rule above all:** only a value marked `verified` (or confirmed by the second service in the Claude workflow) is reliable. Everything else means "look at the page". `ocr` is built so that a value it is unsure of is never marked `verified`, and we need you to tell us if one ever is.
 
 ## What you need
 
-- **Mac:** an Apple Silicon Mac (M1 or later) on **macOS 26 or later**. About 1 GB free for the default engine. The optional model engines need 2–9 GB more and 8–16 GB of RAM (see "Engines" below).
-- **Linux:** x86-64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 and newer), `curl` and `tar`, and an NVIDIA GPU with at least 6 GB of memory (`olmocr` needs about 11 GB; tested on 16 GB). An AMD or Intel GPU with its own memory works through Vulkan, more slowly; without a GPU, `paddleocr-vl` runs on the CPU at about 8 s a page. Allow 5–15 GB of disk for an engine.
+- **Mac:** Apple Silicon (M1 or later) on **macOS 26 or later**. About 1 GB free for the default engine. The optional model engines need 2–9 GB more and 8–16 GB of RAM (see "Engines" below).
+- **Linux:** x86-64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 and newer), `curl` and `tar`, ideally with an NVIDIA GPU (8 GB or more for `dots-ocr`, 12 GB for `olmocr`). An AMD or Intel GPU with its own memory works through Vulkan, more slowly; without a GPU, `paddleocr-vl` runs on the CPU at about 8 s a page. Allow 5–15 GB of disk for an engine. **Read "Known limits" first: a Linux run confirms far fewer values than a Mac run.**
+- Windows builds exist but have not been tested on a real machine; please don't pilot on Windows yet.
 - For the Claude workflow: Claude Code.
 
 ## Install
@@ -34,7 +35,7 @@ mkdir -p ~/.claude/skills && cp -R ocr-*/skills/ocr ~/.claude/skills/
 
 The `xattr` step tells macOS to trust a downloaded program that is not from the App Store. The last step installs the Claude skill.
 
-**From source** (if you have repository access): install the Xcode command line tools (`xcode-select --install`) and Rust ([rustup.rs](https://rustup.rs)), then `cargo build --release` in the repository and copy `target/release/ocr` and `skills/ocr` as above.
+**From source on a Mac** (if you have repository access): install the Xcode command line tools (`xcode-select --install`) and Rust ([rustup.rs](https://rustup.rs)), then `cargo build --release` in the repository and copy `target/release/ocr` and `skills/ocr` as above.
 
 ### Linux
 
@@ -54,7 +55,7 @@ ocr server setup --model dots-ocr
 ocr server start --model dots-ocr
 ```
 
-**From source:** install Rust ([rustup.rs](https://rustup.rs)) and run `cargo build --release` in the repository.
+**From source** (if you have repository access): install Rust ([rustup.rs](https://rustup.rs)) and, for an NVIDIA GPU, a current driver (`nvidia-smi` must work). Then, in the repository, `cargo build --release`, copy `target/release/ocr` and `skills/ocr` as above, and set up an engine.
 
 Check it works:
 
@@ -94,11 +95,11 @@ A whole folder works too: `--input-dir` and `--output-dir`.
 
 ## Engines
 
-- **Mac:** **`apple`** is the default: fast (about 3 pages a second), no download, good on most documents.
+- **`apple`** is the default on a Mac (it is not available on Linux): fast (about 3 pages a second), no download, good on most documents.
 - **The model engines** are optional on a Mac and required on Linux. Set one up once with `ocr server setup --model <engine>`, start it with `ocr server start`, then add `--model <engine>` to `scan`:
   - **`paddleocr-vl`:** the fastest and lightest. On Linux it is the default but weaker on tables and transcripts;
   - **`dots-ocr`:** the most accurate on deposition transcripts and tables; **the recommended engine on Linux**;
-  - **`olmocr`:** accurate on prose and tables, the slowest; needs a 16 GB GPU on Linux.
+  - **`olmocr`:** accurate on prose and tables, the slowest; about 11 GB of GPU memory on Linux.
 
 ## Please report
 
@@ -112,12 +113,13 @@ Send reports to Patrick. For each one, include the document if it may be shared,
 
 ## Known limits
 
-- **Mac and Linux.** Windows builds pass CI but have not been tested on a Windows machine.
-- **On Linux** there is no Apple Vision: Bates numbers come from the model, transcripts are not detected and their line numbers are not re-anchored, and scanned pages have no second reading. The README's "Linux and Windows" section lists the differences.
+- **On Linux, values on scanned pages are never `verified`.** The Mac reads each scanned page a second time with Apple Vision; Linux has no second reader, so only a PDF's own text can confirm a value. Expect most values on scans to be `check` or `unchecked`, and look at those pages or use the Azure step.
+- **On Linux, `paddleocr-vl` is worse on tables** than on a Mac (it cannot crop them out), and **transcript line numbers are not checked** against the page. Use `dots-ocr` for tables and transcripts, and check `page:line` citations against the PDF.
+- **Windows** is not ready for the pilot.
 - **Not read:** filled PDF form fields, stamps added as annotations, and handwriting. Pages with them are flagged, not guessed.
 - **Struck-through or overprinted filing stamps** are often misread. Their values are never marked `verified` by image readers alone.
 - **The Azure step** depends on a tool your organisation sets up. Without it, `azure_pages` is the list of pages for a person to check.
 
 ## Privacy
 
-Everything runs on your machine. There is no telemetry, and model servers listen on your machine only. The only network use is downloading the optional model engines at setup. Nothing leaves your machine unless you use a second service such as Azure through Claude, and the skill asks before sending a document that may be confidential.
+Everything runs on your computer. There is no telemetry, and model servers listen on your machine only. The only network use is downloading the optional model engines at setup. Nothing leaves your machine unless you use a second service such as Azure through Claude, and the skill asks before sending a document that may be confidential.

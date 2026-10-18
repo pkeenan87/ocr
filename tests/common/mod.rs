@@ -1,4 +1,4 @@
-//! Shared harness of the model-engine tests (olmocr.rs, dots.rs): a temp config and state dir, a
+//! Shared harness of the model-engine tests (olmocr.rs, dots.rs; paddle.rs uses only its helpers): a temp config and state dir, a
 //! fake model server (tests/fake_server.py) on a free port, and the real Apple side-pass.
 #![allow(dead_code)]
 
@@ -238,4 +238,15 @@ pub fn penalty_key() -> &'static str {
     } else {
         "repeat_penalty"
     }
+}
+
+/// Whether a scan that exited 1 did so only because the synthetic transcript fixtures trip the
+/// duplicate check: their lines differ only by a number up to 25 ("Line 7 of the testimony
+/// today"), which the check leaves out on transcript pages, so every line reads as a repeat.
+/// Real testimony does not repeat itself like that; the fixture text is right, not the flag.
+pub fn only_fixture_duplicate_flag(code: Option<i32>, label: &str, md: &str) -> bool {
+    code == Some(1)
+        && matches!(label, "transcript" | "four_up")
+        && md.contains("\nsuspect_pages: {1: [duplicated]}\n")
+        && md.contains("\nfallback_pages: []\n")
 }

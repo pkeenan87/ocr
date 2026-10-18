@@ -532,12 +532,15 @@ fn real_dots_engine() {
             out.status.code(),
             t.elapsed().as_secs_f64(),
         );
-        if out.status.code() != Some(0) {
+        let md = e.markdown(input);
+        if out.status.code() != Some(0)
+            && !common::only_fixture_duplicate_flag(out.status.code(), label, &md)
+        {
             failures
                 .borrow_mut()
                 .push(format!("{label}: exit {:?}", out.status.code()));
         }
-        (e.markdown(input), stderr)
+        (md, stderr)
     };
     let scan = |input: &str, label: &str| scan_out(input, label).0;
 

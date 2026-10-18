@@ -1090,3 +1090,46 @@ The holdout set showed dots finding only 19 of 49 dockets. Since "dots: plain te
 **Fix:** when the Apple side pass reads a filing-stamp line at the top of a model page (top tenth), and the model's text has no such line, Apple's line is put at the top of the page. Its values still get `court_stamp`, so two image readers never verify them; the PDF's own text or Azure can.
 
 **Holdout, dots, against master:** values found 74.3% → 85.3% (dockets 19 → 34 of 49, dates 113 → 130 of 151), verified but wrong 0 → 0.
+
+## Holdout re-score on the v1.0 release build (2026-10-18)
+
+Release build of master `3dff738` (`cargo build --release`, `ocr 0.2.0`), macOS 26.6.2 on an M1 Max (32 GB), `eval/holdout/prepare.py scan` (`--verify-json --verify-fields all`), scored with `eval/holdout/score.py`. Paddle is PaddleOCR-VL 1.6 bf16, dots is dots.mocr 8bit, both on mlx-vlm 0.7.6.
+
+| Engine | Values found (292) | Verified but wrong | Verified / check | Amounts | Dates | Dockets | Citations | CER / word error |
+|---|---|---|---|---|---|---|---|---|
+| Apple | 93.5% (2026-10-12: 93.3%) | **0** | 141 / 132 | 67/71 | 142/151 | 46/49 | 16/19 | 14.3% / 20.7% |
+| paddleocr-vl | 96.6% (baseline: 88.4%) | **0** | 181 / 101 | 67/71 | 146/151 | 48/49 | 19/19 | 17.5% / 23.8% |
+| dots-ocr | 85.3% (2026-10-12: 85.3%) | **0** | 175 / 74 | 65/71 | 130/151 | 34/49 | 18/19 | 28.1% / 36.4% |
+
+- **The bar holds: no engine marked a wrong value `verified`.** No engine value outside the set was verified either (Apple 4, Paddle 3, dots 5 extra values, all `check`).
+- **Misreads were all `check`:** Apple `2:21-cy-00598` (h05) and `March 24, 2002` (h12), Paddle and dots `March 24, 2001` (h12, truth `March 24, 2008`).
+- Paddle's gain since its baseline comes from the extraction fixes of 2026-10-12 (dates in capitals, amounts without `$`); it had not been re-scored since.
+- dots still drops 15 of 49 dockets and 21 dates, mostly the filing-stamp header on old scans (h03, h12, h13) and the pleading caption docket on h14.
+
+### indra-ocr on the Mac (2026-10-18)
+
+First real run of indra-ocr on macOS (it had been tested only with the fake helper). Setup failed at first: Datalab squashed the Hugging Face repo's history on 2026-10-15, removing the pinned revision `5993a95` (404). The pin is now `ed345c7`; all seven files have the same sha256.
+
+- Setup (uv venv, seven weight files, checksums) took 5 s.
+- Scans worked on scanned and born-digital PDFs, `--use-text-layer always`, PNG, a page rotated 90° (read upright) and a two-page TIFF.
+- The verify second reader applies: on h01, both values were verified by the Vision re-read.
+- A run stopped with SIGTERM after 102 of 500 pages resumed from the checkpoints to the same output as a clean run. The helper exits about a second after `ocr` is killed, even with SIGKILL.
+- 500-page production at 300 DPI, one thread: 5.4 pages/s on the M1 Max.
+
+**Holdout:** values found 66.8%, **verified but wrong 0** (142 verified, 53 check; amounts 65/71, dates 96/151, dockets 14/49, citations 18/19; CER 23.1%, word error 39.9%). Its one misread, `March 24, 2001` (h12), is `check`. Most of what it drops is the court's filing stamp, which indra classifies as a page header and `ocr` leaves out of the body, as dots did before 2026-10-12.
+
+**Fix:** a header or footer block that is the filing stamp (`COURT_STAMP`) is put back at the top of the page, after the Bates search (so its `Page 2 of 5` is never a Bates number). Its values keep `court_stamp`, so the Vision re-read never verifies them. Tests: three `page_result` unit tests and a fake-helper scan with `--verify-json` (`INDRA_FAKE_STAMP`).
+
+**Holdout, indra-ocr:** values found 66.8% → **80.8%** (dockets 14 → 34 of 49, dates 96 → 117 of 151), verified 142 → 164, **verified but wrong 0 → 0**. Of the values on restored stamp lines, 24 are verified by the PDF's own text and none by the Vision re-read; 11 are `check` with `court_stamp`.
+
+### olmOCR on the holdout set (2026-10-18)
+
+olmOCR 2 (mlx-community 8bit), build of #46, same settings. 61 pages took 28 minutes (about 28 s a page on the M1 Max).
+
+| Values found (292) | Verified but wrong | Verified / check | Amounts | Dates | Dockets | Citations | CER / word error |
+|---|---|---|---|---|---|---|---|
+| 77.4% | **0** | 160 / 66 | 61/71 | 113/151 | 31/49 | 19/19 | 28.7% / 27.6% |
+
+- No misreads: every value olmOCR found is the page's. No engine value outside the set was verified (3 extra, all `check`).
+- What it drops is mostly filing-stamp dates and dockets on old scans (h03, h11, h12), the capitalised header date on h10 (`MARCH 15, 2007`) and h10's invoice amounts.
+- The lowest word error of all engines (27.6%) but a high CER: it drops whole header and footer lines.

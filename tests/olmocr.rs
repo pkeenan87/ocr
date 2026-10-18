@@ -280,6 +280,24 @@ fn truncation_is_retried_with_8000_tokens() {
     assert_eq!(tokens, [4096, 8000], "{reqs:?}");
 }
 
+/// A loop that runs into max_tokens is retried with the penalty, not with more tokens.
+#[test]
+fn loop_cut_off_at_max_tokens_gets_the_penalty() {
+    let e = env(&["transcript_full.pdf"]);
+    e.serve(&[("FAKE_MODE", "looplength"), ("FAKE_FAIL_FIRST", "1")]);
+    e.scan("transcript_full.pdf", &[], &[]).success();
+    let reqs = e.requests();
+    assert_eq!(reqs.len(), 2, "{reqs:?}");
+    assert_eq!(reqs[1]["max_tokens"], 4096, "{reqs:?}");
+    assert_eq!(reqs[1]["repetition_penalty"], 1.15, "{reqs:?}");
+    assert_eq!(reqs[1]["penalty_key"], penalty_key());
+    let md = e.markdown("transcript_full.pdf");
+    assert!(
+        md.contains("fallback_pages: []\n") && md.contains("fake olmocr text"),
+        "{md}"
+    );
+}
+
 #[test]
 fn persistent_truncation_falls_back_and_flags() {
     let e = env(&["transcript_full.pdf"]);

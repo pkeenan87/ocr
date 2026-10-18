@@ -12,7 +12,7 @@ use crate::cli::Engine;
 use crate::htmltable;
 use crate::markdown;
 use crate::model_engine::{
-    Ctx, Fail, LOOP_PENALTY, Output, Planned, Prepared, Prompt, ScanEngine, Spec,
+    Ctx, Fail, LOOP_PENALTY, Output, Planned, Prepared, Prompt, ScanEngine, Spec, has_cut_off_loop,
     has_repetition_loop, render_specs,
 };
 use crate::pipeline::{Settings, SidePass};
@@ -269,7 +269,7 @@ fn run_requests(
 ///   needed". Source: allenai/olmocr@8ef7f8085aeea5a7b857f2ff4a032f3a8f0fcfa2,
 ///   `olmocr/pipeline.py`, `build_page_query` (the transpose) and `process_page`
 ///   (`cumulative_rotation`). Verified on `legal_scan_rot90.png` with the real model.
-/// - `length`: retried once with `retry_max_tokens`, then the page falls back to Apple.
+/// - `length` (not a loop): retried once with `retry_max_tokens`, then the page falls back to Apple.
 /// - Loop (prose only, see `looped`): the crop plan if there is one, else once with a
 ///   `repetition_penalty`, then Apple.
 /// - Empty after the front matter: retried once; the page falls back if everything is empty.
@@ -290,7 +290,14 @@ fn request(
     let mut flagged = false;
     loop {
         let reply = ctx.send(&req, max_tokens, penalty)?;
-        if reply.finish == "length" {
+        // A loop that ran into max_tokens goes down the loop ladder below: more tokens would
+        // only loop longer.
+        let cut_off = reply.finish == "length";
+        let cut_off_loop = cut_off && {
+            let body = parse_reply(&reply.text).body;
+            looped(&body) || has_cut_off_loop(&htmltable::strip_tables(&body))
+        };
+        if cut_off && !cut_off_loop {
             if len_retried {
                 return Err(Fail::Failed("output truncated at max_tokens".into()));
             }
@@ -322,7 +329,7 @@ fn request(
             // Still invalid after the turn: use the text, but have a human look.
             flagged |= rotated;
         }
-        if looped(&parsed.body) {
+        if cut_off_loop || looped(&parsed.body) {
             if crop_alt {
                 return Err(Fail::Degenerate);
             }

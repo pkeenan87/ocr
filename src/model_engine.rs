@@ -298,6 +298,30 @@ pub fn table_specs(blocks: &[Block]) -> Option<Vec<Spec>> {
 /// Whether the tail of `text` is a repetition loop: a unit of 10-120 characters repeated at
 /// least six times in a row.
 pub fn has_repetition_loop(text: &str) -> bool {
+    repetition_loop(text, MIN_UNIT_VARIETY)
+}
+
+/// `has_repetition_loop` for a reply cut off at max_tokens: running out of tokens on a repeated
+/// tail is itself the sign of a loop, so a unit needs only one letter or digit (`By _____`, seen
+/// on a real contract's signature lines, where the full rule's four would miss it), and a unit
+/// may differ in its numbers (`[801] MR. X: It's 36 pages.`, `[802] …`, seen on a real condensed
+/// transcript that counted up until it ran out of tokens).
+pub fn has_cut_off_loop(text: &str) -> bool {
+    let mut numbers_as_zero = String::with_capacity(text.len());
+    let mut in_number = false;
+    for c in text.chars() {
+        let digit = c.is_ascii_digit();
+        if !digit {
+            numbers_as_zero.push(c);
+        } else if !in_number {
+            numbers_as_zero.push('0');
+        }
+        in_number = digit;
+    }
+    repetition_loop(text, 1) || repetition_loop(&numbers_as_zero, 1)
+}
+
+fn repetition_loop(text: &str, min_variety: usize) -> bool {
     let all: Vec<char> = text.chars().collect();
     let tail = &all[all.len().saturating_sub(TAIL_CHARS)..];
     let n = tail.len();
@@ -322,7 +346,7 @@ pub fn has_repetition_loop(text: &str) -> bool {
                     .collect();
                 letters.sort_unstable();
                 letters.dedup();
-                if letters.len() >= MIN_UNIT_VARIETY {
+                if letters.len() >= min_variety {
                     return true;
                 }
                 run = 0;
@@ -899,7 +923,9 @@ impl Ctx {
                 continue;
             }
             let truncated = reply.finish == "length";
-            let looped = req.prompt == Prompt::Ocr && has_repetition_loop(&reply.text);
+            let looped = req.prompt == Prompt::Ocr
+                && (has_repetition_loop(&reply.text)
+                    || (truncated && has_cut_off_loop(&reply.text)));
             if !truncated && !looped {
                 return Ok(reply.text);
             }
@@ -907,18 +933,19 @@ impl Ctx {
                 return Err(Fail::Degenerate);
             }
             if retried {
-                let what = if truncated {
-                    "output truncated at max_tokens"
-                } else {
+                let what = if looped {
                     "repetition loop"
+                } else {
+                    "output truncated at max_tokens"
                 };
                 return Err(Fail::Failed(what.into()));
             }
             retried = true;
-            if truncated {
-                max_tokens = self.lim.retry_max_tokens;
-            } else {
+            // A loop that ran into max_tokens is still a loop: more tokens would only loop longer.
+            if looped {
                 penalty = Some(LOOP_PENALTY);
+            } else {
+                max_tokens = self.lim.retry_max_tokens;
             }
         }
     }
@@ -1259,6 +1286,23 @@ mod tests {
         assert_eq!(penalty_field("llama.cpp b11510 cuda13"), "repeat_penalty");
         assert_eq!(penalty_field("llama.cpp b11510 cpu"), "repeat_penalty");
         assert_eq!(penalty_field("mlx-vlm 0.7.6"), "repetition_penalty");
+    }
+
+    #[test]
+    fn a_cut_off_reply_needs_only_one_letter_to_loop() {
+        // A real contract's signature lines, cut off at max_tokens.
+        let cut = format!("Dealer agrees as follows.\n\n{}", "By _____\n\n".repeat(40));
+        assert!(!has_repetition_loop(&cut));
+        assert!(has_cut_off_loop(&cut));
+        // A real condensed transcript counting up its line numbers until it ran out of tokens.
+        let counting: String = (801..860)
+            .map(|n| format!("[{n}] MR. CRISTOFORO: It's 36 pages.\n"))
+            .collect();
+        assert!(!has_repetition_loop(&counting));
+        assert!(has_cut_off_loop(&counting));
+        // Rules and leaders without a letter or digit are never a loop.
+        assert!(!has_cut_off_loop(&"----------\n".repeat(40)));
+        assert!(!has_cut_off_loop(&". . . . . . ".repeat(40)));
     }
 
     #[test]

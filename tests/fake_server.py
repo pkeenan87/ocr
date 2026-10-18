@@ -10,7 +10,8 @@ The reply format follows the prompt, so no engine setting is needed: `Attached i
 is olmOCR (YAML front matter, text, a figure, an HTML table), `Please output the layout...` is
 dots `prompt_layout_all_en` (a JSON array of {bbox, category, text}), `Extract the text content`
 is dots `prompt_ocr` (plain text), `Table Recognition:` is OTSL, anything else is `OCR:`.
-Modes: `loop` makes the text (olmOCR prose, a dots Text field, plain text) loop; `length` sets
+Modes: `loop` makes the text (olmOCR prose, a dots Text field, plain text) loop; `looplength` is
+`loop` with finish_reason length; `length` sets
 finish_reason length (a dots array is cut off too); `empty` returns an empty reply; `rotate`
 makes olmOCR report is_rotation_valid False with rotation_correction 90; `nofront` drops the
 olmOCR front matter; `longtable` adds a table of 80 identical rows (olmOCR text, dots Table
@@ -223,7 +224,9 @@ def reply(prompt, w, h, active):
     plain = os.environ.get("FAKE_PLAIN_MODE")
     if active and plain and prompt.startswith("Extract the text content"):
         mode = plain
-    reason = "length" if mode == "length" else "stop"
+    reason = "length" if mode in ("length", "looplength") else "stop"
+    if mode == "looplength":  # a loop that ran into max_tokens
+        mode = "loop"
     if mode == "empty":
         return "", reason
     # A Bates corner crop (0.3 x 0.1 or 0.4 x 0.1 of a page, so wider than 2:1) reads as FAKE_CORNER_BATES.

@@ -133,6 +133,45 @@ fn a_server_start_without_a_model_ignores_indra() {
 }
 
 #[test]
+fn the_filing_stamp_header_stays_and_is_never_verified() {
+    let e = env();
+    setup(&e);
+    scan(
+        &e,
+        &["--verify-json", "--verify-fields", "all"],
+        &[("INDRA_FAKE_STAMP", "1")],
+    )
+    .code(predicate::in_iter([0, 1]));
+    let md = e.markdown(THREE);
+    for n in 1..=3 {
+        assert!(
+            md.contains(&format!(
+                "Case 1:19-cv-07208-ST Document 31 Filed 02/24/21 Page {n} of 3\n\nFake indra body of page {n}."
+            )),
+            "{md}"
+        );
+    }
+    // The stamp's page count is not a Bates number; the footer's still is.
+    assert!(md.contains("<!-- page 1 · Bates SMITH000123 -->"), "{md}");
+    assert!(md.contains("<!-- page 2 -->"), "{md}");
+
+    let report: Value =
+        serde_json::from_str(&fs::read_to_string(e.path("three_pages.verify.json")).unwrap())
+            .unwrap();
+    let stamp_fields: Vec<&Value> = report["pages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .flat_map(|p| p["fields"].as_array().unwrap())
+        .filter(|f| matches!(f["kind"].as_str(), Some("docket" | "date")))
+        .collect();
+    assert_eq!(stamp_fields.len(), 6, "{report:#}");
+    for f in stamp_fields {
+        assert_ne!(f["status"], "verified", "{f:#}");
+    }
+}
+
+#[test]
 fn pages_carry_the_footer_bates_and_no_furniture() {
     let e = env();
     setup(&e);
@@ -151,7 +190,7 @@ fn pages_carry_the_footer_bates_and_no_furniture() {
     assert!(md.contains("| Item | Qty |"), "{md}");
     assert!(!md.contains("<table>"), "{md}");
     assert!(
-        md.contains("engine: \"indra-ocr (datalab-to/indra-ocr@5993a95, indra-ocr 0.3.1)\"\n"),
+        md.contains("engine: \"indra-ocr (datalab-to/indra-ocr@ed345c7, indra-ocr 0.3.1)\"\n"),
         "{md}"
     );
     assert!(md.contains("table_pages: [2]\n"), "{md}");

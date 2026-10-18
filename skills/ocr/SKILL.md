@@ -1,16 +1,18 @@
 ---
 name: ocr
-description: OCR PDFs and images to Markdown locally on a Mac with the `ocr` command-line tool (Apple Vision, PaddleOCR-VL, olmOCR 2, dots.ocr), and check the values and quotes in them before anyone relies on them. Use when the user wants text out of a scanned or image-only document, a folder of documents, a deposition transcript, or a legal filing with Bates numbers, and when amounts, dates, docket numbers, citations or quotations from such documents will be relied on. It is the entry point for the verification workflow with a second OCR service such as Azure Document Intelligence.
+description: OCR PDFs and images to Markdown locally on a Mac or a Linux PC with the `ocr` command-line tool (Apple Vision, PaddleOCR-VL, olmOCR 2, dots.ocr, indra-ocr), and check the values and quotes in them before anyone relies on them. Use when the user wants text out of a scanned or image-only document, a folder of documents, a deposition transcript, or a legal filing with Bates numbers, and when amounts, dates, docket numbers, citations or quotations from such documents will be relied on. It is the entry point for the verification workflow with a second OCR service such as Azure Document Intelligence.
 ---
 
 # ocr: local document OCR to Markdown
 
-`ocr` turns PDFs and images into Markdown on Apple Silicon Macs (macOS 26 or later). Nothing is uploaded. Treat the user's documents as confidential: never send them, or the Markdown made from them, to any web service, unless the user asks or has set up a second-OCR tool for exactly this (step 3 of the verification workflow below).
+`ocr` turns PDFs and images into Markdown on Apple Silicon Macs (macOS 26 or later) and on Linux x86-64 PCs (best with an NVIDIA GPU). Windows builds are a preview. Nothing is uploaded.
+
+**Off the Mac** (check with `uname -s`): there is no `apple` engine (`paddleocr-vl` is the default), and **values on scanned pages are never `verified`**, because there is no second reader; only a PDF's own text can confirm a value. Paddle reads tables less accurately off the Mac, so prefer `dots-ocr` for tables, and transcript line numbers are not re-anchored, so never cite `page:line` from them without checking the PDF. Treat the user's documents as confidential: never send them, or the Markdown made from them, to any web service, unless the user asks or has set up a second-OCR tool for exactly this (step 3 of the verification workflow below).
 
 ## Before scanning
 
 1. Check that the tool is installed: `command -v ocr && ocr --version`. If it is missing, tell the user and stop; do not try to install it yourself.
-2. The default engine, `apple`, needs no setup. For a model engine, run `ocr server setup --model <engine>` once. It downloads several GB, so confirm with the user first.
+2. On a Mac the default engine, `apple`, needs no setup. For a model engine, run `ocr server setup --model <engine>` once. It downloads several GB, so confirm with the user first.
 3. A model engine also needs its server running: `ocr server start --model <engine>`. Only one model server runs at a time. `indra-ocr` is the exception: it has no server (setup needs `uv` and downloads about 18 MB). Run `ocr server stop` when you finish, unless the user wants it left running.
 
 ## Choosing an engine
@@ -18,12 +20,12 @@ description: OCR PDFs and images to Markdown locally on a Mac with the `ocr` com
 | Document | `--model` | Notes |
 |---|---|---|
 | Most things: contracts, pleadings, letters, scans, big batches | `apple` (default) | About 3 pages/s; 300 pages in about 90 s |
-| Deposition transcripts (full-page or 4-up condensed) | `dots-ocr` | Most accurate on transcripts; about 12 s/page |
-| Table-heavy documents, or a faster model engine | `paddleocr-vl` | About 5 s/page |
+| Deposition transcripts (full-page or 4-up condensed) | `dots-ocr` | Most accurate on transcripts; about 36 s per 4-up transcript page, 5–9 s on ordinary pages |
+| Table-heavy documents, or a faster model engine | `paddleocr-vl` | About 5 s/page. Off the Mac, use `dots-ocr` for tables instead |
 | Clean prose and tables | `olmocr` | Slowest (about 16 s/page), needs 11 GB of memory |
 | A machine with no GPU, or a fast first pass on clean documents | `indra-ocr` | CPU only, about 2 pages/s, no server; weaker on degraded scans, handwriting and complex tables; weights are under a modified OpenRAIL-M (research, personal use, small startups) |
 
-Start with `apple` unless the document is a transcript or the user asks for a model. Before a model run of more than about 50 pages, tell the user the estimated time.
+On a Mac, start with `apple` unless the document is a transcript or the user asks for a model. Off the Mac, start with `paddleocr-vl`, or `dots-ocr` for tables and transcripts. Before a model run of more than about 50 pages, tell the user the estimated time.
 
 ## Scanning
 
@@ -39,7 +41,7 @@ ocr scan --input-dir ./case --dry-run                       # show input -> outp
 
 Useful flags:
 - `--legal-cleanup` strips running headers and footers that repeat across pages. It changes citable text, so use it only when the user wants that.
-- `--dpi 200` can help on clean pleadings; the default is 150.
+- `--dpi 200` can help on clean pleadings; the default is 150 (dots-ocr 100, indra-ocr 200).
 - `--overwrite` discards earlier output and checkpoints.
 - `--quiet` gives less progress output.
 
@@ -71,7 +73,7 @@ Always use `--verify-fields all` for this workflow. The default, `flagged`, leav
 - `summary`: how many values are `verified`, `check` and `unchecked`.
 - `azure_pages`: the pages that need a second reading, in Azure's `pages` syntax (`3,7-9`). It is empty when the PDF's own text already confirmed everything.
 - Per page: `fields` (each with `kind`, `text`, `value`, `line`, `status`, `why`), `page_check`, `second_reading`, `text_agreement`, `ocr_text_layer`, `text_layer_visibility`.
-- `verified` values were matched by an independent reading: the PDF's own characters, or Vision against a model engine. Nothing else is `verified`.
+- `verified` values were matched by an independent reading: the PDF's own characters, or (on a Mac) Vision against a model engine. Nothing else is `verified`. Off the Mac, a scanned page has no second reading, so all its values need step 3.
 
 ### 3. Get the second reading, only for `azure_pages`
 

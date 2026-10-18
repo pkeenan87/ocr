@@ -401,6 +401,7 @@ Still open:
    9. A text-layer path with layout handling.
    10. The flaky `tests/resume.rs::model_directory_output_does_not_depend_on_jobs`, which failed once at server start.
    11. Report the Vision crash to Apple via Feedback Assistant, with `spike/repro_init_race.sh`.
+   12. Off the Mac, a body token in a page's last lines (`Invoice No. INV-24337`) is taken as the Bates number when the model dropped the footer, and the corner request is then skipped (`corner_bates`). Seen with olmOCR and dots.ocr on seed10 pleading. Fixed for tokens followed by a lowercase word (after any `,;:)`); pleading Bates is now 11/11 for both engines. A token that ends a sentence (`INV-24337.`) is still taken.
 7. **Pending on other machines:** the Linux vLLM reference ([docs/linux-reference-eval.md](docs/linux-reference-eval.md), branch `linux-reference-eval`) and the Azure Document Intelligence comparison ([docs/azure-eval.md](docs/azure-eval.md), branch `azure-eval`).
 
 ## 9. Linux and Windows with a GPU (Phase 7)
@@ -645,7 +646,7 @@ The options as they were put:
     | pages/s | 0.16–0.71 | 0.03–0.11 | 0.13–0.43 |
 
     The Mac's Paddle pleading figure is seeds 10–19; the rest are seeds 10–12. The Paddle table gap is the known missing table crops (no Vision table boxes); vLLM at full precision gives the same 12.3%, so it is not the GGUF.
-  - **7g:** CER is no more than 1 point worse than the Mac's everywhere except Paddle tables (12.3% against 0.0%, the missing Vision table crops). Three cells are more than 1 point better than the Mac: Paddle pleading (0.9% against 13.3%, different seed ranges), Paddle transcripts (39.1% against 51.1%) and dots fax (1.2% against 6.3%, dots.ocr against dots.mocr). olmOCR pleading Bates is 81.8% against the Mac's 90.9% (9/11 against 10/11); whether the two misses are missing or wrong is not yet checked. Not marked done: the margin is yours to agree.
+  - **7g:** CER is no more than 1 point worse than the Mac's everywhere except Paddle tables (12.3% against 0.0%, the missing Vision table crops). Three cells are more than 1 point better than the Mac: Paddle pleading (0.9% against 13.3%, different seed ranges), Paddle transcripts (39.1% against 51.1%) and dots fax (1.2% against 6.3%, dots.ocr against dots.mocr). olmOCR pleading Bates is 81.8% against the Mac's 90.9% (9/11 against 10/11); both misses are wrong, not missing. A body invoice number (`INV-24337`) in the last lines of a page whose footer olmOCR dropped is taken as the Bates number, and the corner request is then skipped (docs/linux-reference-eval-results.md). Not marked done: the margin is yours to agree.
   - **vLLM reference** (docs/linux-reference-eval-results.md): no measurable quantization loss for dots (8-bit dots.mocr against bf16). olmOCR ran as FP8 because bf16 does not fit 16 GB, so its quantization question stays open until a 24 GB card. PaddleOCR-VL is unquantized everywhere.
 
 - 2026-10-14, **indra-ocr engine.** A fifth engine, `datalab-to/indra-ocr` 0.3.1: a CPU ONNX pipeline, not a VLM. Decisions made in the implementation:

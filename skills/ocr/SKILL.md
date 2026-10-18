@@ -1,16 +1,16 @@
 ---
 name: ocr
-description: OCR PDFs and images to Markdown locally on a Mac with the `ocr` command-line tool (Apple Vision, PaddleOCR-VL, olmOCR 2, dots.ocr), and check the values and quotes in them before anyone relies on them. Use when the user wants text out of a scanned or image-only document, a folder of documents, a deposition transcript, or a legal filing with Bates numbers, and when amounts, dates, docket numbers, citations or quotations from such documents will be relied on. It is the entry point for the verification workflow with a second OCR service such as Azure Document Intelligence.
+description: OCR PDFs and images to Markdown locally on a Mac or Linux machine with the `ocr` command-line tool (Apple Vision, PaddleOCR-VL, olmOCR 2, dots.ocr), and check the values and quotes in them before anyone relies on them. Use when the user wants text out of a scanned or image-only document, a folder of documents, a deposition transcript, or a legal filing with Bates numbers, and when amounts, dates, docket numbers, citations or quotations from such documents will be relied on. It is the entry point for the verification workflow with a second OCR service such as Azure Document Intelligence.
 ---
 
 # ocr: local document OCR to Markdown
 
-`ocr` turns PDFs and images into Markdown on Apple Silicon Macs (macOS 26 or later). Nothing is uploaded. Treat the user's documents as confidential: never send them, or the Markdown made from them, to any web service, unless the user asks or has set up a second-OCR tool for exactly this (step 3 of the verification workflow below).
+`ocr` turns PDFs and images into Markdown on Apple Silicon Macs (macOS 26 or later) and on x86-64 Linux, best with a GPU. Nothing is uploaded. Treat the user's documents as confidential: never send them, or the Markdown made from them, to any web service, unless the user asks or has set up a second-OCR tool for exactly this (step 3 of the verification workflow below).
 
 ## Before scanning
 
 1. Check that the tool is installed: `command -v ocr && ocr --version`. If it is missing, tell the user and stop; do not try to install it yourself.
-2. The default engine, `apple`, needs no setup. For a model engine, run `ocr server setup --model <engine>` once. It downloads several GB, so confirm with the user first.
+2. On a Mac, the default engine, `apple`, needs no setup. **On Linux there is no `apple` engine**: a model engine is required (`uname` says `Linux`). Check what is installed with `ocr server status`, and pass `--model <engine>` to every `scan`. For a model engine, run `ocr server setup --model <engine>` once. It downloads several GB, so confirm with the user first.
 3. A model engine also needs its server running: `ocr server start --model <engine>`. Only one model server runs at a time. `indra-ocr` is the exception: it has no server (setup needs `uv` and downloads about 18 MB). Run `ocr server stop` when you finish, unless the user wants it left running.
 
 ## Choosing an engine
@@ -24,6 +24,8 @@ description: OCR PDFs and images to Markdown locally on a Mac with the `ocr` com
 | A machine with no GPU, or a fast first pass on clean documents | `indra-ocr` | CPU only, about 2 pages/s, no server; weaker on degraded scans, handwriting and complex tables; weights are under a modified OpenRAIL-M (research, personal use, small startups) |
 
 Start with `apple` unless the document is a transcript or the user asks for a model. Before a model run of more than about 50 pages, tell the user the estimated time.
+
+**On Linux:** use `dots-ocr` for most work, and always for transcripts and tables (about 3–8 s a page on a GPU). `paddleocr-vl` is faster and fine for prose but weak on tables and transcripts there, because the Mac's Apple Vision table crops are missing. `olmocr` matches dots except on transcripts and is about four times slower. Transcript line numbers are not re-anchored on Linux, so check page:line citations against the PDF.
 
 ## Scanning
 
@@ -71,7 +73,7 @@ Always use `--verify-fields all` for this workflow. The default, `flagged`, leav
 - `summary`: how many values are `verified`, `check` and `unchecked`.
 - `azure_pages`: the pages that need a second reading, in Azure's `pages` syntax (`3,7-9`). It is empty when the PDF's own text already confirmed everything.
 - Per page: `fields` (each with `kind`, `text`, `value`, `line`, `status`, `why`), `page_check`, `second_reading`, `text_agreement`, `ocr_text_layer`, `text_layer_visibility`.
-- `verified` values were matched by an independent reading: the PDF's own characters, or Vision against a model engine. Nothing else is `verified`.
+- `verified` values were matched by an independent reading: the PDF's own characters, or Vision against a model engine. Nothing else is `verified`. On Linux the only independent reading is the PDF's own text, so values on scanned pages are never `verified` there: they all need the second reading in step 3, or a person.
 
 ### 3. Get the second reading, only for `azure_pages`
 
@@ -128,7 +130,7 @@ Front matter fields to watch:
 - `flagged_pages`: pages to check by hand.
 - `suspect_pages`: `{page: [reasons]}` for pages whose text looks wrong although OCR succeeded (`garbled`, `misreads`, `junk_lines`, `duplicated`, `pleading_table`, `transcript_table`, `page_order`, `mixed_case`). Tell the user which pages and why, and do not quote or cite from them without checking the PDF page.
 - `symbol_fixes`: pages where `¶`/`§` were restored in Apple Vision citations (`Compl. 9 60` became `Compl. ¶ 60`); `--verbose` prints each rewrite.
-- `fallback_pages`: the model failed on these pages, and Apple Vision text was used instead.
+- `fallback_pages`: the model failed on these pages, and Apple Vision text was used instead (Mac only). On Linux a failed page has no text: its marker reads `<!-- page 12: OCR failed: … -->` and it is in `flagged_pages`; re-running the same command retries it.
 - `line_numbers.unverified`: transcript pages whose line numbers could not be checked against the page geometry.
 - `column_split_pages`: pages read column by column.
 

@@ -7,7 +7,7 @@ Thank you for testing `ocr`. It turns scanned and image-only PDFs into Markdown 
 ## What you need
 
 - **Mac:** an Apple Silicon Mac (M1 or later) on **macOS 26 or later**. About 1 GB free for the default engine. The optional model engines need 2–9 GB more and 8–16 GB of RAM (see "Engines" below).
-- **Linux:** x86-64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 and newer), `curl` and `tar`, and an NVIDIA GPU with at least 6 GB of memory (16 GB for `olmocr`). An AMD or Intel GPU with its own memory works through Vulkan, more slowly; without a GPU, `paddleocr-vl` runs on the CPU at about 8 s a page. Allow 5–15 GB of disk for an engine.
+- **Linux:** x86-64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 and newer), `curl` and `tar`, and an NVIDIA GPU with at least 6 GB of memory (`olmocr` needs about 11 GB; tested on 16 GB). An AMD or Intel GPU with its own memory works through Vulkan, more slowly; without a GPU, `paddleocr-vl` runs on the CPU at about 8 s a page. Allow 5–15 GB of disk for an engine.
 - For the Claude workflow: Claude Code.
 
 ## Install

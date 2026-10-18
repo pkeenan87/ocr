@@ -14,11 +14,13 @@ Local, private OCR of PDFs and images to Markdown on Apple Silicon, and on Linux
 
 It is built for legal documents that run to hundreds of pages: it streams pages, writes per-page checkpoints, resumes after an interruption, keeps Bates numbers in page markers and flags pages it is not sure about.
 
-Status: Phase 6 evaluation is done; results are in [docs/eval.md](docs/eval.md). The fixtures are synthetic.
+Status: version 1.0. Linux x86-64 has a prebuilt release; on the Mac, build from source. Evaluation results are in [docs/eval.md](docs/eval.md) (Mac) and PLAN.md §9.7 (Linux); the evaluation fixtures are synthetic.
 
 **Testing the pilot?** Start with [docs/TESTERS.md](docs/TESTERS.md).
 
 ## Requirements
+
+This section is for the Mac. For Linux, see [Linux and Windows](#linux-and-windows).
 
 - Apple Silicon Mac, macOS 26 or later (Apple Vision's document API needs it).
 - Xcode command line tools (`xcode-select --install`), for the Swift toolchain.
@@ -76,7 +78,7 @@ Model engines also need a running server:
 
 ## Linux and Windows
 
-Status: Phase 7 (PLAN.md §9). Linux was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build: all three model engines pass. A native Windows run is still to come. Windows builds and tests run in CI.
+Status: **Linux x86-64 is supported** from version 1.0. It was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build. **Windows is not yet supported:** it builds and passes the tests in CI, but has not been run on a Windows machine.
 
 Off the Mac:
 - There is no Apple Vision, so `apple` is not offered and **`paddleocr-vl` is the default engine**.
@@ -88,12 +90,19 @@ Off the Mac:
 - Rust, to build.
 - A GPU is strongly recommended: NVIDIA (CUDA), or any GPU with its own memory through Vulkan.
 
+**Install** the prebuilt Linux binary from the [GitHub release](https://github.com/pkeenan87/ocr/releases) (glibc 2.35 or later: Ubuntu 22.04, Debian 12, Fedora 36 and newer):
+
+    sha256sum -c ocr-<version>-linux-x86_64.tar.gz.sha256
+    tar xzf ocr-<version>-linux-x86_64.tar.gz
+    sudo cp ocr-<version>-linux-x86_64/ocr /usr/local/bin/
+
+or build it with `cargo build --release`. The archive also holds the Claude skill, this README, the tester guide and THIRD_PARTY_NOTICES.md.
+
 **Setup** probes the hardware, downloads the matching llama.cpp build, pdfium and the weights, and checks every file against a pinned sha256:
 
-    cargo build --release
-    ocr server setup --model paddleocr-vl
-    ocr server start --model paddleocr-vl
-    ocr scan --input-file filing.pdf
+    ocr server setup --model dots-ocr
+    ocr server start --model dots-ocr
+    ocr scan --model dots-ocr --input-file filing.pdf
 
 **How the build is chosen:**
 
@@ -120,13 +129,19 @@ Set `OCR_LLAMA_VARIANT=cuda12|cuda13|vulkan|cpu` to override the choice. If a CU
 | olmocr (8bit = Q8_0, default) | 9.5 GB | 10.9 GB |
 | olmocr (bf16) | 16.6 GB | 18.1 GB |
 
-Measured: PaddleOCR-VL on the CPU build uses 2.1 GB resident. On an RTX 5060 Ti (16 GB, CUDA 13 build, accept seeds 10–12, 2026-10-14):
+Measured: PaddleOCR-VL on the CPU build uses 2.1 GB resident. On an RTX 5060 Ti (16 GB, CUDA 13 build, synthetic accept seeds 10–12, 2026-10-18; CER / token recall):
 
-| Engine | GPU memory in use | Pages/s |
-|---|---|---|
-| paddleocr-vl 1.6 | 2.4 GB | 0.16–0.71 (4-up transcripts slowest) |
-| dots-ocr (dots.ocr Q8_0) | 4.4 GB | 0.13–0.43 |
-| olmocr (Q8_0) | 10.2 GB | 0.03–0.11 |
+| | paddleocr-vl 1.6 | dots-ocr (dots.ocr Q8_0) | olmocr (Q8_0) |
+|---|---|---|---|
+| Pleadings | 0.9% / 98.4%, Bates 100% | 0.1% / 100%, Bates 100% | 0.0% / 100%, Bates 100% |
+| Contracts | 0.0% / 100% | 0.0% / 100% | 0.0% / 100% |
+| 4-up transcripts | 39.1% / 91.5% | 2.0% / 100% | 11.6% / 96.9% |
+| Fax scans | 0.0% / 100% | 1.2% / 100% | 0.0% / 100% |
+| Tables | 12.3% / 100% | 0.0% / 100% | 0.0% / 100% |
+| GPU memory in use | 2.4 GB | 4.4 GB | 10.2 GB |
+| Pages/s | 0.16–0.70 (4-up transcripts slowest) | 0.12–0.37 | 0.03–0.09 |
+
+**Which engine on Linux:** `dots-ocr` for most work, and always for transcripts and tables. `paddleocr-vl` is the fastest and lightest, and fine for prose, but weak on tables and transcripts without the Mac's Vision crops. `olmocr` is as accurate as dots on everything but transcripts, and about four times slower.
 
 olmocr bf16 (18.1 GB) does not fit a 16 GB card; use the default 8bit.
 
@@ -134,8 +149,12 @@ olmocr bf16 (18.1 GB) does not fit a 16 GB card; use the default 8bit.
 - dots defaults to `dots.ocr`, because llama.cpp's support for dots.mocr is unconfirmed. Only PaddleOCR-VL 1.6 and 1.5 are offered.
 - Without the Apple Vision side-pass:
   - Bates numbers come from the model's own text.
-  - olmOCR, which drops footers, and dots, whose plain-text prompt leaves out page footers, get up to two extra small requests per page, for the bottom-right and bottom-left corners, when the page text has no Bates number. A document stops getting them after three pages without one. A Bates number centred under the footer is not found.
-  - There are no table crops and no transcript detection.
+  - olmOCR, which drops footers, and dots, whose plain-text prompt leaves out page footers, get up to three extra small requests per page, for the bottom-right corner, the bottom-left corner and the bottom centre, when the page text has no Bates number. A document stops getting them after three pages without one.
+  - On a page stored sideways, olmOCR's corner requests follow its rotation correction; dots has none, so it finds no Bates number there.
+  - A number in the body text followed by more of the sentence (`Invoice No. INV-24337 in the amount of…`) is not taken as a Bates number; one that ends a sentence (`…Invoice No. INV-24337.`) still can be.
+  - There are no table crops, so **use `dots-ocr` or `olmocr` for tables**: `paddleocr-vl` reads them from the full page and is much less accurate on them.
+  - There is no transcript detection, so transcript line numbers are not re-anchored to the page geometry and `line_numbers` is not written. **Use `dots-ocr` for transcripts** and check page:line citations against the PDF.
+  - `--verify-json` has no second image reading: values are `verified` only against the PDF's own text, so on scanned pages they are `check` or `unchecked`.
   - A page the model fails is recorded as failed, and a re-run retries it, instead of falling back to Apple Vision text.
 - Column detection still works: it runs on the rendered bitmap.
 - HEIC images are refused; convert them to PNG or JPEG.
@@ -194,7 +213,7 @@ Examples:
 Notes on the options:
 
 - **`--model-version`** pins an older model release; it applies to `paddleocr-vl` and `dots-ocr` only.
-- **`--jobs` / `--parallel`** is the total number of pages in flight. The default is the number of performance cores for Apple and 1 for model engines. A model server handles one request at a time (`--max-num-seqs 1`), so `--jobs` above 1 on a model engine only overlaps rendering, the Apple side-pass and assembly, and prints a note. Output is the same for `--jobs 1` and `--jobs 8`.
+- **`--jobs` / `--parallel`** is the total number of pages in flight. The default is the number of performance cores for Apple and 1 for model engines. A model server handles one request at a time (`--max-num-seqs 1` with mlx-vlm, one slot with llama-server), so `--jobs` above 1 on a model engine only overlaps rendering, the Apple side-pass and assembly, and prints a note. Output is the same for `--jobs 1` and `--jobs 8`.
 - **`--use-text-layer`**: with the apple engine the default is `auto`. Vision reads the page as usual (layout, tables, margin numbers, Bates), and then every block's words are aligned with the PDF's embedded text inside the block's box, so a born-digital page keeps Vision's structure with the PDF's exact characters (`Case No.3:26-cv-04417` becomes `Case No. 3:26-cv-04417`, `$3,000` read for `$8,000` becomes `$8,000`). The changes are counted per page in `embedded_text_fixes`. The safeguards:
   - A page is corrected only when at least 90% of its words agree with the embedded text, so a hidden layer that does not match the printed page (another draft, a bad scanner OCR layer) changes nothing.
   - A differing word is replaced only when it looks like a misread of the embedded word: at most a third of its characters differ. `thirty` never becomes `sixty`.

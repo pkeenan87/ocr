@@ -495,7 +495,7 @@ Guidance:
 - **PaddleOCR-VL is worse on tables.** On the Mac, Vision finds tables and Paddle reads each one as a crop (`Table Recognition:`). Off the Mac, Paddle reads the whole page, which gave 12.3% CER on the synthetic table fixtures against 0.0% on the Mac (docs/linux-reference-eval-results.md). For table-heavy documents use `dots-ocr` or `olmocr`, which scored 0.0% on the same tables off the Mac.
 - **Transcript line numbers are the model's own.** They are not re-anchored to the page; on the synthetic transcripts with the CUDA build, 34% (Paddle), 26% (olmOCR) and 76% (dots) of lines were exact. Do not cite `page:line` from an off-Mac transcript without checking the PDF.
 - **No embedded-text corrections** (`--use-text-layer auto` is an `apple` feature).
-- **No Bates number from a centred footer** on olmOCR and dots pages (the corner requests look bottom-left and bottom-right only).
+- **No Bates number from a centred footer** on olmOCR and dots pages (the corner requests look bottom-left and bottom-right only). When the model drops the footer, a number-like token that ends a sentence in the page's last lines (`Invoice No. INV-24337.`) can be taken as the Bates number; check Bates markers on those pages.
 - Only Linux and Windows x86-64 have pinned llama.cpp and pdfium builds. Windows is a preview, not yet run on a real machine.
 
 **Every platform:**

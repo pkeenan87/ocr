@@ -401,7 +401,7 @@ Still open:
    9. A text-layer path with layout handling.
    10. The flaky `tests/resume.rs::model_directory_output_does_not_depend_on_jobs`, which failed once at server start.
    11. Report the Vision crash to Apple via Feedback Assistant, with `spike/repro_init_race.sh`.
-   12. Off the Mac, a body token in a page's last lines (`Invoice No. INV-24337`) is taken as the Bates number when the model dropped the footer, and the corner request is then skipped (`corner_bates`). Seen with olmOCR and dots.ocr on seed10 pleading.
+   12. Off the Mac, a body token in a page's last lines (`Invoice No. INV-24337`) is taken as the Bates number when the model dropped the footer, and the corner request is then skipped (`corner_bates`). Seen with olmOCR and dots.ocr on seed10 pleading. Fixed for tokens followed by a lowercase word; a token that ends a sentence (`INV-24337.`) is still taken. Needs a GPU rerun of seed10 pleading.
 7. **Pending on other machines:** the Linux vLLM reference ([docs/linux-reference-eval.md](docs/linux-reference-eval.md), branch `linux-reference-eval`) and the Azure Document Intelligence comparison ([docs/azure-eval.md](docs/azure-eval.md), branch `azure-eval`).
 
 ## 9. Linux and Windows with a GPU (Phase 7)

@@ -271,13 +271,23 @@ pub fn find_bates(blocks: &[Block]) -> Option<String> {
 }
 
 /// A Bates number in the last lines of a page's text (model output, which keeps the footer),
-/// for pages without Vision blocks (off macOS). The bottom-most match wins.
+/// for pages without Vision blocks (off macOS). The bottom-most match wins. A token followed by a
+/// lowercase word is part of a sentence (`Invoice No. INV-24337 in the amount of`), not a stamp:
+/// when the model drops the footer, the last lines are body text.
 pub fn find_bates_in_text(body: &str) -> Option<String> {
     body.lines()
         .rev()
         .filter(|l| !l.trim().is_empty())
         .take(BATES_TAIL_LINES)
-        .find_map(|l| bates_in(l).last().map(str::to_string))
+        .find_map(|l| {
+            bates_in(l)
+                .filter(|m| {
+                    let end = m.as_ptr() as usize - l.as_ptr() as usize + m.len();
+                    !l[end..].trim_start().starts_with(|c: char| c.is_lowercase())
+                })
+                .last()
+                .map(str::to_string)
+        })
 }
 
 fn block_texts(b: &Block) -> Vec<String> {
@@ -793,6 +803,20 @@ mod tests {
         let page = "Exhibit DEF000001 attached.\nline\nline\nline\nline\nCOMPLAINT - Page 3 of 14";
         assert_eq!(find_bates_in_text(page), None);
         assert_eq!(find_bates_in_text(""), None);
+        // olmOCR and dots.ocr dropped the footer of seed10 pleading pages 2 and 3; the invoice
+        // number in the last body line is not a Bates number.
+        for page in [
+            "21. Defendant likewise failed to pay Invoice No. INV-24337 in the amount of $13,663.00, which became due on January 18, 2022.",
+            "36. Defendant likewise failed to pay Invoice No. INV-75940 in the amount of $26,817.00, which became due on May 25, 2025.",
+        ] {
+            assert_eq!(find_bates_in_text(page), None);
+        }
+        // A stamp at the end of a sentence-shaped footer is kept.
+        let page = "Body.\nConfidential - subject to protective order. SMITH000125";
+        assert_eq!(find_bates_in_text(page).as_deref(), Some("SMITH000125"));
+        // Known gap: a token that ends a sentence is still taken.
+        let page = "Defendant failed to pay Invoice No. INV-24337.";
+        assert_eq!(find_bates_in_text(page).as_deref(), Some("INV-24337"));
     }
 
     #[test]

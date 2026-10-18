@@ -143,6 +143,24 @@ At 150 DPI (reported only): pleading 2.1% / 98.2% / 87.6%, contract 1.5% / 97.5%
 
 olmOCR's Bates comes from the Apple side-pass, so its pleading Bates (90.9%, 1 page in 11) is Apple's weakness there, as in Apple's own 88.6%. Table pages 1 of seed 10 and seed 12 fell back to Apple (exit 1, flagged); that is the likely cause of the 98.9% table recall.
 
+### indra-ocr (200 DPI, seeds 10-12, Linux CPU)
+
+Added 2026-10-14 (commit `e7dd644`), after the Phase 6 runs: `datalab-to/indra-ocr` 0.3.1, a CPU ONNX pipeline rather than a VLM. Run on Linux with 32 logical CPUs; raw results in `eval/out/results/indra-linux-cpu.json` (not committed). Not yet run on the Mac or Windows.
+
+| Family | Pages | CER | Token recall | Bates | Transcript lines | Pages/s |
+|---|---|---|---|---|---|---|
+| pleading | 11 | 9.9% | 100% | 100% | - | 3.4 |
+| contract | 14 | 0.0% | 100% | - | - | 3.5 |
+| transcript4up | 9 | 6.8% | 100% | - | 10.6% | 2.0 |
+| fax | 6 | 0.1% | 100% | - | - | 3.2 |
+| table | 6 | 0.0% | 100% | - | - | 2.5 |
+
+- **Pleading CER** is the margin line numbers: indra merges them into the text blocks. Token recall and Bates are unaffected.
+- **Bates** comes from indra's own Page-Footer and Page-Header blocks, not an Apple side-pass.
+- **Transcript lines are raw.** indra does not use the re-anchoring (`src/anchor.rs`) on any platform, so most line numbers are lost; the words are all there (100% token recall). Use dots-ocr for transcripts.
+- **Speed:** 2.0-3.5 pages/s on the CPU alone, about 10x the GPU engines' speed (PLAN.md, 2026-10-14). Not comparable with the Mac timings below (different machine; per-file runs include model load).
+- **No full-precision reference.** The vLLM reference run (docs/linux-reference-eval-results.md) covers the VLM engines only; indra has no quantized build and no vLLM model, so it is out of scope there.
+
 ### Transcripts
 
 | Engine | Token recall | Lines exact |
@@ -151,6 +169,7 @@ olmOCR's Bates comes from the Apple side-pass, so its pleading Bates (90.9%, 1 p
 | olmocr | 96.9% | 30.4% (drops the line numbers) |
 | apple | 83.4% | 38.3% (flags the pages) |
 | paddleocr-vl | 81.5% | 25.2% |
+| indra-ocr (added later, Linux) | 100% | 10.6% (no re-anchoring) |
 
 **Superseded for line numbers by re-anchoring: line numbers are now taken from page geometry for every engine (held-out seeds 40-42, lines exact: dots-ocr 99.9%, olmOCR 99.9%, Apple 97.4%, paddleocr-vl 94.9%). Use dots-ocr for transcripts and check pages under `line_numbers.unverified`. The table above and the text below are the measurements before that change.** Original finding: dots is the best engine for transcripts, but line numbers from every engine were unreliable. Transcripts number every physical line, including wrapped continuations. Paddle reads the words correctly, but joins a continuation onto the line above and renumbers its output sequentially, so every number after the first wrap is off by one and the drift grows down the page; on a whole 4-up sheet it also invents text. (A probe on seed 10 sheet 1, 99 numbered lines: Paddle full page 16-20 lines exact at 150-300 DPI, quadrant crops 42, the remaining crop errors being almost entirely the renumbering.) The earlier "100/100" Paddle spike result came from a fixture with short identical lines that never wrap. The fix, re-anchoring line numbers using the Apple side-pass's physical line geometry, is now implemented.
 
@@ -233,5 +252,6 @@ Related Paddle pleading finding: its pleading CER (13.3% accept) is not from mis
 - Synthetic fixtures only; no handwriting; no multi-language; skew and noise are one recipe.
 - Full 500-page olmOCR and dots runs were not done. Their 300-page times are extrapolations from 60-page slices (dots) or the spike (olmOCR).
 - olmOCR timings in my runs were contended and are not reported as speeds.
-- Model-engine accept samples are small (3 seeds for dots and olmOCR).
+- Model-engine accept samples are small (3 seeds for dots, olmOCR and indra-ocr).
+- indra-ocr: transcript line numbers are not re-anchored (10.6% exact); pleading line numbers merge into the text. Measured on Linux only.
 - The machine slept 00:31-07:45 on 2026-10-08, in the middle of the Paddle tune; tune timings are not used (only accuracy).

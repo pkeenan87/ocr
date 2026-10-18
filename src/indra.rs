@@ -150,6 +150,14 @@ pub fn page_result(number: usize, p: &HelperPage) -> PageResult {
     let bates = bates_in_blocks(&p.blocks, FOOTER)
         .or_else(|| bates_in_blocks(&p.blocks, HEADER))
         .or_else(|| markdown::find_bates_in_text(&body));
+    // The court's filing stamp is labelled a page header, but its case number, filed date and
+    // page count are on the page: it goes back at the top, after the Bates search so that its
+    // `Page 1 of 30` is never taken for one. Two image readers never verify it (`court_stamp`).
+    let stamp = furniture
+        .iter()
+        .map(|b| squash(&b.text))
+        .find(|t| markdown::COURT_STAMP.is_match(t));
+    let body = markdown::restore_court_stamp(body, stamp.as_deref());
     PageResult {
         body,
         bates,
@@ -502,6 +510,61 @@ mod tests {
             r.body
         );
         assert_eq!(r.bates.as_deref(), Some("ABC000045"));
+    }
+
+    const STAMP: &str =
+        "Case 1:19-cv-07208-ST Document 31-1 Filed 02/24/21 Page 2 of 5 PageID #: 140";
+
+    #[test]
+    fn the_filing_stamp_header_goes_back_at_the_top() {
+        let p = HelperPage {
+            page: 2,
+            markdown: "SETTLEMENT AGREEMENT\n\nCase 1:19-cv-07208-ST Document 31-1\nFiled 02/24/21 Page 2 of 5 PageID #: 140\n\nBody text.\n\nSMITH000124".into(),
+            blocks: vec![
+                block(
+                    "Page-Header",
+                    [10.0, 10.0, 500.0, 30.0],
+                    "SETTLEMENT AGREEMENT",
+                ),
+                block(
+                    "Page-Header",
+                    [10.0, 40.0, 900.0, 80.0],
+                    "Case 1:19-cv-07208-ST Document 31-1\nFiled 02/24/21 Page 2 of 5 PageID #: 140",
+                ),
+                block("Page-Footer", [10.0, 1950.0, 500.0, 1970.0], "SMITH000124"),
+            ],
+            error: None,
+        };
+        let r = page_result(2, &p);
+        assert_eq!(r.body, format!("{STAMP}\n\nBody text."));
+        assert_eq!(r.bates.as_deref(), Some("SMITH000124"));
+    }
+
+    #[test]
+    fn the_filing_stamp_is_not_taken_for_a_bates_number() {
+        let p = HelperPage {
+            page: 2,
+            markdown: format!("{STAMP}\n\nBody text."),
+            blocks: vec![block("Page-Header", [10.0, 40.0, 900.0, 80.0], STAMP)],
+            error: None,
+        };
+        let r = page_result(2, &p);
+        assert_eq!(r.body, format!("{STAMP}\n\nBody text."));
+        assert_eq!(r.bates, None);
+    }
+
+    #[test]
+    fn a_filing_stamp_left_in_the_body_is_not_doubled() {
+        // The writer merged the header into a longer paragraph, so it was never stripped.
+        let merged = format!("{STAMP} SETTLEMENT AGREEMENT");
+        let p = HelperPage {
+            page: 2,
+            markdown: format!("{merged}\n\nBody text."),
+            blocks: vec![block("Page-Header", [10.0, 40.0, 900.0, 80.0], STAMP)],
+            error: None,
+        };
+        let r = page_result(2, &p);
+        assert_eq!(r.body, format!("{merged}\n\nBody text."));
     }
 
     #[test]

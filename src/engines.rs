@@ -11,8 +11,9 @@ pub const INDRA_PIN: &str = "0.3.1";
 /// Hugging Face repo of indra-ocr's ONNX models, pinned to a revision below.
 pub const INDRA_REPO: &str = "datalab-to/indra-ocr";
 
-/// The revision of `INDRA_REPO` the files below were hashed at.
-pub const INDRA_REVISION: &str = "5993a956d7ea1d43c0d40d409962bb0b033ac1e8";
+/// The revision of `INDRA_REPO` the files below were hashed at. Datalab squashed the repo's
+/// history on 2026-10-15, removing the first pin (`5993a95`); every file's sha256 is unchanged.
+pub const INDRA_REVISION: &str = "ed345c7f158eddbc7dee0c6a7269afb75a94f7e8";
 
 /// What a checkpoint records for the engine's weights and runtime (the manifest `repo` and
 /// `mlx_vlm` keys): the repo at its short revision, and the pip package.

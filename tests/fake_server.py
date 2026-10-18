@@ -23,10 +23,15 @@ text) prompt only, so a test can fail the plain request and still reach the layo
 With FAKE_REPLIES naming a JSON list of strings, the `OCR:` reply of request number `n` is
 `list[(n - 1) % len(list)]` instead of `fake ocr text WxH` (needs FAKE_LOG for the numbering).
 
+FAKE_CORNER_BATES=<token> makes a request whose image is wider than 2:1 (a Bates corner crop,
+never a page) reply with just that token, in the engine's reply shape (olmOCR front matter, dots
+layout JSON with one Page-footer, otherwise plain text). FAKE_BODY_TAIL=<line> is appended as the
+last line of the olmOCR and dots plain-text replies to full-page (not wide) images.
+
 Every real request is logged as one JSON line to stderr (`fake_server: REQ {...}`, so into the
 server log) and, if FAKE_LOG names a file, appended there too. With FAKE_LOG the request number
 `n` counts the lines in that file, so it survives server restarts:
-`{"n": 3, "prompt": "OCR:", "max_tokens": 4096, "repetition_penalty": null, "w": 1700, "h": 2200,
+`{"n": 3, "prompt": "OCR:", "max_tokens": 4096, "repetition_penalty": null, "penalty_key": null, "w": 1700, "h": 2200,
 "text_first": false, "t": 1700000000.5}` (`text_first`: the text part comes before the image part
 in the message; `t`: arrival time). With FAKE_LOG a line `{"n": 3, "t": ...}` is also appended to
 `$FAKE_LOG.end` when the reply is sent, so tests can measure how many requests overlap.
@@ -139,8 +144,12 @@ class Handler(BaseHTTPRequestHandler):
                 n = REQUESTS
                 if LOG:
                     n = sum(1 for _ in open(LOG)) + 1 if os.path.exists(LOG) else 1
+                # The penalty value, from whichever key it came in: mlx-vlm reads
+                # `repetition_penalty`, llama-server `repeat_penalty`.
+                key = next((k for k in ("repetition_penalty", "repeat_penalty") if k in req), None)
                 line = json.dumps({"n": n, "prompt": prompt, "max_tokens": max_tokens,
-                                   "repetition_penalty": req.get("repetition_penalty"),
+                                   "repetition_penalty": req.get(key) if key else None,
+                                   "penalty_key": key,
                                    "w": w, "h": h, "text_first": text_first, "t": time.time()})
                 sys.stderr.write("fake_server: REQ " + line + "\n")
                 sys.stderr.flush()
@@ -217,6 +226,19 @@ def reply(prompt, w, h, active):
     reason = "length" if mode == "length" else "stop"
     if mode == "empty":
         return "", reason
+    # A Bates corner crop (0.3 x 0.1 or 0.4 x 0.1 of a page, so wider than 2:1) reads as FAKE_CORNER_BATES.
+    corner = os.environ.get("FAKE_CORNER_BATES")
+    wide = w > 2 * h
+    if corner and wide and mode == "ok":
+        if prompt.startswith("Attached is one page"):
+            return OLM_FRONT.format(valid="True", rot=0) + corner, reason
+        if prompt.startswith("Please output the layout"):
+            return json.dumps([{"bbox": [0, 0, 100, 20], "category": "Page-footer",
+                                "text": corner}]), reason
+        if not prompt.startswith("Table Recognition"):
+            return corner, reason
+    tail = "" if wide else os.environ.get("FAKE_BODY_TAIL", "")
+    tail = "\n" + tail if tail else ""
     if prompt.startswith("Attached is one page"):
         valid, rot = ("False", 90) if mode == "rotate" else ("True", 0)
         front = "" if mode == "nofront" else OLM_FRONT.format(valid=valid, rot=rot)
@@ -224,7 +246,7 @@ def reply(prompt, w, h, active):
             return front + LOOP, reason
         table = LONG_TABLE if mode == "longtable" else OLM_TABLE
         return (front + f"fake olmocr text {w}x{h}\n\n![A bar chart](page_10_20_300_400.png)\n\n"
-                + table + "\n\nClosing line"), reason
+                + table + "\n\nClosing line" + tail), reason
     if prompt.startswith("Please output the layout"):
         elements = dots_elements(w, h)
         if mode == "loop":
@@ -236,7 +258,7 @@ def reply(prompt, w, h, active):
             text = text[:int(len(text) * 0.7)]
         return text, reason
     if prompt.startswith("Extract the text content"):
-        return (LOOP if mode == "loop" else f"fake dots plain text {w}x{h}"), reason
+        return (LOOP if mode == "loop" else f"fake dots plain text {w}x{h}" + tail), reason
     if prompt.startswith("Table Recognition"):
         return ("<fcel>Invoice<fcel>Date<fcel>Amount<nl>"
                 "<fcel>INV-1001<fcel>2026-01-05<fcel>$48,250.00<nl>"

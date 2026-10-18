@@ -2,16 +2,15 @@
 //! side-pass is real Vision on this Mac. The `#[ignore]`d test at the end drives the real model
 //! (OCR_REAL_MODELS=1).
 
-// Needs Apple Vision (PLAN §9).
-#![cfg(target_os = "macos")]
-
 mod common;
 
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
-use common::{Env, FIXTURES, longest, without_generated};
+use common::{
+    Env, FIXTURES, fell_back, fell_back_and_flagged, longest, penalty_key, without_generated,
+};
 use predicates::prelude::*;
 
 fn env(fixtures: &[&str]) -> Env {
@@ -37,15 +36,29 @@ fn page_is_text_first_1288_px_with_front_matter_stripped() {
     );
     assert!(!md.contains("<table>"), "{md}");
     // The Bates number comes from the Apple side-pass, not the model.
-    assert!(md.contains("<!-- page 1 · Bates SMITH000123 -->"), "{md}");
+    if cfg!(target_os = "macos") {
+        assert!(md.contains("<!-- page 1 · Bates SMITH000123 -->"), "{md}");
+    } else {
+        // No Vision off macOS, and the fake reply has none: the page has no Bates marker.
+        assert!(md.contains("<!-- page 1 -->"), "{md}");
+    }
     assert!(md.contains("table_pages: [1]\n"), "{md}");
     assert!(md.contains("fallback_pages: []\n"), "{md}");
     assert!(md.contains("flagged_pages: []\n"), "{md}");
     assert!(!md.contains("currency_fixes"), "{md}");
-    assert!(
-        md.contains("engine: \"olmocr (mlx-community/olmOCR-2-7B-1025-8bit, mlx-vlm 0.7.6)\"\n"),
-        "{md}"
-    );
+    if cfg!(target_os = "macos") {
+        assert!(
+            md.contains(
+                "engine: \"olmocr (mlx-community/olmOCR-2-7B-1025-8bit, mlx-vlm 0.7.6)\"\n"
+            ),
+            "{md}"
+        );
+    } else {
+        assert!(
+            md.contains("engine: \"olmocr (bartowski/allenai_olmOCR-2-7B-1025-GGUF, llama.cpp b"),
+            "{md}"
+        );
+    }
     let reqs = e.requests();
     assert_eq!(reqs.len(), 1, "{reqs:?}");
     assert_eq!(reqs[0]["prompt"], ocr::olmocr::PROMPT);
@@ -84,6 +97,7 @@ fn dpi_is_ignored_with_a_note() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // transcripts are detected from Vision blocks
 fn unverified_transcript_page_gets_the_verify_hint() {
     // The fake reply does not match the page geometry, so the page stays unverified.
     let e = env(&["transcript_full.pdf"]);
@@ -192,13 +206,13 @@ fn loop_is_retried_with_a_penalty_then_falls_back_to_apple() {
         .code(1)
         .stderr(predicate::str::contains("repetition loop"));
     let md = e.markdown("transcript_full.pdf");
-    assert!(md.contains("fallback_pages: [1]\n"), "{md}");
-    assert!(md.contains("flagged_pages: [1]\n"), "{md}");
+    assert!(fell_back_and_flagged(&md), "{md}");
     assert!(!md.contains("the same line again"), "{md}");
     let reqs = e.requests();
     assert_eq!(reqs.len(), 2, "{reqs:?}");
     assert!(reqs[0]["repetition_penalty"].is_null());
     assert_eq!(reqs[1]["repetition_penalty"], 1.15);
+    assert_eq!(reqs[1]["penalty_key"], penalty_key());
 }
 
 #[test]
@@ -249,10 +263,8 @@ fn looping_crops_are_retried_with_a_penalty_then_fall_back() {
     // Full page, first crop, first crop again with a penalty; then Apple.
     assert_eq!(reqs.len(), 3, "{reqs:?}");
     assert_eq!(reqs[2]["repetition_penalty"], 1.15);
-    assert!(
-        e.markdown("signature_block.pdf")
-            .contains("fallback_pages: [1]\n")
-    );
+    assert_eq!(reqs[2]["penalty_key"], penalty_key());
+    assert!(fell_back(&e.markdown("signature_block.pdf")));
 }
 
 #[test]
@@ -276,10 +288,7 @@ fn persistent_truncation_falls_back_and_flags() {
         .code(1)
         .stderr(predicate::str::contains("truncated"));
     let md = e.markdown("transcript_full.pdf");
-    assert!(
-        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
-        "{md}"
-    );
+    assert!(fell_back_and_flagged(&md), "{md}");
     assert_eq!(e.requests().len(), 2);
 }
 
@@ -303,10 +312,7 @@ fn persistent_empty_output_falls_back_and_flags() {
         .code(1)
         .stderr(predicate::str::contains("empty model output"));
     let md = e.markdown("transcript_full.pdf");
-    assert!(
-        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
-        "{md}"
-    );
+    assert!(fell_back_and_flagged(&md), "{md}");
     assert_eq!(e.requests().len(), 2, "one try and one retry");
 }
 
@@ -324,10 +330,7 @@ fn timeout_restarts_the_server_then_falls_back() {
     .code(1)
     .stderr(predicate::str::contains("restarting the model server"));
     assert_ne!(e.server_pid(), before, "server was not restarted");
-    assert!(
-        e.markdown("transcript_full.pdf")
-            .contains("fallback_pages: [1]\n")
-    );
+    assert!(fell_back(&e.markdown("transcript_full.pdf")));
     assert_eq!(e.requests().len(), 2, "one try and one retry");
 }
 
@@ -362,10 +365,7 @@ fn server_errors_are_tried_three_times_then_fall_back() {
     e.scan("transcript_full.pdf", &[], &[]).code(1);
     assert!(t.elapsed() >= Duration::from_millis(1500), "no backoff");
     assert_eq!(e.requests().len(), 3);
-    assert!(
-        e.markdown("transcript_full.pdf")
-            .contains("fallback_pages: [1]\n")
-    );
+    assert!(fell_back(&e.markdown("transcript_full.pdf")));
 }
 
 #[test]

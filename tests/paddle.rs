@@ -2,8 +2,7 @@
 //! the Apple side-pass is real Vision on this Mac. The `#[ignore]`d test at the end drives the
 //! real model (OCR_REAL_MODELS=1).
 
-// Needs Apple Vision (PLAN §9).
-#![cfg(target_os = "macos")]
+mod common;
 
 use std::fs;
 use std::net::TcpListener;
@@ -13,6 +12,7 @@ use std::time::{Duration, Instant};
 
 use assert_cmd::Command;
 use assert_cmd::assert::Assert;
+use common::{fell_back, fell_back_and_flagged, penalty_key};
 use predicates::prelude::*;
 use serde_json::Value;
 use tempfile::{TempDir, tempdir};
@@ -130,6 +130,7 @@ impl Env {
     }
 }
 
+#[cfg(target_os = "macos")]
 fn prompts(reqs: &[Value]) -> Vec<&str> {
     reqs.iter().map(|r| r["prompt"].as_str().unwrap()).collect()
 }
@@ -142,6 +143,7 @@ fn without_generated(md: &str) -> String {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // table crops and Bates come from Vision blocks
 fn legal_scan_uses_side_pass_bates_and_table_recognition() {
     let e = Env::new(&["legal_scan.pdf"]);
     e.serve(&[]);
@@ -179,6 +181,7 @@ fn legal_scan_uses_side_pass_bates_and_table_recognition() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // transcripts are detected from Vision blocks
 fn transcript_is_one_full_page_request() {
     let e = Env::new(&["transcript_full.pdf"]);
     e.serve(&[]);
@@ -197,6 +200,7 @@ fn transcript_is_one_full_page_request() {
 
 /// The mini-pages of `transcript4up_seed0.expected.txt` (sheet 1 of an eval transcript4up
 /// document): a `Page N` header and the physical lines, each as `N text`.
+#[cfg(target_os = "macos")]
 fn seed0_pages() -> Vec<(String, Vec<String>)> {
     let text =
         fs::read_to_string(Path::new(FIXTURES).join("transcript4up_seed0.expected.txt")).unwrap();
@@ -213,6 +217,7 @@ fn seed0_pages() -> Vec<(String, Vec<String>)> {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // transcripts are detected from Vision blocks
 fn merged_wraps_and_sequential_numbers_come_out_with_geometry_numbering() {
     let e = Env::new(&["transcript4up_seed0.pdf"]);
     let pages = seed0_pages();
@@ -276,6 +281,7 @@ fn merged_wraps_and_sequential_numbers_come_out_with_geometry_numbering() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // transcripts are detected from Vision blocks
 fn text_that_does_not_match_the_page_is_kept_and_marked_unverified() {
     let e = Env::new(&["transcript4up_seed0.pdf"]);
     e.serve(&[]);
@@ -307,6 +313,7 @@ fn dpi_override_changes_the_render() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // column crops need the Vision table mask and blocks
 fn narrow_columns_are_cropped() {
     let e = Env::new(&["narrow_unequal_seed2.pdf"]);
     e.serve(&[]);
@@ -340,14 +347,18 @@ fn loop_is_retried_with_a_penalty_then_falls_back_to_apple() {
         .code(1)
         .stderr(predicate::str::contains("repetition loop"));
     let md = e.markdown("transcript_full.pdf");
-    assert!(md.contains("fallback_pages: [1]\n"), "{md}");
-    assert!(md.contains("flagged_pages: [1]\n"), "{md}");
+    assert!(fell_back_and_flagged(&md), "{md}");
     assert!(!md.contains("the same line again"), "{md}");
-    assert!(md.contains("<!-- page 1 -->"), "{md}");
+    // Off macOS there is no Apple text: the page body is the `OCR failed` marker.
+    assert!(
+        md.contains("<!-- page 1 -->") || !cfg!(target_os = "macos"),
+        "{md}"
+    );
     let reqs = e.requests();
     assert_eq!(reqs.len(), 2, "{reqs:?}");
     assert!(reqs[0]["repetition_penalty"].is_null());
     assert_eq!(reqs[1]["repetition_penalty"], 1.15);
+    assert_eq!(reqs[1]["penalty_key"], penalty_key());
 }
 
 #[test]
@@ -364,6 +375,7 @@ fn loop_that_clears_on_retry_is_not_a_fallback() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the column plan needs Vision blocks
 fn looping_crops_are_retried_once_then_fall_back() {
     // The column plan's own loop ladder: the first crop is retried once, then the page falls back.
     let e = Env::new(&["narrow_unequal_seed2.pdf"]);
@@ -418,14 +430,25 @@ fn timing_json_records_requests_and_totals_and_changes_nothing_else() {
         serde_json::from_str(&fs::read_to_string(e.path("legal_scan.timing.json")).unwrap())
             .unwrap();
     assert_eq!(t["engine"], "paddleocr-vl");
-    assert_eq!(t["model"], "PaddlePaddle/PaddleOCR-VL-1.6");
+    assert_eq!(
+        t["model"],
+        if cfg!(target_os = "macos") {
+            "PaddlePaddle/PaddleOCR-VL-1.6"
+        } else {
+            "PaddlePaddle/PaddleOCR-VL-1.6-GGUF"
+        }
+    );
     assert_eq!(t["dpi"], 150);
     let pages = t["pages"].as_array().unwrap();
     assert_eq!(pages.len(), 1);
     assert!(pages[0]["prep_s"].as_f64().unwrap() > 0.0);
     assert!(pages[0]["recognize_s"].as_f64().unwrap() > 0.0);
     let reqs = pages[0]["requests"].as_array().unwrap();
-    assert!(reqs.len() >= 2, "{reqs:?}");
+    // The table crop is a second request; off macOS there are no Vision table blocks.
+    assert!(
+        reqs.len() >= if cfg!(target_os = "macos") { 2 } else { 1 },
+        "{reqs:?}"
+    );
     for r in reqs {
         assert_eq!(r["reason"], "first");
         assert_eq!(r["outcome"], "ok");
@@ -501,8 +524,7 @@ fn persistent_empty_output_falls_back_and_flags() {
         .code(1)
         .stderr(predicate::str::contains("empty model output"));
     let md = e.markdown("transcript_full.pdf");
-    assert!(md.contains("fallback_pages: [1]\n"), "{md}");
-    assert!(md.contains("flagged_pages: [1]\n"), "{md}");
+    assert!(fell_back_and_flagged(&md), "{md}");
     assert_eq!(e.requests().len(), 2, "one try and one retry");
 }
 
@@ -528,10 +550,7 @@ fn persistent_truncation_falls_back() {
     let e = Env::new(&["transcript_full.pdf"]);
     e.serve(&[("FAKE_MODE", "length")]);
     e.scan("transcript_full.pdf", &[], &[]).code(1);
-    assert!(
-        e.markdown("transcript_full.pdf")
-            .contains("fallback_pages: [1]\n")
-    );
+    assert!(fell_back(&e.markdown("transcript_full.pdf")));
     assert_eq!(e.requests().len(), 2);
 }
 
@@ -550,7 +569,7 @@ fn timeout_restarts_the_server_then_falls_back() {
     .stderr(predicate::str::contains("restarting the model server"));
     assert_ne!(e.server_pid(), before, "server was not restarted");
     let md = e.markdown("transcript_full.pdf");
-    assert!(md.contains("fallback_pages: [1]\n"), "{md}");
+    assert!(fell_back(&md), "{md}");
     assert_eq!(e.requests().len(), 2, "one try and one retry");
 }
 
@@ -582,10 +601,7 @@ fn server_errors_are_tried_three_times_then_fall_back() {
     e.scan("transcript_full.pdf", &[], &[]).code(1);
     assert!(t.elapsed() >= Duration::from_millis(1500), "no backoff");
     assert_eq!(e.requests().len(), 3);
-    assert!(
-        e.markdown("transcript_full.pdf")
-            .contains("fallback_pages: [1]\n")
-    );
+    assert!(fell_back(&e.markdown("transcript_full.pdf")));
 }
 
 #[test]

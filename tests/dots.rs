@@ -2,16 +2,13 @@
 //! side-pass is real Vision on this Mac. The `#[ignore]`d test at the end drives the real model
 //! (OCR_REAL_MODELS=1).
 
-// Needs Apple Vision (PLAN §9).
-#![cfg(target_os = "macos")]
-
 mod common;
 
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
-use common::{Env, FIXTURES, without_generated};
+use common::{Env, FIXTURES, fell_back, fell_back_and_flagged, without_generated};
 use predicates::prelude::*;
 use serde_json::Value;
 
@@ -57,7 +54,6 @@ fn layout_json_becomes_markdown() {
         "Figure 1. A fake picture",
         "1 A fake footnote.",
         "FAKE RUNNING FOOTER",
-        "<!-- page 1 · Bates SMITH000123 -->",
         "table_pages: [1]\n",
         "fallback_pages: []\n",
         "flagged_pages: []\n",
@@ -65,10 +61,21 @@ fn layout_json_becomes_markdown() {
         assert!(md.contains(want), "missing {want:?}\n{md}");
     }
     assert!(!md.contains("\"bbox\"") && !md.contains("<table>"), "{md}");
-    assert!(
-        md.contains("engine: \"dots-ocr (mlx-community/dots.mocr-8bit, mlx-vlm 0.7.6)\"\n"),
-        "{md}"
-    );
+    if cfg!(target_os = "macos") {
+        // The Bates number comes from the Apple side-pass.
+        assert!(md.contains("<!-- page 1 · Bates SMITH000123 -->"), "{md}");
+        assert!(
+            md.contains("engine: \"dots-ocr (mlx-community/dots.mocr-8bit, mlx-vlm 0.7.6)\"\n"),
+            "{md}"
+        );
+    } else {
+        // No Vision off macOS, and the fake reply has none: the page has no Bates marker.
+        assert!(md.contains("<!-- page 1 -->"), "{md}");
+        assert!(
+            md.contains("engine: \"dots-ocr (ggml-org/dots.ocr-GGUF, llama.cpp b"),
+            "{md}"
+        );
+    }
     let reqs = e.requests();
     assert_eq!(kinds(&reqs), ["ocr", "layout"], "{reqs:?}");
     assert_eq!(reqs[1]["text_first"], false, "image first");
@@ -124,6 +131,8 @@ fn columns_are_not_split_up_front_and_unverified_transcripts_get_the_verify_hint
     );
     assert_eq!(e.requests().len(), 1);
     // The fake reply does not match the page geometry: the page stays unverified and says so.
+    // Transcripts are detected from Vision blocks, so this part is macOS only.
+    #[cfg(target_os = "macos")]
     e.scan("transcript_full.pdf", &[], &[])
         .success()
         .stderr(predicate::str::contains(
@@ -221,10 +230,7 @@ fn loop_in_plain_layout_and_first_crop_goes_to_apple() {
     assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
     no_penalty(&reqs);
     let md = e.markdown("legal_scan.pdf");
-    assert!(
-        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
-        "{md}"
-    );
+    assert!(fell_back_and_flagged(&md), "{md}");
     assert!(!md.contains("the same line again"), "{md}");
 }
 
@@ -275,10 +281,7 @@ fn looping_crop_ends_the_crop_plan_and_falls_back_to_apple() {
     assert!(reqs[2]["h"].as_u64().unwrap() < 1100, "a crop: {reqs:?}");
     no_penalty(&reqs);
     let md = e.markdown("signature_block.pdf");
-    assert!(
-        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
-        "{md}"
-    );
+    assert!(fell_back_and_flagged(&md), "{md}");
 }
 
 #[test]
@@ -291,10 +294,7 @@ fn everything_looping_falls_back_to_apple() {
     assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
     no_penalty(&reqs);
     let md = e.markdown("signature_block.pdf");
-    assert!(
-        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
-        "{md}"
-    );
+    assert!(fell_back_and_flagged(&md), "{md}");
     assert!(!md.contains("the same line again"), "{md}");
 }
 
@@ -320,10 +320,7 @@ fn persistent_truncation_falls_back_and_flags() {
         .code(1)
         .stderr(predicate::str::contains("truncated"));
     let md = e.markdown("legal_scan.pdf");
-    assert!(
-        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
-        "{md}"
-    );
+    assert!(fell_back_and_flagged(&md), "{md}");
     let reqs = e.requests();
     assert_eq!(kinds(&reqs), ["ocr", "layout", "layout"], "{reqs:?}");
 }
@@ -349,10 +346,7 @@ fn persistent_empty_output_falls_back_and_flags() {
         .code(1)
         .stderr(predicate::str::contains("empty model output"));
     let md = e.markdown("legal_scan.pdf");
-    assert!(
-        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
-        "{md}"
-    );
+    assert!(fell_back_and_flagged(&md), "{md}");
     let reqs = e.requests();
     assert_eq!(
         kinds(&reqs),
@@ -375,10 +369,7 @@ fn timeout_restarts_the_server_then_falls_back() {
     .code(1)
     .stderr(predicate::str::contains("restarting the model server"));
     assert_ne!(e.server_pid(), before, "server was not restarted");
-    assert!(
-        e.markdown("legal_scan.pdf")
-            .contains("fallback_pages: [1]\n")
-    );
+    assert!(fell_back(&e.markdown("legal_scan.pdf")));
     let reqs = e.requests();
     assert_eq!(
         kinds(&reqs),
@@ -420,15 +411,13 @@ fn server_errors_are_tried_three_times_then_fall_back() {
     // Three tries for the plain request, then three for the layout request.
     let reqs = e.requests();
     assert_eq!(kinds(&reqs), ["ocr", "ocr", "ocr"], "{reqs:?}");
-    assert!(
-        e.markdown("legal_scan.pdf")
-            .contains("fallback_pages: [1]\n")
-    );
+    assert!(fell_back(&e.markdown("legal_scan.pdf")));
 }
 
 // ------------------------------------------------- transcript pages: layout first
 
 #[test]
+#[cfg(target_os = "macos")] // transcripts are detected from Vision blocks
 fn transcript_page_sends_only_the_layout_prompt() {
     let e = env(&["transcript_full.pdf"]);
     e.serve(&[]);
@@ -441,6 +430,7 @@ fn transcript_page_sends_only_the_layout_prompt() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // transcripts are detected from Vision blocks
 fn transcript_layout_loop_without_crops_goes_to_plain_text() {
     // The layout request loops (1), the plain one is fine (2): not a fallback.
     let e = env(&["transcript_full.pdf"]);
@@ -458,6 +448,7 @@ fn transcript_layout_loop_without_crops_goes_to_plain_text() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // transcripts are detected from Vision blocks
 fn transcript_everything_looping_falls_back_to_apple() {
     let e = env(&["transcript_full.pdf"]);
     e.serve(&[("FAKE_MODE", "loop")]);
@@ -467,10 +458,7 @@ fn transcript_everything_looping_falls_back_to_apple() {
     let reqs = e.requests();
     assert_eq!(kinds(&reqs), ["layout", "ocr"], "{reqs:?}");
     let md = e.markdown("transcript_full.pdf");
-    assert!(
-        md.contains("fallback_pages: [1]\n") && md.contains("flagged_pages: [1]\n"),
-        "{md}"
-    );
+    assert!(fell_back_and_flagged(&md), "{md}");
     assert!(!md.contains("the same line again"), "{md}");
 }
 

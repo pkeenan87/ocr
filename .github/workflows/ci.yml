@@ -44,5 +44,7 @@ jobs:
           echo "OCR_PDFIUM_LIB=$RUNNER_TEMP/pdfium/${{ matrix.pdfium_lib }}" >> "$GITHUB_ENV"
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
-      - run: cargo test --no-fail-fast
+      # Release: the model-engine tests render and crop pages, which a debug build does about
+      # ten times slower on the runners.
+      - run: cargo test --release --no-fail-fast
         timeout-minutes: 30

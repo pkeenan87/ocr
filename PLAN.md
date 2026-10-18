@@ -393,7 +393,7 @@ Still open:
    1. Apple column split firing on single-column real filings.
    2. Paddle pleading-table margin column.
    3. Pilcrow and section-sign misreads (Apple).
-   4. Paddle repetition below the loop-detector threshold on real pages.
+   4. Paddle repetition below the loop-detector threshold on real pages. On Linux (2026-10-18, the 20 public filings): only 1 of 230 pages has a short back-to-back repeat the detector misses (3 repeats of a table cell). The real misses were loops that ran into max_tokens; fixed, see the 2026-10-18 note.
    5. Apple Bates accuracy of 88.6% on pleadings.
    6. Apple `flagged_pages` never set on bad pages; consider wiring the judge's signals or a heuristic.
    7. Pleading margin-number inconsistency across engines.
@@ -677,7 +677,9 @@ The options as they were put:
     - Bates corners gained the bottom centre (a third request); a centred stamp was missed. On `legal.pdf` restamped at bottom centre (4 pages), olmOCR, dots and Paddle read 4/4. `three_pages.pdf` page 2 (no stamp) still gets none.
     - The loop retry sent `repetition_penalty`, which llama-server ignores (it reads `repeat_penalty`; the b11510 libraries contain no other name), so off the Mac a looping page was retried unchanged. Checked on a live server: `repetition_penalty: 1.15` gave output identical to no penalty, `repeat_penalty: 1.15` changed it.
     - olmOCR's Bates corners are taken from the turned page when the model says the rotation is invalid (follow-up 8): `tests/fixtures/legal_rot90.pdf` had no Bates, now `SMITH000123`.
-  - **Eval** (seeds 10–12, RTX 5060 Ti, CUDA 13; `eval/out/results/*-linux-cuda-1.0.json`; Paddle and olmOCR at `312f100`, dots at `0b8d44b`, which differ from the release only in code dots does not run). CER / token recall:
+    - Loops cut off at max_tokens (Paddle and olmOCR, both platforms). Paddle on the 20 public filings (230 pages, Linux) lost 3 pages as `output truncated at max_tokens`; all three were loops. A reply that looped and hit max_tokens was retried with more tokens and no penalty, and two loops escaped the detector: `By _____` (two distinct letters, under the rule's four) and a condensed transcript counting `[801] MR. X: It's 36 pages.`, `[802] …`. A cut-off reply is now checked with `has_cut_off_loop` (one letter or digit, numbers may differ) and a loop gets the penalty. ctr-nissan-dealer p1 and depo-christoforo-lupo p5 now succeed; lupo p1 (a 4-up condensed transcript) still loops under the penalty and is flagged as failed, as off the Mac there is no Vision fallback. Rerun over all 230 pages (`eval/out/public/paddleocr-vl-linux-b`): failed pages 3 → 1, and the 18 other documents byte-identical apart from `generated:`.
+    - CI runs the tests in release mode: the un-gated model-engine tests took 25 minutes in a debug build on the runners (30-minute limit), and `tests/paddle.rs` used `fake_server.py` directly, which Windows cannot start; it now shares `common::FAKE` (the `.cmd` wrapper there).
+  - **Eval** (seeds 10–12, RTX 5060 Ti, CUDA 13; `eval/out/results/*-linux-cuda-1.0.json`; Paddle and olmOCR at `312f100`, rerun at `e551528` after the cut-off-loop fix with identical results (`*-linux-cuda-1.0b.json`); dots at `0b8d44b`, which differs from the release only in code dots does not run). CER / token recall:
 
     | Family | paddleocr-vl | olmocr | dots-ocr (dots.ocr) |
     |---|---|---|---|

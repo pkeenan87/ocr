@@ -12,12 +12,11 @@ use std::time::{Duration, Instant};
 
 use assert_cmd::Command;
 use assert_cmd::assert::Assert;
-use common::{fell_back, fell_back_and_flagged, penalty_key};
+use common::{FAKE, fell_back, fell_back_and_flagged, penalty_key};
 use predicates::prelude::*;
 use serde_json::Value;
 use tempfile::{TempDir, tempdir};
 
-const FAKE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fake_server.py");
 const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/spike/fixtures");
 
 fn free_port() -> u16 {

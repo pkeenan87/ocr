@@ -393,16 +393,16 @@ Still open:
    1. Apple column split firing on single-column real filings.
    2. Paddle pleading-table margin column.
    3. Pilcrow and section-sign misreads (Apple).
-   4. Paddle repetition below the loop-detector threshold on real pages.
+   4. Paddle repetition below the loop-detector threshold on real pages. On Linux (2026-10-18, the 20 public filings): only 1 of 230 pages has a short back-to-back repeat the detector misses (3 repeats of a table cell). The real misses were loops that ran into max_tokens; fixed, see the 2026-10-18 note.
    5. Apple Bates accuracy of 88.6% on pleadings.
    6. Apple `flagged_pages` never set on bad pages; consider wiring the judge's signals or a heuristic.
    7. Pleading margin-number inconsistency across engines.
-   8. olmOCR rotated-page Bates gap.
+   8. olmOCR rotated-page Bates gap. Off the Mac, fixed 2026-10-18: the corner requests are taken from the turned page. dots.ocr, which has no rotation signal, still misses the Bates number on a sideways page.
    9. A text-layer path with layout handling.
    10. The flaky `tests/resume.rs::model_directory_output_does_not_depend_on_jobs`, which failed once at server start.
    11. Report the Vision crash to Apple via Feedback Assistant, with `spike/repro_init_race.sh`.
    12. Off the Mac, a body token in a page's last lines (`Invoice No. INV-24337`) is taken as the Bates number when the model dropped the footer, and the corner request is then skipped (`corner_bates`). Seen with olmOCR and dots.ocr on seed10 pleading. Fixed for tokens followed by a lowercase word (after any `,;:)`); pleading Bates is now 11/11 for both engines. A token that ends a sentence (`INV-24337.`) is still taken.
-7. **Pending on other machines:** the Linux vLLM reference ([docs/linux-reference-eval.md](docs/linux-reference-eval.md), branch `linux-reference-eval`) and the Azure Document Intelligence comparison ([docs/azure-eval.md](docs/azure-eval.md), branch `azure-eval`).
+7. **Pending on other machines:** the Azure Document Intelligence comparison ([docs/azure-eval.md](docs/azure-eval.md), branch `azure-eval`). The Linux vLLM reference ran on 2026-10-14 ([docs/linux-reference-eval-results.md](docs/linux-reference-eval-results.md)).
 
 ## 9. Linux and Windows with a GPU (Phase 7)
 
@@ -448,14 +448,14 @@ VRAM is then checked against the engine and quant, with the same tiers as the RA
 
 | Phase | Deliverable | Done when |
 |---|---|---|
-| **7a. Backend spike** (no Rust, on the RTX 3090 machine) | Pinned llama-server build with each GGUF. Run the four prompts (`OCR:`, `Table Recognition:`, olmOCR v4 YAML, `prompt_layout_all_en`) through llama-server's chat templates. Test `-np 2` with images. Measure VRAM and s/page per engine and quant. Compare output with the Mac's MLX output and the vLLM reference. Send olmOCR a footer-strip crop: does the Bates number come back? (It is trained to drop footers, and option (b) in §9.5 depends on this.) Settle the Vulkan device probe | `docs/spike.md` records: prompt compatibility (same output shape as MLX), whether parallel image slots work, VRAM floors, speeds. Any engine that fails is documented with its blocker |
+| ✅ **7a. Backend spike** (no Rust; run on the Ryzen CPU build and, for CUDA, the RTX 5060 Ti instead of the 3090, recorded in docs/spike.md) | Pinned llama-server build with each GGUF. Run the four prompts (`OCR:`, `Table Recognition:`, olmOCR v4 YAML, `prompt_layout_all_en`) through llama-server's chat templates. Test `-np 2` with images. Measure VRAM and s/page per engine and quant. Compare output with the Mac's MLX output and the vLLM reference. Send olmOCR a footer-strip crop: does the Bates number come back? (It is trained to drop footers, and option (b) in §9.5 depends on this.) Settle the Vulkan device probe | `docs/spike.md` records: prompt compatibility (same output shape as MLX), whether parallel image slots work, VRAM floors, speeds. Any engine that fails is documented with its blocker |
 | ✅ **7b. Build portability** | `build.rs` and the FFI half of `vision.rs` gated on `target_os = "macos"` (types stay shared). `.cargo/config.toml` rustflags moved under `[target.aarch64-apple-darwin]`. Supervisor macOS-only. `flock` → `File::lock`. Process and memory calls → `sysinfo` / job object. `Engine::Apple` hidden off the Mac | `cargo build` and the unit tests pass on Linux (Mac-only tests gated). `cargo check --target x86_64-pc-windows-msvc` passes. Mac tests unchanged |
 | ✅ **7c. Portable document layer** (Mac comparison pending) | `Document` trait over `document_info`, `text_layer`, `render_gray`, `render_png_fit`. pdfium + `image`/`tiff` implementation, including multi-page TIFF and rotation | On the non-table fixtures, `regions.rs` makes the same column and band decisions as on the Mac (renders need not be byte-identical). Table pages differ by design: there are no Vision table masks |
 | ✅ **7d-1. llama-server backend** | `Backend` (mlx-vlm / llama-server) in config, `server.json` and checkpoints. `server.json` gets an explicit `slots` field instead of reading `--max-num-seqs` from argv. Checkpoints record a generic runtime version instead of `mlx_vlm`, under the same key so Mac checkpoints stay valid. Setup downloads with `curl` and verifies the sha256 of: the pinned llama.cpp archive (plus cudart for CUDA), pdfium, and the GGUF weights pinned by HF revision. Minimal GPU probe to pick the archive, with an `OCR_LLAMA_VARIANT` override. `-c` per engine from `Limits` x slots | Start, stop, status and restart pass with the fake server on Linux. A real paddleocr-vl server starts on this machine (Vulkan or CPU) |
 | ✅ **7d-2. Engine layer off the Mac** (GPU acceptance passed 2026-10-14, RTX 5060 Ti) | A non-Mac `side_pass` (bitmap regions, no blocks). `find_bates` runs on the model's output. Paddle's table-crop branch is off. Failed pages are flagged with no fallback text. The olmOCR footer-strip request (§9.5) | `paddleocr-vl`, `olmocr` and `dots-ocr` each scan `three_pages.pdf` on the Linux GPU machine, with Bates numbers in the page markers |
 | ✅ **7e. GPU gate** (CUDA path checked 2026-10-14 on an RTX 5060 Ti) | Hardware probe, build selection, VRAM tiers, the no-GPU warning | This AMD-iGPU machine gets the warning and still runs on CPU. The 3090 machine is silent and picks CUDA |
 | **7f. Windows** (CI green on Linux and Windows; a real Windows + NVIDIA run is pending, no machine yet) | `.exe` paths, job-object kill, CI build and unit tests on `windows-latest` (model tests use `tests/fake_server.py`) | A scan runs end-to-end on a Windows + NVIDIA machine |
-| **7g. Eval and docs** | Run the eval set (seeds 10–12) on Linux; compare with the Mac and vLLM numbers. README: Linux/Windows requirements, speeds, VRAM table | CER within an agreed margin of the Mac numbers per engine |
+| ✅ **7g. Eval and docs** (2026-10-18, margin: no more than 1 point of CER worse than the Mac, except Paddle tables, documented with dots/olmOCR recommended) | Run the eval set (seeds 10–12) on Linux; compare with the Mac and vLLM numbers. README: Linux/Windows requirements, speeds, VRAM table | CER within an agreed margin of the Mac numbers per engine |
 
 ### 9.5 Decisions
 
@@ -671,3 +671,25 @@ The options as they were put:
     | table | 6 | 0.0% | 100% | - | - | 2.5 |
 
     About 10x the GPU engines' speed on the CPU alone. The pleading CER is the margin line numbers, which indra merges into the text blocks. Transcript line numbers are mostly lost.
+
+- 2026-10-18, **Linux 1.0.** Release work on branch `linux-1.0`. Decisions (yours): merge #45 first; document Paddle's table gap and recommend dots-ocr or olmOCR for tables rather than build a bitmap table detector; Linux is supported, Windows is CI-only and not yet supported, indra-ocr ships with its license note; a prebuilt Linux tarball with sha256 from a release workflow.
+  - **Fixes:**
+    - Bates corners gained the bottom centre (a third request); a centred stamp was missed. On `legal.pdf` restamped at bottom centre (4 pages), olmOCR, dots and Paddle read 4/4. `three_pages.pdf` page 2 (no stamp) still gets none.
+    - The loop retry sent `repetition_penalty`, which llama-server ignores (it reads `repeat_penalty`; the b11510 libraries contain no other name), so off the Mac a looping page was retried unchanged. Checked on a live server: `repetition_penalty: 1.15` gave output identical to no penalty, `repeat_penalty: 1.15` changed it.
+    - olmOCR's Bates corners are taken from the turned page when the model says the rotation is invalid (follow-up 8): `tests/fixtures/legal_rot90.pdf` had no Bates, now `SMITH000123`.
+    - Loops cut off at max_tokens (Paddle and olmOCR, both platforms). Paddle on the 20 public filings (230 pages, Linux) lost 3 pages as `output truncated at max_tokens`; all three were loops. A reply that looped and hit max_tokens was retried with more tokens and no penalty, and two loops escaped the detector: `By _____` (two distinct letters, under the rule's four) and a condensed transcript counting `[801] MR. X: It's 36 pages.`, `[802] …`. A cut-off reply is now checked with `has_cut_off_loop` (one letter or digit, numbers may differ) and a loop gets the penalty. ctr-nissan-dealer p1 and depo-christoforo-lupo p5 now succeed; lupo p1 (a 4-up condensed transcript) still loops under the penalty and is flagged as failed, as off the Mac there is no Vision fallback. Rerun over all 230 pages (`eval/out/public/paddleocr-vl-linux-b`): failed pages 3 → 1, and the 18 other documents byte-identical apart from `generated:`.
+    - CI runs the tests in release mode: the un-gated model-engine tests took 25 minutes in a debug build on the runners (30-minute limit), and `tests/paddle.rs` used `fake_server.py` directly, which Windows cannot start; it now shares `common::FAKE` (the `.cmd` wrapper there).
+  - **Eval** (seeds 10–12, RTX 5060 Ti, CUDA 13; `eval/out/results/*-linux-cuda-1.0.json`; Paddle and olmOCR at `312f100`, rerun at `e551528` after the cut-off-loop fix with identical results (`*-linux-cuda-1.0b.json`); dots at `0b8d44b`, which differs from the release only in code dots does not run). CER / token recall:
+
+    | Family | paddleocr-vl | olmocr | dots-ocr (dots.ocr) |
+    |---|---|---|---|
+    | pleading | 0.9% / 98.4%, Bates 100% | 0.0% / 100%, Bates 100% | 0.1% / 100%, Bates 100% |
+    | contract | 0.0% / 100% | 0.0% / 100% | 0.0% / 100% |
+    | transcript4up | 39.1% / 91.5%, lines 34.3% | 11.6% / 96.9%, lines 25.6% | 2.0% / 100%, lines 76.3% |
+    | fax | 0.0% / 100% | 0.0% / 100% | 1.2% / 100% |
+    | table | 12.3% / 100% | 0.0% / 100% | 0.0% / 100% |
+    | GPU memory | 2.4 GB | 10.2 GB | 4.4 GB |
+    | pages/s | 0.16–0.70 | 0.03–0.09 | 0.12–0.37 |
+
+    Same CER as the 2026-10-14 run everywhere; pleading Bates rose from 81.8% (olmOCR) and 90.9% (dots) to 100%. In the 15 runs no page failed or was flagged and no `ocr` process crashed, so the Apple-Silicon-derived timeouts did not cost a page on this GPU (a timeout that succeeded on its retry would not show: the server log is rewritten at each start). GPU memory matches the README estimates.
+

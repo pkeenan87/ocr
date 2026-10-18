@@ -160,8 +160,19 @@ impl Env {
         fs::read_to_string(self.path(&format!("{stem}.md"))).unwrap()
     }
 
-    /// Requests the fake server has seen, oldest first.
+    /// The page and crop requests the fake server has seen, oldest first. Off macOS the Bates
+    /// corner requests (`CORNER_MAX_TOKENS`, `Ctx::corner_bates`) are left out, so the counts and
+    /// orders the tests assert are the Mac's; `all_requests` has them.
     pub fn requests(&self) -> Vec<Value> {
+        let all = self.all_requests();
+        if cfg!(target_os = "macos") {
+            return all;
+        }
+        all.into_iter().filter(|r| !is_corner(r)).collect()
+    }
+
+    /// Every request the fake server has seen, oldest first, Bates corner requests included.
+    pub fn all_requests(&self) -> Vec<Value> {
         fs::read_to_string(self.path("fake.log"))
             .unwrap_or_default()
             .lines()
@@ -196,6 +207,37 @@ pub fn without_generated(md: &str) -> String {
 
 pub fn longest(r: &Value) -> u64 {
     r["w"].as_u64().unwrap().max(r["h"].as_u64().unwrap())
+}
+
+/// Whether a logged request is a Bates corner probe: only those ask for 256 tokens.
+pub fn is_corner(r: &Value) -> bool {
+    r["max_tokens"] == 256
+}
+
+/// Whether page 1 was given up on by the model. macOS falls back to Apple Vision text
+/// (`fallback_pages: [1]`); off macOS there is no fallback: the page is flagged and its body is
+/// an `OCR failed` marker.
+pub fn fell_back(md: &str) -> bool {
+    if cfg!(target_os = "macos") {
+        md.contains("fallback_pages: [1]\n")
+    } else {
+        md.contains("fallback_pages: []\n") && md.contains("<!-- page 1: OCR failed: ")
+    }
+}
+
+/// `fell_back`, and page 1 is in `flagged_pages`.
+pub fn fell_back_and_flagged(md: &str) -> bool {
+    fell_back(md) && md.contains("flagged_pages: [1]\n")
+}
+
+/// The request field a loop-retry penalty travels in: mlx-vlm reads `repetition_penalty`,
+/// llama-server (off macOS) `repeat_penalty`.
+pub fn penalty_key() -> &'static str {
+    if cfg!(target_os = "macos") {
+        "repetition_penalty"
+    } else {
+        "repeat_penalty"
+    }
 }
 
 /// Whether a scan that exited 1 did so only because the synthetic transcript fixtures trip the

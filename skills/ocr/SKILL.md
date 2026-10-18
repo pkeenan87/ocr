@@ -12,7 +12,7 @@ description: OCR PDFs and images to Markdown locally on a Mac or a Linux PC with
 ## Before scanning
 
 1. Check that the tool is installed: `command -v ocr && ocr --version`. If it is missing, tell the user and stop; do not try to install it yourself.
-2. On a Mac the default engine, `apple`, needs no setup. For a model engine, run `ocr server setup --model <engine>` once. It downloads several GB, so confirm with the user first.
+2. On a Mac the default engine, `apple`, needs no setup. For a model engine, run `ocr server setup --model <engine>` once. It downloads several GB, so confirm with the user first. Off the Mac, check which engine is installed with `ocr server status` and pass `--model <engine>` to every `scan`.
 3. A model engine also needs its server running: `ocr server start --model <engine>`. Only one model server runs at a time. `indra-ocr` is the exception: it has no server (setup needs `uv` and downloads about 18 MB). Run `ocr server stop` when you finish, unless the user wants it left running.
 
 ## Choosing an engine
@@ -25,7 +25,9 @@ description: OCR PDFs and images to Markdown locally on a Mac or a Linux PC with
 | Clean prose and tables | `olmocr` | Slowest (about 16 s/page), needs 11 GB of memory |
 | A machine with no GPU, or a fast first pass on clean documents | `indra-ocr` | CPU only, about 2 pages/s, no server; weaker on degraded scans, handwriting and complex tables; weights are under a modified OpenRAIL-M (research, personal use, small startups) |
 
-On a Mac, start with `apple` unless the document is a transcript or the user asks for a model. Off the Mac, start with `paddleocr-vl`, or `dots-ocr` for tables and transcripts. Before a model run of more than about 50 pages, tell the user the estimated time.
+On a Mac, start with `apple` unless the document is a transcript or the user asks for a model. Off the Mac, start with `dots-ocr` (see below). Before a model run of more than about 50 pages, tell the user the estimated time.
+
+**Off the Mac:** `dots-ocr` is the most accurate for most work, and always the choice for transcripts and tables (about 3–8 s a page on a GPU). `paddleocr-vl` is faster and fine for prose, but weak on tables and transcripts there, because the Mac's Apple Vision table crops are missing. `olmocr` matches dots except on transcripts and is about four times slower.
 
 ## Scanning
 
@@ -130,7 +132,7 @@ Front matter fields to watch:
 - `flagged_pages`: pages to check by hand.
 - `suspect_pages`: `{page: [reasons]}` for pages whose text looks wrong although OCR succeeded (`garbled`, `misreads`, `junk_lines`, `duplicated`, `pleading_table`, `transcript_table`, `page_order`, `mixed_case`). Tell the user which pages and why, and do not quote or cite from them without checking the PDF page.
 - `symbol_fixes`: pages where `¶`/`§` were restored in Apple Vision citations (`Compl. 9 60` became `Compl. ¶ 60`); `--verbose` prints each rewrite.
-- `fallback_pages`: the model failed on these pages, and Apple Vision text was used instead.
+- `fallback_pages`: the model failed on these pages, and Apple Vision text was used instead (Mac only). Off the Mac a failed page has no text: its marker reads `<!-- page 12: OCR failed: … -->` and it is in `flagged_pages`; re-running the same command retries it.
 - `line_numbers.unverified`: transcript pages whose line numbers could not be checked against the page geometry.
 - `column_split_pages`: pages read column by column.
 

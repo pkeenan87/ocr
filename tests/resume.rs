@@ -2,26 +2,30 @@
 //! corrupt and failed pages, directory mode, and the cap on in-flight model requests.
 //! The apple tests run real Apple Vision; the PDFs are built with the spike venv's pypdfium2.
 
-// Needs Apple Vision (PLAN §9).
-#![cfg(target_os = "macos")]
-
 mod common;
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+#[cfg(target_os = "macos")]
+use std::path::PathBuf;
 use std::process::{Child, Command as StdCommand, Stdio};
 use std::time::{Duration, Instant};
 
+#[cfg(target_os = "macos")]
 use assert_cmd::Command;
 use common::{Env as ModelEnv, FIXTURES, without_generated};
+#[cfg(target_os = "macos")]
 use tempfile::{TempDir, tempdir};
 
+#[cfg(target_os = "macos")] // the spike venv builds the test PDFs
 const THREE: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/spike/fixtures/three_pages.pdf"
 );
+#[cfg(target_os = "macos")] // the spike venv builds the test PDFs
 const PYTHON: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/spike/.venv/bin/python");
 
+#[cfg(target_os = "macos")] // the spike venv builds the test PDFs
 fn python(code: &str, args: &[&str]) {
     assert!(
         Path::new(PYTHON).exists(),
@@ -40,6 +44,7 @@ fn python(code: &str, args: &[&str]) {
 }
 
 /// A PDF of `copies` x three_pages.pdf (3 * copies pages).
+#[cfg(target_os = "macos")] // the spike venv builds the test PDFs
 fn repeated_pdf(dest: &Path, copies: usize) {
     python(
         "import sys, pypdfium2 as p\n\
@@ -51,6 +56,7 @@ fn repeated_pdf(dest: &Path, copies: usize) {
 }
 
 /// Three pages, the middle one with an empty page box: Vision fails on it outright.
+#[cfg(target_os = "macos")] // the spike venv builds the test PDFs
 fn pdf_with_failing_page(dest: &Path) {
     python(
         "import sys, pypdfium2 as p\n\
@@ -126,12 +132,14 @@ fn summary_count(stderr: &str, label: &str) -> usize {
 
 // ------------------------------------------------------------------- apple
 
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 struct Apple {
     config: TempDir,
     state: TempDir,
     work: TempDir,
 }
 
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 impl Apple {
     fn new() -> Self {
         Self {
@@ -188,6 +196,7 @@ impl Apple {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn killed_apple_run_resumes_to_the_clean_output() {
     let e = Apple::new();
     repeated_pdf(&e.path("big.pdf"), 14); // 42 pages
@@ -219,6 +228,7 @@ fn killed_apple_run_resumes_to_the_clean_output() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn a_changed_dpi_discards_the_checkpoints() {
     let e = Apple::new();
     let partial = e.interrupted(&[]);
@@ -234,6 +244,7 @@ fn a_changed_dpi_discards_the_checkpoints() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn a_modified_input_discards_the_checkpoints() {
     let e = Apple::new();
     e.interrupted(&[]);
@@ -254,6 +265,7 @@ fn a_modified_input_discards_the_checkpoints() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn overwrite_redoes_everything_and_drops_the_old_output() {
     let e = Apple::new();
     let partial = e.interrupted(&[]);
@@ -268,6 +280,7 @@ fn overwrite_redoes_everything_and_drops_the_old_output() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn a_corrupt_page_file_is_redone() {
     let e = Apple::new();
     let partial = e.interrupted(&[]);
@@ -286,6 +299,7 @@ fn a_corrupt_page_file_is_redone() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn a_failed_page_is_not_checkpointed_and_is_retried() {
     let e = Apple::new();
     pdf_with_failing_page(&e.path("bad.pdf"));
@@ -317,6 +331,7 @@ fn a_failed_page_is_not_checkpointed_and_is_retried() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn assembly_options_do_not_invalidate_checkpoints() {
     let e = Apple::new();
     let partial = e.interrupted(&[]);
@@ -354,6 +369,7 @@ fn six_files(dir: &Path) {
     .unwrap();
 }
 
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn scan_dir(e: &Apple, out: &str, jobs: &str) -> String {
     let a = Command::cargo_bin("ocr")
         .unwrap()
@@ -390,6 +406,7 @@ fn outputs(dir: &Path) -> Vec<(String, String)> {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn directory_of_six_files_is_the_same_at_jobs_4_and_1() {
     let e = Apple::new();
     six_files(&e.path("in"));
@@ -402,6 +419,7 @@ fn directory_of_six_files_is_the_same_at_jobs_4_and_1() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn stale_partial_dir_next_to_a_finished_output_is_removed() {
     let e = Apple::new();
     six_files(&e.path("in"));
@@ -501,6 +519,7 @@ fn model_directory_output_does_not_depend_on_jobs() {
 }
 
 /// Sets `--max-num-seqs` in the recorded argv of the running server (the fake ignores it).
+#[cfg(target_os = "macos")]
 fn set_max_num_seqs(e: &ModelEnv, n: usize) {
     let path = e.state.path().join("server.json");
     let mut info: serde_json::Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
@@ -511,6 +530,7 @@ fn set_max_num_seqs(e: &ModelEnv, n: usize) {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the venv builds its PDFs
 fn in_flight_requests_are_capped_by_max_num_seqs() {
     let e = ModelEnv::new("olmocr", &[]);
     repeated_pdf(&e.path("six.pdf"), 2);
@@ -535,6 +555,50 @@ fn in_flight_requests_are_capped_by_max_num_seqs() {
         without_generated(&fs::read_to_string(e.path("a.md")).unwrap()),
         without_generated(&fs::read_to_string(e.path("b.md")).unwrap())
     );
+}
+
+/// Off macOS the server records `slots` (llama-server) instead of `--max-num-seqs`; the PDFs
+/// are two copies of a fixture in a directory, since the spike venv is not available.
+#[cfg(not(target_os = "macos"))]
+fn set_slots(e: &ModelEnv, n: usize) {
+    let path = e.state.path().join("server.json");
+    let mut info: serde_json::Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+    assert!(info["slots"].is_number(), "no slots in {info}");
+    info["slots"] = n.into();
+    fs::write(&path, serde_json::to_vec(&info).unwrap()).unwrap();
+}
+
+#[test]
+#[cfg(not(target_os = "macos"))]
+fn in_flight_requests_are_capped_by_slots() {
+    let e = ModelEnv::new("olmocr", &["three_pages.pdf"]);
+    fs::create_dir(e.path("in")).unwrap();
+    for f in ["a.pdf", "b.pdf"] {
+        fs::copy(e.path("three_pages.pdf"), e.path("in").join(f)).unwrap();
+    }
+    e.serve(&slow("1"));
+    let run = |out: &str| {
+        e.base_cmd()
+            .args(["scan", "--model", "olmocr", "--input-dir", "in"])
+            .args(["--output-dir", out, "--jobs", "8"])
+            .assert()
+            .success();
+    };
+
+    // The server was started with 1 slot: --jobs 8 still makes one request at a time.
+    run("a");
+    assert_eq!(e.requests().len(), 6);
+    assert_eq!(e.max_overlap(), 1);
+
+    // With 2, the same run overlaps exactly two requests.
+    set_slots(&e, 2);
+    for f in ["fake.log", "fake.log.end"] {
+        fs::remove_file(e.path(f)).unwrap();
+    }
+    run("b");
+    assert_eq!(e.requests().len(), 6);
+    assert_eq!(e.max_overlap(), 2);
+    assert_eq!(outputs(&e.path("a")), outputs(&e.path("b")));
 }
 
 #[test]
@@ -565,6 +629,7 @@ fn two_scans_on_one_server_take_turns() {
 // ------------------------------------------- directory mode: stale outputs
 
 /// One scan of `in/` into `out/` with the apple engine; returns stderr.
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn scan_stale(e: &Apple, extra: &[&str]) -> String {
     let a = Command::cargo_bin("ocr")
         .unwrap()
@@ -578,6 +643,7 @@ fn scan_stale(e: &Apple, extra: &[&str]) -> String {
     String::from_utf8_lossy(&a.get_output().stderr).into_owned()
 }
 
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn scan_record_of(md: &Path) -> String {
     fs::read_to_string(md)
         .unwrap()
@@ -587,6 +653,7 @@ fn scan_record_of(md: &Path) -> String {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn directory_rescans_only_what_changed() {
     let e = Apple::new();
     fs::create_dir_all(e.path("in")).unwrap();
@@ -644,6 +711,7 @@ fn directory_rescans_only_what_changed() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn replacing_the_input_removes_the_old_sidecar() {
     let e = Apple::new();
     fs::create_dir_all(e.path("in")).unwrap();
@@ -662,6 +730,7 @@ fn replacing_the_input_removes_the_old_sidecar() {
 }
 
 #[test]
+#[cfg(target_os = "macos")] // the apple engine runs Vision
 fn output_without_a_scan_record_is_kept_and_reported() {
     let e = Apple::new();
     fs::create_dir_all(e.path("in")).unwrap();

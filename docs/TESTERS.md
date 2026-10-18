@@ -7,11 +7,13 @@ Thank you for testing `ocr`. It turns scanned and image-only PDFs into Markdown 
 ## What you need
 
 - **Mac:** Apple Silicon (M1 or later) on **macOS 26 or later**. About 1 GB free for the default engine. The optional model engines need 2–9 GB more and 8–16 GB of RAM (see "Engines" below).
-- **Linux:** x86-64, ideally with an NVIDIA GPU (8 GB or more for `dots-ocr`, 12 GB for `olmocr`). It runs on the CPU too, but slowly. `paddleocr-vl` downloads about 2 GB of weights plus the llama.cpp runtime. **Read "Known limits" first: a Linux run confirms far fewer values than a Mac run.**
+- **Linux:** x86-64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 and newer), `curl` and `tar`, ideally with an NVIDIA GPU (8 GB or more for `dots-ocr`, 12 GB for `olmocr`). An AMD or Intel GPU with its own memory works through Vulkan, more slowly; without a GPU, `paddleocr-vl` runs on the CPU at about 8 s a page. Allow 5–15 GB of disk for an engine. **Read "Known limits" first: a Linux run confirms far fewer values than a Mac run.**
 - Windows builds exist but have not been tested on a real machine; please don't pilot on Windows yet.
 - For the Claude workflow: Claude Code.
 
 ## Install
+
+### Mac
 
 **From the release (no build tools needed).** Download `ocr-<version>-macos-arm64.tar.gz` from the GitHub release Patrick shares, then in Terminal:
 
@@ -35,21 +37,25 @@ The `xattr` step tells macOS to trust a downloaded program that is not from the 
 
 **From source on a Mac** (if you have repository access): install the Xcode command line tools (`xcode-select --install`) and Rust ([rustup.rs](https://rustup.rs)), then `cargo build --release` in the repository and copy `target/release/ocr` and `skills/ocr` as above.
 
-**On Linux** (from source): install Rust ([rustup.rs](https://rustup.rs)) and, for an NVIDIA GPU, a current driver (`nvidia-smi` must work). Then, in the repository:
+### Linux
+
+Download `ocr-<version>-linux-x86_64.tar.gz` and its `.sha256` from the GitHub release, then:
 
 ```bash
-cargo build --release
+sha256sum -c ocr-*-linux-x86_64.tar.gz.sha256
+tar xzf ocr-*-linux-x86_64.tar.gz
+sudo cp ocr-*/ocr /usr/local/bin/
+mkdir -p ~/.claude/skills && cp -R ocr-*/skills/ocr ~/.claude/skills/
 ```
+
+Linux has no built-in engine, so set one up before the first scan. Setup picks the CUDA, Vulkan or CPU build for your hardware and downloads it with pdfium and the model weights (every file is checked against a pinned sha256):
 
 ```bash
-sudo cp target/release/ocr /usr/local/bin/ && mkdir -p ~/.claude/skills && cp -R skills/ocr ~/.claude/skills/
+ocr server setup --model dots-ocr
+ocr server start --model dots-ocr
 ```
 
-```bash
-ocr server setup --model paddleocr-vl
-```
-
-Setup picks the right GPU build, downloads it and the weights, and checks each file. Start the engine before scanning with `ocr server start`.
+**From source** (if you have repository access): install Rust ([rustup.rs](https://rustup.rs)) and, for an NVIDIA GPU, a current driver (`nvidia-smi` must work). Then, in the repository, `cargo build --release`, copy `target/release/ocr` and `skills/ocr` as above, and set up an engine.
 
 Check it works:
 
@@ -65,6 +71,8 @@ ocr --version
 ocr scan --input-file filing.pdf --output-file filing.md --verify-json --verify-fields all
 ```
 
+On Linux, add `--model dots-ocr` (or the engine you set up).
+
 This writes:
 - **`filing.md`:** the text, with page markers and Bates numbers;
 - **`filing.verify.json`:** every value found, with its status.
@@ -77,7 +85,7 @@ A whole folder works too: `--input-dir` and `--output-dir`.
 
 | You see | It means |
 |---|---|
-| `verified` | Two independent readings agree on this exact value (the PDF's own text, or, on a Mac, a model engine against Apple Vision). Safe to rely on, with its page. |
+| `verified` | Two independent readings agree on this exact value (the PDF's own text, or, on a Mac, a model engine against Apple Vision). Safe to rely on, with its page. On Linux the only second reading is the PDF's own text, so values on scanned pages are `check` or `unchecked`, never `verified`. |
 | `check` | Something disagrees or looks wrong. **Look at the page.** The `why` list says what. |
 | `unchecked` | Nothing could confirm it either way. **Look at the page** before relying on it. |
 | `azure_pages` | The pages a second service, or a person, should read. |
@@ -88,10 +96,10 @@ A whole folder works too: `--input-dir` and `--output-dir`.
 ## Engines
 
 - **`apple`** is the default on a Mac (it is not available on Linux): fast (about 3 pages a second), no download, good on most documents.
-- **The model engines** are optional, slower, and more accurate on some pages. Set one up once with `ocr server setup --model <engine>`, start it with `ocr server start`, then add `--model <engine>` to `scan`:
-  - **`paddleocr-vl`:** 2–4 s a page, about 4 GB of memory;
-  - **`dots-ocr`:** 5–10 s a page, about 7 GB, the most accurate on deposition transcripts.
-- **On Linux**, `paddleocr-vl` is the default. Use `dots-ocr` for documents with tables (see "Known limits").
+- **The model engines** are optional on a Mac and required on Linux. Set one up once with `ocr server setup --model <engine>`, start it with `ocr server start`, then add `--model <engine>` to `scan`:
+  - **`paddleocr-vl`:** the fastest and lightest. On Linux it is the default but weaker on tables and transcripts;
+  - **`dots-ocr`:** the most accurate on deposition transcripts and tables; **the recommended engine on Linux**;
+  - **`olmocr`:** accurate on prose and tables, the slowest; about 11 GB of GPU memory on Linux.
 
 ## Please report
 

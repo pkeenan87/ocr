@@ -1,0 +1,64 @@
+# Linux x86-64 release (PLAN §9). On a `v*` tag: check the tag matches Cargo.toml, test, build,
+# package the binary with the skill, docs, license and third-party notices, and attach it with its
+# sha256 to a DRAFT GitHub release. Publishing the draft is a manual step. The macOS build is made
+# on a Mac.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  PDFIUM_URL: https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/7881
+  PDFIUM_SHA256: 1470e21b8b4a3b4ad7f85684e2da11d94f3b69a86d81dee11b9b6709d927ac1d
+
+jobs:
+  linux:
+    # The oldest supported runner, so the binary runs on glibc 2.35 and newer.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Tag matches Cargo.toml
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 | python3 -c 'import json,sys; print(json.load(sys.stdin)["packages"][0]["version"])')
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != Cargo.toml $version"; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: pdfium (pinned, checksum verified)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pdfium"
+          curl -fsSL "$PDFIUM_URL/pdfium-linux-x64.tgz" -o "$RUNNER_TEMP/pdfium.tgz"
+          echo "$PDFIUM_SHA256  $RUNNER_TEMP/pdfium.tgz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/pdfium.tgz" -C "$RUNNER_TEMP/pdfium"
+          echo "OCR_PDFIUM_LIB=$RUNNER_TEMP/pdfium/lib/libpdfium.so" >> "$GITHUB_ENV"
+      - run: cargo test --release --no-fail-fast
+        timeout-minutes: 30
+      - run: cargo build --release --locked
+      - name: Package
+        run: |
+          name="ocr-$VERSION-linux-x86_64"
+          mkdir -p "dist/$name/skills"
+          cp target/release/ocr README.md LICENSE "dist/$name/"
+          cp docs/TESTERS.md "dist/$name/"
+          cp -R skills/ocr "dist/$name/skills/"
+          python3 scripts/third_party_notices.py --target x86_64-unknown-linux-gnu > "dist/$name/THIRD_PARTY_NOTICES.md"
+          tar -czf "dist/$name.tar.gz" -C dist "$name"
+          (cd dist && sha256sum "$name.tar.gz" > "$name.tar.gz.sha256")
+          echo "ASSET=dist/$name.tar.gz" >> "$GITHUB_ENV"
+      - name: Smoke test the packaged binary
+        run: |
+          mkdir smoke && tar -xzf "$ASSET" -C smoke
+          smoke/*/ocr --version
+          smoke/*/ocr scan --help > /dev/null
+      - name: Draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes=docs/release-notes/$GITHUB_REF_NAME.md
+          test -f "$notes" || { echo "missing $notes"; exit 1; }
+          gh release create "$GITHUB_REF_NAME" --draft --title "ocr $VERSION" \
+            --notes-file "$notes" "$ASSET" "$ASSET.sha256"

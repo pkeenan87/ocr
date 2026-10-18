@@ -449,6 +449,15 @@ pub struct Ctx {
     bates_misses: Mutex<HashMap<PathBuf, u32>>,
 }
 
+/// The request field for a repetition penalty on the runtime `runtime` (`Ctx::mlx_vlm`).
+fn penalty_field(runtime: &str) -> &'static str {
+    if runtime.starts_with("llama.cpp") {
+        "repeat_penalty"
+    } else {
+        "repetition_penalty"
+    }
+}
+
 /// `bates_misses` value of a document known to carry Bates numbers.
 const BATES_FOUND: u32 = u32::MAX;
 /// Pages of a document probed for a Bates corner, with nothing found, before probing stops.
@@ -706,7 +715,8 @@ impl Ctx {
             "messages": [{"role": "user", "content": content}],
         });
         if let Some(p) = penalty {
-            body["repetition_penalty"] = p.into();
+            // llama-server reads `repeat_penalty` and silently ignores mlx-vlm's name.
+            body[penalty_field(&self.mlx_vlm)] = p.into();
         }
         let classify = |e: ureq::Error| match e {
             ureq::Error::Timeout(_) => PostErr::Timeout,
@@ -1242,6 +1252,13 @@ mod tests {
         assert!(has_repetition_loop(&cut));
         // Unicode does not panic.
         assert!(has_repetition_loop(&"naïve café résumé — ".repeat(10)));
+    }
+
+    #[test]
+    fn penalty_field_follows_the_runtime() {
+        assert_eq!(penalty_field("llama.cpp b11510 cuda13"), "repeat_penalty");
+        assert_eq!(penalty_field("llama.cpp b11510 cpu"), "repeat_penalty");
+        assert_eq!(penalty_field("mlx-vlm 0.7.6"), "repetition_penalty");
     }
 
     #[test]

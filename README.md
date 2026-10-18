@@ -1,6 +1,16 @@
 # ocr
 
-Local, private OCR of PDFs and images to Markdown on Apple Silicon, and on Linux and Windows machines with a GPU (see [Linux and Windows](#linux-and-windows)). Nothing is uploaded anywhere.
+Local, private OCR of PDFs and images to Markdown. Nothing is uploaded anywhere.
+
+**Supported platforms (v1.0):**
+
+| Platform | Status | Engines |
+|---|---|---|
+| macOS 26 or later, Apple Silicon | Supported | all five; `apple` is the default |
+| Linux x86-64, ideally with an NVIDIA GPU | Supported | `paddleocr-vl` (default), `dots-ocr`, `olmocr`, `indra-ocr` |
+| Windows 10/11 x86-64 | Preview: builds and passes tests in CI, not yet run on a real machine | as Linux |
+
+Linux arm64 and Intel Macs are not supported. Off the Mac, `ocr` works differently in ways that matter for legal use; read [Known limits](#known-limits) first.
 
 `ocr` is a single command-line tool with five engines:
 
@@ -14,11 +24,13 @@ Local, private OCR of PDFs and images to Markdown on Apple Silicon, and on Linux
 
 It is built for legal documents that run to hundreds of pages: it streams pages, writes per-page checkpoints, resumes after an interruption, keeps Bates numbers in page markers and flags pages it is not sure about.
 
-Status: Phase 6 evaluation is done; results are in [docs/eval.md](docs/eval.md). The fixtures are synthetic.
+Accuracy is measured on 61 hand-checked pages of real public court filings (see [Which engine?](#which-engine)) and on synthetic fixtures ([docs/eval.md](docs/eval.md)).
 
-**Testing the pilot?** Start with [docs/TESTERS.md](docs/TESTERS.md).
+**Testing it?** Start with [docs/TESTERS.md](docs/TESTERS.md).
 
 ## Requirements
+
+On a Mac (Linux and Windows: see [Linux and Windows](#linux-and-windows)):
 
 - Apple Silicon Mac, macOS 26 or later (Apple Vision's document API needs it).
 - Xcode command line tools (`xcode-select --install`), for the Swift toolchain.
@@ -76,7 +88,7 @@ Model engines also need a running server:
 
 ## Linux and Windows
 
-Status: Phase 7 (PLAN.md §9). Linux was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build: all three model engines pass. A native Windows run is still to come. Windows builds and tests run in CI.
+Status: Linux is supported in v1.0. It was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build: all three model engines pass. Windows is a preview: it builds and passes the tests in CI, but has not been run on a real machine.
 
 Off the Mac:
 - There is no Apple Vision, so `apple` is not offered and **`paddleocr-vl` is the default engine**.
@@ -135,8 +147,11 @@ olmocr bf16 (18.1 GB) does not fit a 16 GB card; use the default 8bit.
 - Without the Apple Vision side-pass:
   - Bates numbers come from the model's own text.
   - olmOCR, which drops footers, and dots, whose plain-text prompt leaves out page footers, get up to two extra small requests per page, for the bottom-right and bottom-left corners, when the page text has no Bates number. A document stops getting them after three pages without one. A Bates number centred under the footer is not found.
-  - There are no table crops and no transcript detection.
+  - There are no table crops: PaddleOCR-VL reads tables from the full page, which is less accurate (see [Known limits](#known-limits)).
+  - There is no transcript detection, so transcript line numbers are the model's own, not re-anchored to the page, and `line_numbers.unverified` is never written.
+  - `--verify-json` has no second reading of scanned pages. Only the PDF's own embedded text can mark a value `verified`; on a scan every value stays `unchecked` (or `check` with `--verify-fields all`).
   - A page the model fails is recorded as failed, and a re-run retries it, instead of falling back to Apple Vision text.
+- `--use-text-layer auto` (the embedded-text corrections) belongs to the `apple` engine, so it does not run off the Mac.
 - Column detection still works: it runs on the rendered bitmap.
 - HEIC images are refused; convert them to PNG or JPEG.
 
@@ -344,7 +359,7 @@ An example (abridged):
   - `words_numerals_mismatch`: an amount in words disagrees with its numerals. `Five Thousand Dollars ($3,000.00)` means one side was misread, or the document itself is wrong.
   - `arithmetic_mismatch`: a table's total row disagrees with the sum of the amounts above it. A `Subtotal` row and what follows it, such as tax, are allowed for.
   - `unconfirmed`: with `--verify-fields all`, nothing confirmed the value.
-- **Second reading of scanned pages (macOS):** pages without embedded text that have values are read again with Vision's line recognizer at 300 DPI (`second_reader: true` on the page).
+- **Second reading of scanned pages (macOS only; off the Mac nothing confirms a value on a scan):** pages without embedded text that have values are read again with Vision's line recognizer at 300 DPI (`second_reader: true` on the page).
   - **Model engines:** when the second reading has the same value, the value is `verified` (`matches_second_reading`). A model and Vision are independent readers. Bates numbers are the exception: on model pages they come from Apple Vision's side pass, so the Apple second reading cannot verify them.
   - **Apple engine:** agreement verifies nothing, because two Apple readings share blind spots. On one filing both read two overprinted stamps, `04/24/24` and `04/18/24`, as `04/28/24`. A disagreement still turns the value into `check`.
 - **`unchecked`:** nothing confirms the value and nothing speaks against it. This typically means a scan with no embedded text. `--verify-fields all` turns these into `check`; use it when nothing may be missed.
@@ -431,7 +446,7 @@ Setup needs [`uv`](https://docs.astral.sh/uv/). It builds a Python 3.12 environm
 
 There is no `--quant` or `--model-version`, and `ocr server start --model indra-ocr` only says that no server is needed. At scan time the helper runs offline.
 
-Page headers and footers are read but left out of the body, and the Bates number is taken from them. HTML tables become GFM tables. By its model card it is weaker than the VLM engines on degraded scans, handwriting and complex tables; check such pages.
+Page headers and footers are read but left out of the body, and the Bates number is taken from them. The court's filing stamp (`Case … Document … Filed … Page … of …`) is the exception: indra labels it a page header, but its docket, filed date and page count are on the page, so it is put back at the top of the page. Two image readers never verify its values (`court_stamp`). On a Mac, scanned indra-ocr pages get the Apple Vision second reading like the other model engines (tested on macOS 26.6 on 2026-10-18). HTML tables become GFM tables. By its model card it is weaker than the VLM engines on degraded scans, handwriting and complex tables; check such pages.
 
 License: the weights are under a modified OpenRAIL-M. They are free for research, personal use and startups under $20M in funding or revenue, and may not be used competitively with Datalab's API. Read the [model card](https://huggingface.co/datalab-to/indra-ocr) before using it commercially.
 
@@ -440,12 +455,25 @@ License: the weights are under a modified OpenRAIL-M. They are free for research
 | Engine | Best for | Speed (measured) | 300-page estimate | Memory (server peak) |
 |---|---|---|---|---|
 | apple | General documents, contracts, pleadings, scans, bulk runs. Transcripts work (line numbers re-anchored) but dots-ocr is more accurate | about 3.4-3.5 pages/s at 150 DPI with the Vision limit of 2 (16 pages/s before the limit; see below) | about 85-87 s | `ocr` worker about 178 MB |
-| paddleocr-vl | The fastest model engine; text-heavy documents, tables | about 0.19 pages/s (5.3 s/page at 150 DPI) | about 27 minutes | 4.0 GB |
+| paddleocr-vl | The fastest model engine; text-heavy documents, tables (on a Mac; off the Mac use dots-ocr for tables) | about 0.19 pages/s (5.3 s/page at 150 DPI) | about 27 minutes | 4.0 GB |
 | olmocr | Clean prose and tables in ordinary documents | about 0.06 pages/s (about 16 s/page, from the spike) | about 80 minutes | 11-11.5 GB (5.5 GB at 4bit, estimated) |
 | indra-ocr | Fast CPU-only text extraction on any machine, no GPU or server; clean documents | about 2.5 pages/s on a 32-thread CPU (3-page pleading in 1.2 s, models loaded each run) | a few minutes | no server; a few hundred MB in the helper process |
 | dots-ocr | **Deposition transcripts (most accurate)** and layout-heavy pages | plain text first since 2026-10-10: about 5–9 s/page on ordinary pages (was 7–17), transcripts about 36 s per 4-up page (layout prompt, unchanged) | about 30–45 minutes, not counting transcripts | 6.8 GB |
 
-Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 85-87 s at the 150 DPI default (84-96 s at 200 DPI), about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes. Accuracy on the synthetic eval set (accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
+Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 85-87 s at the 150 DPI default (84-96 s at 200 DPI), about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes.
+
+**Accuracy on real filings** (the hand-checked holdout set: 61 pages of 18 public court filings, 292 values; v1.0 release build `3dff738`, macOS 26.6, `--verify-json --verify-fields all`, 2026-10-18). The measure that matters is the second column: a value marked `verified` that is not what the page says.
+
+| Engine | Values found | Verified but wrong | Verified | Amounts | Dates | Dockets | Citations | Transcription CER / word error (12 pages) |
+|---|---|---|---|---|---|---|---|---|
+| apple | 93.5% | **0** | 141 | 67/71 | 142/151 | 46/49 | 16/19 | 14.3% / 20.7% |
+| paddleocr-vl | 96.6% | **0** | 181 | 67/71 | 146/151 | 48/49 | 19/19 | 17.5% / 23.8% |
+| dots-ocr | 85.3% | **0** | 175 | 65/71 | 130/151 | 34/49 | 18/19 | 28.1% / 36.4% |
+| indra-ocr | 80.8% | **0** | 164 | 65/71 | 117/151 | 34/49 | 18/19 | 21.8% / 38.7% |
+
+Every misread value (two for Apple, one each for Paddle, dots and indra-ocr, such as `March 24, 2008` read as `2001`) was marked `check`, not `verified`. What every engine misses is mostly stamps, struck-through filing headers and handwriting; dots and indra-ocr also drop many filing-stamp dockets and dates on old scans. The set was measured on the Mac only: off the Mac nothing verifies a value on a scan (see [Known limits](#known-limits)), and olmOCR has not been scored on it. Details: [docs/spike.md](docs/spike.md).
+
+Accuracy on the synthetic eval set (Phase 6, 2026-10-08; accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
 
 | Engine | Token recall | CER | Bates | Notes |
 |---|---|---|---|---|
@@ -460,14 +488,24 @@ Guidance:
 - **Deposition transcripts: use `dots-ocr`, and check `line_numbers.unverified`.** Transcripts number every physical line, wrapped continuations included, and the models renumber sequentially after a wrap. So for every engine (Apple included) the line numbers of transcript pages are re-anchored to the page geometry, never taken from the model. On held-out seeds 40-42, lines exact were dots-ocr 99.9%, olmOCR 99.9%, Apple 97.4% and paddleocr-vl 94.9% (before re-anchoring: 68%, 30%, 38% and 25%). dots-ocr is the most accurate engine for transcripts and `paddleocr-vl` the least. A page whose text could not be matched to the geometry keeps the engine's own numbering and is listed under `line_numbers.unverified` in the front matter; `ocr` prints a note for those pages. Verify page:line citations on them against the PDF.
 - **Pleadings with tables on `paddleocr-vl`:** its table crops pull the margin line numbers in as an extra column. Use another engine for pleading-paper tables.
 
-## Limitations
+## Known limits
 
-- Transcript line numbers are re-anchored to page geometry for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr and olmOCR). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
+**Off the Mac (Linux, Windows).** There is no Apple Vision, and that matters most for checking values:
+- **Nothing confirms a value on a scanned page.** `--verify-json` has no second reader, so only the PDF's own embedded text can mark a value `verified`. On a scan, every value is `unchecked`, or `check` with `--verify-fields all`. Send such pages to a second service or to a person (use `--verify-fields all` so they are listed in `azure_pages`).
+- **PaddleOCR-VL is worse on tables.** On the Mac, Vision finds tables and Paddle reads each one as a crop (`Table Recognition:`). Off the Mac, Paddle reads the whole page, which gave 12.3% CER on the synthetic table fixtures against 0.0% on the Mac (docs/linux-reference-eval-results.md). For table-heavy documents use `dots-ocr` or `olmocr`, which scored 0.0% on the same tables off the Mac.
+- **Transcript line numbers are the model's own.** They are not re-anchored to the page; on the synthetic transcripts with the CUDA build, 34% (Paddle), 26% (olmOCR) and 76% (dots) of lines were exact. Do not cite `page:line` from an off-Mac transcript without checking the PDF.
+- **No embedded-text corrections** (`--use-text-layer auto` is an `apple` feature).
+- **No Bates number from a centred footer** on olmOCR and dots pages (the corner requests look bottom-left and bottom-right only).
+- Only Linux and Windows x86-64 have pinned llama.cpp and pdfium builds. Windows is a preview, not yet run on a real machine.
+
+**Every platform:**
+- Transcript line numbers are re-anchored to page geometry on the Mac for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr and olmOCR). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
 - The raw text-layer path (`--use-text-layer always`) has no layout handling. The default `auto` does not correct pages whose text layer is invisible OCR or whose visibility cannot be read, because that layer is another reading, not the document's characters.
 - Pleading margin line numbers (1-2 digits in the left margin) are dropped by Apple Vision, dots and olmOCR but kept by `paddleocr-vl`, where they can be glued to paragraph numbers and land in table crops on pleading paper. Recovering `page:line` citations is not implemented.
 - With olmOCR, a rotated page loses its Bates number in the marker, because the Apple side-pass cannot read a sideways page.
 - Column detection was tuned on synthetic fixtures; it found about 97.6% of lines on held-out synthetic layouts, and unusual layouts can still be mis-ordered.
-- Fixtures and evaluation data are synthetic, not real filings. Apple Bates accuracy on pleadings was 88.6% on the accept seeds.
+- The hand-checked set is small: 61 pages, 292 values. "No wrong value verified" on it means none in 292, not that one is impossible. Apple Bates accuracy on synthetic pleadings was 88.6% on the accept seeds.
+- Stamps, struck-through filing headers and handwriting are where every engine misses values. Filled PDF form fields and annotation stamps are not read at all; their pages get `annotations_not_read`.
 - Apple Vision crashed intermittently at process start in the evaluation binary (an Apple framework init race); the current build caps Vision at 2 concurrent requests and re-runs a crashed child from its checkpoints.
 - Handwriting is not evaluated; there is no trustworthy ground truth for it.
 - `suspect_pages` catches gibberish, duplicated passages, prose read as a table and transcript pages out of order, but not wrong-but-plausible numbers, dropped text or readable text in the wrong order. Its thresholds were set on synthetic text and simulated misreads, not yet re-checked on the real filings of eval/PUBLIC_SET.md.

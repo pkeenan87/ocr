@@ -272,7 +272,8 @@ pub fn find_bates(blocks: &[Block]) -> Option<String> {
 
 /// A Bates number in the last lines of a page's text (model output, which keeps the footer),
 /// for pages without Vision blocks (off macOS). The bottom-most match wins. A token followed by a
-/// lowercase word is part of a sentence (`Invoice No. INV-24337 in the amount of`), not a stamp:
+/// lowercase word, after any `,;:)`, is part of a sentence (`Invoice No. INV-24337 in the amount
+/// of`, `INV-89271, which was due`), not a stamp:
 /// when the model drops the footer, the last lines are body text.
 pub fn find_bates_in_text(body: &str) -> Option<String> {
     body.lines()
@@ -283,7 +284,10 @@ pub fn find_bates_in_text(body: &str) -> Option<String> {
             bates_in(l)
                 .filter(|m| {
                     let end = m.as_ptr() as usize - l.as_ptr() as usize + m.len();
-                    !l[end..].trim_start().starts_with(|c: char| c.is_lowercase())
+                    !l[end..]
+                        .trim_start_matches([',', ';', ':', ')'])
+                        .trim_start()
+                        .starts_with(|c: char| c.is_lowercase())
                 })
                 .last()
                 .map(str::to_string)
@@ -808,6 +812,8 @@ mod tests {
         for page in [
             "21. Defendant likewise failed to pay Invoice No. INV-24337 in the amount of $13,663.00, which became due on January 18, 2022.",
             "36. Defendant likewise failed to pay Invoice No. INV-75940 in the amount of $26,817.00, which became due on May 25, 2025.",
+            // seed10 production page 15 (dots.ocr)
+            "I am writing regarding the outstanding balance of $169,024.00 on Invoice No. INV-89271, which was due on September 7, 2025.",
         ] {
             assert_eq!(find_bates_in_text(page), None);
         }

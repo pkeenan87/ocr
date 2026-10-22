@@ -143,9 +143,9 @@ At 150 DPI (reported only): pleading 2.1% / 98.2% / 87.6%, contract 1.5% / 97.5%
 
 olmOCR's Bates comes from the Apple side-pass, so its pleading Bates (90.9%, 1 page in 11) is Apple's weakness there, as in Apple's own 88.6%. Table pages 1 of seed 10 and seed 12 fell back to Apple (exit 1, flagged); that is the likely cause of the 98.9% table recall.
 
-### indra-ocr (200 DPI, seeds 10-12, Linux CPU)
+### indra-ocr 0.3.1 (200 DPI, seeds 10-12, Linux CPU) — history
 
-Added 2026-10-14 (commit `e7dd644`), after the Phase 6 runs: `datalab-to/indra-ocr` 0.3.1, a CPU ONNX pipeline rather than a VLM. Run on Linux with 32 logical CPUs; raw results in `eval/out/results/indra-linux-cpu.json` (not committed). Not yet run on the Mac or Windows.
+Added 2026-10-14 (commit `e7dd644`), after the Phase 6 runs: `datalab-to/indra-ocr` 0.3.1, a CPU ONNX pipeline rather than a VLM. Run on Linux with 32 logical CPUs; raw results in `eval/out/results/indra-linux-cpu.json` (not committed). Not yet run on the Mac or Windows. Superseded by the 1.1.2 section below; kept so the delta is visible.
 
 | Family | Pages | CER | Token recall | Bates | Transcript lines | Pages/s |
 |---|---|---|---|---|---|---|
@@ -161,6 +161,35 @@ Added 2026-10-14 (commit `e7dd644`), after the Phase 6 runs: `datalab-to/indra-o
 - **Speed:** 2.0-3.5 pages/s on the CPU alone, about 10x the GPU engines' speed (PLAN.md, 2026-10-14). Not comparable with the Mac timings below (different machine; per-file runs include model load).
 - **No full-precision reference.** The vLLM reference run (docs/linux-reference-eval-results.md) covers the VLM engines only; indra has no quantized build and no vLLM model, so it is out of scope there.
 
+### indra-ocr 1.1.2 (200 DPI, seeds 10-12, Linux CPU)
+
+Re-run 2026-10-22 after the upgrade from 0.3.1. Platform: Linux x86-64, 32 logical CPUs (AMD Ryzen 9 9950X); binary `d008f31`. Isolated state (`eval/out/state`), `eval/run.py --engine indra-ocr --tag indra-1.1-linux-cpu`, usual normalization (`eval/score.py`; pleading with `--strip-line-numbers`). Raw results in `eval/out/results/indra-1.1-linux-cpu.json` (not committed). macOS 26 was not available.
+
+| Family | Pages | CER | Token recall | Bates | Transcript lines | Pages/s |
+|---|---|---|---|---|---|---|
+| pleading | 11 | 7.4% | 100% | 100% | - | 1.5 |
+| contract | 14 | 0.0% | 100% | - | - | 1.4 |
+| transcript4up | 9 | 13.7% | 92.2% | - | 4.1% | 0.7 |
+| fax | 6 | 0.0% | 97.7% | - | - | 1.3 |
+| table | 6 | 0.0% | 100% | - | - | 1.0 |
+
+Delta from the 0.3.1 table above (same seeds, same 32-thread Linux CPU; per-file pages/s include model load):
+
+| Family | CER | Token recall | Transcript lines | Pages/s |
+|---|---|---|---|---|
+| pleading | 9.9% → 7.4% | 100% → 100% | - | 3.4 → 1.5 |
+| contract | 0.0% → 0.0% | 100% → 100% | - | 3.5 → 1.4 |
+| transcript4up | 6.8% → 13.7% | 100% → 92.2% | 10.6% → 4.1% | 2.0 → 0.7 |
+| fax | 0.1% → 0.0% | 100% → 97.7% | - | 3.2 → 1.3 |
+| table | 0.0% → 0.0% | 100% → 100% | - | 2.5 → 1.0 |
+
+- **No `[Figure]` markers.** None of these outputs, and none of the holdout markdown, contained `[Figure]` or `picture-N`. The CER change is not from picture placeholders. The accept seeds have no picture regions.
+- **Fax recall** drops by one token (`July 1, 2022`, seed 11 page 2).
+- **Transcript CER** rises because 4-up reading order is worse, not because of `[Figure]`. Line numbers are still not re-anchored.
+- **Pleading CER** is still mostly margin line numbers merged into the text. The aggregate improved; seed 11 got worse.
+- **Speed and memory.** Short files are slower than 0.3.1 because the twelve-file set (about 76 MB) is loaded each run (`ocr` process peak 543–843 MB). One 20-page production file on the same machine did 4.5 pages/s (4.5 s wall); helper peak 0.6 GB on that file, 0.6 GB on a 3-page pleading (1.8 pages/s) and 0.9 GB on a 3-page 4-up transcript. A one-page `spike/fixtures/legal_scan.pdf` took 0.8 s.
+- **Holdout** (same Linux machine, 2026-10-22, `eval/holdout/score.py --engine indra-ocr`; no Vision second reader): values found 79.1% (231/292), verified but wrong **0** (134 verified, 97 check), amounts 63/71, dates 117/151, dockets 32/49, citations 17/19, transcription CER 27.1% / word error 41.2%. Two misreads, both `check` (`March 24, 2008` as `2001`; `3/29/21` as `3/29/12`). The Mac 0.3.1 row was 80.8% found, verified but wrong 0, CER 21.8% / word error 38.7%; the verified count is not comparable off the Mac.
+
 ### Transcripts
 
 | Engine | Token recall | Lines exact |
@@ -169,7 +198,7 @@ Added 2026-10-14 (commit `e7dd644`), after the Phase 6 runs: `datalab-to/indra-o
 | olmocr | 96.9% | 30.4% (drops the line numbers) |
 | apple | 83.4% | 38.3% (flags the pages) |
 | paddleocr-vl | 81.5% | 25.2% |
-| indra-ocr (added later, Linux) | 100% | 10.6% (no re-anchoring) |
+| indra-ocr 0.3.1 (added later, Linux; history) | 100% | 10.6% (no re-anchoring) |
 
 **Superseded for line numbers by re-anchoring: line numbers are now taken from page geometry for every engine (held-out seeds 40-42, lines exact: dots-ocr 99.9%, olmOCR 99.9%, Apple 97.4%, paddleocr-vl 94.9%). Use dots-ocr for transcripts and check pages under `line_numbers.unverified`. The table above and the text below are the measurements before that change.** Original finding: dots is the best engine for transcripts, but line numbers from every engine were unreliable. Transcripts number every physical line, including wrapped continuations. Paddle reads the words correctly, but joins a continuation onto the line above and renumbers its output sequentially, so every number after the first wrap is off by one and the drift grows down the page; on a whole 4-up sheet it also invents text. (A probe on seed 10 sheet 1, 99 numbered lines: Paddle full page 16-20 lines exact at 150-300 DPI, quadrant crops 42, the remaining crop errors being almost entirely the renumbering.) The earlier "100/100" Paddle spike result came from a fixture with short identical lines that never wrap. The fix, re-anchoring line numbers using the Apple side-pass's physical line geometry, is now implemented.
 
@@ -253,5 +282,5 @@ Related Paddle pleading finding: its pleading CER (13.3% accept) is not from mis
 - Full 500-page olmOCR and dots runs were not done. Their 300-page times are extrapolations from 60-page slices (dots) or the spike (olmOCR).
 - olmOCR timings in my runs were contended and are not reported as speeds.
 - Model-engine accept samples are small (3 seeds for dots, olmOCR and indra-ocr).
-- indra-ocr: transcript line numbers are not re-anchored (10.6% exact); pleading line numbers merge into the text. Measured on Linux only.
+- indra-ocr 1.1.2: transcript line numbers are not re-anchored (4.1% exact on seeds 10-12; 10.6% was 0.3.1); pleading line numbers merge into the text. Measured on Linux only.
 - The machine slept 00:31-07:45 on 2026-10-08, in the middle of the Paddle tune; tune timings are not used (only accuracy).

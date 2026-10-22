@@ -693,3 +693,12 @@ The options as they were put:
 
     Same CER as the 2026-10-14 run everywhere; pleading Bates rose from 81.8% (olmOCR) and 90.9% (dots) to 100%. In the 15 runs no page failed or was flagged and no `ocr` process crashed, so the Apple-Silicon-derived timeouts did not cost a page on this GPU (a timeout that succeeded on its retry would not show: the server log is rewritten at each start). GPU memory matches the README estimates.
 
+- 2026-10-22, **indra-ocr 1.1.2.** Replaces 0.3.1. One version only; no second selectable pin and no tag fallback (setup fetches the revision below, not a moving tag).
+  - **Pin.** Package `INDRA_PIN = 1.1.2`. Weights at HF commit `a1283c4b42a273c09480ad50e71461daff50fcc7` (tag `v1.1.0`, the model set 1.1.0–1.1.2 were built against). Identity `datalab-to/indra-ocr@a1283c4, indra-ocr 1.1.2`.
+  - **Files.** Twelve files, about 76 MB: `det`, `rec`, `rec_cjk`, `rec_rtl`, `rec_world`, `order`, `orient`, `script`, `lm.npz`, `lm_cjk.npz`, `lm_world.npz`, `meta.json`. Math files are not downloaded (`math=False`).
+  - **`[Figure]`.** indra 1.1 writes a picture region as a `![](picture-N)` paragraph. `page_result` maps a paragraph that is exactly that to `[Figure]` (olmOCR's empty-alt token) rather than dropping it.
+  - **Freshness gate.** `Indra::new` requires each weight's sha256 stamp (`fetch::is_verified`) and the recorded `[engines.indra-ocr] version` to equal `1.1.2`. A 0.3.1 install with the old same-named files fails closed (exit 2) and tells the user to run `ocr server setup --model indra-ocr`. The venv is reinstalled when the installed package version differs from the pin.
+  - **Eval (Linux CPU, 2026-10-22; no Mac).** Accept seeds 10–12 and the 61-page holdout are in docs/eval.md. No `[Figure]` text on either set, so the CER delta is not that rewrite. Holdout: values found 79.1%, verified but wrong 0.
+
+- 2026-10-22, **OXR-1.0 deferred** (your decision: not a laptop fit). SoMark OXR-1.0 is not added as an engine; this note is the only record. Reasons: no GGUF and no llama.cpp build; upstream vLLM needs a 24 GB+ NVIDIA GPU and a PyTorch layout service; mlx-vlm support was merged 2026-10-21 but is unreleased. Revisit when llama.cpp or a released mlx-vlm supports it.
+

@@ -18,7 +18,7 @@ These are fetched at setup time, checked against a pinned sha256, and used under
 - **Model weights** from Hugging Face, each under its model's license: PaddleOCR-VL (Apache-2.0),
   olmOCR 2 (Apache-2.0), dots.ocr / dots.mocr (see the model card), indra-ocr (modified
   OpenRAIL-M, restricted commercial use; read https://huggingface.co/datalab-to/indra-ocr)
-- **indra-ocr** Python package (0.3.1) and its dependencies, installed by `uv`
+- **indra-ocr** Python package (1.1.2) and its dependencies, installed by `uv`
 """
 
 LICENSE_FILE = re.compile(r"^(LICEN[CS]E|COPYING|NOTICE|UNLICENSE)", re.I)

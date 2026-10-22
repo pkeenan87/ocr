@@ -133,7 +133,11 @@ fn bates_in_blocks(blocks: &[HelperBlock], label: &str) -> Option<String> {
         .find_map(|b| markdown::last_bates_in(&b.text))
 }
 
-static PICTURE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^!\[\]\(picture-\d+\)$").unwrap());
+/// indra 1.1's picture placeholder, `![alt](picture-k)`, wherever it appears. The alt text may
+/// span lines and hold escaped (`\]`) or balanced (`[..]`) brackets, as Markdown allows; it is
+/// never taken across another `![`, so a real image before a placeholder is kept.
+static PICTURE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"!\[(?:\\.|\[[^\[\]]*\]|[^\[\]\\])*\]\(picture-\d+\)").unwrap());
 
 /// The finished page for one helper reply.
 pub fn page_result(number: usize, p: &HelperPage) -> PageResult {
@@ -149,18 +153,9 @@ pub fn page_result(number: usize, p: &HelperPage) -> PageResult {
         .filter(|b| matches!(b.label.as_deref(), Some(FOOTER | HEADER)))
         .collect();
     let stripped = strip_furniture(&p.markdown, &furniture);
-    // indra 1.1 marks picture regions as `![](picture-k)` paragraphs.
-    let stripped = stripped
-        .split("\n\n")
-        .map(|para| {
-            if PICTURE.is_match(para.trim()) {
-                "[Figure]"
-            } else {
-                para
-            }
-        })
-        .collect::<Vec<_>>()
-        .join("\n\n");
+    // indra 1.1 marks picture regions as `![](picture-k)`, usually a paragraph of its own but
+    // possibly joined to text or with alt text; every occurrence becomes `[Figure]`.
+    let stripped = PICTURE.replace_all(&stripped, "[Figure]");
     let (tabled, tables) = htmltable::convert_tables(&stripped);
     let body = clean_ocr(&tabled);
     let bates = bates_in_blocks(&p.blocks, FOOTER)
@@ -320,9 +315,8 @@ impl Indra {
         }
         let python = venv_python(&venv_dir()?);
         let helper = helper_path()?;
-        let recorded = crate::config::Config::load()
-            .ok()
-            .flatten()
+        // A config that cannot be read or parsed is reported as such, not as "run setup".
+        let recorded = crate::config::Config::load()?
             .and_then(|c| c.engines.get("indra-ocr").and_then(|e| e.version.clone()));
         check_install(&python, &helper, &model_dir, recorded.as_deref())?;
         Ok(Self {
@@ -614,6 +608,27 @@ mod tests {
         let r = page_result(1, &p);
         assert_eq!(r.body, "Intro text.\n\n[Figure]\n\nMore text.\n\n[Figure]");
         assert!(!r.body.contains("picture-"));
+        // Joined to text by a single newline, inline, or with alt text.
+        let p = HelperPage {
+            markdown: "Exhibit A\n![](picture-3)\nsee ![stamp](picture-4) above".into(),
+            page: 1,
+            blocks: vec![],
+            error: None,
+        };
+        let r = page_result(1, &p);
+        assert!(!r.body.contains("picture-"), "{}", r.body);
+        assert_eq!(r.body.matches("[Figure]").count(), 2, "{}", r.body);
+        // Alt text across lines, with escaped and balanced brackets; a real image is kept.
+        let p = HelperPage {
+            markdown: "![a\nb \\] [c]](picture-5)\n\n![logo](logo.png) and ![](picture-6)".into(),
+            page: 1,
+            blocks: vec![],
+            error: None,
+        };
+        let r = page_result(1, &p);
+        assert!(!r.body.contains("picture-"), "{}", r.body);
+        assert!(r.body.contains("![logo](logo.png)"), "{}", r.body);
+        assert_eq!(r.body.matches("[Figure]").count(), 2, "{}", r.body);
         let legal = "The defendant failed to answer the complaint within the time allowed, and the plaintiff therefore moves for default judgment under the rules.";
         let p = HelperPage {
             page: 1,
@@ -622,6 +637,26 @@ mod tests {
             error: None,
         };
         assert!(crate::suspect::check(&page_result(1, &p)).is_empty());
+        // A page that is only pictures, or pictures with a caption, gets no suspect reason.
+        for markdown in [
+            "![](picture-0)",
+            "![](picture-0)\n\n![](picture-1)\n\n![](picture-2)",
+            "![](picture-0)\n\nExhibit 4: photograph of the loading dock",
+        ] {
+            let p = HelperPage {
+                page: 1,
+                markdown: markdown.into(),
+                blocks: vec![block("Picture", [0.0, 0.0, 1.0, 1.0], "")],
+                error: None,
+            };
+            let r = page_result(1, &p);
+            assert!(r.body.contains("[Figure]"), "{}", r.body);
+            assert!(
+                crate::suspect::check(&r).is_empty(),
+                "{markdown:?}: {:?}",
+                crate::suspect::check(&r)
+            );
+        }
     }
 
     #[test]

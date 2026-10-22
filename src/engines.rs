@@ -223,62 +223,62 @@ pub fn gguf(engine: Engine, version: Option<&str>, quant: Quant) -> Option<Gguf>
 pub const INDRA_FILES: [GgufFile; 12] = [
     f(
         "det.onnx",
-        389948,
+        389_948,
         "f2bd4cba23e9c328cf7ec824634e423e191a2c6aacbbf35c62bd79dd70f62f59",
     ),
     f(
         "rec.onnx",
-        5042161,
+        5_042_161,
         "475972a2710be4a3cbfeb2bc7f3624ffd563de07de42476fc7a290d4e1ece484",
     ),
     f(
         "rec_cjk.onnx",
-        10176018,
+        10_176_018,
         "4a035516a17e62cdf33a4fe2d88077654cb8841cff024685cdef4e351694ef50",
     ),
     f(
         "rec_rtl.onnx",
-        4812710,
+        4_812_710,
         "468796bd684486a8388c30c8b4ed2a26e3eeb1f8ff02831c24c2e12c79a2a834",
     ),
     f(
         "rec_world.onnx",
-        5627990,
+        5_627_990,
         "c8d1e59f21b04966f179d2d2d8e22b230d22110b3f89855bbbf2624a58c40043",
     ),
     f(
         "order.onnx",
-        2973138,
+        2_973_138,
         "a42db2e8b536ad3d84045a4b7f9b0a72667cf8be4aa02d63f7b38004719fb180",
     ),
     f(
         "orient.onnx",
-        371802,
+        371_802,
         "20eaf670f55a7cf9facfe1bdd6c7b8e40be75bbf4d48a3df43f66aa3bbd874fd",
     ),
     f(
         "script.onnx",
-        191630,
+        191_630,
         "b6ce4e926e19c243faaf37bd46880398bf2cb4ae56a29e1177a3b017c1280e36",
     ),
     f(
         "lm.npz",
-        15695957,
+        15_695_957,
         "6c0fb618a363a0acdd05d4f5b0edd9e8146d2d990541b87f6130bbfe17cea58d",
     ),
     f(
         "lm_cjk.npz",
-        18955160,
+        18_955_160,
         "6d64f13f4f90f4e529bd63340c6df76238d007feaef2abb903d8cd28d92bc2f3",
     ),
     f(
         "lm_world.npz",
-        11641215,
+        11_641_215,
         "34df5e74a2fcbb9cf5e7f360a559375ffa2e04d2d2943a42308c177bcb444d5d",
     ),
     f(
         "meta.json",
-        211869,
+        211_869,
         "4ce4c94b46f5d644033c02e718322014ff4081270f385038c571912b56696339",
     ),
 ];

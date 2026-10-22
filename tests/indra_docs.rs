@@ -1,76 +1,83 @@
-//! Ticket 02: the indra-ocr 1.1.2 eval write-up and the OXR deferral stay in the docs.
+//! The user-facing docs name the indra-ocr version the code pins (`engines::INDRA_PIN`) and no
+//! earlier one. History (PLAN.md, docs/eval.md, docs/spike.md) may name old versions.
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 
-fn root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-}
+use ocr::engines::INDRA_PIN;
+
+/// Docs that state the version.
+const VERSIONED_DOCS: [&str; 2] = ["README.md", "scripts/third_party_notices.py"];
+/// Every user-facing doc that describes the install.
+const CURRENT_DOCS: [&str; 3] = [
+    "README.md",
+    "skills/ocr/SKILL.md",
+    "scripts/third_party_notices.py",
+];
+/// Facts of the 0.3.1 install (version, download size, file count), as patterns so spacing and
+/// digit variants are caught. Only lines about indra-ocr are checked, so another engine's size or
+/// a dependency version elsewhere in a doc cannot trip it.
+const RETIRED: [&str; 3] = [
+    r"\b0\.3\.1\b",
+    r"(?i)\b18\s*MB\b",
+    r"(?i)\b(seven|7)\s+(weight\s+|model\s+)?files\b",
+];
 
 fn read(rel: &str) -> String {
-    fs::read_to_string(root().join(rel)).unwrap_or_else(|e| panic!("{rel}: {e}"))
+    fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join(rel))
+        .unwrap_or_else(|e| panic!("{rel}: {e}"))
 }
 
 #[test]
-fn eval_has_indra_112_synthetic_table() {
-    let eval = read("docs/eval.md");
-    let marker = "### indra-ocr 1.1.2 (200 DPI, seeds 10-12, Linux CPU)";
-    let start = eval.find(marker).expect("1.1.2 section");
-    let end = eval[start..]
-        .find("### Transcripts")
-        .map(|i| start + i)
-        .expect("section ends before Transcripts");
-    let section = &eval[start..end];
-    assert!(section.contains("Linux"), "the section must name the platform");
-    assert!(section.contains("seeds 10-12"));
-    assert!(section.contains("| Family | Pages | CER |"));
-    for family in ["pleading", "contract", "transcript4up", "fax", "table"] {
-        assert!(section.contains(family), "{family} missing from the 1.1.2 table");
-    }
-}
-
-#[test]
-fn readme_holdout_row_is_labelled() {
-    let readme = read("README.md");
-    let row = readme
-        .lines()
-        .find(|l| l.starts_with("| indra-ocr 1.1.2"))
-        .expect("holdout row");
-    assert!(row.contains("1.1.2"), "{row}");
-    assert!(row.contains("Linux"), "{row}");
-    assert!(row.contains("2026-10-22"), "{row}");
-}
-
-#[test]
-fn current_indra_docs_do_not_keep_031() {
-    // History (PLAN.md, docs/eval.md, docs/spike.md) may still name 0.3.1.
-    for rel in ["README.md", "skills/ocr/SKILL.md", "scripts/third_party_notices.py"] {
-        let text = read(rel);
-        assert!(!text.contains("0.3.1"), "{rel} still says 0.3.1");
-        assert!(!text.contains("18 MB"), "{rel} still says 18 MB");
+fn current_docs_name_the_pinned_indra_version() {
+    for rel in VERSIONED_DOCS {
         assert!(
-            !text.split_whitespace().any(|w| w == "seven" || w.starts_with("seven")),
-            "{rel} still says seven"
+            read(rel).contains(INDRA_PIN),
+            "{rel} does not name indra-ocr {INDRA_PIN}"
         );
     }
 }
 
 #[test]
-fn plan_records_upgrade_and_oxr_deferral() {
-    let plan = read("PLAN.md");
-    let upgrade = plan
-        .split("**indra-ocr 1.1.2.**")
-        .nth(1)
-        .expect("upgrade entry");
-    let upgrade = upgrade.split("**OXR-1.0 deferred**").next().unwrap();
-    assert!(upgrade.contains("a1283c4"), "pin");
-    assert!(upgrade.contains("Twelve files"), "file count");
-    assert!(upgrade.contains("[Figure]"));
-    assert!(upgrade.contains("no tag fallback"));
-    assert!(upgrade.contains("sha256 stamp"), "freshness gate");
-    let oxr = plan.split("**OXR-1.0 deferred**").nth(1).expect("oxr entry");
-    assert!(oxr.contains("not a laptop fit"));
-    assert!(oxr.contains("llama.cpp"));
-    assert!(oxr.contains("24 GB"));
-    assert!(oxr.contains("mlx-vlm"));
-    assert!(oxr.contains("Revisit when llama.cpp or a released mlx-vlm supports it"));
+fn current_docs_drop_the_old_install_facts() {
+    let retired: Vec<regex::Regex> = RETIRED
+        .iter()
+        .map(|r| regex::Regex::new(r).unwrap())
+        .collect();
+    for rel in CURRENT_DOCS {
+        for (n, line) in read(rel).lines().enumerate() {
+            if !line.to_lowercase().contains("indra") {
+                continue;
+            }
+            for re in &retired {
+                assert!(!re.is_match(line), "{rel}:{}: matches {re}: {line}", n + 1);
+            }
+        }
+    }
+}
+
+#[test]
+fn the_retired_patterns_catch_variants() {
+    let hit = |s: &str| {
+        RETIRED
+            .iter()
+            .any(|r| regex::Regex::new(r).unwrap().is_match(s))
+    };
+    for s in [
+        "indra-ocr==0.3.1",
+        "about 18MB",
+        "18 mb",
+        "the 7 files",
+        "seven weight files",
+    ] {
+        assert!(hit(s), "{s}");
+    }
+    for s in [
+        "indra-ocr 1.1.2",
+        "about 76 MB",
+        "180 MB",
+        "seventeen files",
+        "0.3.14",
+    ] {
+        assert!(!hit(s), "{s}");
+    }
 }

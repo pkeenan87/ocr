@@ -252,3 +252,70 @@ fn a_helper_that_dies_fails_the_pages_it_did_not_deliver() {
     let runs = runs(&e);
     assert_eq!(arg(&runs[1], "--pages"), "2,3");
 }
+
+/// A complete install (venv python, helper, every 1.1.2 weight with its stamp) that differs
+/// only in the recorded version: 0.3.1 is refused before any helper runs, 1.1.2 passes the check.
+#[test]
+fn a_stale_install_is_told_to_rerun_setup() {
+    let e = env();
+    setup(&e);
+    let python = ocr::indra::venv_python(&e.state.path().join("indra/venv"));
+    fs::create_dir_all(python.parent().unwrap()).unwrap();
+    // On Unix the "python" records that it was started, then dies without a page.
+    let started = e.path("python-started");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::write(
+            &python,
+            format!("#!/bin/sh\necho \"$@\" > '{}'\nexit 1\n", started.display()),
+        )
+        .unwrap();
+        fs::set_permissions(&python, fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    #[cfg(not(unix))]
+    fs::write(&python, "").unwrap();
+    let models = e.state.path().join("models").join(ocr::engines::INDRA_REPO);
+    fs::create_dir_all(&models).unwrap();
+    for f in &ocr::engines::INDRA_FILES {
+        fs::write(models.join(f.name), "x").unwrap();
+        fs::write(models.join(format!("{}.sha256", f.name)), f.sha256).unwrap();
+    }
+    let cfg = e.config.path().join("config.toml");
+    let current = fs::read_to_string(&cfg).unwrap();
+    assert!(current.contains("version = \"1.1.2\""), "{current}");
+
+    // No OCR_INDRA_CMD: the real install check runs.
+    fs::write(
+        &cfg,
+        current.replace("version = \"1.1.2\"", "version = \"0.3.1\""),
+    )
+    .unwrap();
+    e.scan(THREE, &[], &[])
+        .code(2)
+        .stderr(predicate::str::contains("missing or out of date"))
+        .stderr(predicate::str::contains(
+            "ocr server setup --model indra-ocr",
+        ));
+    assert!(runs(&e).is_empty());
+
+    assert!(
+        !started.exists(),
+        "a stale install must not start the helper"
+    );
+
+    // The same install recorded as 1.1.2 passes the check: the helper is started, and as it
+    // dies without a page every page fails (exit 1), not the setup error (exit 2).
+    fs::write(&cfg, &current).unwrap();
+    let out = e
+        .scan(THREE, &[], &[])
+        .stderr(predicate::str::contains("out of date").not());
+    #[cfg(unix)]
+    {
+        out.code(1);
+        let argv = fs::read_to_string(&started).unwrap();
+        assert!(argv.contains("helper.py"), "{argv}");
+    }
+    #[cfg(not(unix))]
+    out.failure();
+}

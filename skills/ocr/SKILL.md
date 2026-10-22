@@ -13,7 +13,7 @@ description: OCR PDFs and images to Markdown locally on a Mac or a Linux PC with
 
 1. Check that the tool is installed: `command -v ocr && ocr --version`. If it is missing, tell the user and stop; do not try to install it yourself.
 2. On a Mac the default engine, `apple`, needs no setup. For a model engine, run `ocr server setup --model <engine>` once. It downloads several GB, so confirm with the user first. Off the Mac, check which engine is installed with `ocr server status` and pass `--model <engine>` to every `scan`.
-3. A model engine also needs its server running: `ocr server start --model <engine>`. Only one model server runs at a time. `indra-ocr` is the exception: it has no server (setup needs `uv` and downloads about 18 MB). Run `ocr server stop` when you finish, unless the user wants it left running.
+3. A model engine also needs its server running: `ocr server start --model <engine>`. Only one model server runs at a time. `indra-ocr` is the exception: it has no server (setup needs `uv` and downloads about 76 MB). Run `ocr server stop` when you finish, unless the user wants it left running.
 
 ## Choosing an engine
 

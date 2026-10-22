@@ -159,9 +159,9 @@ fn ensure_venv(uv: &Path, venv: &Path) -> Result<Runtime, CliError> {
     })
 }
 
-/// Installs indra-ocr (every platform): its own venv with the pinned package, the pinned ONNX
-/// weights, the helper script, and (off macOS) pdfium for `ocr`'s own page reading. No server,
-/// no llama.cpp, no GPU check. `fake` (OCR_FAKE_INSTALL) only writes the helper.
+/// Installs indra-ocr (every platform): its own venv with the pinned package, the twelve pinned
+/// ONNX/npz weights, the helper script, and (off macOS) pdfium for `ocr`'s own page reading. No
+/// server, no llama.cpp, no GPU check. `fake` (OCR_FAKE_INSTALL) only writes the helper.
 fn install_indra(fake: bool) -> Result<EngineEntry, CliError> {
     use crate::indra;
     let dir = indra::indra_dir()?;

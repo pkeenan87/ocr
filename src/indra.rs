@@ -9,7 +9,9 @@ use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::{self, Receiver};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, LazyLock, Mutex};
+
+use regex::Regex;
 
 use serde::Deserialize;
 
@@ -131,6 +133,12 @@ fn bates_in_blocks(blocks: &[HelperBlock], label: &str) -> Option<String> {
         .find_map(|b| markdown::last_bates_in(&b.text))
 }
 
+/// indra 1.1's picture placeholder, `![alt](picture-k)`, wherever it appears. The alt text may
+/// span lines and hold escaped (`\]`) or balanced (`[..]`) brackets, as Markdown allows; it is
+/// never taken across another `![`, so a real image before a placeholder is kept.
+static PICTURE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"!\[(?:\\.|\[[^\[\]]*\]|[^\[\]\\])*\]\(picture-\d+\)").unwrap());
+
 /// The finished page for one helper reply.
 pub fn page_result(number: usize, p: &HelperPage) -> PageResult {
     if let Some(e) = &p.error {
@@ -145,6 +153,9 @@ pub fn page_result(number: usize, p: &HelperPage) -> PageResult {
         .filter(|b| matches!(b.label.as_deref(), Some(FOOTER | HEADER)))
         .collect();
     let stripped = strip_furniture(&p.markdown, &furniture);
+    // indra 1.1 marks picture regions as `![](picture-k)`, usually a paragraph of its own but
+    // possibly joined to text or with alt text; every occurrence becomes `[Figure]`.
+    let stripped = PICTURE.replace_all(&stripped, "[Figure]");
     let (tabled, tables) = htmltable::convert_tables(&stripped);
     let body = clean_ocr(&tabled);
     let bates = bates_in_blocks(&p.blocks, FOOTER)
@@ -266,6 +277,30 @@ pub struct Indra {
     state: Mutex<State>,
 }
 
+/// Whether setup's venv, helper and weights are there and current. This trusts setup-managed
+/// state (the config's recorded version and the weight stamps) and does not re-hash the files.
+fn check_install(
+    python: &Path,
+    helper: &Path,
+    model_dir: &Path,
+    recorded_version: Option<&str>,
+) -> Result<(), CliError> {
+    let ok = python.is_file()
+        && helper.is_file()
+        && recorded_version == Some(engines::INDRA_PIN)
+        && engines::INDRA_FILES
+            .iter()
+            .all(|f| crate::fetch::is_verified(&model_dir.join(f.name), f.sha256));
+    if ok {
+        Ok(())
+    } else {
+        Err(CliError::Setup(
+            "error: the indra-ocr runtime or weights are missing or out of date. Run `ocr server setup --model indra-ocr`."
+                .into(),
+        ))
+    }
+}
+
 impl Indra {
     /// The backend, if setup's venv, helper and weights are there.
     pub fn new() -> Result<Self, CliError> {
@@ -280,15 +315,10 @@ impl Indra {
         }
         let python = venv_python(&venv_dir()?);
         let helper = helper_path()?;
-        let weights_ok = engines::INDRA_FILES
-            .iter()
-            .all(|f| model_dir.join(f.name).is_file());
-        if !(python.is_file() && helper.is_file() && weights_ok) {
-            return Err(CliError::Setup(
-                "error: the indra-ocr runtime or weights are missing. Run `ocr server setup --model indra-ocr`."
-                    .into(),
-            ));
-        }
+        // A config that cannot be read or parsed is reported as such, not as "run setup".
+        let recorded = crate::config::Config::load()?
+            .and_then(|c| c.engines.get("indra-ocr").and_then(|e| e.version.clone()));
+        check_install(&python, &helper, &model_dir, recorded.as_deref())?;
         Ok(Self {
             program: python,
             prefix: vec![helper],
@@ -565,6 +595,100 @@ mod tests {
         };
         let r = page_result(2, &p);
         assert_eq!(r.body, format!("{merged}\n\nBody text."));
+    }
+
+    #[test]
+    fn picture_placeholders_become_figures() {
+        let p = HelperPage {
+            markdown: "Intro text.\n\n![](picture-0)\n\nMore text.\n\n![](picture-12)".into(),
+            page: 1,
+            blocks: vec![block("Picture", [0.0, 0.0, 1.0, 1.0], "")],
+            error: None,
+        };
+        let r = page_result(1, &p);
+        assert_eq!(r.body, "Intro text.\n\n[Figure]\n\nMore text.\n\n[Figure]");
+        assert!(!r.body.contains("picture-"));
+        // Joined to text by a single newline, inline, or with alt text.
+        let p = HelperPage {
+            markdown: "Exhibit A\n![](picture-3)\nsee ![stamp](picture-4) above".into(),
+            page: 1,
+            blocks: vec![],
+            error: None,
+        };
+        let r = page_result(1, &p);
+        assert!(!r.body.contains("picture-"), "{}", r.body);
+        assert_eq!(r.body.matches("[Figure]").count(), 2, "{}", r.body);
+        // Alt text across lines, with escaped and balanced brackets; a real image is kept.
+        let p = HelperPage {
+            markdown: "![a\nb \\] [c]](picture-5)\n\n![logo](logo.png) and ![](picture-6)".into(),
+            page: 1,
+            blocks: vec![],
+            error: None,
+        };
+        let r = page_result(1, &p);
+        assert!(!r.body.contains("picture-"), "{}", r.body);
+        assert!(r.body.contains("![logo](logo.png)"), "{}", r.body);
+        assert_eq!(r.body.matches("[Figure]").count(), 2, "{}", r.body);
+        let legal = "The defendant failed to answer the complaint within the time allowed, and the plaintiff therefore moves for default judgment under the rules.";
+        let p = HelperPage {
+            page: 1,
+            markdown: format!("{legal}\n\n![](picture-0)\n\n{legal}"),
+            blocks: vec![],
+            error: None,
+        };
+        assert!(crate::suspect::check(&page_result(1, &p)).is_empty());
+        // A page that is only pictures, or pictures with a caption, gets no suspect reason.
+        for markdown in [
+            "![](picture-0)",
+            "![](picture-0)\n\n![](picture-1)\n\n![](picture-2)",
+            "![](picture-0)\n\nExhibit 4: photograph of the loading dock",
+        ] {
+            let p = HelperPage {
+                page: 1,
+                markdown: markdown.into(),
+                blocks: vec![block("Picture", [0.0, 0.0, 1.0, 1.0], "")],
+                error: None,
+            };
+            let r = page_result(1, &p);
+            assert!(r.body.contains("[Figure]"), "{}", r.body);
+            assert!(
+                crate::suspect::check(&r).is_empty(),
+                "{markdown:?}: {:?}",
+                crate::suspect::check(&r)
+            );
+        }
+    }
+
+    #[test]
+    fn check_install_needs_a_current_install() {
+        use crate::fetch::stamp_path;
+        let d = tempfile::tempdir().unwrap();
+        let py = d.path().join("python");
+        let helper = d.path().join("helper.py");
+        let models = d.path().join("models");
+        std::fs::create_dir_all(&models).unwrap();
+        std::fs::write(&py, "").unwrap();
+        std::fs::write(&helper, "").unwrap();
+        for f in &engines::INDRA_FILES {
+            let p = models.join(f.name);
+            std::fs::write(&p, "x").unwrap();
+            std::fs::write(stamp_path(&p), f.sha256).unwrap();
+        }
+        let v = Some(engines::INDRA_PIN);
+        assert!(check_install(&py, &helper, &models, v).is_ok());
+        assert!(check_install(&py, &helper, &models, Some("0.3.1")).is_err());
+        assert!(check_install(&py, &helper, &models, None).is_err());
+        assert!(check_install(&d.path().join("no"), &helper, &models, v).is_err());
+        assert!(check_install(&py, &d.path().join("no"), &models, v).is_err());
+        let first = models.join(engines::INDRA_FILES[0].name);
+        std::fs::write(stamp_path(&first), "stale").unwrap();
+        assert!(check_install(&py, &helper, &models, v).is_err());
+        std::fs::remove_file(stamp_path(&first)).unwrap();
+        assert!(check_install(&py, &helper, &models, v).is_err());
+        std::fs::write(stamp_path(&first), engines::INDRA_FILES[0].sha256).unwrap();
+        assert!(check_install(&py, &helper, &models, v).is_ok());
+        std::fs::remove_file(&first).unwrap();
+        assert!(check_install(&py, &helper, &models, v).is_err());
     }
 
     #[test]

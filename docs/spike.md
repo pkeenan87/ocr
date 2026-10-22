@@ -1133,3 +1133,12 @@ olmOCR 2 (mlx-community 8bit), build of #46, same settings. 61 pages took 28 min
 - No misreads: every value olmOCR found is the page's. No engine value outside the set was verified (3 extra, all `check`).
 - What it drops is mostly filing-stamp dates and dockets on old scans (h03, h11, h12), the capitalised header date on h10 (`MARCH 15, 2007`) and h10's invoice amounts.
 - The lowest word error of all engines (27.6%) but a high CER: it drops whole header and footer lines.
+
+### indra-ocr 1.1.2 upgrade (Linux, 2026-10-22)
+
+No Mac was available. Same machine as the Linux synthetic runs (32 logical CPUs, AMD Ryzen 9 9950X). The 0.3.1 Mac holdout above is history.
+
+- **Setup.** `ocr server setup --model indra-ocr` against a stale install finished in 13 s and recorded `indra-ocr 1.1.2` (`datalab-to/indra-ocr@a1283c4`). The isolated eval state installed the same pin (twelve weight files, about 76 MB on disk as decimal MB).
+- **Speed.** `spike/fixtures/legal_scan.pdf` (1 page): 0.8–0.9 s (about 1.1 pages/s), including model load. Accept seeds 10–12, model loaded each file: 0.7–1.5 pages/s. One 20-page production file: 4.5 pages/s (4.5 s wall). A 3-page pleading: 1.8 pages/s.
+- **Memory.** Helper peak 0.6 GB on the pleading and the 20-page production file, 0.9 GB on a 3-page 4-up transcript. `ocr` process peak on the accept seeds was 543–843 MB. No server.
+- **Accuracy.** Synthetic and holdout numbers are in docs/eval.md and the README. No `[Figure]` text in either set, so the CER change from 0.3.1 is not the picture-placeholder rewrite.

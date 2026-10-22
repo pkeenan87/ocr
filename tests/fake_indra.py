@@ -3,7 +3,7 @@
 
 Prints one JSON line per requested page, as the helper does: a body paragraph, a page-footer
 block "COMPLAINT - Page N of 3" and, on odd pages, a Bates footer block (SMITH000123,
-SMITH000124, ...). Page 2 also holds an HTML table.
+SMITH000124, ...). Page 2 also holds an HTML table and a `![](picture-0)` placeholder (Picture block).
 
 Env: INDRA_FAKE_LOG appends one JSON line with the argv of each run; INDRA_FAKE_FAIL_PAGE=N
 makes page N an error page; INDRA_FAKE_EXIT_AFTER=K ends the run (exit 1, stderr message) after
@@ -48,6 +48,8 @@ def main():
             if n == 2:
                 md.append("<table><tr><th>Item</th><th>Qty</th></tr><tr><td>Widget</td><td>3</td></tr></table>")
                 blocks.append({"label": "Table", "bbox": [100, 300, 900, 500], "text": "Item Qty Widget 3"})
+                md.append("![](picture-0)")
+                blocks.append({"label": "Picture", "bbox": [100, 520, 900, 800], "text": ""})
             footer = f"COMPLAINT - Page {n} of 3"
             md.append(footer)
             blocks.append({"label": "Page-Footer", "bbox": [100, 1900, 700, 1930], "text": footer})

@@ -6,7 +6,7 @@ python. One JSON object per line goes to stdout for every requested page, flushe
 page is done so the caller can checkpoint it:
   {"page": 1, "markdown": "...", "blocks": [{"label", "bbox", "text"}], "source": "ocr",
    "error": null}
-A page that fails has "error" set (and an empty markdown). Page numbers are 1-based.
+Uses indra-ocr 1.1.2 (twelve model files, math off). A page that fails has "error" set (and an empty markdown). Page numbers are 1-based.
 """
 
 import argparse

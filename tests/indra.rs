@@ -70,7 +70,7 @@ fn setup_records_the_engine_without_a_runtime() {
     let cfg = fs::read_to_string(e.config.path().join("config.toml")).unwrap();
     assert!(cfg.contains("[engines.indra-ocr]"), "{cfg}");
     assert!(cfg.contains("installed = true"), "{cfg}");
-    assert!(cfg.contains("version = \"0.3.1\""), "{cfg}");
+    assert!(cfg.contains("version = \"1.1.2\""), "{cfg}");
     assert!(cfg.contains("repo = \"datalab-to/indra-ocr\""), "{cfg}");
     assert!(!cfg.contains("quant"), "{cfg}");
     assert!(!cfg.contains("[runtime]"), "{cfg}");
@@ -189,8 +189,9 @@ fn pages_carry_the_footer_bates_and_no_furniture() {
     // The HTML table became a GFM table.
     assert!(md.contains("| Item | Qty |"), "{md}");
     assert!(!md.contains("<table>"), "{md}");
+    assert!(md.contains("[Figure]") && !md.contains("picture-0"), "{md}");
     assert!(
-        md.contains("engine: \"indra-ocr (datalab-to/indra-ocr@ed345c7, indra-ocr 0.3.1)\"\n"),
+        md.contains("engine: \"indra-ocr (datalab-to/indra-ocr@a1283c4, indra-ocr 1.1.2)\"\n"),
         "{md}"
     );
     assert!(md.contains("table_pages: [2]\n"), "{md}");

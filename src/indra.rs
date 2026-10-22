@@ -9,7 +9,9 @@ use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::{self, Receiver};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, LazyLock, Mutex};
+
+use regex::Regex;
 
 use serde::Deserialize;
 
@@ -131,6 +133,8 @@ fn bates_in_blocks(blocks: &[HelperBlock], label: &str) -> Option<String> {
         .find_map(|b| markdown::last_bates_in(&b.text))
 }
 
+static PICTURE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^!\[\]\(picture-\d+\)$").unwrap());
+
 /// The finished page for one helper reply.
 pub fn page_result(number: usize, p: &HelperPage) -> PageResult {
     if let Some(e) = &p.error {
@@ -145,6 +149,18 @@ pub fn page_result(number: usize, p: &HelperPage) -> PageResult {
         .filter(|b| matches!(b.label.as_deref(), Some(FOOTER | HEADER)))
         .collect();
     let stripped = strip_furniture(&p.markdown, &furniture);
+    // indra 1.1 marks picture regions as `![](picture-k)` paragraphs.
+    let stripped = stripped
+        .split("\n\n")
+        .map(|para| {
+            if PICTURE.is_match(para.trim()) {
+                "[Figure]"
+            } else {
+                para
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n\n");
     let (tabled, tables) = htmltable::convert_tables(&stripped);
     let body = clean_ocr(&tabled);
     let bates = bates_in_blocks(&p.blocks, FOOTER)
@@ -266,6 +282,30 @@ pub struct Indra {
     state: Mutex<State>,
 }
 
+/// Whether setup's venv, helper and weights are there and current. This trusts setup-managed
+/// state (the config's recorded version and the weight stamps) and does not re-hash the files.
+fn check_install(
+    python: &Path,
+    helper: &Path,
+    model_dir: &Path,
+    recorded_version: Option<&str>,
+) -> Result<(), CliError> {
+    let ok = python.is_file()
+        && helper.is_file()
+        && recorded_version == Some(engines::INDRA_PIN)
+        && engines::INDRA_FILES
+            .iter()
+            .all(|f| crate::fetch::is_verified(&model_dir.join(f.name), f.sha256));
+    if ok {
+        Ok(())
+    } else {
+        Err(CliError::Setup(
+            "error: the indra-ocr runtime or weights are missing or out of date. Run `ocr server setup --model indra-ocr`."
+                .into(),
+        ))
+    }
+}
+
 impl Indra {
     /// The backend, if setup's venv, helper and weights are there.
     pub fn new() -> Result<Self, CliError> {
@@ -280,15 +320,11 @@ impl Indra {
         }
         let python = venv_python(&venv_dir()?);
         let helper = helper_path()?;
-        let weights_ok = engines::INDRA_FILES
-            .iter()
-            .all(|f| model_dir.join(f.name).is_file());
-        if !(python.is_file() && helper.is_file() && weights_ok) {
-            return Err(CliError::Setup(
-                "error: the indra-ocr runtime or weights are missing. Run `ocr server setup --model indra-ocr`."
-                    .into(),
-            ));
-        }
+        let recorded = crate::config::Config::load()
+            .ok()
+            .flatten()
+            .and_then(|c| c.engines.get("indra-ocr").and_then(|e| e.version.clone()));
+        check_install(&python, &helper, &model_dir, recorded.as_deref())?;
         Ok(Self {
             program: python,
             prefix: vec![helper],
@@ -565,6 +601,59 @@ mod tests {
         };
         let r = page_result(2, &p);
         assert_eq!(r.body, format!("{merged}\n\nBody text."));
+    }
+
+    #[test]
+    fn picture_placeholders_become_figures() {
+        let p = HelperPage {
+            markdown: "Intro text.\n\n![](picture-0)\n\nMore text.\n\n![](picture-12)".into(),
+            page: 1,
+            blocks: vec![block("Picture", [0.0, 0.0, 1.0, 1.0], "")],
+            error: None,
+        };
+        let r = page_result(1, &p);
+        assert_eq!(r.body, "Intro text.\n\n[Figure]\n\nMore text.\n\n[Figure]");
+        assert!(!r.body.contains("picture-"));
+        let legal = "The defendant failed to answer the complaint within the time allowed, and the plaintiff therefore moves for default judgment under the rules.";
+        let p = HelperPage {
+            page: 1,
+            markdown: format!("{legal}\n\n![](picture-0)\n\n{legal}"),
+            blocks: vec![],
+            error: None,
+        };
+        assert!(crate::suspect::check(&page_result(1, &p)).is_empty());
+    }
+
+    #[test]
+    fn check_install_needs_a_current_install() {
+        use crate::fetch::stamp_path;
+        let d = tempfile::tempdir().unwrap();
+        let py = d.path().join("python");
+        let helper = d.path().join("helper.py");
+        let models = d.path().join("models");
+        std::fs::create_dir_all(&models).unwrap();
+        std::fs::write(&py, "").unwrap();
+        std::fs::write(&helper, "").unwrap();
+        for f in &engines::INDRA_FILES {
+            let p = models.join(f.name);
+            std::fs::write(&p, "x").unwrap();
+            std::fs::write(stamp_path(&p), f.sha256).unwrap();
+        }
+        let v = Some(engines::INDRA_PIN);
+        assert!(check_install(&py, &helper, &models, v).is_ok());
+        assert!(check_install(&py, &helper, &models, Some("0.3.1")).is_err());
+        assert!(check_install(&py, &helper, &models, None).is_err());
+        assert!(check_install(&d.path().join("no"), &helper, &models, v).is_err());
+        assert!(check_install(&py, &d.path().join("no"), &models, v).is_err());
+        let first = models.join(engines::INDRA_FILES[0].name);
+        std::fs::write(stamp_path(&first), "stale").unwrap();
+        assert!(check_install(&py, &helper, &models, v).is_err());
+        std::fs::remove_file(stamp_path(&first)).unwrap();
+        assert!(check_install(&py, &helper, &models, v).is_err());
+        std::fs::write(stamp_path(&first), engines::INDRA_FILES[0].sha256).unwrap();
+        assert!(check_install(&py, &helper, &models, v).is_ok());
+        std::fs::remove_file(&first).unwrap();
+        assert!(check_install(&py, &helper, &models, v).is_err());
     }
 
     #[test]

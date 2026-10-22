@@ -6,14 +6,15 @@ use crate::cli::{Engine, Quant};
 pub const MLX_VLM_PIN: &str = "0.7.6";
 
 /// Pinned `indra-ocr` PyPI release installed into its own venv (every platform).
-pub const INDRA_PIN: &str = "0.3.1";
+pub const INDRA_PIN: &str = "1.1.2";
 
 /// Hugging Face repo of indra-ocr's ONNX models, pinned to a revision below.
 pub const INDRA_REPO: &str = "datalab-to/indra-ocr";
 
-/// The revision of `INDRA_REPO` the files below were hashed at. Datalab squashed the repo's
-/// history on 2026-10-15, removing the first pin (`5993a95`); every file's sha256 is unchanged.
-pub const INDRA_REVISION: &str = "ed345c7f158eddbc7dee0c6a7269afb75a94f7e8";
+/// The revision of `INDRA_REPO` the files below were hashed at: HF tag `v1.1.0`, the model set
+/// indra-ocr 1.1.0-1.1.2 declare. If Datalab squashes history again, bump the pin as with
+/// `5993a95` -> `ed345c7`.
+pub const INDRA_REVISION: &str = "a1283c4b42a273c09480ad50e71461daff50fcc7";
 
 /// What a checkpoint records for the engine's weights and runtime (the manifest `repo` and
 /// `mlx_vlm` keys): the repo at its short revision, and the pip package.
@@ -215,44 +216,70 @@ pub fn gguf(engine: Engine, version: Option<&str>, quant: Quant) -> Option<Gguf>
     })
 }
 
-/// The files the default (non-math) indra-ocr pipeline loads: `OrtOCR` opens det, rec, order,
-/// orient and script+rec_cjk when present, and reads meta.json. Pinned at `INDRA_REVISION`;
-/// the sha256 of the LFS files is the LFS oid, meta.json's was computed from the download.
-pub const INDRA_FILES: [GgufFile; 7] = [
+/// The files the default (non-math) indra-ocr pipeline loads: `OrtOCR` opens det, rec, order and
+/// meta.json, plus script, rec_cjk, rec_rtl, rec_world, orient and lm*.npz when present; the math
+/// files are excluded (`math=False`). Pinned at `INDRA_REVISION`; the sha256 of the LFS files is
+/// the LFS oid, meta.json's was computed from the download.
+pub const INDRA_FILES: [GgufFile; 12] = [
     f(
         "det.onnx",
-        389_948,
-        "46b0050ce4c4692f887a1a9c038480223af1c7a91b3fcced2657d9cf00290dc4",
+        389948,
+        "f2bd4cba23e9c328cf7ec824634e423e191a2c6aacbbf35c62bd79dd70f62f59",
     ),
     f(
         "rec.onnx",
-        4_977_797,
-        "e243be069b357e56a0e867a21d7482e498df42fb19678bfb67a25f48b1f06151",
+        5042161,
+        "475972a2710be4a3cbfeb2bc7f3624ffd563de07de42476fc7a290d4e1ece484",
     ),
     f(
         "rec_cjk.onnx",
-        9_255_441,
-        "4cec840b55e1bb7f375daf30a2975404a867a71ac1a5bc5b1629c4909ce16baa",
+        10176018,
+        "4a035516a17e62cdf33a4fe2d88077654cb8841cff024685cdef4e351694ef50",
+    ),
+    f(
+        "rec_rtl.onnx",
+        4812710,
+        "468796bd684486a8388c30c8b4ed2a26e3eeb1f8ff02831c24c2e12c79a2a834",
+    ),
+    f(
+        "rec_world.onnx",
+        5627990,
+        "c8d1e59f21b04966f179d2d2d8e22b230d22110b3f89855bbbf2624a58c40043",
     ),
     f(
         "order.onnx",
-        2_973_138,
-        "23635dd2324b4ccc00c408af961273a2dedd2e4f0386bc54dba678c41bcf6b46",
+        2973138,
+        "a42db2e8b536ad3d84045a4b7f9b0a72667cf8be4aa02d63f7b38004719fb180",
     ),
     f(
         "orient.onnx",
-        371_414,
-        "8d7bfce5d08bcad55955f41ca494a7f9d9d3ed5d5b6da1f6f276d5c509590729",
+        371802,
+        "20eaf670f55a7cf9facfe1bdd6c7b8e40be75bbf4d48a3df43f66aa3bbd874fd",
     ),
     f(
         "script.onnx",
-        191_005,
-        "5ba37030e817affede0097a7503b6829624104166c6e0b6aacecacf919fc7d11",
+        191630,
+        "b6ce4e926e19c243faaf37bd46880398bf2cb4ae56a29e1177a3b017c1280e36",
+    ),
+    f(
+        "lm.npz",
+        15695957,
+        "6c0fb618a363a0acdd05d4f5b0edd9e8146d2d990541b87f6130bbfe17cea58d",
+    ),
+    f(
+        "lm_cjk.npz",
+        18955160,
+        "6d64f13f4f90f4e529bd63340c6df76238d007feaef2abb903d8cd28d92bc2f3",
+    ),
+    f(
+        "lm_world.npz",
+        11641215,
+        "34df5e74a2fcbb9cf5e7f360a559375ffa2e04d2d2943a42308c177bcb444d5d",
     ),
     f(
         "meta.json",
-        139_429,
-        "ff6ec58f91c93a475ae9505ad21c73c3ecda0b378f1d889dd83408e10832d1bb",
+        211869,
+        "4ce4c94b46f5d644033c02e718322014ff4081270f385038c571912b56696339",
     ),
 ];
 
@@ -362,6 +389,40 @@ pub fn ram_verdict(engine: Engine, quant: Quant, ram_gb: f64) -> RamVerdict {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn indra_files_are_the_default_set() {
+        let mut names: Vec<&str> = INDRA_FILES.iter().map(|f| f.name).collect();
+        names.sort();
+        let mut want = vec![
+            "det.onnx",
+            "rec.onnx",
+            "rec_cjk.onnx",
+            "rec_rtl.onnx",
+            "rec_world.onnx",
+            "order.onnx",
+            "orient.onnx",
+            "script.onnx",
+            "lm.npz",
+            "lm_cjk.npz",
+            "lm_world.npz",
+            "meta.json",
+        ];
+        want.sort();
+        assert_eq!(names, want);
+        for f in &INDRA_FILES {
+            assert!(
+                f.sha256.len() == 64
+                    && f.sha256
+                        .bytes()
+                        .all(|c| c.is_ascii_digit() || (b'a'..=b'f').contains(&c)),
+                "{}",
+                f.name
+            );
+        }
+        assert_eq!(INDRA_REVISION.len(), 40);
+        assert!(INDRA_REVISION.bytes().all(|c| c.is_ascii_hexdigit()));
+    }
 
     #[test]
     #[cfg(target_os = "macos")]

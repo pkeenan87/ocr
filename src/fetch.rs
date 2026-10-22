@@ -59,7 +59,7 @@ pub fn sha256_file(path: &Path) -> std::io::Result<String> {
 }
 
 /// `<file>.sha256`, written once a download is verified so later runs skip re-hashing.
-fn stamp_path(dest: &Path) -> PathBuf {
+pub(crate) fn stamp_path(dest: &Path) -> PathBuf {
     let mut name = dest.file_name().unwrap_or_default().to_os_string();
     name.push(".sha256");
     dest.with_file_name(name)

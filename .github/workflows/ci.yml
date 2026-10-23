@@ -4,7 +4,18 @@ name: ci
 
 on:
   push:
+    branches: [master]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -12,19 +23,7 @@ env:
 
 jobs:
   test:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            pdfium: pdfium-linux-x64.tgz
-            pdfium_sha256: 1470e21b8b4a3b4ad7f85684e2da11d94f3b69a86d81dee11b9b6709d927ac1d
-            pdfium_lib: lib/libpdfium.so
-          - os: windows-latest
-            pdfium: pdfium-win-x64.tgz
-            pdfium_sha256: 73cc0de638ac2095e7445bf56a38200a5b7c7ca0e9f4ba144598f2457377ac08
-            pdfium_lib: bin/pdfium.dll
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
@@ -37,11 +36,39 @@ jobs:
       - name: pdfium (pinned, checksum verified)
         run: |
           mkdir -p "$RUNNER_TEMP/pdfium"
-          curl -fsSL "$PDFIUM_URL/${{ matrix.pdfium }}" -o "$RUNNER_TEMP/pdfium.tgz"
-          echo "${{ matrix.pdfium_sha256 }}  $RUNNER_TEMP/pdfium.tgz" | sha256sum -c -
+          curl -fsSL "$PDFIUM_URL/pdfium-linux-x64.tgz" -o "$RUNNER_TEMP/pdfium.tgz"
+          echo "1470e21b8b4a3b4ad7f85684e2da11d94f3b69a86d81dee11b9b6709d927ac1d  $RUNNER_TEMP/pdfium.tgz" | sha256sum -c -
           # Relative paths: Git Bash's GNU tar reads `D:\...` as a remote host.
           cd "$RUNNER_TEMP" && tar -xzf pdfium.tgz -C pdfium
-          echo "OCR_PDFIUM_LIB=$RUNNER_TEMP/pdfium/${{ matrix.pdfium_lib }}" >> "$GITHUB_ENV"
+          echo "OCR_PDFIUM_LIB=$RUNNER_TEMP/pdfium/lib/libpdfium.so" >> "$GITHUB_ENV"
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      # Release: the model-engine tests render and crop pages, which a debug build does about
+      # ten times slower on the runners.
+      - run: cargo test --release --no-fail-fast
+        timeout-minutes: 30
+
+  # Windows runners bill at 2×. Pull requests are covered by the Ubuntu job above.
+  test-windows:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: pdfium (pinned, checksum verified)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pdfium"
+          curl -fsSL "$PDFIUM_URL/pdfium-win-x64.tgz" -o "$RUNNER_TEMP/pdfium.tgz"
+          echo "73cc0de638ac2095e7445bf56a38200a5b7c7ca0e9f4ba144598f2457377ac08  $RUNNER_TEMP/pdfium.tgz" | sha256sum -c -
+          # Relative paths: Git Bash's GNU tar reads `D:\...` as a remote host.
+          cd "$RUNNER_TEMP" && tar -xzf pdfium.tgz -C pdfium
+          echo "OCR_PDFIUM_LIB=$RUNNER_TEMP/pdfium/bin/pdfium.dll" >> "$GITHUB_ENV"
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
       # Release: the model-engine tests render and crop pages, which a debug build does about

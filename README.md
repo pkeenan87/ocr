@@ -8,7 +8,7 @@ Local, private OCR of PDFs and images to Markdown. Nothing is uploaded anywhere.
 |---|---|---|
 | macOS 26 or later, Apple Silicon | Supported | all five; `apple` is the default |
 | Linux x86-64, ideally with an NVIDIA GPU | Supported | `paddleocr-vl` (default), `dots-ocr`, `olmocr`, `indra-ocr` |
-| Windows 10/11 x86-64 | Preview: builds and passes tests in CI, not yet run on a real machine | as Linux |
+| Windows 10/11 x86-64 | Preview: passes the tests in CI and on a real machine; `paddleocr-vl` run end to end on the CPU build | as Linux |
 
 Linux arm64 and Intel Macs are not supported. Off the Mac, `ocr` works differently in ways that matter for legal use; read [Known limits](#known-limits) first.
 
@@ -88,7 +88,7 @@ Model engines also need a running server:
 
 ## Linux and Windows
 
-Status: Linux is supported in v1.0, with a prebuilt x86-64 binary from 1.0.1. It was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build: all three model engines pass. Windows is a preview: it builds and passes the tests in CI, but has not been run on a real machine.
+Status: Linux is supported in v1.0, with a prebuilt x86-64 binary from 1.0.1. It was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build: all three model engines pass. Windows is a preview: it builds and passes the tests in CI and on a Windows 11 machine (8-core EPYC VM, no GPU), where `paddleocr-vl` was set up, started and run end to end on the CPU build (about 60 s a page). `olmocr`, `dots-ocr`, `indra-ocr` and the GPU builds have not been run on Windows.
 
 Off the Mac:
 - There is no Apple Vision, so `apple` is not offered and **`paddleocr-vl` is the default engine**.
@@ -96,7 +96,7 @@ Off the Mac:
 - PDFs are rendered with pdfium (`chromium/7881`).
 
 **Requirements:**
-- Linux x86-64 or Windows 10 (version 1803 or later) x86-64. Setup uses the `curl` and `tar` that ship with both.
+- Linux x86-64 or Windows 10 (version 1803 or later) x86-64. Setup uses the `curl` and `tar` that ship with both. On Windows, a download that fails because `curl` cannot reach a certificate's revocation server (`CRYPT_E_NO_REVOCATION_CHECK`, common behind corporate proxies) is retried once with `--ssl-revoke-best-effort`; every file is still checked against its pinned sha256.
 - Rust, to build.
 - A GPU is strongly recommended: NVIDIA (CUDA), or any GPU with its own memory through Vulkan.
 
@@ -512,7 +512,7 @@ Guidance:
 - **Transcript line numbers are the model's own.** They are not re-anchored to the page; on the synthetic transcripts with the CUDA build, 34% (Paddle), 26% (olmOCR) and 76% (dots) of lines were exact. Do not cite `page:line` from an off-Mac transcript without checking the PDF.
 - **No embedded-text corrections** (`--use-text-layer auto` is an `apple` feature).
 - **Bates numbers on olmOCR and dots pages come from corner requests** when the model drops the footer. On a page stored sideways dots finds none (olmOCR follows its rotation correction). A number-like token that ends a sentence in the page's last lines (`Invoice No. INV-24337.`) can be taken as the Bates number; check Bates markers on those pages.
-- Only Linux and Windows x86-64 have pinned llama.cpp and pdfium builds. Windows is a preview, not yet run on a real machine.
+- Only Linux and Windows x86-64 have pinned llama.cpp and pdfium builds. Windows is a preview: only `paddleocr-vl` on the CPU build has been run on a real machine.
 
 **Every platform:**
 - Transcript line numbers are re-anchored to page geometry on the Mac for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr and olmOCR). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
@@ -547,7 +547,7 @@ Everything runs on your machine. Model servers bind to 127.0.0.1 only, and there
     OCR_REAL_MODELS=1 cargo test --release     # also run tests against real model servers (slow, needs setup)
     scripts/xcheck.sh                          # from Linux: type-check the Windows and macOS targets
 
-Off macOS, tests that render documents need pdfium. It is found at `$OCR_PDFIUM_LIB`, `<state>/pdfium/` (setup installs it there), next to the binary, or on the system library path. CI (`.github/workflows/ci.yml`) runs fmt, clippy and the tests on Linux and Windows. The macOS tests need a Mac with macOS 26.
+Off macOS, tests that render documents need pdfium. It is found at `$OCR_PDFIUM_LIB`, `<state>/pdfium/` (setup installs it there), next to the binary, or on the system library path. The model-engine tests run a fake server and helper written in Python, so `python` must be on the `PATH` (on Windows, a real install, not the Microsoft Store alias). CI (`.github/workflows/ci.yml`) runs fmt, clippy and the tests on Linux and Windows. The macOS tests need a Mac with macOS 26.
 
 Layout: `src/` (Rust CLI and pipeline), `bridge/` (Swift static library for Apple Vision and PDF rendering), `tests/`, `examples/` (probes), `spike/` (Phase 0 to 2b experiments and fixtures), `eval/` (Phase 6 evaluation harness, see [eval/README.md](eval/README.md)).
 

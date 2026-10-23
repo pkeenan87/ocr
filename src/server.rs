@@ -468,7 +468,7 @@ fn process_command(pid: u32) -> Option<String> {
     (out.status.success() && !s.is_empty()).then_some(s)
 }
 
-/// The process `pid`, refreshed with its command line.
+/// The process `pid`, refreshed with its command line and memory (`footprint` reads it).
 #[cfg(windows)]
 fn process<T>(pid: u32, f: impl FnOnce(&sysinfo::Process) -> T) -> Option<T> {
     use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
@@ -477,7 +477,9 @@ fn process<T>(pid: u32, f: impl FnOnce(&sysinfo::Process) -> T) -> Option<T> {
     sys.refresh_processes_specifics(
         ProcessesToUpdate::Some(&[pid]),
         true,
-        ProcessRefreshKind::nothing().with_cmd(UpdateKind::Always),
+        ProcessRefreshKind::nothing()
+            .with_cmd(UpdateKind::Always)
+            .with_memory(),
     );
     sys.process(pid).map(f)
 }

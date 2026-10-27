@@ -151,7 +151,7 @@ mod tests {
         let mut c = Config::new();
         c.mark_apple_installed();
         c.engines.insert(
-            "olmocr".into(),
+            "dots-ocr".into(),
             EngineEntry {
                 installed: true,
                 version: Some("v".into()),
@@ -162,7 +162,7 @@ mod tests {
         let back: Config = toml::from_str(&toml::to_string_pretty(&c).unwrap()).unwrap();
         assert_eq!(back, c);
         assert!(back.is_installed(Engine::Apple));
-        assert!(back.is_installed(Engine::Olmocr));
-        assert!(!back.is_installed(Engine::DotsOcr));
+        assert!(back.is_installed(Engine::DotsOcr));
+        assert!(!back.is_installed(Engine::PaddleocrVl));
     }
 }

@@ -195,7 +195,7 @@ fn vision_cap_can_be_overridden_for_measurement() {
 
 #[test]
 fn crashed_model_scan_resumes_without_repeating_pages_and_the_server_survives() {
-    let e = ModelEnv::new("olmocr", &["three_pages.pdf"]);
+    let e = ModelEnv::new("dots-ocr", &["three_pages.pdf"]);
     e.serve(&[("FAKE_MODE", "sleep"), ("FAKE_SLEEP_SECS", "1")]);
     e.scan("three_pages.pdf", &["--output-file", "clean.md"], &[])
         .success();
@@ -225,7 +225,7 @@ fn crashed_model_scan_resumes_without_repeating_pages_and_the_server_survives() 
         .args(["server", "status"])
         .assert()
         .success()
-        .stdout(predicates::str::contains("olmocr"));
+        .stdout(predicates::str::contains("dots-ocr"));
     assert_eq!(
         without_generated(&fs::read_to_string(e.path("out.md")).unwrap()),
         without_generated(&clean)

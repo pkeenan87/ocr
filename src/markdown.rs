@@ -807,7 +807,7 @@ mod tests {
         let page = "Exhibit DEF000001 attached.\nline\nline\nline\nline\nCOMPLAINT - Page 3 of 14";
         assert_eq!(find_bates_in_text(page), None);
         assert_eq!(find_bates_in_text(""), None);
-        // olmOCR and dots.ocr dropped the footer of seed10 pleading pages 2 and 3; the invoice
+        // dots.ocr dropped the footer of seed10 pleading pages 2 and 3; the invoice
         // number in the last body line is not a Bates number.
         for page in [
             "21. Defendant likewise failed to pay Invoice No. INV-24337 in the amount of $13,663.00, which became due on January 18, 2022.",

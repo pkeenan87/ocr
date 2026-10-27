@@ -19,7 +19,6 @@ pub mod layout;
 pub mod llama;
 pub mod markdown;
 pub mod model_engine;
-pub mod olmocr;
 pub mod otsl;
 pub mod pipeline;
 pub mod progress;

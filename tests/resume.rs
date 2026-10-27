@@ -458,7 +458,7 @@ fn slow(secs: &str) -> [(&'static str, &str); 2] {
 
 #[test]
 fn killed_model_run_resumes_without_repeating_finished_pages() {
-    let e = ModelEnv::new("olmocr", &["three_pages.pdf"]);
+    let e = ModelEnv::new("dots-ocr", &["three_pages.pdf"]);
     e.serve(&slow("1"));
     e.scan("three_pages.pdf", &["--output-file", "clean.md"], &[])
         .success();
@@ -480,7 +480,7 @@ fn killed_model_run_resumes_without_repeating_finished_pages() {
         .args(["server", "status"])
         .assert()
         .success()
-        .stdout(predicates::str::contains("olmocr"));
+        .stdout(predicates::str::contains("dots-ocr"));
     let before = e.requests().len();
 
     let a = e
@@ -503,12 +503,12 @@ fn killed_model_run_resumes_without_repeating_finished_pages() {
 
 #[test]
 fn model_directory_output_does_not_depend_on_jobs() {
-    let e = ModelEnv::new("olmocr", &[]);
+    let e = ModelEnv::new("dots-ocr", &[]);
     six_files(&e.path("in"));
     e.serve(&[]);
     for (out, jobs) in [("out4", "4"), ("out1", "1")] {
         e.base_cmd()
-            .args(["scan", "--model", "olmocr", "--input-dir", "in"])
+            .args(["scan", "--model", "dots-ocr", "--input-dir", "in"])
             .args(["--output-dir", out, "--jobs", jobs])
             .assert()
             .success();
@@ -532,7 +532,7 @@ fn set_max_num_seqs(e: &ModelEnv, n: usize) {
 #[test]
 #[cfg(target_os = "macos")] // the venv builds its PDFs
 fn in_flight_requests_are_capped_by_max_num_seqs() {
-    let e = ModelEnv::new("olmocr", &[]);
+    let e = ModelEnv::new("dots-ocr", &[]);
     repeated_pdf(&e.path("six.pdf"), 2);
     e.serve(&slow("1"));
 
@@ -571,7 +571,7 @@ fn set_slots(e: &ModelEnv, n: usize) {
 #[test]
 #[cfg(not(target_os = "macos"))]
 fn in_flight_requests_are_capped_by_slots() {
-    let e = ModelEnv::new("olmocr", &["three_pages.pdf"]);
+    let e = ModelEnv::new("dots-ocr", &["three_pages.pdf"]);
     fs::create_dir(e.path("in")).unwrap();
     for f in ["a.pdf", "b.pdf"] {
         fs::copy(e.path("three_pages.pdf"), e.path("in").join(f)).unwrap();
@@ -579,7 +579,7 @@ fn in_flight_requests_are_capped_by_slots() {
     e.serve(&slow("1"));
     let run = |out: &str| {
         e.base_cmd()
-            .args(["scan", "--model", "olmocr", "--input-dir", "in"])
+            .args(["scan", "--model", "dots-ocr", "--input-dir", "in"])
             .args(["--output-dir", out, "--jobs", "8"])
             .assert()
             .success();
@@ -603,7 +603,7 @@ fn in_flight_requests_are_capped_by_slots() {
 
 #[test]
 fn two_scans_on_one_server_take_turns() {
-    let e = ModelEnv::new("olmocr", &["three_pages.pdf"]);
+    let e = ModelEnv::new("dots-ocr", &["three_pages.pdf"]);
     fs::copy(e.path("three_pages.pdf"), e.path("other.pdf")).unwrap();
     e.serve(&slow("1"));
     let mut scans: Vec<Scan> = ["three_pages.pdf", "other.pdf"]

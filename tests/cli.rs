@@ -89,16 +89,16 @@ fn apple_before_setup_warns_and_continues() {
 }
 
 #[test]
-fn olmocr_before_setup_exits_2() {
+fn dots_before_setup_exits_2() {
     let e = Env::new();
     e.file("a.pdf", PDF);
     e.cmd()
-        .args(["scan", "--model", "olmocr", "--input-file", "a.pdf"])
+        .args(["scan", "--model", "dots-ocr", "--input-file", "a.pdf"])
         .assert()
         .code(2)
         .stderr(predicate::str::contains(WARNING));
     e.cmd()
-        .args(["server", "start", "--model", "olmocr"])
+        .args(["server", "start", "--model", "dots-ocr"])
         .assert()
         .code(2)
         .stderr(predicate::str::contains(WARNING));
@@ -117,31 +117,33 @@ fn server_start_without_model_needs_one_installed() {
         .stderr(predicate::str::contains("apple engine needs no server"));
     let config = e.config.path().join("config.toml");
     let mut toml = fs::read_to_string(&config).unwrap();
-    toml.push_str("\n[engines.olmocr]\ninstalled = true\n\n[engines.dots-ocr]\ninstalled = true\n");
+    toml.push_str(
+        "\n[engines.paddleocr-vl]\ninstalled = true\n\n[engines.dots-ocr]\ninstalled = true\n",
+    );
     fs::write(&config, toml).unwrap();
     e.cmd()
         .args(["server", "start"])
         .assert()
         .code(2)
         .stderr(predicate::str::contains(
-            "choose one with --model (olmocr, dots-ocr)",
+            "choose one with --model (paddleocr-vl, dots-ocr)",
         ));
 }
 
 #[test]
-fn setup_then_olmocr_not_installed() {
+fn setup_then_dots_not_installed() {
     let e = Env::new();
     e.file("a.pdf", PDF);
     e.setup();
     e.cmd()
-        .args(["scan", "--model", "olmocr", "--input-file", "a.pdf"])
+        .args(["scan", "--model", "dots-ocr", "--input-file", "a.pdf"])
         .assert()
         .code(2)
         .stderr(predicate::str::contains(
-            "Engine 'olmocr' is not installed. Run `ocr server setup --model olmocr`.",
+            "Engine 'dots-ocr' is not installed. Run `ocr server setup --model dots-ocr`.",
         ));
     e.cmd()
-        .args(["server", "start", "--model", "olmocr"])
+        .args(["server", "start", "--model", "dots-ocr"])
         .assert()
         .code(2)
         .stderr(predicate::str::contains("not installed"));
@@ -173,7 +175,7 @@ fn setup_rejects_unavailable_quant_and_version() {
     let e = Env::new();
     for args in [
         &["--model", "paddleocr-vl", "--quant", "8bit"][..],
-        &["--model", "olmocr", "--model-version", "1"],
+        &["--model", "indra-ocr", "--model-version", "1"],
         &["--model", "dots-ocr", "--model-version", "9"],
     ] {
         e.cmd()
@@ -396,7 +398,7 @@ fn invalid_model_version_exits_2() {
     let cases = [
         ("paddleocr-vl", "2.0", paddle),
         ("dots-ocr", "x", dots),
-        ("olmocr", "1", "no selectable"),
+        ("indra-ocr", "1", "no selectable"),
         ("apple", "1", "no selectable"),
     ];
     for (model, ver, expect) in cases.into_iter().filter(|c| apple || c.0 != "apple") {

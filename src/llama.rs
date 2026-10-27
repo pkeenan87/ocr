@@ -367,7 +367,7 @@ pub fn probe() -> Result<Hardware, CliError> {
 pub fn cpu_warning() -> &'static str {
     "⚠ No supported GPU found (NVIDIA with CUDA, or a discrete GPU with Vulkan).\n  \
      ocr will run the model on the CPU, which is much slower: paddleocr-vl took about 8 s a \
-     page on a 16-core CPU, and olmocr and dots are several times slower than that."
+     page on a 16-core CPU, and dots is several times slower than that."
 }
 
 /// Whether `engine` may be installed on the CPU build without `--force`: only PaddleOCR-VL
@@ -597,8 +597,7 @@ pub fn install_weights(gguf: &Gguf) -> Result<(), CliError> {
 
 // ---------------------------------------------------------------- server argv
 
-/// Highest `--dpi` the server's context is sized for (paddleocr-vl and dots-ocr; olmOCR images
-/// are a fixed 1288 px). The server is started without knowing the scans' DPI, so it is sized
+/// Highest `--dpi` the server's context is sized for (paddleocr-vl and dots-ocr). The server is started without knowing the scans' DPI, so it is sized
 /// for this one; a scan above it is warned that long pages may be cut short.
 pub const MAX_DPI: u32 = 300;
 
@@ -606,15 +605,13 @@ pub const MAX_DPI: u32 = 300;
 /// is sized for the work rather than the model's full trained context (131072 tokens per slot
 /// for PaddleOCR-VL by default). Image tokens grow with the square of the DPI, so the budget is
 /// the measured count scaled to `MAX_DPI`, plus 15%. Measured (docs/spike.md): PaddleOCR-VL
-/// 1253 at 150 DPI; dots 1386 at 100 DPI (5035 at 200, so the square overestimates); olmOCR
-/// about 1790 at 1288 px.
+/// 1253 at 150 DPI; dots 1386 at 100 DPI (5035 at 200, so the square overestimates).
 fn prompt_budget(engine: Engine) -> u32 {
     let scaled = |tokens: u32, dpi: u32| {
         let r = f64::from(MAX_DPI) / f64::from(dpi);
         (f64::from(tokens) * r * r * 1.15).ceil() as u32
     };
     match engine {
-        Engine::Olmocr => 2048,
         Engine::PaddleocrVl => scaled(1253, 150),
         Engine::DotsOcr => scaled(1386, 100),
         // No llama-server: nothing is sized.
@@ -697,17 +694,30 @@ mod tests {
     #[test]
     fn memory_tiers() {
         let paddle = engines::gguf(Engine::PaddleocrVl, None, crate::cli::Quant::Bf16).unwrap();
-        let olmocr = engines::gguf(Engine::Olmocr, None, crate::cli::Quant::Q8).unwrap();
-        let olmocr16 = engines::gguf(Engine::Olmocr, None, crate::cli::Quant::Bf16).unwrap();
-        // An RTX 3090 (24 GiB): everything fits, bf16 olmOCR included.
-        for g in [paddle, olmocr, olmocr16] {
+        // A made-up 7B-class 8-bit build: about 10.95 GB with the 1.5 GB allowance.
+        let big = engines::Gguf {
+            repo: "t/big",
+            revision: "r",
+            model: engines::GgufFile {
+                name: "m",
+                size: 8_100_000_000,
+                sha256: "",
+            },
+            mmproj: engines::GgufFile {
+                name: "p",
+                size: 1_350_000_000,
+                sha256: "",
+            },
+        };
+        // An RTX 3090 (24 GiB): everything fits.
+        for g in [paddle, big] {
             assert_eq!(fit(need_gb(&g), 25.8, true), Fit::Ok);
         }
-        // An 8 GB card: olmOCR 8-bit (about 10.9 GB) does not.
-        assert_eq!(fit(need_gb(&olmocr), 8.6, true), Fit::TooBig);
+        // An 8 GB card: the big build does not.
+        assert_eq!(fit(need_gb(&big), 8.6, true), Fit::TooBig);
         assert_eq!(fit(need_gb(&paddle), 8.6, true), Fit::Ok);
-        // CPU build with 16 GB of RAM: olmOCR is tight, Paddle fine.
-        assert_eq!(fit(need_gb(&olmocr), 16.0, false), Fit::Tight);
+        // CPU build with 16 GB of RAM: the big build is tight, Paddle fine.
+        assert_eq!(fit(need_gb(&big), 16.0, false), Fit::Tight);
         assert_eq!(fit(need_gb(&paddle), 16.0, false), Fit::Ok);
     }
 
@@ -741,7 +751,6 @@ mod tests {
         // Paddle: 8192 retry tokens + 5764 prompt (1253 x 4 x 1.15, 300 DPI) -> 14336 per slot.
         assert_eq!(ctx_size(Engine::PaddleocrVl, 1), 14336);
         assert_eq!(ctx_size(Engine::PaddleocrVl, 2), 28672);
-        assert_eq!(ctx_size(Engine::Olmocr, 1), 10240);
         // dots: 8192 + 14346 (1386 x 9 x 1.15) -> 23552.
         assert_eq!(ctx_size(Engine::DotsOcr, 1), 23552);
         let args = server_args(

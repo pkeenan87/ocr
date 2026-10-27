@@ -42,7 +42,7 @@ impl Quant {
 pub fn default_quant(engine: Engine) -> Quant {
     match engine {
         Engine::PaddleocrVl => Quant::Bf16,
-        Engine::Olmocr | Engine::DotsOcr | Engine::Apple | Engine::IndraOcr => Quant::Q8,
+        Engine::DotsOcr | Engine::Apple | Engine::IndraOcr => Quant::Q8,
     }
 }
 
@@ -56,9 +56,6 @@ pub fn repo(engine: Engine, version: Option<&str>, quant: Quant) -> Option<&'sta
     use Quant::{Bf16, Q4, Q8};
     let version = version.or_else(|| engine.versions().first().copied());
     Some(match (engine, version, quant) {
-        (Engine::Olmocr, _, Q8) => "mlx-community/olmOCR-2-7B-1025-8bit",
-        (Engine::Olmocr, _, Q4) => "mlx-community/olmOCR-2-7B-1025-4bit",
-        (Engine::Olmocr, _, Bf16) => "mlx-community/olmOCR-2-7B-1025-bf16",
         (Engine::PaddleocrVl, Some("1.6"), Bf16) => "PaddlePaddle/PaddleOCR-VL-1.6",
         (Engine::PaddleocrVl, Some("1.6"), Q4) => "mlx-community/PaddleOCR-VL-1.6-4bit",
         (Engine::PaddleocrVl, Some("1.5"), Bf16) => "mlx-community/PaddleOCR-VL-1.5-bf16",
@@ -107,10 +104,6 @@ const PADDLE_15: (&str, &str) = (
     "PaddlePaddle/PaddleOCR-VL-1.5-GGUF",
     "cc977c16989848c264d813ec1705cb181b7a21ee",
 );
-const OLMOCR: (&str, &str) = (
-    "bartowski/allenai_olmOCR-2-7B-1025-GGUF",
-    "42654d7abfe9a19d3cdb90b9a855ce26d265fd93",
-);
 const DOTS_OCR: (&str, &str) = (
     "ggml-org/dots.ocr-GGUF",
     "2c093a32ca360a396bc6d87d60408636130b9d9b",
@@ -119,13 +112,8 @@ const DOTS_OCR: (&str, &str) = (
 /// The GGUF build of an engine/version/quant served by llama-server off macOS; `None` if that
 /// combination has none. The official PaddleOCR-VL GGUFs come in one precision, listed as bf16.
 pub fn gguf(engine: Engine, version: Option<&str>, quant: Quant) -> Option<Gguf> {
-    use Quant::{Bf16, Q4, Q8};
+    use Quant::{Bf16, Q8};
     let version = version.or_else(|| engine.versions().first().copied());
-    let olmocr_mmproj = f(
-        "mmproj-allenai_olmOCR-2-7B-1025-f16.gguf",
-        1_354_163_296,
-        "78d1690a4d98051f527104c33796b79faa05f158d14645e19db91fac99bd1b04",
-    );
     let ((repo, revision), model, mmproj) = match (engine, version, quant) {
         (Engine::PaddleocrVl, Some("1.6"), Bf16) => (
             PADDLE_16,
@@ -152,33 +140,6 @@ pub fn gguf(engine: Engine, version: Option<&str>, quant: Quant) -> Option<Gguf>
                 881_770_496,
                 "e7f1a72400fba517046f90d964e2fa0f4dac7781ee3b1bc5d2022f5f8cecbd87",
             ),
-        ),
-        (Engine::Olmocr, _, Q8) => (
-            OLMOCR,
-            f(
-                "allenai_olmOCR-2-7B-1025-Q8_0.gguf",
-                8_098_524_320,
-                "72a15d2b7532ed3decf5ca8019009f4dd2d54006142bcee0721c888961a4673e",
-            ),
-            olmocr_mmproj,
-        ),
-        (Engine::Olmocr, _, Q4) => (
-            OLMOCR,
-            f(
-                "allenai_olmOCR-2-7B-1025-Q4_K_M.gguf",
-                4_683_072_672,
-                "347935fc4c16808cf97c7adc563da92c67ad90eeb0504a465ff9fa98d2794f3e",
-            ),
-            olmocr_mmproj,
-        ),
-        (Engine::Olmocr, _, Bf16) => (
-            OLMOCR,
-            f(
-                "allenai_olmOCR-2-7B-1025-bf16.gguf",
-                15_237_852_032,
-                "c02b509b658a75d68cb94cdd3674e31ad30a2bd914cd7c5614c52f28811ea699",
-            ),
-            olmocr_mmproj,
         ),
         (Engine::DotsOcr, Some("dots.ocr"), Q8) => (
             DOTS_OCR,
@@ -295,19 +256,11 @@ pub struct Limits {
 }
 
 /// Request limits per engine (docs/spike.md): PaddleOCR-VL prefill 990 tok/s and decode
-/// 218 tok/s; olmOCR prefill 323 tok/s (about 1790 prompt tokens, 5.5 s) and decode 39.5 tok/s,
-/// so 2 x (5.5 + 4096 / 39.5) = 218 s and 2 x (5.5 + 8000 / 39.5) = 416 s; dots at 200 DPI
+/// 218 tok/s; dots at 200 DPI
 /// prefill 183 tok/s (5035 prompt tokens, 27.5 s) and decode 125 tok/s, so
 /// 2 x (27.5 + 8192 / 125) = 186 s. dots has no larger retry (a truncated reply goes to crops).
 pub fn limits(engine: Engine) -> Limits {
     match engine {
-        Engine::Olmocr => Limits {
-            max_tokens: 4096,
-            // olmOCR's own pipeline uses 8000.
-            retry_max_tokens: 8000,
-            timeout_secs: 220,
-            retry_timeout_secs: 420,
-        },
         Engine::DotsOcr => Limits {
             max_tokens: 8192,
             retry_max_tokens: 8192,
@@ -339,10 +292,9 @@ pub fn quants(engine: Engine, version: Option<&str>) -> Vec<&'static str> {
         .collect()
 }
 
-/// Measured (olmocr 8bit, dots 8bit, paddle bf16) or proportionally estimated peak physical footprint, GB.
+/// Measured (dots 8bit, paddle bf16) or proportionally estimated peak physical footprint, GB.
 pub fn footprint_gb(engine: Engine, quant: Quant) -> f64 {
     let (base, base_bits) = match engine {
-        Engine::Olmocr => (10.9, 8.0),
         Engine::DotsOcr => (7.3, 8.0),
         Engine::PaddleocrVl => (3.8, 16.0),
         Engine::Apple => return 0.0,
@@ -364,18 +316,8 @@ pub enum RamVerdict {
     Refuse,
 }
 
-/// RAM check. olmocr 8bit: silent at 24 GB or more, warn at 16-24, refuse below 16.
-/// Others: warn if footprint x 1.5 exceeds RAM, refuse if footprint exceeds RAM x 0.75.
+/// RAM check: warn if footprint x 1.5 exceeds RAM, refuse if footprint exceeds RAM x 0.75.
 pub fn ram_verdict(engine: Engine, quant: Quant, ram_gb: f64) -> RamVerdict {
-    if engine == Engine::Olmocr && quant == Quant::Q8 {
-        return if ram_gb >= 24.0 {
-            RamVerdict::Ok
-        } else if ram_gb >= 16.0 {
-            RamVerdict::Warn
-        } else {
-            RamVerdict::Refuse
-        };
-    }
     let fp = footprint_gb(engine, quant);
     if fp > ram_gb * 0.75 {
         RamVerdict::Refuse
@@ -448,7 +390,6 @@ mod tests {
         );
         assert_eq!(repo(Engine::PaddleocrVl, None, Quant::Q4), None);
         assert_eq!(quants(Engine::PaddleocrVl, None), ["bf16"]);
-        assert_eq!(quants(Engine::Olmocr, None), ["4bit", "8bit", "bf16"]);
         assert_eq!(quants(Engine::DotsOcr, None), ["8bit", "bf16"]);
         let dots = gguf(Engine::DotsOcr, None, Quant::Q8).unwrap();
         assert_eq!(dots.repo, "ggml-org/dots.ocr-GGUF");
@@ -458,15 +399,6 @@ mod tests {
 
     #[test]
     fn ram() {
-        assert_eq!(ram_verdict(Engine::Olmocr, Quant::Q8, 24.0), RamVerdict::Ok);
-        assert_eq!(
-            ram_verdict(Engine::Olmocr, Quant::Q8, 16.0),
-            RamVerdict::Warn
-        );
-        assert_eq!(
-            ram_verdict(Engine::Olmocr, Quant::Q8, 8.0),
-            RamVerdict::Refuse
-        );
         assert_eq!(
             ram_verdict(Engine::PaddleocrVl, Quant::Bf16, 16.0),
             RamVerdict::Ok
@@ -475,6 +407,6 @@ mod tests {
             ram_verdict(Engine::DotsOcr, Quant::Q8, 8.0),
             RamVerdict::Refuse
         );
-        assert_eq!(footprint_gb(Engine::Olmocr, Quant::Q4), 5.45);
+        assert_eq!(footprint_gb(Engine::DotsOcr, Quant::Q4), 3.65);
     }
 }

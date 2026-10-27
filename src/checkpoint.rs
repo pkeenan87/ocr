@@ -361,7 +361,7 @@ mod tests {
         m.fingerprint.mtime_nanos += 1;
         differs(scan_record(&m, &[1, 2], None));
         let mut m = manifest(200);
-        m.engine = "olmocr".into();
+        m.engine = "dots-ocr".into();
         differs(scan_record(&m, &[1, 2], None));
     }
 

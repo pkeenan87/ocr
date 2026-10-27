@@ -1,0 +1,177 @@
+{
+ "paddle-raw": {
+  "repo": "PaddlePaddle/PaddleOCR-VL-1.6-GGUF",
+  "revision": "511b09642bb324401f15f97cc23bc67e8f0a291d",
+  "model": {
+   "name": "PaddleOCR-VL-1.6-GGUF.gguf",
+   "size": 935769056,
+   "sha256": "f3ae46ec885050acf4b3d31944431e1fd90d50664fb09126af4a3c050ba14ee8"
+  },
+  "mmproj": {
+   "name": "PaddleOCR-VL-1.6-GGUF-mmproj.gguf",
+   "size": 881770560,
+   "sha256": "204d757d7610d9b3faab10d506d69e5b244e32bf765e2bab2d0167e65e0a058a"
+  },
+  "prompt": "OCR:",
+  "text_first": false,
+  "render": {
+   "dpi": 150
+  },
+  "max_tokens": 4096,
+  "convert": "raw",
+  "thinking_off": false,
+  "ctx": 32768,
+  "license": "Apache-2.0",
+  "role": "baseline"
+ },
+ "olmocr-raw": {
+  "repo": "bartowski/allenai_olmOCR-2-7B-1025-GGUF",
+  "revision": "42654d7abfe9a19d3cdb90b9a855ce26d265fd93",
+  "model": {
+   "name": "allenai_olmOCR-2-7B-1025-Q8_0.gguf",
+   "size": 8098524320,
+   "sha256": "72a15d2b7532ed3decf5ca8019009f4dd2d54006142bcee0721c888961a4673e"
+  },
+  "mmproj": {
+   "name": "mmproj-allenai_olmOCR-2-7B-1025-f16.gguf",
+   "size": 1354163296,
+   "sha256": "78d1690a4d98051f527104c33796b79faa05f158d14645e19db91fac99bd1b04"
+  },
+  "prompt": "@olmocr_v4",
+  "text_first": true,
+  "render": {
+   "side": 1288
+  },
+  "max_tokens": 4096,
+  "convert": "olmocr_yaml",
+  "thinking_off": false,
+  "ctx": 32768,
+  "license": "Apache-2.0",
+  "role": "baseline"
+ },
+ "dots-ocr-raw": {
+  "repo": "ggml-org/dots.ocr-GGUF",
+  "revision": "2c093a32ca360a396bc6d87d60408636130b9d9b",
+  "model": {
+   "name": "dots.ocr-Q8_0.gguf",
+   "size": 1894530272,
+   "sha256": "6f2db1a75215893760b7c7185d52f11715d2e0cb7bff9cefd3f6d409fa1de7e9"
+  },
+  "mmproj": {
+   "name": "mmproj-dots.ocr-Q8_0.gguf",
+   "size": 1344068512,
+   "sha256": "20d3d35bea3a64ead0b4b213f8db0de136e174bb5b75b8e85786c51e8e822423"
+  },
+  "prompt": "Extract the text content from this image.",
+  "text_first": false,
+  "render": {
+   "dpi": 100
+  },
+  "max_tokens": 8192,
+  "convert": "raw",
+  "thinking_off": false,
+  "ctx": 32768,
+  "license": "MIT",
+  "role": "baseline"
+ },
+ "dots-mocr": {
+  "repo": "prithivMLmods/dots.mocr-GGUF",
+  "revision": "5cd9f01392968881af86dfde7bc60b9cb412f87a",
+  "model": {
+   "name": "dots.mocr.Q8_0.gguf",
+   "size": 1894530336,
+   "sha256": "caed947b6fdd5cecad85dc1ed7c6b0a381fad03b1934060ce840e0676d90122a"
+  },
+  "mmproj": {
+   "name": "dots.mocr.mmproj-q8_0.gguf",
+   "size": 1344068544,
+   "sha256": "065248b59f7dc65771d45640ab688a57e2fe1fff78d4e5d44085e027bc4521cb"
+  },
+  "prompt": "Extract the text content from this image.",
+  "text_first": false,
+  "render": {
+   "dpi": 100
+  },
+  "max_tokens": 8192,
+  "convert": "raw",
+  "thinking_off": false,
+  "ctx": 32768,
+  "license": "MIT (+ supplementary terms)",
+  "role": "candidate"
+ },
+ "glm-ocr": {
+  "repo": "ggml-org/GLM-OCR-GGUF",
+  "revision": "65a42de1148dbed2297e922b5dbc7d9b70c36578",
+  "model": {
+   "name": "GLM-OCR-Q8_0.gguf",
+   "size": 950433408,
+   "sha256": "45bc244a6446aff850521dc41f18bc8d7105ad5f0c2c8c28af04e7cc4f4d50b1"
+  },
+  "mmproj": {
+   "name": "mmproj-GLM-OCR-Q8_0.gguf",
+   "size": 484403648,
+   "sha256": "9c4b58e33e316ed142eb5dcb41abec3844d3e6e5dc361ffb782c3fa9d175141f"
+  },
+  "prompt": "Text Recognition:",
+  "text_first": false,
+  "render": {
+   "dpi": 150
+  },
+  "max_tokens": 8192,
+  "convert": "raw",
+  "thinking_off": false,
+  "ctx": 32768,
+  "license": "MIT",
+  "role": "candidate"
+ },
+ "ovisocr3": {
+  "repo": "mradermacher/OvisOCR3-GGUF",
+  "revision": "041e883c46e3fe2bbe0a8d7d9bdc73571f6f769a",
+  "model": {
+   "name": "OvisOCR3.Q8_0.gguf",
+   "size": 811844128,
+   "sha256": "858b61f2ea49526fd513a3e0e58d54d909a24c50fed19f1e59f7b40281410c32"
+  },
+  "mmproj": {
+   "name": "OvisOCR3.mmproj-f16.gguf",
+   "size": 204987136,
+   "sha256": "698d199cf44ff10f99825bbd71ad9715e03a6cf7ad041c8ec1db979bfce905cd"
+  },
+  "prompt": "Extract all readable content from the image in natural human reading order and output the result as a single Markdown document. For charts or images, represent them using an HTML image tag: <img src=\"images/bbox_{left}_{top}_{right}_{bottom}.jpg\" />, where left, top, right, bottom are bounding box coordinates scaled to [0, 1000). Format formulas as LaTeX. Format tables as HTML: <table>...</table>. Transcribe all other text as standard Markdown. Preserve the original text without translation or paraphrasing.",
+  "text_first": false,
+  "render": {
+   "dpi": 200
+  },
+  "max_tokens": 8192,
+  "convert": "ovis_markdown",
+  "thinking_off": true,
+  "ctx": 32768,
+  "license": "Apache-2.0",
+  "role": "candidate"
+ },
+ "lighton-4b": {
+  "repo": "prithivMLmods/LightOnOCR-3-4B-GGUF",
+  "revision": "557c2b008f7abff778985246b1a045c635f9abdf",
+  "model": {
+   "name": "LightOnOCR-3-4B.Q8_0.gguf",
+   "size": 4482403264,
+   "sha256": "eb9f84e81a27f1449bd1fc91eb9b9f7eeeec49bd03483af0423839bc1bf5ffd4"
+  },
+  "mmproj": {
+   "name": "LightOnOCR-3-4B.mmproj-bf16.gguf",
+   "size": 675569216,
+   "sha256": "4c4f14c8bda8cd67cf4822f99c7c57b6353fd4907cba38d5535987d0db06dd8e"
+  },
+  "prompt": "",
+  "text_first": false,
+  "render": {
+   "side": 2048
+  },
+  "max_tokens": 8192,
+  "convert": "raw",
+  "thinking_off": true,
+  "ctx": 32768,
+  "license": "Apache-2.0",
+  "role": "candidate"
+ }
+}

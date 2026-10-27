@@ -23,6 +23,7 @@ pub mod otsl;
 pub mod pipeline;
 pub mod progress;
 pub mod regions;
+pub mod removed;
 pub mod run;
 pub mod server;
 pub mod supervisor;

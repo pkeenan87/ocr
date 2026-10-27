@@ -1166,6 +1166,7 @@ pub fn status() -> Result<(), CliError> {
         } else {
             println!("no server running");
         }
+        print_olmocr_notice();
         return Ok(());
     };
     let uptime = chrono::DateTime::parse_from_rfc3339(&info.started_at)
@@ -1205,7 +1206,20 @@ pub fn status() -> Result<(), CliError> {
             println!("memory:  {fp}");
         }
     }
+    print_olmocr_notice();
     Ok(())
+}
+
+/// Read-only: mentions an olmocr entry that is still in the config.
+fn print_olmocr_notice() {
+    if let Some(n) = Config::load()
+        .ok()
+        .flatten()
+        .as_ref()
+        .and_then(crate::removed::olmocr_notice)
+    {
+        println!("{n}");
+    }
 }
 
 #[cfg(test)]

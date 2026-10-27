@@ -446,3 +446,44 @@ fn real_paddle_setup_start_status_stop() {
     assert!(real(&["server", "stop"]).status.success());
     assert!(!e.json_path().exists());
 }
+
+/// Rewrites server.json as if an ocr 1.0.x olmocr server were running.
+fn make_olmocr(e: &Env) {
+    let mut j = e.server_json();
+    j["engine"] = "olmocr".into();
+    j["repo"] = "bartowski/allenai_olmOCR-2-7B-1025-GGUF".into();
+    fs::write(e.json_path(), serde_json::to_string(&j).unwrap()).unwrap();
+}
+
+#[test]
+fn old_olmocr_server_can_be_stopped_and_replaced() {
+    let e = Env::new();
+    e.setup(&["paddleocr-vl", "dots-ocr"]);
+    e.start("paddleocr-vl").success();
+    make_olmocr(&e);
+    e.cmd()
+        .args(["server", "status"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("engine:  olmocr"));
+    e.start("dots-ocr")
+        .code(2)
+        .stderr(predicate::str::contains("olmocr"))
+        .stderr(predicate::str::contains("--force"));
+    let port = e.port.to_string();
+    e.cmd()
+        .args([
+            "server", "start", "--model", "dots-ocr", "--port", &port, "--force",
+        ])
+        .assert()
+        .success();
+    assert_eq!(e.server_json()["engine"], "dots-ocr");
+    make_olmocr(&e);
+    e.cmd()
+        .args(["server", "stop"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("stopped olmocr server"));
+    assert!(!e.json_path().exists());
+    assert!(!fake_alive(e.port));
+}

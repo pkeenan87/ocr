@@ -53,6 +53,19 @@ impl Env {
         }
     }
 
+    /// Runs setup and checks whether stderr carries the olmOCR removal notice.
+    fn setup_quiet_check(&self, expect_notice: bool) {
+        let mut c = self.cmd();
+        c.env("OCR_FAKE_INSTALL", "1").args(["server", "setup"]);
+        if cfg!(not(target_os = "macos")) {
+            c.args(["--model", "paddleocr-vl"]);
+        }
+        let out = c.assert().success();
+        let err = String::from_utf8_lossy(&out.get_output().stderr).into_owned();
+        assert_eq!(err.contains("olmOCR was removed"), expect_notice, "{err}");
+        assert_eq!(err.contains("can be deleted"), expect_notice, "{err}");
+    }
+
     fn file(&self, rel: &str, bytes: &[u8]) {
         let p = self.work.path().join(rel);
         fs::create_dir_all(p.parent().unwrap()).unwrap();
@@ -471,4 +484,62 @@ fn directory_skips_existing_outputs() {
     );
     let out = e.dry_run(&["--input-dir", "d", "--overwrite"]);
     assert!(out.contains("-> d/ocr-output/a.md"), "{out}");
+}
+
+#[test]
+fn model_olmocr_hints_dots_ocr() {
+    let e = Env::new();
+    for args in [
+        &["scan", "--model", "olmocr", "--input-file", "a.pdf"][..],
+        &["server", "start", "--model", "olmocr"],
+        &["server", "setup", "--model", "olmocr"],
+    ] {
+        e.cmd()
+            .args(args)
+            .assert()
+            .code(2)
+            .stderr(predicate::str::contains("invalid value 'olmocr'"))
+            .stderr(predicate::str::contains("use --model dots-ocr"));
+    }
+    e.cmd().arg("--help").assert().success();
+    e.cmd()
+        .args(["scan", "--model", "nope", "--input-file", "a.pdf"])
+        .assert()
+        .code(2)
+        .stderr(predicate::str::contains("use --model dots-ocr").not());
+}
+
+#[test]
+fn setup_drops_olmocr_entry_once() {
+    let e = Env::new();
+    e.setup();
+    let path = e.config.path().join("config.toml");
+    let repo = if cfg!(target_os = "macos") {
+        "mlx-community/olmOCR-2-7B-1025-8bit"
+    } else {
+        "bartowski/allenai_olmOCR-2-7B-1025-GGUF"
+    };
+    let mut toml = fs::read_to_string(&path).unwrap();
+    toml.push_str(&format!(
+        "\n[engines.olmocr]\ninstalled = true\nrepo = \"{repo}\"\n"
+    ));
+    fs::write(&path, &toml).unwrap();
+    e.cmd()
+        .args(["server", "status"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("olmOCR was removed"));
+    assert_eq!(toml, fs::read_to_string(&path).unwrap());
+    e.setup_quiet_check(true);
+    assert!(
+        !fs::read_to_string(&path)
+            .unwrap()
+            .contains("[engines.olmocr]")
+    );
+    e.setup_quiet_check(false);
+    e.cmd()
+        .args(["server", "status"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("olmOCR").not());
 }

@@ -33,7 +33,17 @@ fn utf8_console() {
 fn main() -> ExitCode {
     #[cfg(windows)]
     utf8_console();
-    let cli = Cli::parse();
+    let cli = match Cli::try_parse() {
+        Ok(c) => c,
+        Err(e) => {
+            if let Some(h) = ocr::removed::model_hint(&e) {
+                let _ = e.print();
+                eprintln!("{h}");
+                return ExitCode::from(e.exit_code() as u8);
+            }
+            e.exit()
+        }
+    };
     #[cfg(target_os = "macos")]
     {
         if supervised(&cli) {
@@ -118,6 +128,7 @@ fn setup(args: &SetupArgs) -> Result<(), CliError> {
     if cfg!(target_os = "macos") {
         cfg.mark_apple_installed();
     }
+    ocr::removed::drop_olmocr(&mut cfg);
     cfg.save()?;
     std::fs::create_dir_all(ocr::config::state_dir()?).map_err(anyhow::Error::from)?;
     if cfg!(target_os = "macos") {

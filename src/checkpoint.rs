@@ -268,10 +268,20 @@ pub fn load(output: &Path, manifest: &Manifest, overwrite: bool) -> Loaded {
         Some(old) => old.changed(manifest),
     };
     if let Some(why) = why {
-        loaded.warnings.push(format!(
-            "warning: discarding checkpoints for {}: {why} changed",
-            output.display()
-        ));
+        let was_olmocr = read_manifest(&dir)
+            .is_some_and(|m| m.engine == crate::removed::OLMOCR && m.engine != manifest.engine);
+        loaded.warnings.push(if was_olmocr {
+            format!(
+                "warning: discarding checkpoints for {}: they were made by olmOCR, which was removed in ocr {}; scanning again",
+                output.display(),
+                crate::removed::REMOVED_IN
+            )
+        } else {
+            format!(
+                "warning: discarding checkpoints for {}: {why} changed",
+                output.display()
+            )
+        });
         let _ = fs::remove_dir_all(&dir);
         return loaded;
     }
@@ -330,6 +340,27 @@ mod tests {
             currency_fix: true,
             failed_pages: vec![],
         }
+    }
+
+    #[test]
+    fn olmocr_checkpoint_is_discarded_with_a_note() {
+        let d = tempfile::tempdir().unwrap();
+        let out = d.path().join("a.md");
+        let dir = partial_dir(&out);
+        fs::create_dir_all(&dir).unwrap();
+        let mut old = manifest(200);
+        old.engine = "olmocr".into();
+        write_manifest(&dir, &old).unwrap();
+        let mut now = manifest(200);
+        now.engine = "dots-ocr".into();
+        let loaded = load(&out, &now, false);
+        assert_eq!(loaded.warnings.len(), 1);
+        assert!(
+            loaded.warnings[0].contains(
+                "they were made by olmOCR, which was removed in ocr 1.1.0; scanning again"
+            )
+        );
+        assert!(!dir.exists());
     }
 
     #[test]

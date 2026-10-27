@@ -39,7 +39,7 @@ peak MB. Same scorer flags for every engine: pleading margin numbers are strippe
 
 To run one: `python3 eval/candidate_serve.py <name> --gpu 1` in one terminal (fetches the pinned files and starts `llama-server` on port 8095); then `cargo build --release --example verify_md`, `python3 eval/candidate_run.py <name>` (add `--overwrite` to redo), and `python3 eval/holdout/score.py --engine cand-<name> --json eval/out/holdout/cand-<name>.json`.
 
-For the synthetic sets, `eval/vllm_reference.py` takes `--candidate <name>` (instead of `--engine`) and scores the served model against the fixtures: `python3 eval/vllm_reference.py --candidate <name> --set eval/out/seed10 ... --out eval/out/candidates --port 8095`. The full plan, gates and results table are in [docs/model-lineup-eval.md](../docs/model-lineup-eval.md).
+For the synthetic sets, `eval/vllm_reference.py` takes `--candidate <name>` (instead of `--engine`) and scores the served model against the fixtures: `python3 eval/vllm_reference.py --candidate <name> --set eval/out/seed10 ... --out eval/out/candidates --port 8095`. `spike/.venv/bin/python eval/candidate_report.py` prints the results rows (filing-stamp dockets and dates split out). The full plan, gates and results table are in [docs/model-lineup-eval.md](../docs/model-lineup-eval.md).
 
 ## Seed convention
 Tune on seeds 0-9 only. Accept on seeds 10-39, which are never looked at while tuning.

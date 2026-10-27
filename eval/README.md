@@ -33,6 +33,14 @@ peak MB. Same scorer flags for every engine: pleading margin numbers are strippe
 (`--strip-line-numbers`, pleading family only) and ground-truth furniture is ignored unless
 `--keep-furniture`.
 
+## Candidate models (raw harness)
+
+`eval/candidates.json` pins the local-model lineup for evaluation: the three shipped engines as `*-raw` baselines (paddle-raw, olmocr-raw, dots-ocr-raw) and the candidates dots-mocr, glm-ocr, ovisocr3 and lighton-4b. Each entry fixes a repo revision, sha256-verified GGUF (model + mmproj), the model's upstream prompt and its render/max-tokens settings, so every request is one full page at temperature 0 — no crops, retries, Bates corners or stamp restore.
+
+To run one: `python3 eval/candidate_serve.py <name> --gpu 1` in one terminal (fetches the pinned files and starts `llama-server` on port 8095); then `cargo build --release --example verify_md`, `python3 eval/candidate_run.py <name>` (add `--overwrite` to redo), and `python3 eval/holdout/score.py --engine cand-<name> --json eval/out/holdout/cand-<name>.json`.
+
+For the synthetic sets, `eval/vllm_reference.py` takes `--candidate <name>` (instead of `--engine`) and scores the served model against the fixtures: `python3 eval/vllm_reference.py --candidate <name> --set eval/out/seed10 ... --out eval/out/candidates --port 8095`. The full plan, gates and results table are in [docs/model-lineup-eval.md](../docs/model-lineup-eval.md).
+
 ## Seed convention
 Tune on seeds 0-9 only. Accept on seeds 10-39, which are never looked at while tuning.
 

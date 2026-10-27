@@ -8,6 +8,8 @@ as eval/run.py. One vLLM server must already be serving the engine's model on --
     python eval/vllm_reference.py --engine dots --set eval/out/seed10 eval/out/seed11 \
         --out eval/out/vllm --model rednote-hilab/dots.mocr
 
+    python eval/vllm_reference.py --candidate glm-ocr --set eval/out/seed10 eval/out/seed11 eval/out/seed12 --out eval/out/candidates --port 8095
+
 --rescore scores the Markdown a previous run saved under --out, with no server (no timings or GPU memory).
 """
 import argparse, base64, concurrent.futures as cf, io, json, re, subprocess, sys, time, urllib.request
@@ -19,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "eval"))
 sys.path.insert(0, str(ROOT / "spike/upstream"))
 import score as scorer  # noqa: E402
+import candidates  # noqa: E402
 from allenai_olmocr import build_no_anchoring_v4_yaml_prompt  # noqa: E402
 
 FAMILIES = ["pleading", "contract", "transcript4up", "fax", "table"]
@@ -92,8 +95,10 @@ def vram_mb():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--engine", required=True, choices=ENGINES)
-    ap.add_argument("--model", required=True, help="model id as served by vLLM")
+    g = ap.add_mutually_exclusive_group(required=True)
+    g.add_argument("--engine", choices=ENGINES)
+    g.add_argument("--candidate")
+    ap.add_argument("--model", help="model id as served by vLLM")
     ap.add_argument("--set", required=True, nargs="+", dest="set_dirs")
     ap.add_argument("--out", required=True)
     ap.add_argument("--port", type=int, default=8000)
@@ -102,8 +107,18 @@ def main():
     ap.add_argument("--concurrency", type=int, default=1)
     ap.add_argument("--rescore", action="store_true", help="score the saved Markdown; no server needed")
     a = ap.parse_args()
-    prompt, text_first, how, max_tokens = ENGINES[a.engine]
-    out_root = Path(a.out) / a.engine
+    if a.engine and not a.model:
+        ap.error("--model is required with --engine")
+    if a.candidate:
+        c = candidates.load(a.candidate)
+        prompt = candidates.prompt_of(c)
+        how = c["render"]
+        tag = f"cand-{a.candidate}"
+    else:
+        c = None
+        prompt, text_first, how, max_tokens = ENGINES[a.engine]
+        tag = a.engine
+    out_root = Path(a.out) / tag
     results, peak_vram = {}, 0
     for set_dir in map(Path, a.set_dirs):
         for fam in a.families.split(","):
@@ -118,21 +133,41 @@ def main():
             dest = out_root / set_dir.name / f"{fam}.md"
             if a.rescore:
                 md, wall = dest.read_text(), None
+                if c is not None:
+                    raw_path = dest.with_suffix(".raw.json")
+                    asks = json.loads(raw_path.read_text()) if raw_path.exists() else []
+                    failed = sum(bool(x["error"]) for x in asks)
+                    length_cut = sum(x["finish_reason"] == "length" for x in asks)
             else:
-                pngs = [render(pdf[i], how) for i in range(n)]
+                if c is not None:
+                    pngs = [candidates.render(pdf[i], c["render"]) for i in range(n)]
+                else:
+                    pngs = [render(pdf[i], how) for i in range(n)]
                 t0 = time.time()
                 with cf.ThreadPoolExecutor(a.concurrency) as pool:
-                    replies = list(pool.map(lambda p: ask(a.port, a.model, p, prompt, text_first, max_tokens), pngs))
+                    if c is not None:
+                        asks = list(pool.map(lambda p: candidates.ask(a.port, c, p, prompt), pngs))
+                        replies = ["" if x["error"] else x["reply"] for x in asks]
+                        failed = sum(bool(x["error"]) for x in asks)
+                        length_cut = sum(x["finish_reason"] == "length" for x in asks)
+                        md = "".join(f"<!-- page {i} -->\n\n{candidates.convert(c, r).strip()}\n\n" for i, r in enumerate(replies, 1))
+                        raw = json.dumps(asks, indent=1)
+                    else:
+                        replies = list(pool.map(lambda p: ask(a.port, a.model, p, prompt, text_first, max_tokens), pngs))
+                        md = "".join(f"<!-- page {i} -->\n\n{CONVERT[a.engine](r).strip()}\n\n" for i, r in enumerate(replies, 1))
+                        raw = json.dumps(replies, indent=1)
                 wall = time.time() - t0
                 peak_vram = max(peak_vram, vram_mb() or 0)
-                md = "".join(f"<!-- page {i} -->\n\n{CONVERT[a.engine](r).strip()}\n\n" for i, r in enumerate(replies, 1))
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 dest.write_text(md)
-                (dest.with_suffix(".raw.json")).write_text(json.dumps(replies, indent=1))
+                (dest.with_suffix(".raw.json")).write_text(raw)
             s = scorer.score(gt, md, strip_line_numbers=(fam == "pleading"))
             e = {k: s[k] for k in ("dist_sum", "len_sum", "tokens_found", "tokens_total", "tl_ok", "tl_total",
                                    "cer_pages", "dist_pages", "len_pages")}
             e.update(pages=n, wall_s=None if wall is None else round(wall, 2), cer=s["cer"])
+            if c is not None:
+                e["failed"] = failed
+                e["length_cut"] = length_cut
             results.setdefault(fam, []).append(e)
             took = "" if wall is None else f", {wall:.1f}s"
             print(f"{set_dir.name}/{fam}: {s['cer']} CER{took}, pages {s['cer_pages']}", file=sys.stderr, flush=True)
@@ -150,12 +185,14 @@ def main():
                         "token_recall": r("tokens_found", "tokens_total"),
                         "transcript_line_accuracy": r("tl_ok", "tl_total"),
                         "pages_per_s": None if None in walls else round(g("pages") / sum(walls), 3)}
-    res = {"engine": a.engine, "model": a.model, "render": how, "peak_vram_mb": peak_vram,
+        if c is not None:
+            summary[fam].update(failed=g("failed"), length_cut=g("length_cut"))
+    res = {"engine": tag, "model": a.model or c["model"]["name"], "render": how, "peak_vram_mb": peak_vram,
            "runs": results, "summary": summary}
     Path(a.out).mkdir(parents=True, exist_ok=True)
-    json.dump(res, open(Path(a.out) / f"{a.engine}{'-rescore' if a.rescore else ''}.json", "w"), indent=1)
+    json.dump(res, open(Path(a.out) / f"{tag}{'-rescore' if a.rescore else ''}.json", "w"), indent=1)
     f = lambda v: "-" if v is None else f"{v * 100:.1f}%"
-    print(f"\n{a.engine} ({a.model})  peak GPU memory used {peak_vram} MB")
+    print(f"\n{tag} ({a.model or c['model']['name']})  peak GPU memory used {peak_vram} MB")
     print("| family | pages | CER | CER without worst page | token recall | transcript lines | pages/s |\n"
           "|---|---|---|---|---|---|---|")
     for fam, s in summary.items():

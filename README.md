@@ -69,7 +69,7 @@ To install a model engine:
 
     ocr server setup --model paddleocr-vl
     ocr server setup --model paddleocr-vl --quant 4bit --model-version 1.5
-    ocr server setup --model dots-ocr --quant 4bit
+    ocr server setup --model dots-ocr --model-version dots.ocr
     ocr server setup --all
 
 `--model` is repeatable; other setup flags are `--quant 4bit|8bit|bf16`, `--model-version`, `--non-interactive` and `--force` (skip the RAM check). Valid versions: paddleocr-vl `1.6` (default), `1.5`, `1.0`; dots-ocr `dots.mocr` (default), `dots.ocr`. Not every quant exists for every release; the error message lists those that do. Defaults: paddleocr-vl bf16, dots-ocr 8bit. `indra-ocr` takes neither `--quant` nor `--model-version`.

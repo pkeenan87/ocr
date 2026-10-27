@@ -20,18 +20,32 @@ const OLMOCR_REPO: &str = if cfg!(target_os = "macos") {
 /// Hugging Face cache.
 pub fn weights_dir(repo: &str) -> Option<PathBuf> {
     if cfg!(target_os = "macos") {
-        let base = if let Some(d) = std::env::var_os("HF_HUB_CACHE") {
-            PathBuf::from(d)
-        } else if let Some(d) = std::env::var_os("HF_HOME") {
-            PathBuf::from(d).join("hub")
-        } else {
-            dirs::home_dir()?.join(".cache/huggingface/hub")
-        };
+        let base = hf_hub_cache(|k| std::env::var_os(k), dirs::home_dir())?;
         Some(weights_dir_in(&base, repo, true))
     } else {
         let base = crate::config::state_dir().ok()?.join("models");
         Some(weights_dir_in(&base, repo, false))
     }
+}
+
+/// The Hugging Face hub cache, resolved as huggingface_hub does: $HF_HUB_CACHE, else $HF_HOME/hub,
+/// else $XDG_CACHE_HOME/huggingface/hub, else ~/.cache/huggingface/hub.
+fn hf_hub_cache(
+    env: impl Fn(&str) -> Option<std::ffi::OsString>,
+    home: Option<PathBuf>,
+) -> Option<PathBuf> {
+    let set = |k: &str| env(k).filter(|v| !v.is_empty()).map(PathBuf::from);
+    if let Some(d) = set("HF_HUB_CACHE") {
+        return Some(d);
+    }
+    if let Some(d) = set("HF_HOME") {
+        return Some(d.join("hub"));
+    }
+    let cache = match set("XDG_CACHE_HOME") {
+        Some(d) => d,
+        None => home?.join(".cache"),
+    };
+    Some(cache.join("huggingface/hub"))
 }
 
 fn weights_dir_in(base: &Path, repo: &str, hf_layout: bool) -> PathBuf {
@@ -84,6 +98,44 @@ mod tests {
     use super::*;
     use crate::cli::Cli;
     use clap::Parser;
+
+    #[test]
+    fn hf_cache_resolution() {
+        use std::ffi::OsString;
+        let home = Some(PathBuf::from("/h"));
+        let env = |pairs: &'static [(&'static str, &'static str)]| {
+            move |k: &str| {
+                pairs
+                    .iter()
+                    .find(|(n, _)| *n == k)
+                    .map(|(_, v)| OsString::from(v))
+            }
+        };
+        let all = &[
+            ("HF_HUB_CACHE", "/a"),
+            ("HF_HOME", "/b"),
+            ("XDG_CACHE_HOME", "/c"),
+        ];
+        assert_eq!(
+            hf_hub_cache(env(all), home.clone()),
+            Some(PathBuf::from("/a"))
+        );
+        let hf_home = &[("HF_HOME", "/b"), ("XDG_CACHE_HOME", "/c")];
+        assert_eq!(
+            hf_hub_cache(env(hf_home), home.clone()),
+            Some(PathBuf::from("/b/hub"))
+        );
+        let xdg = &[("XDG_CACHE_HOME", "/c")];
+        assert_eq!(
+            hf_hub_cache(env(xdg), home.clone()),
+            Some(PathBuf::from("/c/huggingface/hub"))
+        );
+        assert_eq!(
+            hf_hub_cache(env(&[]), home),
+            Some(PathBuf::from("/h/.cache/huggingface/hub"))
+        );
+        assert_eq!(hf_hub_cache(env(&[]), None), None);
+    }
 
     #[test]
     fn weights_layouts() {

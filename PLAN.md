@@ -149,7 +149,7 @@ All model calls use `temperature 0`.
 
 ### 4.3 Apple side-pass for model engines
 
-olmOCR drops page headers, footers and Bates numbers, and the other engines label them inconsistently. For every model engine, each page therefore also gets an Apple Vision pass, which is cheap (about 0.15 s per page). It supplies:
+Model engines drop or label page headers, footers and Bates numbers inconsistently (dots' plain-text prompt leaves out page footers). For every model engine, each page therefore also gets an Apple Vision pass, which is cheap (about 0.15 s per page). It supplies:
 - Bates numbers and footer text for the page markers;
 - the table regions that PaddleOCR-VL crops;
 - the fallback text if the model fails.

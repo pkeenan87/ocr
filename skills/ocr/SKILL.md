@@ -1,6 +1,6 @@
 ---
 name: ocr
-description: OCR PDFs and images to Markdown locally on a Mac or a Linux PC with the `ocr` command-line tool (Apple Vision, PaddleOCR-VL, olmOCR 2, dots.ocr, indra-ocr), and check the values and quotes in them before anyone relies on them. Use when the user wants text out of a scanned or image-only document, a folder of documents, a deposition transcript, or a legal filing with Bates numbers, and when amounts, dates, docket numbers, citations or quotations from such documents will be relied on. It is the entry point for the verification workflow with a second OCR service such as Azure Document Intelligence.
+description: OCR PDFs and images to Markdown locally on a Mac or a Linux PC with the `ocr` command-line tool (Apple Vision, PaddleOCR-VL, dots.ocr, indra-ocr), and check the values and quotes in them before anyone relies on them. Use when the user wants text out of a scanned or image-only document, a folder of documents, a deposition transcript, or a legal filing with Bates numbers, and when amounts, dates, docket numbers, citations or quotations from such documents will be relied on. It is the entry point for the verification workflow with a second OCR service such as Azure Document Intelligence.
 ---
 
 # ocr: local document OCR to Markdown
@@ -22,12 +22,11 @@ description: OCR PDFs and images to Markdown locally on a Mac or a Linux PC with
 | Most things: contracts, pleadings, letters, scans, big batches | `apple` (default) | About 3 pages/s; 300 pages in about 90 s |
 | Deposition transcripts (full-page or 4-up condensed) | `dots-ocr` | Most accurate on transcripts; about 36 s per 4-up transcript page, 5–9 s on ordinary pages |
 | Table-heavy documents, or a faster model engine | `paddleocr-vl` | About 5 s/page. Off the Mac, use `dots-ocr` for tables instead |
-| Clean prose and tables | `olmocr` | Slowest (about 16 s/page), needs 11 GB of memory |
 | A machine with no GPU, or a fast first pass on clean documents | `indra-ocr` | CPU only, about 2 pages/s, no server; weaker on degraded scans, handwriting and complex tables; weights are under a modified OpenRAIL-M (research, personal use, small startups) |
 
 On a Mac, start with `apple` unless the document is a transcript or the user asks for a model. Off the Mac, start with `dots-ocr` (see below). Before a model run of more than about 50 pages, tell the user the estimated time.
 
-**Off the Mac:** `dots-ocr` is the most accurate for most work, and always the choice for transcripts and tables (about 3–8 s a page on a GPU). `paddleocr-vl` is faster and fine for prose, but weak on tables and transcripts there, because the Mac's Apple Vision table crops are missing. `olmocr` matches dots except on transcripts and is about four times slower.
+**Off the Mac:** `dots-ocr` is the most accurate for most work, and always the choice for transcripts and tables (about 3–8 s a page on a GPU). `paddleocr-vl` is faster and fine for prose, but weak on tables and transcripts there, because the Mac's Apple Vision table crops are missing.
 
 ## Scanning
 

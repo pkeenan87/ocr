@@ -9,7 +9,6 @@ Plan v3 · 2026-10-07 (updated 2026-10-08, Phase 6 done). Incorporates the Fable
 | Engine flag | Backend | Runs where |
 |---|---|---|
 | `apple` (default) | Apple Vision `RecognizeDocumentsRequest` (macOS 26+) | In-process, no server |
-| `olmocr` | allenai olmOCR 2 (7B, Qwen2.5-VL based) | Local model server |
 | `paddleocr-vl` | PaddlePaddle PaddleOCR-VL (0.9B) | Local model server |
 | `dots-ocr` | rednote-hilab dots.mocr / dots.ocr | Local model server |
 
@@ -42,7 +41,7 @@ ocr scan --input-file <path>  [--output-file <path.md>] [options]
 ocr scan --input-dir  <dir>   [--output-dir  <dir>]     [options]
 
 options:
-  --model apple|olmocr|paddleocr-vl|dots-ocr   (default: apple)
+  --model apple|paddleocr-vl|dots-ocr|indra-ocr   (default: apple)
   --model-version <v>                          (per-engine enum, see §4.2; default = newest)
   --file-type pdf|image|auto                   (default: auto = by extension)
   --recursive                                  (dir mode: walk subfolders, mirror tree in output)
@@ -84,10 +83,10 @@ options:
     ```
   - Config exists but the requested model engine isn't installed: the tool warns and exits 2.
     ```
-    ⚠ Engine 'olmocr' is not installed. Run `ocr server setup --model olmocr`.
+    ⚠ Engine 'dots-ocr' is not installed. Run `ocr server setup --model dots-ocr`.
     ```
   - `server stop` and `server status` never hard-fail. They only report.
-- **Server gate.** If a model engine is chosen and its server isn't running, the scan exits 3 with `run 'ocr server start --model olmocr'`.
+- **Server gate.** If a model engine is chosen and its server isn't running, the scan exits 3 with `run 'ocr server start --model dots-ocr'`.
 
 ### Exit codes
 
@@ -142,7 +141,6 @@ Defaults are the **newest** release of each model. `--model-version` takes a per
 
 | Engine | Default | `--model-version` pins | Prompt / mode | Notes |
 |---|---|---|---|---|
-| olmOCR 2 | `mlx-community/olmOCR-2-7B-1025-8bit` (`--quant 4bit` available) | — | Upstream `build_no_anchoring_v4_yaml_prompt()`, verbatim. This is olmOCR 2's own default | Longest side 1288 px. About 16 s/page. Output has YAML front-matter, which is parsed for rotation, then stripped. **Drops headers and footers**, so they come from the Apple pass (§4.3) |
 | PaddleOCR-VL | **1.6 bf16** (`PaddlePaddle/PaddleOCR-VL-1.6`, 2.4 GB). `--quant 4bit` = `mlx-community/PaddleOCR-VL-1.6-4bit` | `1.5` (`mlx-community/PaddleOCR-VL-1.5-bf16`), `1.0` (`PaddlePaddle/PaddleOCR-VL`) | Full-page `OCR:`. Tables found by Apple Vision are cropped and sent with `Table Recognition:`, which returns OTSL `<fcel>…<nl>` and is converted to GFM | About 2.5 s/page. Full-page `OCR:` was word-perfect on the test page, so per-block cropping is reduced to tables only |
 | dots | **dots.mocr** (`mlx-community/dots.mocr-8bit`). Confirmed successor (rednote-hilab, same prompt family). Not `dots.mocr-svg` | `dots.ocr` (original) | Official `prompt_layout_all_en`, verbatim. It returns a JSON **array** of `{bbox, category, text}`, which our converter turns into Markdown. `prompt_ocr` is the cheap mode | About 34 s/page at 200 DPI, dominated by prefill of about 5k image tokens; lower DPI is tuned in Phase 6. Tables come out as HTML, converted to GFM. Formulas come out as LaTeX |
 | Apple | Built in | — | `RecognizeDocumentsRequest` with `[en-US]`, auto-detect off and **language correction off**, which caused a `cv`→`cr` error | **150 DPI default** (was about 200 until the 2026-10-08 "Resolved" note in §8): on the fixture, 300 and 400 DPI were *less* accurate. Tuned in Phase 2, about 0.15 s/page at 8 jobs. The bridge rebuilds reading order from the bboxes and drops paragraphs that duplicate table or list text. Margin line numbers are filtered by bbox. List markers come from `markerString` |
@@ -248,7 +246,7 @@ olmOCR drops page headers, footers and Bates numbers, and the other engines labe
 ---
 source: Smith_v_Jones_Complaint.pdf
 pages: 312
-engine: olmocr (mlx-community/olmOCR-2-7B-1025-8bit)
+engine: dots-ocr (mlx-community/dots.mocr-8bit)
 generated: 2026-10-07T19:30:00Z
 flagged_pages: [88, 141]
 ---
@@ -439,7 +437,6 @@ VRAM is then checked against the engine and quant, with the same tiers as the RA
 | Engine | Default off the Mac | Other quants |
 |---|---|---|
 | paddleocr-vl 1.6 | `PaddlePaddle/PaddleOCR-VL-1.6-GGUF` (official, f16) | 1.5: `PaddlePaddle/PaddleOCR-VL-1.5-GGUF`. 1.0: community only |
-| olmocr | `bartowski/allenai_olmOCR-2-7B-1025-GGUF` Q8_0 + mmproj f16 | Q4_K_M, bf16 |
 | dots-ocr | `ggml-org/dots.ocr-GGUF` Q8_0 (first-party, llama.cpp support merged in PR #17575). `--model-version dots.mocr` only if 7a shows a community GGUF works | f16 |
 
 `--quant 4bit|8bit|bf16` maps to Q4_K_M / Q8_0 / f16-or-bf16 where the repo has it.

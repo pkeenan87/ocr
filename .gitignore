@@ -2,6 +2,8 @@
 /bridge/.build
 /spike/.venv
 /spike/out
+# Real scans and the hand corrections for them. Never commit this directory.
+/spike/heldout-local/
 eval/out/
 .env
 __pycache__/

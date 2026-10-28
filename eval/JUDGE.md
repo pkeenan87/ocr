@@ -3,6 +3,7 @@
 `eval/judge.py` asks TypeSafe AI's **Jev** decision model typed questions about each page of an OCR
 Markdown output, and returns defect probabilities and a readability score. It is a development
 measurement tool for outputs **without ground truth**. It is never part of the `ocr` CLI.
+MiniCPM-OCR Jev (OpenBMB, a local region scorer used by `eval/minicpm`) is a different model and stays on this machine. This file is only the TypeSafe judge.
 
 Jev is text-only. It judges whether the text is *plausible*, not whether it matches the page image.
 

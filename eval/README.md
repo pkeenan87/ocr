@@ -80,3 +80,7 @@ The embedded text is not perfect ground truth (old scans carry bad OCR layers), 
 - a strict word error rate against the embedded text (case, punctuation, decimal points and signs kept);
 - the reference words deleted;
 - the pages with a run of 12 or more reference words that appear nowhere on the OCR page, which usually means a dropped line or paragraph. Text that the OCR has elsewhere on the page counts as moved, not dropped. Misreads can still put a page on this list, so it is a list of pages to look at, not a count of drops.
+
+## MiniCPM-OCR 1.0 and MiniCPM-OCR Jev
+
+`eval/minicpm/compare.py` is an opt-in comparison against `paddleocr-vl` (pass `--model` explicitly; the binary default is unchanged). MiniCPM-OCR Jev here is OpenBMB's local region scorer, not the TypeSafe judge in [JUDGE.md](JUDGE.md). Corrections are the Export JSON from `eval/holdout/review_template.html`: `contract.pdf` pairs with `contract.json` whose `pages[].doc` is `contract`. Put real scans in `spike/heldout-local/` (gitignored). Results go to `eval/out/minicpm/`. Setup, GPUs, and the two-pass commands for a 2×16GB Linux box are in the README section "MiniCPM-OCR comparison". `python3 eval/minicpm/selftest.py` runs the harness against a fake localhost server and a synthetic contract.

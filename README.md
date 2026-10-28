@@ -541,6 +541,24 @@ Everything runs on your machine. Model servers bind to 127.0.0.1 only, and there
 - macOS: Hugging Face and Python packages. At run time the servers start with `HF_HUB_OFFLINE=1`.
 - Linux and Windows: the pinned llama.cpp and pdfium releases from GitHub, and the GGUF weights from Hugging Face, all checked by sha256.
 
+## MiniCPM-OCR comparison (opt-in, eval only)
+
+`eval/minicpm/compare.py` scores MiniCPM-OCR 1.0 against an explicit `--model` (use `paddleocr-vl` on Linux) and then scores MiniCPM-OCR Jev as a review flag on each engine's text. It does not change the default engine and it does not call the TypeSafe judge in [eval/JUDGE.md](eval/JUDGE.md). Servers must be on `127.0.0.1`. Page text is written under `eval/out/minicpm/`, which is gitignored; a path inside the repo that `git check-ignore` does not ignore is refused.
+
+On a 16GB GPU, run the baseline first and stop it before loading MiniCPM. MiniCPM-OCR 1.0 is the Q8_0 GGUF from `openbmb/MiniCPM-OCR-1.0-gguf` (`MiniCPM-OCR-1_0-Q8_0.gguf` plus `mmproj-model-f16-4x.gguf`) on llama.cpp, `--host 127.0.0.1 --port 18499 --ctx-size 8192 --alias minicpm-ocr`. Do not use this repo's pinned llama.cpp, and do not copy the vendor's `--ctx-size 40960` (about 26GB at F16 on a 5090). The published Jev score service speaks vLLM (`--runner pooling --convert classify`), so Jev goes on the other GPU at `127.0.0.1:18498` with the render+score service at `127.0.0.1:18500` (`HOST=127.0.0.1`). The GGUF Jev weights exist, and the vendor doc points at `sdk/backends/llamacpp.yaml`, but that file is not in the tree that was checked; use it only if the clone actually contains it.
+
+Extra scans and their corrections go in `spike/heldout-local/` (gitignored). A correction is the Export JSON from `eval/holdout/review_template.html`, renamed from `holdout_v1.json` to the scan stem: `contract.pdf` with `contract.json` and `"doc": "contract"`. `contract.html` is read when it embeds that export. `transcript_prefill` is not a correction. The harness warns on unpaired scans, unpaired corrections, and a `doc` that does not match the stem.
+
+```bash
+python3 -m pip install -r eval/requirements.txt
+python3 eval/minicpm/compare.py --dry-run \
+  --input-dir spike/heldout --input-dir spike/heldout-local \
+  --reference-dir spike/heldout-local --use-real-config \
+  --out eval/out/minicpm/run1
+```
+
+Smoke one file with `--only signature_block.pdf` and `--out eval/out/minicpm/smoke`: `--skip-minicpm --skip-jev` while `paddleocr-vl` is up, then `ocr server stop`, start MiniCPM and Jev, and rerun with `--baseline-md eval/out/minicpm/smoke/baseline`. The full run is the same two commands without `--only`, writing `eval/out/minicpm/run1/summary.md` and `results.json`. Report CER, WER, amount/date/docket precision and recall, pages/s and mean per-page time, and Jev AUROC, precision, recall, and `critical_errors_caught`. Do not commit the scans or paste page text. `python3 eval/minicpm/selftest.py` is the CPU check (fake server, synthetic contract).
+
 ## Development
 
     cargo test --release                       # unit and integration tests

@@ -85,17 +85,30 @@ pub fn download(url: &str, dest: &Path, sha256: &str, label: &str) -> Result<(),
     part.push(".part");
     let part = PathBuf::from(part);
     println!("downloading {label}");
-    let status = tool("curl")
-        .args(["-fL", "--retry", "3", "--progress-bar", "-C", "-", "-o"])
-        .arg(&part)
-        .arg(url)
-        .status()
-        .map_err(|e| {
-            setup_err(format!(
-                "error: cannot run curl ({e}); curl is needed to download models ({})",
-                tool_hint()
-            ))
-        })?;
+    let curl = |extra: &[&str]| {
+        tool("curl")
+            .args(["-fL", "--retry", "3", "--progress-bar", "-C", "-"])
+            .args(extra)
+            .arg("-o")
+            .arg(&part)
+            .arg(url)
+            .status()
+            .map_err(|e| {
+                setup_err(format!(
+                    "error: cannot run curl ({e}); curl is needed to download models ({})",
+                    tool_hint()
+                ))
+            })
+    };
+    let mut status = curl(&[])?;
+    // Windows' curl (schannel) fails with exit 35 when it cannot reach the certificate's
+    // revocation server, as behind many corporate proxies. Retry once checking revocation only
+    // where it can; the file is still checked against its pinned sha256. Retry rather than pass
+    // the flag up front: the curl in Windows 10 1803 (7.55) predates it.
+    if cfg!(windows) && status.code() == Some(35) {
+        println!("{label}: TLS revocation check failed; retrying with --ssl-revoke-best-effort");
+        status = curl(&["--ssl-revoke-best-effort"])?;
+    }
     if !status.success() {
         return Err(setup_err(format!(
             "error: download of {label} failed ({status}); re-run setup to resume\n  {url}"

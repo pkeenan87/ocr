@@ -33,7 +33,17 @@ fn utf8_console() {
 fn main() -> ExitCode {
     #[cfg(windows)]
     utf8_console();
-    let cli = Cli::parse();
+    let cli = match Cli::try_parse() {
+        Ok(c) => c,
+        Err(e) => {
+            if let Some(h) = ocr::removed::model_hint(&e) {
+                let _ = e.print();
+                eprintln!("{h}");
+                return ExitCode::from(e.exit_code() as u8);
+            }
+            e.exit()
+        }
+    };
     #[cfg(target_os = "macos")]
     {
         if supervised(&cli) {
@@ -118,6 +128,7 @@ fn setup(args: &SetupArgs) -> Result<(), CliError> {
     if cfg!(target_os = "macos") {
         cfg.mark_apple_installed();
     }
+    ocr::removed::drop_olmocr(&mut cfg);
     cfg.save()?;
     std::fs::create_dir_all(ocr::config::state_dir()?).map_err(anyhow::Error::from)?;
     if cfg!(target_os = "macos") {
@@ -166,7 +177,7 @@ fn default_server_model() -> Result<Engine, CliError> {
         [] => Err(CliError::Setup(if cfg!(target_os = "macos") {
             "no model engine is installed. The default apple engine needs no server: run \
              `ocr scan` directly. To use a model engine, run `ocr server setup --model <engine>` \
-             (paddleocr-vl, olmocr or dots-ocr; indra-ocr needs no server)."
+             (paddleocr-vl or dots-ocr; indra-ocr needs no server)."
                 .into()
         } else {
             "no model engine is installed. Run `ocr server setup --model <engine>`.".into()
@@ -298,13 +309,8 @@ fn run_model(args: &ScanArgs, plan: &Plan, info: ServerInfo) -> Result<(), CliEr
             }
         });
     let spec = model_engine::scan_engine(args.model).expect("model engines have a scan engine");
-    if args.model == Engine::Olmocr && args.dpi.is_some() && !args.quiet {
-        eprintln!(
-            "note: --dpi is ignored for olmocr; images are always 1288 px on the longest side"
-        );
-    }
     #[cfg(not(target_os = "macos"))]
-    if args.model != Engine::Olmocr && args.effective_dpi() > ocr::llama::MAX_DPI && !args.quiet {
+    if args.effective_dpi() > ocr::llama::MAX_DPI && !args.quiet {
         eprintln!(
             "⚠ --dpi {} is above the {} DPI the model server's context is sized for; long pages may be cut short",
             args.effective_dpi(),

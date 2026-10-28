@@ -2,20 +2,17 @@
 """Stand-in for mlx_vlm.server in tests. Same argv; parses --port and --model, ignores the rest.
 
 Behaviour is chosen by env FAKE_MODE: ok, slow_ready, never_ready, crash, loop, length,
-error5xx, sleep, empty, longtable, and per engine: rotate and nofront (olmOCR), truncated (dots). The
+error5xx, sleep, empty, longtable, and per engine: truncated (dots). The
 request modes skip the readiness probe (max_tokens <= 8). FAKE_FAIL_FIRST=N limits them to the
 first N real requests; FAKE_SLEEP_SECS sets how long `sleep` blocks (default 30).
 
-The reply format follows the prompt, so no engine setting is needed: `Attached is one page...`
-is olmOCR (YAML front matter, text, a figure, an HTML table), `Please output the layout...` is
+The reply format follows the prompt, so no engine setting is needed: `Please output the layout...` is
 dots `prompt_layout_all_en` (a JSON array of {bbox, category, text}), `Extract the text content`
 is dots `prompt_ocr` (plain text), `Table Recognition:` is OTSL, anything else is `OCR:`.
-Modes: `loop` makes the text (olmOCR prose, a dots Text field, plain text) loop; `looplength` is
+Modes: `loop` makes the text (a dots Text field, plain text) loop; `looplength` is
 `loop` with finish_reason length; `length` sets
-finish_reason length (a dots array is cut off too); `empty` returns an empty reply; `rotate`
-makes olmOCR report is_rotation_valid False with rotation_correction 90; `nofront` drops the
-olmOCR front matter; `longtable` adds a table of 80 identical rows (olmOCR text, dots Table
-element), which must not be mistaken for a loop; `truncated` cuts the dots JSON in the middle of an element with finish
+finish_reason length (a dots array is cut off too); `empty` returns an empty reply;
+`longtable` adds a table of 80 identical rows (a dots Table element), which must not be mistaken for a loop; `truncated` cuts the dots JSON in the middle of an element with finish
 stop.
 
 FAKE_PLAIN_MODE, if set, replaces FAKE_MODE for the dots `Extract the text content` (plain
@@ -25,9 +22,9 @@ With FAKE_REPLIES naming a JSON list of strings, the `OCR:` reply of request num
 `list[(n - 1) % len(list)]` instead of `fake ocr text WxH` (needs FAKE_LOG for the numbering).
 
 FAKE_CORNER_BATES=<token> makes a request whose image is wider than 2:1 (a Bates corner crop,
-never a page) reply with just that token, in the engine's reply shape (olmOCR front matter, dots
+never a page) reply with just that token, in the engine's reply shape (dots
 layout JSON with one Page-footer, otherwise plain text). FAKE_BODY_TAIL=<line> is appended as the
-last line of the olmOCR and dots plain-text replies to full-page (not wide) images.
+last line of the dots plain-text replies to full-page (not wide) images.
 
 Every real request is logged as one JSON line to stderr (`fake_server: REQ {...}`, so into the
 server log) and, if FAKE_LOG names a file, appended there too. With FAKE_LOG the request number
@@ -190,9 +187,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send(200, out)
 
 
-OLM_FRONT = ("---\nprimary_language: en\nis_rotation_valid: {valid}\nrotation_correction: {rot}\n"
-             "is_table: True\nis_diagram: False\n---\n")
-OLM_TABLE = ("<table>\n<tr><th>Invoice</th><th>Date</th><th>Amount</th></tr>\n"
+HTML_TABLE = ("<table>\n<tr><th>Invoice</th><th>Date</th><th>Amount</th></tr>\n"
              "<tr><td>INV-1001</td><td>2026-01-05</td><td>$48,250.00</td></tr>\n"
              "<tr><td>INV-1002</td><td>2026-02-11</td><td>$51,900.00</td></tr>\n</table>")
 LOOP = "the same line again\n" * 200
@@ -209,7 +204,7 @@ def dots_elements(w, h):
         {"bbox": [10, 170, 90, 190], "category": "List-item", "text": "first item"},
         {"bbox": [10, 195, 90, 215], "category": "List-item", "text": "second item"},
         {"bbox": [10, 220, 90, 300], "category": "Table",
-         "text": OLM_TABLE.replace("\n", "")},
+         "text": HTML_TABLE.replace("\n", "")},
         {"bbox": [10, 310, 90, 340], "category": "Formula", "text": "E = mc^{2}"},
         {"bbox": [10, 350, 90, 450], "category": "Picture"},
         {"bbox": [10, 455, 90, 470], "category": "Caption", "text": "Figure 1. A fake picture"},
@@ -233,8 +228,6 @@ def reply(prompt, w, h, active):
     corner = os.environ.get("FAKE_CORNER_BATES")
     wide = w > 2 * h
     if corner and wide and mode == "ok":
-        if prompt.startswith("Attached is one page"):
-            return OLM_FRONT.format(valid="True", rot=0) + corner, reason
         if prompt.startswith("Please output the layout"):
             return json.dumps([{"bbox": [0, 0, 100, 20], "category": "Page-footer",
                                 "text": corner}]), reason
@@ -242,14 +235,6 @@ def reply(prompt, w, h, active):
             return corner, reason
     tail = "" if wide else os.environ.get("FAKE_BODY_TAIL", "")
     tail = "\n" + tail if tail else ""
-    if prompt.startswith("Attached is one page"):
-        valid, rot = ("False", 90) if mode == "rotate" else ("True", 0)
-        front = "" if mode == "nofront" else OLM_FRONT.format(valid=valid, rot=rot)
-        if mode == "loop":
-            return front + LOOP, reason
-        table = LONG_TABLE if mode == "longtable" else OLM_TABLE
-        return (front + f"fake olmocr text {w}x{h}\n\n![A bar chart](page_10_20_300_400.png)\n\n"
-                + table + "\n\nClosing line" + tail), reason
     if prompt.startswith("Please output the layout"):
         elements = dots_elements(w, h)
         if mode == "loop":

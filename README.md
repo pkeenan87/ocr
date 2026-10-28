@@ -6,21 +6,22 @@ Local, private OCR of PDFs and images to Markdown. Nothing is uploaded anywhere.
 
 | Platform | Status | Engines |
 |---|---|---|
-| macOS 26 or later, Apple Silicon | Supported | all five; `apple` is the default |
-| Linux x86-64, ideally with an NVIDIA GPU | Supported | `paddleocr-vl` (default), `dots-ocr`, `olmocr`, `indra-ocr` |
+| macOS 26 or later, Apple Silicon | Supported | all four; `apple` is the default |
+| Linux x86-64, ideally with an NVIDIA GPU | Supported | `paddleocr-vl` (default), `dots-ocr`, `indra-ocr` |
 | Windows 10/11 x86-64 | Preview: passes the tests in CI and on a real machine; `paddleocr-vl` run end to end on the CPU build | as Linux |
 
 Linux arm64 and Intel Macs are not supported. Off the Mac, `ocr` works differently in ways that matter for legal use; read [Known limits](#known-limits) first.
 
-`ocr` is a single command-line tool with five engines:
+`ocr` is a single command-line tool with four engines:
 
 | `--model` | Backend | Runs |
 |---|---|---|
 | `apple` (default) | Apple Vision `RecognizeDocumentsRequest` | In-process, no download |
 | `paddleocr-vl` | PaddleOCR-VL (0.9B) | Local model server |
-| `olmocr` | olmOCR 2 (7B) | Local model server |
 | `dots-ocr` | dots.mocr (or the original dots.ocr) | Local model server |
 | `indra-ocr` | indra-ocr (ONNX, CPU only) | A helper process per document, no server (see [indra-ocr](#indra-ocr)) |
+
+olmOCR was removed in 1.1.0 (see docs/model-lineup-eval.md).
 
 It is built for legal documents that run to hundreds of pages: it streams pages, writes per-page checkpoints, resumes after an interruption, keeps Bates numbers in page markers and flags pages it is not sure about.
 
@@ -43,9 +44,8 @@ Memory needed by the model engines (peak physical footprint measured with `vmmap
 |---|---|---|
 | paddleocr-vl 1.6 (bf16) | 1.8 GiB | 3.8-4.0 GB |
 | dots-ocr, dots.mocr (8bit) | 4.1 GiB | 6.8 GB at the default 100 DPI (7.6 GB at 200) |
-| olmocr (8bit) | 8.8 GiB | 10.9-11.5 GB |
 
-Setup checks installed RAM. For olmOCR 8bit it is silent at 24 GB or more, warns at 16-24 GB and refuses below 16 GB unless you pass `--force`; `--quant 4bit` (about 5.5 GB estimated) is the recommendation on smaller machines. For the other engines it warns when 1.5x the footprint exceeds RAM and refuses when the footprint exceeds 75% of RAM. Apple Vision needs no download; a 500-page production peaked at about 0.5 GB.
+Setup checks installed RAM. It warns when 1.5x the footprint exceeds RAM and refuses when the footprint exceeds 75% of RAM. Apple Vision needs no download; a 500-page production peaked at about 0.5 GB.
 
 ## Build and install
 
@@ -69,14 +69,14 @@ To install a model engine:
 
     ocr server setup --model paddleocr-vl
     ocr server setup --model paddleocr-vl --quant 4bit --model-version 1.5
-    ocr server setup --model olmocr --quant 4bit
+    ocr server setup --model dots-ocr --model-version dots.ocr
     ocr server setup --all
 
-`--model` is repeatable; other setup flags are `--quant 4bit|8bit|bf16`, `--model-version`, `--non-interactive` and `--force` (skip the RAM check). Valid versions: paddleocr-vl `1.6` (default), `1.5`, `1.0`; dots-ocr `dots.mocr` (default), `dots.ocr`. olmOCR has no selectable version. Not every quant exists for every release; the error message lists those that do. Defaults: paddleocr-vl bf16, olmocr and dots-ocr 8bit. `indra-ocr` takes neither `--quant` nor `--model-version`.
+`--model` is repeatable; other setup flags are `--quant 4bit|8bit|bf16`, `--model-version`, `--non-interactive` and `--force` (skip the RAM check). Valid versions: paddleocr-vl `1.6` (default), `1.5`, `1.0`; dots-ocr `dots.mocr` (default), `dots.ocr`. Not every quant exists for every release; the error message lists those that do. Defaults: paddleocr-vl bf16, dots-ocr 8bit. `indra-ocr` takes neither `--quant` nor `--model-version`.
 
 For a model engine, a missing or incomplete setup is an error (exit 2), not a warning:
 
-    ⚠ Engine 'olmocr' is not installed. Run `ocr server setup --model olmocr`.
+    ⚠ Engine 'dots-ocr' is not installed. Run `ocr server setup --model dots-ocr`.
 
 Model engines also need a running server:
 
@@ -88,7 +88,7 @@ Model engines also need a running server:
 
 ## Linux and Windows
 
-Status: Linux is supported in v1.0, with a prebuilt x86-64 binary from 1.0.1. It was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build: all three model engines pass. Windows is a preview: it builds and passes the tests in CI and on a Windows 11 machine (8-core EPYC VM, no GPU), where `paddleocr-vl` was set up, started and run end to end on the CPU build (about 60 s a page). `olmocr`, `dots-ocr`, `indra-ocr` and the GPU builds have not been run on Windows.
+Status: Linux is supported in v1.0, with a prebuilt x86-64 binary from 1.0.1. It was tested on a Ryzen 9950X with the CPU build, and with an RTX 5060 Ti (16 GB, Blackwell) on the CUDA 13 build: all three model engines pass. Windows is a preview: it builds and passes the tests in CI and on a Windows 11 machine (8-core EPYC VM, no GPU), where `paddleocr-vl` was set up, started and run end to end on the CPU build (about 60 s a page). `dots-ocr`, `indra-ocr` and the GPU builds have not been run on Windows.
 
 Off the Mac:
 - There is no Apple Vision, so `apple` is not offered and **`paddleocr-vl` is the default engine**.
@@ -123,7 +123,7 @@ or build it with `cargo build --release`. The archive also holds the Claude skil
 | Integrated graphics only, or no GPU | CPU, with a warning |
 
 Integrated graphics get the CPU build because it was 6x faster than Vulkan on a Ryzen's built-in Radeon. With the CPU build:
-- `olmocr` and `dots-ocr` need `--force` at setup.
+- `dots-ocr` needs `--force` at setup.
 - `paddleocr-vl` runs at about 8 s a page on a 16-core CPU.
 - Request timeouts are four times as long.
 
@@ -135,34 +135,29 @@ Set `OCR_LLAMA_VARIANT=cuda12|cuda13|vulkan|cpu` to override the choice. If a CU
 |---|---|---|
 | paddleocr-vl 1.6 (bf16, the only GGUF) | 1.8 GB | 3.3 GB |
 | dots-ocr, dots.ocr (8bit = Q8_0) | 3.2 GB | 4.7 GB |
-| olmocr (4bit = Q4_K_M) | 6.0 GB | 7.5 GB |
-| olmocr (8bit = Q8_0, default) | 9.5 GB | 10.9 GB |
-| olmocr (bf16) | 16.6 GB | 18.1 GB |
 
 Measured: PaddleOCR-VL on the CPU build uses 2.1 GB resident. On an RTX 5060 Ti (16 GB, CUDA 13 build, synthetic accept seeds 10–12, 2026-10-18; CER / token recall):
 
-| | paddleocr-vl 1.6 | dots-ocr (dots.ocr Q8_0) | olmocr (Q8_0) |
-|---|---|---|---|
-| Pleadings | 0.9% / 98.4%, Bates 100% | 0.1% / 100%, Bates 100% | 0.0% / 100%, Bates 100% |
-| Contracts | 0.0% / 100% | 0.0% / 100% | 0.0% / 100% |
-| 4-up transcripts | 39.1% / 91.5% | 2.0% / 100% | 11.6% / 96.9% |
-| Fax scans | 0.0% / 100% | 1.2% / 100% | 0.0% / 100% |
-| Tables | 12.3% / 100% | 0.0% / 100% | 0.0% / 100% |
-| GPU memory in use | 2.4 GB | 4.4 GB | 10.2 GB |
-| Pages/s | 0.16–0.70 (4-up transcripts slowest) | 0.12–0.37 | 0.03–0.09 |
+| | paddleocr-vl 1.6 | dots-ocr (dots.ocr Q8_0) |
+|---|---|---|
+| Pleadings | 0.9% / 98.4%, Bates 100% | 0.1% / 100%, Bates 100% |
+| Contracts | 0.0% / 100% | 0.0% / 100% |
+| 4-up transcripts | 39.1% / 91.5% | 2.0% / 100% |
+| Fax scans | 0.0% / 100% | 1.2% / 100% |
+| Tables | 12.3% / 100% | 0.0% / 100% |
+| GPU memory in use | 2.4 GB | 4.4 GB |
+| Pages/s | 0.16–0.70 (4-up transcripts slowest) | 0.12–0.37 |
 
-**Which engine on Linux:** `dots-ocr` for most work, and always for transcripts and tables. `paddleocr-vl` is the fastest and lightest, and fine for prose, but weak on tables and transcripts without the Mac's Vision crops. `olmocr` is as accurate as dots on everything but transcripts, and about four times slower.
-
-olmocr bf16 (18.1 GB) does not fit a 16 GB card; use the default 8bit.
+**Which engine on Linux:** `dots-ocr` for most work, and always for transcripts and tables. `paddleocr-vl` is the fastest and lightest, and fine for prose, but weak on tables and transcripts without the Mac's Vision crops.
 
 **Differences from the Mac:**
 - dots defaults to `dots.ocr`, because llama.cpp's support for dots.mocr is unconfirmed. Only PaddleOCR-VL 1.6 and 1.5 are offered.
 - Without the Apple Vision side-pass:
   - Bates numbers come from the model's own text.
-  - olmOCR, which drops footers, and dots, whose plain-text prompt leaves out page footers, get up to three extra small requests per page, for the bottom-right corner, the bottom-left corner and the bottom centre, when the page text has no Bates number. A document stops getting them after three pages without one.
-  - On a page stored sideways, olmOCR's corner requests follow its rotation correction; dots has none, so it finds no Bates number there.
+  - dots, whose plain-text prompt leaves out page footers, gets up to three extra small requests per page, for the bottom-right corner, the bottom-left corner and the bottom centre, when the page text has no Bates number. A document stops getting them after three pages without one.
+  - On a page stored sideways, dots has no rotation correction, so it finds no Bates number there.
   - A number in the body text followed by more of the sentence (`Invoice No. INV-24337 in the amount of…`) is not taken as a Bates number; one that ends a sentence (`…Invoice No. INV-24337.`) still can be.
-  - There are no table crops, so **use `dots-ocr` or `olmocr` for tables**: `paddleocr-vl` reads them from the full page and is much less accurate on them (see [Known limits](#known-limits)).
+  - There are no table crops, so **use `dots-ocr` for tables**: `paddleocr-vl` reads them from the full page and is much less accurate on them (see [Known limits](#known-limits)).
   - There is no transcript detection, so transcript line numbers are not re-anchored to the page geometry and `line_numbers` is not written. **Use `dots-ocr` for transcripts** and check page:line citations against the PDF.
   - `--verify-json` has no second reading of scanned pages. Only the PDF's own embedded text can mark a value `verified`; on a scan every value stays `unchecked` (or `check` with `--verify-fields all`).
   - A page the model fails is recorded as failed, and a re-run retries it, instead of falling back to Apple Vision text.
@@ -182,7 +177,7 @@ Usage (`ocr scan --help`):
     --input-dir <DIR>          Input directory
     --output-file <PATH.md>    Output Markdown file (default ./<stem>.md)
     --output-dir <DIR>         Output directory (default <input-dir>/ocr-output)
-    --model <MODEL>            [default: apple] [apple, olmocr, paddleocr-vl, dots-ocr, indra-ocr]
+    --model <MODEL>            [default: apple] [apple, paddleocr-vl, dots-ocr, indra-ocr]
     --model-version <V>        Pin an older model release (paddleocr-vl: 1.6|1.5|1.0, dots-ocr: dots.mocr|dots.ocr)
     --file-type <FILE_TYPE>    [default: auto] [pdf, image, auto]
     --recursive                Walk subfolders and mirror the tree in the output
@@ -238,7 +233,7 @@ Notes on the options:
   - **Letters and digits are never added.** Only punctuation that the PDF has and Vision missed can come back (`units essentially,` → `units—essentially,`).
 
   `never` is pure OCR (the default for model engines). `always` takes the raw embedded text instead of OCR and has no layout handling: margin line numbers come out inline, tables are flattened and the Bates number is lost.
-- **`--dpi`** has a per-engine default tuned in Phase 6 (indra-ocr uses its own default, 200): Apple 150 (switched from 200 on 2026-10-08 by user decision: 150 scored better on the synthetic fixtures, mostly on fax scans; pleading CER and Bates were slightly worse, so use `--dpi 200` on clean pleadings if that matters), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster). olmOCR ignores `--dpi` (images are always 1288 px on the longest side) and says so.
+- **`--dpi`** has a per-engine default tuned in Phase 6 (indra-ocr uses its own default, 200): Apple 150 (switched from 200 on 2026-10-08 by user decision: 150 scored better on the synthetic fixtures, mostly on fax scans; pleading CER and Bates were slightly worse, so use `--dpi 200` on clean pleadings if that matters), paddleocr-vl 150, dots-ocr 100 (as accurate as 200 and about 3x faster).
 - **`--legal-cleanup`** is opt-in because it changes citable text. A line is stripped when it sits in the top or bottom three lines of at least half the pages (minimum 3 pages); lines of 20 or more characters match fuzzily. Transcript pages, table rows, Bates numbers and page markers are never stripped. It runs at assembly time, so toggling it never redoes OCR.
 - **`--no-currency-fix`**: Vision sometimes reads `$` as `S`. By default `S22,375.50` becomes `$22,375.50` on Apple pages (counted per page in the front matter). Model-engine output is not touched.
 - **`--no-symbol-fix`**: Vision never outputs `¶` and sometimes reads `§` as `S` or `$`. By default, on Apple Vision text (and, with a model engine, only on pages that fell back to Apple), `Compl. 9 60` and `Id. T18` become `Compl. ¶ 60` and `Id. ¶ 18` (`99` becomes `¶¶`), and `U.S.C. $1441(b)` and `U.S.C. S 1367` become `U.S.C. § 1441(b)` and `U.S.C. § 1367`. Only these shapes are rewritten: the paragraph sign after a citation form such as `Id.`, `Compl.` or `Decl.` and before a number on the same line (never after `Ex.`), and the section sign after `U.S.C.`/`C.F.R.` (never before an amount such as `$75,000` or `$50.00`), `S` before a section with a subsection (`S1983(a)`), or `$` before one with two (`$1983(a)(1)`). A bare `$1441(b)` is left alone because it looks exactly like an amount with a list marker (`$150(a)`). Text-layer pages are not touched. The fix runs at assembly, so toggling it never redoes OCR; replacements are counted in `symbol_fixes`, and `--verbose` prints each one (`before -> after`).
@@ -270,7 +265,7 @@ Every Markdown output has a `scan_record: <16 hex digits>` front-matter line: a 
     ---
     source: Smith_v_Jones_Complaint.pdf
     pages: 312
-    engine: olmocr (mlx-community/olmOCR-2-7B-1025-8bit)
+    engine: dots-ocr (mlx-community/dots.mocr-8bit)
     generated: 2026-10-07T19:30:00Z
     text_layer_pages: []
     column_split_pages: [12, 13]
@@ -461,7 +456,7 @@ Setup needs [`uv`](https://docs.astral.sh/uv/). It builds a Python 3.12 environm
 
 There is no `--quant` or `--model-version`, and `ocr server start --model indra-ocr` only says that no server is needed. At scan time the helper runs offline.
 
-Page headers and footers are read but left out of the body, and the Bates number is taken from them. The court's filing stamp (`Case … Document … Filed … Page … of …`) is the exception: indra labels it a page header, but its docket, filed date and page count are on the page, so it is put back at the top of the page. Two image readers never verify its values (`court_stamp`). On a Mac, scanned indra-ocr pages get the Apple Vision second reading like the other model engines (tested on macOS 26.6 on 2026-10-18). HTML tables become GFM tables. A picture region comes back as a `![](picture-N)` paragraph; `ocr` writes that as `[Figure]`, the same token olmOCR uses for a figure without alt text.
+Page headers and footers are read but left out of the body, and the Bates number is taken from them. The court's filing stamp (`Case … Document … Filed … Page … of …`) is the exception: indra labels it a page header, but its docket, filed date and page count are on the page, so it is put back at the top of the page. Two image readers never verify its values (`court_stamp`). On a Mac, scanned indra-ocr pages get the Apple Vision second reading like the other model engines (tested on macOS 26.6 on 2026-10-18). HTML tables become GFM tables. A picture region comes back as a `![](picture-N)` paragraph; `ocr` writes that as `[Figure]`, the token for a figure without alt text.
 
 License: the weights are under a modified OpenRAIL-M. They are free for research, personal use and startups under $20M in funding or revenue, and may not be used competitively with Datalab's API. Read the [model card](https://huggingface.co/datalab-to/indra-ocr) before using it commercially.
 
@@ -471,23 +466,21 @@ License: the weights are under a modified OpenRAIL-M. They are free for research
 |---|---|---|---|---|
 | apple | General documents, contracts, pleadings, scans, bulk runs. Transcripts work (line numbers re-anchored) but dots-ocr is more accurate | about 3.4-3.5 pages/s at 150 DPI with the Vision limit of 2 (16 pages/s before the limit; see below) | about 85-87 s | `ocr` worker about 178 MB |
 | paddleocr-vl | The fastest model engine; text-heavy documents, tables (on a Mac; off the Mac use dots-ocr for tables) | about 0.19 pages/s (5.3 s/page at 150 DPI) | about 27 minutes | 4.0 GB |
-| olmocr | Clean prose and tables in ordinary documents | about 0.06 pages/s (about 16 s/page, from the spike) | about 80 minutes | 11-11.5 GB (5.5 GB at 4bit, estimated) |
 | indra-ocr | Fast CPU-only text extraction on any machine, no GPU or server; clean documents | about 0.7–1.5 pages/s on 1–5-page files (model loaded each run; 4-up transcripts slowest) and about 4.5 pages/s on a 20-page production file, 32-thread Linux CPU (2026-10-22) | about 1–2 minutes as one 300-page file (4.5 pages/s); 3–7 minutes as many short files | no server; helper about 0.6–0.9 GB |
 | dots-ocr | **Deposition transcripts (most accurate)** and layout-heavy pages | plain text first since 2026-10-10: about 5–9 s/page on ordinary pages (was 7–17), transcripts about 36 s per 4-up page (layout prompt, unchanged) | about 30–45 minutes, not counting transcripts | 6.8 GB |
 
-Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages, olmOCR from the spike (my eval runs of it were contended). The indra-ocr speed and memory are the 2026-10-22 Linux CPU run in that doc, not the Mac. Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 85-87 s at the 150 DPI default (84-96 s at 200 DPI), about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes.
+Throughput comes from [docs/eval.md](docs/eval.md) on a 32 GB M-series Mac: Apple on a quiet machine, Paddle on a 500-page production, dots on 60 pages. The indra-ocr speed and memory are the 2026-10-22 Linux CPU run in that doc, not the Mac. Apple throughput is measured with the Vision concurrency limit of 2 (a crash fix): on a quiet machine a 300-page file took 85-87 s at the 150 DPI default (84-96 s at 200 DPI), about 3x slower than unlimited Vision (29 s). The earlier 1.5x estimate was taken while a model was using the GPU and understated the cost. `OCR_VISION_MAX_CONCURRENT` raises the limit at the risk of start-up crashes.
 
-**Accuracy on real filings** (the hand-checked holdout set: 61 pages of 18 public court filings, 292 values; release builds of `3dff738`, and of #46 for olmOCR; macOS 26.6, `--verify-json --verify-fields all`, 2026-10-18). The indra-ocr row is indra-ocr 1.1.2, remeasured on Linux x86-64 (32 logical CPUs, AMD Ryzen 9 9950X) on 2026-10-22, because macOS 26 was not available. The measure that matters is the second column: a value marked `verified` that is not what the page says.
+**Accuracy on real filings** (the hand-checked holdout set: 61 pages of 18 public court filings, 292 values; release builds of `3dff738`; macOS 26.6, `--verify-json --verify-fields all`, 2026-10-18). The indra-ocr row is indra-ocr 1.1.2, remeasured on Linux x86-64 (32 logical CPUs, AMD Ryzen 9 9950X) on 2026-10-22, because macOS 26 was not available. The measure that matters is the second column: a value marked `verified` that is not what the page says.
 
 | Engine | Values found | Verified but wrong | Verified | Amounts | Dates | Dockets | Citations | Transcription CER / word error (12 pages) |
 |---|---|---|---|---|---|---|---|---|
 | apple | 93.5% | **0** | 141 | 67/71 | 142/151 | 46/49 | 16/19 | 14.3% / 20.7% |
 | paddleocr-vl | 96.6% | **0** | 181 | 67/71 | 146/151 | 48/49 | 19/19 | 17.5% / 23.8% |
 | dots-ocr | 85.3% | **0** | 175 | 65/71 | 130/151 | 34/49 | 18/19 | 28.1% / 36.4% |
-| olmocr | 77.4% | **0** | 160 | 61/71 | 113/151 | 31/49 | 19/19 | 28.7% / 27.6% |
 | indra-ocr 1.1.2 (Linux, 2026-10-22) | 79.1% | **0** | 134 | 63/71 | 117/151 | 32/49 | 17/19 | 27.1% / 41.2% |
 
-Every misread value was marked `check`, not `verified`: two for Apple, one each for Paddle and dots, and two for indra-ocr 1.1.2 (`March 24, 2008` read as `2001`, and `3/29/21` read as `3/29/12`). olmOCR misread none. What every engine misses is mostly stamps, struck-through filing headers and handwriting; dots, olmOCR and indra-ocr also drop many filing-stamp dockets and dates on old scans. The Apple, Paddle, dots and olmOCR rows were measured on the Mac only: off the Mac nothing verifies a value on a scan (see [Known limits](#known-limits)), so indra-ocr's verified count (134) is not comparable with the Mac's 164 for the previous release. Values found and the transcription are the OCR itself. Details: [docs/spike.md](docs/spike.md).
+Every misread value was marked `check`, not `verified`: two for Apple, one each for Paddle and dots, and two for indra-ocr 1.1.2 (`March 24, 2008` read as `2001`, and `3/29/21` read as `3/29/12`). What every engine misses is mostly stamps, struck-through filing headers and handwriting; dots and indra-ocr also drop many filing-stamp dockets and dates on old scans. The Apple, Paddle and dots rows were measured on the Mac only: off the Mac nothing verifies a value on a scan (see [Known limits](#known-limits)), so indra-ocr's verified count (134) is not comparable with the Mac's 164 for the previous release. Values found and the transcription are the OCR itself. Details: [docs/spike.md](docs/spike.md).
 
 Accuracy on the synthetic eval set (Phase 6, 2026-10-08; accept seeds; token recall is the primary metric; the transcript line figures marked "after" are from held-out seeds 40-42, see below):
 
@@ -496,29 +489,27 @@ Accuracy on the synthetic eval set (Phase 6, 2026-10-08; accept seeds; token rec
 | apple | 97.4% (no transcripts) | 2.3% | 93/105 pages on pleadings | fax scans 96.3% at the 150 DPI default (88.5% at 200) |
 | paddleocr-vl | 99.6% (no transcripts) | 3.3% (pleading CER inflated by margin numbers) | 100% | transcripts 81.5% recall; lines exact 25% before re-anchoring, 94.9% after |
 | dots-ocr | 100% (no transcripts and 99.8% on a 60-page production) | 0.6% | 100% | transcripts 100% recall; lines exact 68% before re-anchoring, 99.9% after |
-| olmocr | 99.3% (no transcripts) | 0.0% | 10 of 11 pages | transcripts 96.9% recall; lines exact 30% before re-anchoring, 99.9% after |
 
 Guidance:
 
 - **Start with Apple.** It is fast and light, with exact case numbers and amounts on the test fixtures, and does not need a server.
-- **Deposition transcripts: use `dots-ocr`, and check `line_numbers.unverified`.** Transcripts number every physical line, wrapped continuations included, and the models renumber sequentially after a wrap. So for every engine (Apple included) the line numbers of transcript pages are re-anchored to the page geometry, never taken from the model. On held-out seeds 40-42, lines exact were dots-ocr 99.9%, olmOCR 99.9%, Apple 97.4% and paddleocr-vl 94.9% (before re-anchoring: 68%, 30%, 38% and 25%). dots-ocr is the most accurate engine for transcripts and `paddleocr-vl` the least. A page whose text could not be matched to the geometry keeps the engine's own numbering and is listed under `line_numbers.unverified` in the front matter; `ocr` prints a note for those pages. Verify page:line citations on them against the PDF.
+- **Deposition transcripts: use `dots-ocr`, and check `line_numbers.unverified`.** Transcripts number every physical line, wrapped continuations included, and the models renumber sequentially after a wrap. So for every engine (Apple included) the line numbers of transcript pages are re-anchored to the page geometry, never taken from the model. On held-out seeds 40-42, lines exact were dots-ocr 99.9%, Apple 97.4% and paddleocr-vl 94.9% (before re-anchoring: 68%, 38% and 25%). dots-ocr is the most accurate engine for transcripts and `paddleocr-vl` the least. A page whose text could not be matched to the geometry keeps the engine's own numbering and is listed under `line_numbers.unverified` in the front matter; `ocr` prints a note for those pages. Verify page:line citations on them against the PDF.
 - **Pleadings with tables on `paddleocr-vl`:** its table crops pull the margin line numbers in as an extra column. Use another engine for pleading-paper tables.
 
 ## Known limits
 
 **Off the Mac (Linux, Windows).** There is no Apple Vision, and that matters most for checking values:
 - **Nothing confirms a value on a scanned page.** `--verify-json` has no second reader, so only the PDF's own embedded text can mark a value `verified`. On a scan, every value is `unchecked`, or `check` with `--verify-fields all`. Send such pages to a second service or to a person (use `--verify-fields all` so they are listed in `azure_pages`).
-- **PaddleOCR-VL is worse on tables.** On the Mac, Vision finds tables and Paddle reads each one as a crop (`Table Recognition:`). Off the Mac, Paddle reads the whole page, which gave 12.3% CER on the synthetic table fixtures against 0.0% on the Mac (docs/linux-reference-eval-results.md). For table-heavy documents use `dots-ocr` or `olmocr`, which scored 0.0% on the same tables off the Mac.
-- **Transcript line numbers are the model's own.** They are not re-anchored to the page; on the synthetic transcripts with the CUDA build, 34% (Paddle), 26% (olmOCR) and 76% (dots) of lines were exact. Do not cite `page:line` from an off-Mac transcript without checking the PDF.
+- **PaddleOCR-VL is worse on tables.** On the Mac, Vision finds tables and Paddle reads each one as a crop (`Table Recognition:`). Off the Mac, Paddle reads the whole page, which gave 12.3% CER on the synthetic table fixtures against 0.0% on the Mac (docs/linux-reference-eval-results.md). For table-heavy documents use `dots-ocr`, which scored 0.0% on the same tables off the Mac.
+- **Transcript line numbers are the model's own.** They are not re-anchored to the page; on the synthetic transcripts with the CUDA build, 34% (Paddle) and 76% (dots) of lines were exact. Do not cite `page:line` from an off-Mac transcript without checking the PDF.
 - **No embedded-text corrections** (`--use-text-layer auto` is an `apple` feature).
-- **Bates numbers on olmOCR and dots pages come from corner requests** when the model drops the footer. On a page stored sideways dots finds none (olmOCR follows its rotation correction). A number-like token that ends a sentence in the page's last lines (`Invoice No. INV-24337.`) can be taken as the Bates number; check Bates markers on those pages.
+- **Bates numbers on dots pages come from corner requests** when the model drops the footer. On a page stored sideways dots finds none. A number-like token that ends a sentence in the page's last lines (`Invoice No. INV-24337.`) can be taken as the Bates number; check Bates markers on those pages.
 - Only Linux and Windows x86-64 have pinned llama.cpp and pdfium builds. Windows is a preview: only `paddleocr-vl` on the CPU build has been run on a real machine.
 
 **Every platform:**
-- Transcript line numbers are re-anchored to page geometry on the Mac for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr and olmOCR). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
+- Transcript line numbers are re-anchored to page geometry on the Mac for every engine, but not perfectly (97.4% of lines exact for Apple, 94.9% for paddleocr-vl on held-out seeds; 99.9% for dots-ocr). Apple flags transcript pages. Pages listed under `line_numbers.unverified` keep the engine's own numbering; verify page:line citations on them.
 - The raw text-layer path (`--use-text-layer always`) has no layout handling. The default `auto` does not correct pages whose text layer is invisible OCR or whose visibility cannot be read, because that layer is another reading, not the document's characters.
-- Pleading margin line numbers (1-2 digits in the left margin) are dropped by Apple Vision, dots and olmOCR but kept by `paddleocr-vl`, where they can be glued to paragraph numbers and land in table crops on pleading paper. Recovering `page:line` citations is not implemented.
-- On the Mac, with olmOCR, a rotated page loses its Bates number in the marker, because the Apple side-pass cannot read a sideways page.
+- Pleading margin line numbers (1-2 digits in the left margin) are dropped by Apple Vision and dots but kept by `paddleocr-vl`, where they can be glued to paragraph numbers and land in table crops on pleading paper. Recovering `page:line` citations is not implemented.
 - Column detection was tuned on synthetic fixtures; it found about 97.6% of lines on held-out synthetic layouts, and unusual layouts can still be mis-ordered.
 - The hand-checked set is small: 61 pages, 292 values. "No wrong value verified" on it means none in 292, not that one is impossible. Apple Bates accuracy on synthetic pleadings was 88.6% on the accept seeds.
 - Stamps, struck-through filing headers and handwriting are where every engine misses values. Filled PDF form fields and annotation stamps are not read at all; their pages get `annotations_not_read`.

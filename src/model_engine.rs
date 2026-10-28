@@ -1,7 +1,7 @@
 //! Model-server scan engines (PLAN §4.2, §4.3, §5): request planning from the Apple side-pass,
 //! the HTTP client, retries, fallback and ordered assembly. What differs per engine (prompts,
 //! message order, image sizing, output parser, retry ladder) sits behind `ScanEngine`: PaddleOCR-VL
-//! is here, olmOCR in `olmocr.rs`, dots in `dots.rs`.
+//! is here, dots in `dots.rs`.
 //!
 //! Model requests go to a server started with `--max-num-seqs N`. In-flight requests are capped
 //! at min(`--jobs`, N) by a counting gate, and each request also holds a file lock in the state
@@ -53,8 +53,6 @@ pub enum Prompt {
     Ocr,
     /// PaddleOCR-VL table crop.
     Table,
-    /// olmOCR `build_no_anchoring_v4_yaml_prompt()`.
-    Olmocr,
     /// dots `prompt_layout_all_en`.
     DotsLayout,
     /// dots `prompt_ocr`.
@@ -66,7 +64,6 @@ impl Prompt {
         match self {
             Self::Ocr => "OCR:",
             Self::Table => "Table Recognition:",
-            Self::Olmocr => crate::olmocr::PROMPT,
             Self::DotsLayout => crate::dots::PROMPT_LAYOUT,
             Self::DotsOcr => crate::dots::PROMPT_OCR,
         }
@@ -77,7 +74,6 @@ impl Prompt {
         match self {
             Self::Ocr => "OCR:",
             Self::Table => "Table Recognition:",
-            Self::Olmocr => "olmocr",
             Self::DotsLayout => "dots layout",
             Self::DotsOcr => "dots ocr",
         }
@@ -94,7 +90,7 @@ pub trait ScanEngine: Sync {
     fn max_side(&self) -> Option<u32> {
         None
     }
-    /// Whether the prompt comes before the image in the message (olmOCR, as upstream).
+    /// Whether the prompt comes before the image in the message.
     fn text_first(&self) -> bool {
         false
     }
@@ -118,7 +114,7 @@ impl ScanEngine for Paddle {
     /// Off macOS the bitmap regions have no Vision table masks, so table columns and 4-up
     /// transcript panels look like text columns, and splitting them garbled tables (52% CER) and
     /// transcripts (44%) on accept seeds 10-12. The full page is read first instead, and the
-    /// region crops are kept for a loop or truncation, as for olmOCR (PLAN §9.7).
+    /// region crops are kept for a loop or truncation (PLAN §9.7).
     fn plan(&self, side: &SidePass) -> (Vec<Spec>, bool) {
         if cfg!(not(target_os = "macos")) {
             return (vec![(Prompt::Ocr, None)], false);
@@ -144,7 +140,6 @@ impl ScanEngine for Paddle {
 pub fn scan_engine(engine: Engine) -> Option<&'static dyn ScanEngine> {
     match engine {
         Engine::PaddleocrVl => Some(&Paddle),
-        Engine::Olmocr => Some(&crate::olmocr::Olmocr),
         Engine::DotsOcr => Some(&crate::dots::Dots),
         Engine::Apple | Engine::IndraOcr => None,
     }
@@ -381,9 +376,7 @@ pub fn clean_ocr(text: &str) -> String {
 fn convert(prompt: Prompt, text: &str) -> (String, bool, bool) {
     match prompt {
         // The other engines' prompts never reach this converter (they parse their own replies).
-        Prompt::Ocr | Prompt::Olmocr | Prompt::DotsLayout | Prompt::DotsOcr => {
-            (clean_ocr(text), false, false)
-        }
+        Prompt::Ocr | Prompt::DotsLayout | Prompt::DotsOcr => (clean_ocr(text), false, false),
         Prompt::Table => match otsl::otsl_to_gfm(text) {
             Ok(table) => (table, true, false),
             Err(_) => (format!("```\n{}\n```", text.trim()), false, true),
@@ -468,7 +461,7 @@ pub struct Ctx {
     permits: Mutex<usize>,
     permit_freed: Condvar,
     mlx_vlm: String,
-    /// Per document: Bates corner probes that found nothing, or `BATES_FOUND` (olmOCR off
+    /// Per document: Bates corner probes that found nothing, or `BATES_FOUND` (dots off
     /// macOS, `want_bates_corners`).
     bates_misses: Mutex<HashMap<PathBuf, u32>>,
 }
@@ -488,9 +481,8 @@ const BATES_FOUND: u32 = u32::MAX;
 const BATES_PROBE_PAGES: u32 = 3;
 
 /// Bottom-right corner, bottom-left corner, then bottom centre of the page (normalized top-left
-/// [x, y, w, h]), where Bates numbers are stamped. olmOCR drops a whole footer strip as page
-/// furniture, and dots' `prompt_ocr` leaves out Page-footer text, but both read a corner on its
-/// own (docs/spike.md, "olmOCR footer strip" and "dots Bates corners"). The order is fixed so a
+/// [x, y, w, h]), where Bates numbers are stamped. dots' `prompt_ocr` leaves out Page-footer
+/// text, but reads a corner on its own (docs/spike.md, "dots Bates corners"). The order is fixed so a
 /// page's result does not depend on the pages read before it.
 const BATES_CORNERS: [[f64; 4]; 3] = [
     [0.7, 0.9, 0.3, 0.1],
@@ -955,7 +947,7 @@ pub struct Output {
     pub(crate) body: String,
     pub(crate) table: bool,
     pub(crate) flagged: bool,
-    /// A Bates number the engine read itself (olmOCR's corner requests off macOS).
+    /// A Bates number the engine read itself (dots' corner requests off macOS).
     pub(crate) bates: Option<String>,
 }
 
@@ -1107,7 +1099,7 @@ fn process(path: &Path, prep: Prepared, s: &Settings, ctx: &Ctx) -> Result<PageR
             let body = markdown::restore_court_stamp(body, prep.stamp.as_deref());
             PageResult {
                 // Off macOS there is no Vision side-pass: the Bates number comes from the
-                // model's own text, which keeps the footer, or from olmOCR's corner requests
+                // model's own text, which keeps the footer, or from the engine's corner requests
                 // (PLAN §9.5).
                 bates: prep.bates.clone().or(out.bates).or_else(|| {
                     cfg!(not(target_os = "macos"))

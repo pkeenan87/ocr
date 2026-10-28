@@ -7,7 +7,7 @@ Thank you for testing `ocr`. It turns scanned and image-only PDFs into Markdown 
 ## What you need
 
 - **Mac:** Apple Silicon (M1 or later) on **macOS 26 or later**. About 1 GB free for the default engine. The optional model engines need 2–9 GB more and 8–16 GB of RAM (see "Engines" below).
-- **Linux:** x86-64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 and newer), `curl` and `tar`, ideally with an NVIDIA GPU (8 GB or more for `dots-ocr`, 12 GB for `olmocr`). An AMD or Intel GPU with its own memory works through Vulkan, more slowly; without a GPU, `paddleocr-vl` runs on the CPU at about 8 s a page. Allow 5–15 GB of disk for an engine. **Read "Known limits" first: a Linux run confirms far fewer values than a Mac run.**
+- **Linux:** x86-64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 and newer), `curl` and `tar`, ideally with an NVIDIA GPU (8 GB or more for `dots-ocr`). An AMD or Intel GPU with its own memory works through Vulkan, more slowly; without a GPU, `paddleocr-vl` runs on the CPU at about 8 s a page. Allow 5–15 GB of disk for an engine. **Read "Known limits" first: a Linux run confirms far fewer values than a Mac run.**
 - Windows builds exist but have not been tested on a real machine; please don't pilot on Windows yet.
 - For the Claude workflow: Claude Code.
 
@@ -99,7 +99,6 @@ A whole folder works too: `--input-dir` and `--output-dir`.
 - **The model engines** are optional on a Mac and required on Linux. Set one up once with `ocr server setup --model <engine>`, start it with `ocr server start`, then add `--model <engine>` to `scan`:
   - **`paddleocr-vl`:** the fastest and lightest. On Linux it is the default but weaker on tables and transcripts;
   - **`dots-ocr`:** the most accurate on deposition transcripts and tables; **the recommended engine on Linux**;
-  - **`olmocr`:** accurate on prose and tables, the slowest; about 11 GB of GPU memory on Linux.
 
 ## Please report
 

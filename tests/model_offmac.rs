@@ -62,14 +62,9 @@ fn corners(e: &Env) -> Vec<Value> {
     e.all_requests().into_iter().filter(is_corner).collect()
 }
 
-/// Corner requests one page without a Bates number costs: olmOCR asks once per corner, dots
-/// asks `prompt_ocr`, then the layout prompt, per corner.
-fn probes_per_page(engine: &str) -> usize {
-    match engine {
-        "olmocr" => 3,
-        _ => 6,
-    }
-}
+/// Corner requests one page without a Bates number costs: dots asks `prompt_ocr`, then the
+/// layout prompt, for each of the three corners.
+const PROBES_PER_PAGE: usize = 6;
 
 fn marker(page: usize) -> String {
     format!("<!-- page {page} · Bates {BATES} -->")
@@ -91,12 +86,7 @@ fn corner_request_supplies_the_bates_number(engine: &'static str) {
         c[0]["w"].as_u64() > c[0]["h"].as_u64().map(|h| 2 * h),
         "{c:?}"
     );
-    let first = if engine == "olmocr" {
-        ocr::olmocr::PROMPT
-    } else {
-        ocr::dots::PROMPT_OCR
-    };
-    assert_eq!(c[0]["prompt"], first);
+    assert_eq!(c[0]["prompt"], ocr::dots::PROMPT_OCR);
 }
 
 /// No Bates number anywhere: the first three pages are probed in all three corners, the rest are
@@ -107,7 +97,7 @@ fn probing_stops_after_three_pages(engine: &'static str) {
     assert_eq!(e.requests().len(), 5, "one page request per page");
     assert_eq!(
         corners(&e).len(),
-        PROBE_PAGES * probes_per_page(engine),
+        PROBE_PAGES * PROBES_PER_PAGE,
         "{:?}",
         e.all_requests()
     );
@@ -129,7 +119,7 @@ fn invoice_number_in_the_body_is_not_a_bates_number(engine: &'static str, tail: 
     assert!(md.contains(tail), "the tail is in the page text: {md}");
     assert!(!md.contains("Bates INV-"), "{md}");
     assert_eq!(bates_markers(&md), 0, "{md}");
-    assert_eq!(corners(&e).len(), probes_per_page(engine), "still probed");
+    assert_eq!(corners(&e).len(), PROBES_PER_PAGE, "still probed");
 
     let (e, md) = scan(
         engine,
@@ -189,4 +179,4 @@ macro_rules! per_engine {
     )*};
 }
 
-per_engine!(olmocr => "olmocr", dots => "dots-ocr");
+per_engine!(dots => "dots-ocr");

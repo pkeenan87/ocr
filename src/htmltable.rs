@@ -1,4 +1,4 @@
-//! HTML tables in model output (olmOCR replies, dots `Table` elements) to GFM, shared by both
+//! HTML tables in model output (dots `Table` elements, indra-ocr tables) to GFM, shared by both
 //! engines. Tables with `rowspan` or `colspan` cannot be written as GFM and stay raw HTML.
 
 use std::borrow::Cow;

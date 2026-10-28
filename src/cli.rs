@@ -48,7 +48,6 @@ pub enum Engine {
     /// Apple Vision, in-process. macOS only.
     #[cfg_attr(not(target_os = "macos"), value(skip))]
     Apple,
-    Olmocr,
     PaddleocrVl,
     DotsOcr,
     /// CPU-only ONNX pipeline run as a subprocess per document; no server.
@@ -56,17 +55,11 @@ pub enum Engine {
 }
 
 impl Engine {
-    pub const MODELS: [Engine; 4] = [
-        Engine::Olmocr,
-        Engine::PaddleocrVl,
-        Engine::DotsOcr,
-        Engine::IndraOcr,
-    ];
+    pub const MODELS: [Engine; 3] = [Engine::PaddleocrVl, Engine::DotsOcr, Engine::IndraOcr];
 
     pub fn name(self) -> &'static str {
         match self {
             Self::Apple => "apple",
-            Self::Olmocr => "olmocr",
             Self::PaddleocrVl => "paddleocr-vl",
             Self::DotsOcr => "dots-ocr",
             Self::IndraOcr => "indra-ocr",
@@ -77,7 +70,7 @@ impl Engine {
     /// build are offered, and dots defaults to `dots.ocr` (PLAN §9.5).
     pub fn versions(self) -> &'static [&'static str] {
         match self {
-            Self::Apple | Self::Olmocr | Self::IndraOcr => &[],
+            Self::Apple | Self::IndraOcr => &[],
             Self::PaddleocrVl if cfg!(target_os = "macos") => &["1.6", "1.5", "1.0"],
             Self::PaddleocrVl => &["1.6", "1.5"],
             Self::DotsOcr if cfg!(target_os = "macos") => &["dots.mocr", "dots.ocr"],
@@ -301,8 +294,6 @@ pub struct ScanArgs {
 /// Default render resolution for apple. The user switched it from 200 to 150 on 2026-10-08
 /// (docs/eval.md) and the goldens were regenerated.
 pub const DEFAULT_DPI: u32 = 150;
-/// olmocr's Apple side pass keeps the former default; the switch to 150 was for the apple engine.
-pub const OLMOCR_SIDE_DPI: u32 = 200;
 /// Phase 6 tuning (docs/eval.md): paddleocr-vl scored best on tune seeds 0-4 at 150 DPI.
 pub const PADDLE_DPI: u32 = 150;
 /// Phase 6 tuning (docs/eval.md): dots-ocr was as accurate at 100 DPI as at 200, and 3-4x faster.
@@ -327,12 +318,11 @@ impl ScanArgs {
         !self.no_page_markers
     }
 
-    /// Effective `--dpi`: explicit value, else the engine default (apple 150; paddleocr-vl 150; dots-ocr 100; olmocr side pass 200; indra-ocr 200).
+    /// Effective `--dpi`: explicit value, else the engine default (apple 150; paddleocr-vl 150; dots-ocr 100; indra-ocr 200).
     pub fn effective_dpi(&self) -> u32 {
         self.dpi.unwrap_or(match self.model {
             Engine::PaddleocrVl => PADDLE_DPI,
             Engine::DotsOcr => DOTS_DPI,
-            Engine::Olmocr => OLMOCR_SIDE_DPI,
             Engine::IndraOcr => INDRA_DPI,
             Engine::Apple => DEFAULT_DPI,
         })
@@ -387,8 +377,6 @@ mod tests {
             Engine::DotsOcr.resolve_version(Some("dots.ocr")).unwrap(),
             Some("dots.ocr")
         );
-        assert_eq!(Engine::Olmocr.resolve_version(None).unwrap(), None);
-        assert!(Engine::Olmocr.resolve_version(Some("1")).is_err());
         let e = Engine::PaddleocrVl.resolve_version(Some("2")).unwrap_err();
         let listed = if cfg!(target_os = "macos") {
             "1.6, 1.5, 1.0"
@@ -411,7 +399,7 @@ mod tests {
     fn indra_has_no_server_and_no_version() {
         assert_eq!(Engine::IndraOcr.name(), "indra-ocr");
         assert!(Engine::MODELS.contains(&Engine::IndraOcr));
-        assert!(!Engine::IndraOcr.has_server() && Engine::Olmocr.has_server());
+        assert!(!Engine::IndraOcr.has_server() && Engine::DotsOcr.has_server());
         assert_eq!(Engine::IndraOcr.resolve_version(None).unwrap(), None);
         assert!(Engine::IndraOcr.resolve_version(Some("1")).is_err());
     }

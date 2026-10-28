@@ -1,4 +1,4 @@
-//! Shared harness of the model-engine tests (olmocr.rs, dots.rs; paddle.rs uses only its helpers): a temp config and state dir, a
+//! Shared harness of the model-engine tests (dots.rs, paddle.rs): a temp config and state dir, a
 //! fake model server (tests/fake_server.py) on a free port, and the real Apple side-pass.
 #![allow(dead_code)]
 

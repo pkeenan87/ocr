@@ -303,7 +303,7 @@ pub fn setup_models(args: &SetupArgs, cfg: &mut Config) -> Result<(), CliError> 
 
 /// Off macOS (PLAN §9.2): probes the GPU, picks the llama.cpp build, checks that every engine
 /// being installed fits its memory (refusing without `--force` when it doesn't, and refusing
-/// olmocr and dots on the CPU build), then installs llama.cpp and pdfium.
+/// dots on the CPU build), then installs llama.cpp and pdfium.
 #[cfg(not(target_os = "macos"))]
 fn install_llama_runtime(
     engines: &[(Engine, Option<&str>, Quant)],
@@ -355,22 +355,17 @@ fn install_llama_runtime(
             continue;
         };
         let q = quant.name();
-        let hint = if engine == Engine::Olmocr && quant != Quant::Q4 {
-            " Try `--quant 4bit`."
-        } else {
-            ""
-        };
         match llama::fit(need, have, dedicated) {
             Fit::Ok => {}
             Fit::Tight => eprintln!(
-                "⚠ {name} {q} needs about {need:.1} GB and this machine has {have:.1} GB of {what}, so it may be tight.{hint}"
+                "⚠ {name} {q} needs about {need:.1} GB and this machine has {have:.1} GB of {what}, so it may be tight."
             ),
             Fit::TooBig if force => eprintln!(
                 "⚠ {name} {q} needs about {need:.1} GB but this machine has {have:.1} GB of {what}; continuing because of --force"
             ),
             Fit::TooBig => {
                 return Err(CliError::Setup(format!(
-                    "error: {name} {q} needs about {need:.1} GB but this machine has only {have:.1} GB of {what}.{hint} \
+                    "error: {name} {q} needs about {need:.1} GB but this machine has only {have:.1} GB of {what}. \
                      Pass --force to install anyway."
                 )));
             }
@@ -1173,6 +1168,7 @@ pub fn status() -> Result<(), CliError> {
         } else {
             println!("no server running");
         }
+        print_olmocr_notice();
         return Ok(());
     };
     let uptime = chrono::DateTime::parse_from_rfc3339(&info.started_at)
@@ -1212,7 +1208,20 @@ pub fn status() -> Result<(), CliError> {
             println!("memory:  {fp}");
         }
     }
+    print_olmocr_notice();
     Ok(())
+}
+
+/// Read-only: mentions an olmocr entry that is still in the config.
+fn print_olmocr_notice() {
+    if let Some(n) = Config::load()
+        .ok()
+        .flatten()
+        .as_ref()
+        .and_then(crate::removed::olmocr_notice)
+    {
+        println!("{n}");
+    }
 }
 
 #[cfg(test)]

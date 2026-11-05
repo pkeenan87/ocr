@@ -1,6 +1,6 @@
 # Public court-filing set (20 documents, 230 pages)
 
-> **Removed for privacy.** `ctr-marital-settlement` was part of the set when these results were measured, but its manifest entry and OCR text are not in this repository because the filing contains personal details about minor children. Figures here still describe all 20 documents, and rerunning from this repository covers the remaining 19.
+> **Removed for privacy.** Four filings were part of the set when these results were measured but are not in this repository, because they contain personal details about private people: `ctr-marital-settlement`, `depo-removed-1`, `mot-removed-2` and `scan-removed-3`. Their manifest entries, OCR text and quoted examples are gone, and the last three have new labels. Figures here still describe all 20 documents, and rerunning from this repository covers the remaining 16.
 
 This is a small real-world evaluation set with no ground truth. It contains public federal
 filings from the CourtListener RECAP archive. They are OCR'd with Apple Vision and scored with

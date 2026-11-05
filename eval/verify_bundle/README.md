@@ -1,6 +1,6 @@
 # Mac `--verify-json` runs for the Azure residual-risk measurement
 
-> `ctr-marital-settlement` has been removed from these runs for privacy, so each run holds 19 of the 20 filings. The graded figures below were measured on all 20.
+> Four filings have been removed from these runs for privacy (`ctr-marital-settlement`, `depo-removed-1`, `mot-removed-2`, `scan-removed-3`), so each run holds 16 of the 20 filings. The graded figures below were measured on all 20.
 
 Apple Vision on the 20 public filings of `eval/public_set.json`, from `eval/verify_eval.py`, copied with `eval/export_verify_bundle.py`. Used by `eval/azure_verify_eval.py` and [docs/azure-verify-eval.md](../../docs/azure-verify-eval.md).
 

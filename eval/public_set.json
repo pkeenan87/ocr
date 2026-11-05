@@ -1,7 +1,7 @@
 {
  "description": "Public federal court filings from the CourtListener RECAP archive for real-world OCR evaluation. PDFs live in eval/out/public/pdfs/<id>.pdf (gitignored); fetch them from pdf_url. text_layer: pages in the used range whose PDF text (pypdfium2) exceeds 200 characters; PACER header stamps alone do not count.",
  "retrieved": "2026-10-08",
- "total_pages_used": 215,
+ "total_pages_used": 181,
  "documents": [
   {
    "id": "cmpl-sec-kuzdas",

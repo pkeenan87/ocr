@@ -1,5 +1,7 @@
 # Public court-filing set (20 documents, 230 pages)
 
+> **Removed for privacy.** `ctr-marital-settlement` was part of the set when these results were measured, but its manifest entry and OCR text are not in this repository because the filing contains personal details about minor children. Figures here still describe all 20 documents, and rerunning from this repository covers the remaining 19.
+
 This is a small real-world evaluation set with no ground truth. It contains public federal
 filings from the CourtListener RECAP archive. They are OCR'd with Apple Vision and scored with
 the dev quality judge (`eval/judge.py`, Jev; see `eval/JUDGE.md`). This set is the judge's first
